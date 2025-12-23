@@ -42,40 +42,87 @@ site-rodogarcia/
     │   ├── base.css       # Reset e estilos base
     │   ├── variables.css  # Variáveis CSS
     │   ├── mapa.css       # Estilos do mapa interativo
+    │   ├── responsive.css # Media queries e responsividade
     │   ├── components/    # Componentes reutilizáveis
+    │   │   └── buttons.css
     │   ├── layout/        # Header e Footer
+    │   │   ├── header.css
+    │   │   └── footer.css
     │   └── sections/      # Seções da página
-    ├── script/            # JavaScript
-    │   ├── main.js        # Script principal
-    │   └── mapa.js        # Mapa interativo do Brasil
-    └── mapa/
-        └── assets/
-            └── map.svg    # Mapa do Brasil (SVG)
+    │       ├── hero.css
+    │       ├── certificados.css
+    │       ├── diferenciais.css
+    │       ├── dna.css
+    │       ├── servicos.css
+    │       ├── filiais.css
+    │       └── rastreio.css
+    └── script/            # JavaScript
+        ├── main.js        # Script principal
+        └── mapas/         # Mapa interativo (estrutura modular)
+            ├── mapa.js    # Arquivo principal
+            ├── config.js  # Configurações (cores, estados)
+            ├── filiais.js # Dados das filiais
+            ├── mapeamento.js # Mapeamento índices/estados
+            ├── destaques.js  # Funções de destaque visual
+            ├── interacoes.js # Cliques, hover, select
+            ├── carregamento.js # Carregamento do SVG
+            ├── map.svg    # Mapa do Brasil (SVG)
+            └── README.md  # Documentação do mapa
 ```
 
 ## 🗺️ Mapa Interativo
 
-O mapa do Brasil destaca os estados onde a Rodogarcia tem presença:
+O mapa do Brasil destaca os estados onde a Rodogarcia tem filiais:
 - **SP** - São Paulo
 - **PE** - Pernambuco
 - **PR** - Paraná
 - **RJ** - Rio de Janeiro
 - **RS** - Rio Grande do Sul
 
+### Estrutura Modular
+
+O mapa foi refatorado em módulos para facilitar manutenção:
+
+- **`config.js`** - Configurações gerais (cores, estados, caminho SVG)
+- **`filiais.js`** - Dados completos de todas as filiais
+- **`mapeamento.js`** - Mapeamento de índices para estados (necessário pois os IDs no SVG estão errados)
+- **`destaques.js`** - Funções de destaque visual dos estados
+- **`interacoes.js`** - Interações (cliques, hover, integração com select)
+- **`carregamento.js`** - Carregamento e inserção do SVG no DOM
+- **`mapa.js`** - Arquivo principal que inicializa tudo
+
 ### Como alterar estados destacados
 
-Edite o array em `src/script/mapa.js`:
+Edite o array em `src/script/mapas/config.js`:
 
 ```javascript
-const estadosDestaque = ['sp', 'pe', 'pr', 'rj', 'rs'];
+export const ESTADOS_COM_FILIAIS = ['sp', 'pe', 'pr', 'rj', 'rs'];
 ```
+
+### Funcionalidades do Mapa
+
+- ✅ Destaque visual dos estados com filiais
+- ✅ Hover padronizado em todos os estados
+- ✅ Clique nos estados para ver filiais
+- ✅ Integração com select de filiais
+- ✅ Totalmente responsivo
+- ✅ Animações suaves
+
+## 📱 Responsividade
+
+O site é totalmente responsivo com breakpoints otimizados:
+
+- **Desktop**: Layout completo com grid de 2 colunas
+- **Tablet** (até 968px): Grid em coluna única, elementos ajustados
+- **Mobile** (até 768px): Layout vertical, fontes reduzidas
+- **Mobile Pequeno** (até 480px): Espaçamentos mínimos, otimizado para telas pequenas
 
 ## 🎨 Tecnologias
 
 - **HTML5** - Estrutura semântica
-- **CSS3** - Estilos modernos com variáveis CSS
-- **JavaScript Vanilla** - Sem frameworks, puro e performático
-- **SVG** - Mapa vetorial do Brasil
+- **CSS3** - Estilos modernos com variáveis CSS e media queries
+- **JavaScript ES6+** - Módulos ES6, código modular e organizado
+- **SVG** - Mapa vetorial do Brasil interativo
 - **Phosphor Icons** - Ícones modernos
 
 ## 📦 Deploy
@@ -88,13 +135,28 @@ Para fazer deploy, você só precisa dos arquivos:
 **Não é necessário:**
 - `server.js` (apenas para desenvolvimento local)
 - `package.json` (apenas para desenvolvimento local)
-- Arquivos Python em `src/mapa/` (já processados)
+- Arquivos de desenvolvimento em `src/mapa/sources/` (já processados)
 
 ### Plataformas de Deploy Gratuitas
 
 - **Vercel**: `vercel --prod`
 - **Netlify**: Arraste a pasta no site
 - **GitHub Pages**: Configure nas settings do repositório
+
+## 🔧 Desenvolvimento
+
+### Adicionar Nova Filial
+
+1. Edite `src/script/mapas/filiais.js`
+2. Adicione o objeto da filial no objeto `filiais`
+3. Se for em um estado novo, adicione o estado em `ESTADOS_COM_FILIAIS` em `config.js`
+4. Adicione o mapeamento do índice em `mapeamento.js` se necessário
+
+### Adicionar Nova Seção
+
+1. Crie o arquivo CSS em `src/css/sections/nova-secao.css`
+2. Importe em `src/css/main.css`
+3. Adicione media queries em `src/css/responsive.css` se necessário
 
 ## 👨‍💻 Desenvolvedor
 

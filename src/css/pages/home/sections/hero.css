@@ -1,0 +1,170 @@
+/* =========================================
+   HERO SECTION (Azul)
+   ========================================= */
+.hero {
+    background-color: var(--cor-azul-hero);
+    color: var(--cor-branco);
+    padding: 10rem 0 10rem;
+    margin-top: -2rem; /* Desktop: aproxima do header */
+    position: relative;
+    overflow: hidden;
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Divisor de Onda (Shape Divider) */
+.custom-shape-divider-bottom-16789 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+    z-index: 10;
+}
+
+.custom-shape-divider-bottom-16789 svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 100px;
+}
+
+.custom-shape-divider-bottom-16789 .shape-fill {
+    fill: #FFFFFF;
+}
+
+.hero__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.hero__texto {
+    max-width: 550px;
+    z-index: 2;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.titulo-hero {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    margin-top: 0;
+}
+
+.subtitulo-hero {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    max-width: 480px;
+}
+
+/* Card Ações Hero (Botões Grandes) */
+.card-acao-hero {
+    background: transparent;
+}
+
+.botoes-acao {
+    display: flex;
+    gap: 1rem;
+}
+
+.botao--largo {
+    min-width: 160px;
+}
+
+.hero__imagem {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+}
+
+.img-hero-destaque {
+    max-width: 130%;
+    transform: translateX(-5%);
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.4));
+    transition: transform 0.3s ease;
+    border-radius: 12px;
+    animation: slideInRight 1s ease-out;
+}
+
+.img-hero-destaque:hover {
+    transform: translateX(-5%) scale(1.02);
+}
+
+/* =========================================
+   DECORAÇÃO HERO (Background Vivo)
+   ========================================= */
+.hero-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Padrão de Pontos (Mapa Logístico) - Mais nítido */
+.hero-pattern-dots {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+/* Luz/Glow Mais Rico (Azul Claro + Roxo) */
+.hero-glow {
+    position: absolute;
+    top: -40%;
+    left: -10%;
+    width: 100%;
+    height: 180%;
+    background: radial-gradient(circle at 30% 30%, rgba(80, 141, 202, 0.3) 0%, rgba(46, 40, 130, 0) 60%),
+        radial-gradient(circle at 70% 60%, rgba(65, 77, 130, 0.4) 0%, transparent 50%);
+    filter: blur(60px);
+}
+
+/* Ícones Flutuantes - Mais Visíveis */
+.decoration-icon {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.1);
+    z-index: -1;
+}
+
+.icon-pin {
+    top: 10%;
+    left: 5%;
+    font-size: 10rem;
+    transform: rotate(-20deg);
+    animation: floatIcon 7s ease-in-out infinite;
+}
+
+.icon-box {
+    bottom: 5%;
+    left: 35%;
+    font-size: 8rem;
+    transform: rotate(15deg);
+    animation: floatIcon 5s ease-in-out infinite reverse;
+    opacity: 0.08;
+}
+
+.icon-plane {
+    top: 15%;
+    right: 5%;
+    font-size: 14rem;
+    opacity: 0.05;
+    transform: rotate(10deg);
+    animation: floatIcon 9s ease-in-out infinite;
+}

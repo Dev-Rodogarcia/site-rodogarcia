@@ -1,0 +1,282 @@
+/* =========================================
+   RESPONSIVE - SOBRE
+   ========================================= */
+
+/* Responsivo - Tablet */
+@media (max-width: 968px) {
+    .hero-sobre {
+        padding: 5rem 0 5rem;
+        min-height: auto;
+    }
+
+    .hero-sobre__container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .hero-sobre__imagem {
+        order: -1;
+    }
+
+    .hero-sobre .titulo-hero {
+        font-size: 2.5rem;
+    }
+
+    .hero-sobre .subtitulo-hero {
+        font-size: 1.1rem;
+    }
+
+    .numeros-hero-sobre {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .numero-hero-item {
+        padding: 1.25rem;
+    }
+
+    .numero-grande {
+        font-size: 2rem;
+    }
+
+    /* Badge removido */
+
+    .grid-historia {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .historia-imagem {
+        order: -1;
+    }
+
+    .grid-valores {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .grid-certificacoes {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+/* Responsivo - Mobile */
+@media (max-width: 768px) {
+    .hero-sobre {
+        padding: 4rem 0 4rem;
+        min-height: auto;
+    }
+
+    .hero-sobre__container {
+        gap: 2rem;
+    }
+
+    .tag-hero-sobre {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-sobre .titulo-hero {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+    }
+
+    .hero-sobre .subtitulo-hero {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        max-width: 100%;
+        line-height: 1.5;
+    }
+
+    .numeros-hero-sobre {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .numero-hero-item {
+        padding: 1.25rem;
+        text-align: center;
+    }
+
+    .numero-grande {
+        font-size: 2rem;
+    }
+
+    .numero-hero-item span {
+        font-size: 0.85rem;
+    }
+
+    .hero-sobre__imagem {
+        margin-bottom: 1rem;
+    }
+
+    .img-hero-sobre {
+        max-height: 300px;
+        object-fit: cover;
+    }
+
+    /* Badge removido */
+
+    /* Esconde ícones decorativos no mobile */
+    .decoration-icon {
+        display: none;
+    }
+
+    .grid-historia {
+        gap: 2rem;
+    }
+
+    .titulo-secao {
+        font-size: 2rem;
+    }
+
+    .texto-historia {
+        font-size: 1rem;
+    }
+
+    .destaques-historia {
+        gap: 1rem;
+    }
+
+    .destaque-item {
+        padding: 1.25rem;
+    }
+
+    .destaque-item i {
+        font-size: 2rem;
+    }
+
+    .grid-valores {
+        grid-template-columns: 1fr;
+    }
+
+    .card-valor {
+        padding: 2rem;
+    }
+
+    .grid-certificacoes {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .box-cta-sobre {
+        padding: 0 1rem;
+    }
+
+    .box-cta-sobre h3 {
+        font-size: 1.75rem;
+    }
+
+    .cta-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-actions .botao {
+        width: 100%;
+    }
+}
+
+/* Responsivo - Mobile Pequeno */
+@media (max-width: 480px) {
+    .hero-sobre {
+        padding: 3.5rem 0 3rem;
+    }
+
+    .hero-sobre__container {
+        gap: 1.5rem;
+    }
+
+    .tag-hero-sobre {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-sobre .titulo-hero {
+        font-size: 1.75rem;
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-sobre .subtitulo-hero {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .numeros-hero-sobre {
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .numero-hero-item {
+        padding: 1rem;
+    }
+
+    .numero-grande {
+        font-size: 1.75rem;
+    }
+
+    .numero-hero-item span {
+        font-size: 0.8rem;
+    }
+
+    .img-hero-sobre {
+        max-height: 250px;
+    }
+
+    /* Badge removido */
+
+    .titulo-secao {
+        font-size: 1.75rem;
+    }
+
+    .texto-historia {
+        font-size: 0.95rem;
+    }
+
+    .destaque-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .destaque-item i {
+        font-size: 1.75rem;
+    }
+
+    .card-valor {
+        padding: 1.5rem;
+    }
+
+    .card-valor .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        font-size: 1.75rem;
+    }
+
+    .card-valor h3 {
+        font-size: 1.1rem;
+    }
+
+    .grid-certificacoes {
+        grid-template-columns: 1fr;
+    }
+
+    .card-certificacao {
+        padding: 1.5rem;
+    }
+
+    .box-cta-sobre h3 {
+        font-size: 1.5rem;
+    }
+
+    .box-cta-sobre p {
+        font-size: 1rem;
+    }
+}
+

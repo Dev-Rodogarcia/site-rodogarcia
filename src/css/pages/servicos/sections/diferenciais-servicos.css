@@ -1,0 +1,52 @@
+/* =========================================
+   DIFERENCIAIS SERVIÇOS
+   ========================================= */
+.secao-diferenciais-servicos {
+    background-color: var(--cor-cinza-claro);
+    padding: 3rem 0;
+}
+
+.grid-diferenciais-servicos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.card-diferencial-servico {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--cor-borda);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card-diferencial-servico:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    border-color: transparent;
+}
+
+.card-diferencial-servico .icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 1.5rem;
+}
+
+.card-diferencial-servico h3 {
+    font-size: 1.2rem;
+    color: var(--cor-texto-principal);
+    margin-bottom: 0.75rem;
+}
+
+.card-diferencial-servico p {
+    font-size: 0.95rem;
+    color: var(--cor-texto-secundario);
+    line-height: 1.5;
+}
+

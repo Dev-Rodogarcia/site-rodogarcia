@@ -1,0 +1,42 @@
+/* =========================================
+   CTA SERVIÇOS
+   ========================================= */
+.secao-cta-servicos {
+    background-color: var(--cor-azul-hero);
+    color: white;
+    padding: 4rem 0;
+}
+
+.box-cta-servicos {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.cta-content h3 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.cta-content p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    color: white;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cta-actions .botao {
+    min-width: 200px;
+}
+

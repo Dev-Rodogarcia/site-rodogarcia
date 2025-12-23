@@ -1,0 +1,12 @@
+/* =========================================
+   HOME PAGE - Estilos específicos da página inicial
+   ========================================= */
+
+/* Importa as seções da home */
+@import 'sections/hero.css';
+@import 'sections/certificados.css';
+@import 'sections/diferenciais.css';
+@import 'sections/dna.css';
+@import 'sections/filiais.css';
+@import 'sections/servicos.css';
+@import 'sections/rastreio.css';

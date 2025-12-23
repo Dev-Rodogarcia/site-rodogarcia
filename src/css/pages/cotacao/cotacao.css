@@ -1,0 +1,8 @@
+/* =========================================
+   COTAÇÃO PAGE - Estilos específicos da página de cotação
+   ========================================= */
+
+/* Importa as seções da página de cotação */
+@import 'sections/whatsapp-contatos.css';
+@import 'sections/formulario-cotacao.css';
+@import 'sections/responsive-cotacao.css';

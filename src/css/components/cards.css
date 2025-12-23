@@ -1,0 +1,76 @@
+/* =========================================
+   COMPONENTE CARD - Base Reutilizável
+   ========================================= */
+
+/* Card Base */
+.card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cor-borda);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: transparent;
+}
+
+/* Variações de Tamanho */
+.card--compact {
+    padding: 1.5rem;
+}
+
+.card--large {
+    padding: 3rem;
+}
+
+/* Variações de Estilo */
+.card--center {
+    align-items: center;
+    text-align: center;
+}
+
+/* Estilos de Conteúdo */
+.card h3 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    color: var(--cor-texto-principal);
+}
+
+.card p {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .card {
+        padding: 2rem;
+    }
+    
+    .card--compact {
+        padding: 1.25rem;
+    }
+    
+    .card h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .card:hover {
+        transform: none;
+    }
+}
+

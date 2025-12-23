@@ -1,0 +1,47 @@
+/* =========================================
+   RASTREAMENTO SERVIÇOS
+   ========================================= */
+.secao-rastreamento-servicos {
+    background-color: var(--cor-azul-hero);
+    color: white;
+    padding: 3rem 0;
+}
+
+.box-rastreamento-servicos {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.rastreamento-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.rastreamento-content i {
+    font-size: 3rem;
+    color: white;
+    opacity: 0.9;
+}
+
+.rastreamento-content h3 {
+    font-size: 1.5rem;
+    color: white;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.rastreamento-action {
+    flex-shrink: 0;
+}
+
+.rastreamento-action .botao {
+    white-space: nowrap;
+}
+

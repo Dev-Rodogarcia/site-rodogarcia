@@ -1,0 +1,391 @@
+/* =========================================
+   RESPONSIVE - SERVIÇOS
+   ========================================= */
+
+/* Responsivo - Tablet */
+@media (max-width: 968px) {
+    .grid-diferenciais-servicos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .grid-servicos-principais {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .box-rastreamento-servicos {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .rastreamento-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .carousel-depoimentos-container {
+        margin-top: 2rem;
+        width: calc(100% + 4rem);
+        margin-left: -2rem;
+        margin-right: -2rem;
+        padding: 0 2rem;
+    }
+
+    .carousel-depoimentos-track {
+        gap: 2rem;
+        padding: 0 0.5rem;
+    }
+
+    .card-depoimento {
+        width: 360px;
+        min-width: 360px;
+        padding: 1.75rem;
+        margin: 0 0.25rem;
+    }
+
+    @keyframes scrollDepoimentos {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-360px * 6 - 2rem * 6 - 0.5rem * 6 - 4rem));
+        }
+    }
+}
+
+/* Responsivo - Mobile */
+@media (max-width: 768px) {
+    .hero-servicos {
+        padding: 3rem 0 1.5rem;
+    }
+
+    .grid-diferenciais-servicos {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .card-diferencial-servico {
+        padding: 1.5rem;
+    }
+
+    .card-servico-principal {
+        padding: 2rem;
+    }
+
+    .card-servico-principal .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+
+    .card-servico-principal h3 {
+        font-size: 1.3rem;
+    }
+
+    .box-rastreamento-servicos {
+        flex-direction: column;
+        text-align: center;
+        padding: 0 1rem;
+    }
+
+    .rastreamento-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .rastreamento-content i {
+        font-size: 2.5rem;
+    }
+
+    .rastreamento-content h3 {
+        font-size: 1.3rem;
+    }
+
+    .rastreamento-action {
+        width: 100%;
+    }
+
+    .rastreamento-action .botao {
+        width: 100%;
+    }
+
+    .carousel-depoimentos-container {
+        margin-top: 2rem;
+        width: calc(100% + 3rem);
+        margin-left: -1.5rem;
+        margin-right: -1.5rem;
+        padding: 0 1.5rem;
+    }
+
+    .carousel-depoimentos-track {
+        gap: 1.5rem;
+        padding: 0 0.5rem;
+    }
+
+    .card-depoimento {
+        width: 320px;
+        min-width: 320px;
+        padding: 1.5rem;
+        margin: 0 0.25rem;
+    }
+
+    .cabecalho-secao.centro {
+        padding: 0 1rem;
+    }
+
+    .titulo-secao {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .subtitulo-secao {
+        font-size: 0.95rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .stats-depoimentos {
+        gap: 1.5rem !important;
+        margin-top: 1.5rem !important;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat-item {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .stat-item strong {
+        font-size: 1.75rem !important;
+    }
+
+    .stat-item span {
+        font-size: 0.85rem !important;
+    }
+
+    .depoimento-avaliacao {
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+    
+    .depoimento-avaliacao i {
+        font-size: 1rem;
+    }
+
+    .depoimento-resultado {
+        font-size: 0.85rem;
+    }
+
+    @keyframes scrollDepoimentos {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-320px * 6 - 1.5rem * 6 - 1rem));
+        }
+    }
+
+    .depoimento-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1rem;
+    }
+
+    .depoimento-info h4 {
+        font-size: 1rem;
+    }
+
+    .depoimento-info p {
+        font-size: 0.8rem;
+    }
+
+    .depoimento-texto {
+        font-size: 0.9rem;
+    }
+
+    .box-cta-servicos {
+        padding: 0 1rem;
+    }
+
+    .cta-content h3 {
+        font-size: 1.75rem;
+    }
+
+    .cta-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-actions .botao {
+        width: 100%;
+    }
+}
+
+/* Responsivo - Mobile Pequeno */
+@media (max-width: 480px) {
+    .hero-servicos {
+        padding: 2.5rem 0 1rem;
+    }
+
+    .grid-diferenciais-servicos {
+        gap: 1rem;
+    }
+
+    .card-diferencial-servico {
+        padding: 1.25rem;
+    }
+
+    .card-diferencial-servico .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-diferencial-servico h3 {
+        font-size: 1.1rem;
+    }
+
+    .card-diferencial-servico p {
+        font-size: 0.9rem;
+    }
+
+    .card-servico-principal {
+        padding: 1.5rem;
+    }
+
+    .card-servico-principal h3 {
+        font-size: 1.2rem;
+    }
+
+    .rastreamento-content i {
+        font-size: 2rem;
+    }
+
+    .rastreamento-content h3 {
+        font-size: 1.2rem;
+    }
+
+    .carousel-depoimentos-container {
+        width: calc(100% + 2rem);
+        margin-left: -1rem;
+        margin-right: -1rem;
+        padding: 0 1rem;
+    }
+
+    .carousel-depoimentos-track {
+        gap: 1.25rem;
+        padding: 0 0.25rem;
+    }
+
+    .card-depoimento {
+        width: 300px;
+        min-width: 300px;
+        padding: 1.25rem;
+        margin: 0 0.25rem;
+    }
+
+    .cabecalho-secao.centro {
+        padding: 0 0.5rem;
+    }
+
+    .titulo-secao {
+        font-size: 1.3rem !important;
+        margin-bottom: 0.625rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .subtitulo-secao {
+        font-size: 0.875rem !important;
+        margin-bottom: 1.25rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .stats-depoimentos {
+        gap: 1.25rem !important;
+        margin-top: 1.25rem !important;
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+
+    .stat-item {
+        flex: 1;
+        min-width: 100px;
+        max-width: 120px;
+    }
+
+    .stat-item strong {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .stat-item span {
+        font-size: 0.8rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .depoimento-avaliacao {
+        top: 0.625rem;
+        right: 0.625rem;
+    }
+    
+    .depoimento-avaliacao i {
+        font-size: 0.95rem;
+    }
+
+    .depoimento-resultado {
+        font-size: 0.8rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+
+    .depoimento-resultado i {
+        font-size: 1rem;
+    }
+
+    @keyframes scrollDepoimentos {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-300px * 6 - 1.25rem * 6 - 0.5rem));
+        }
+    }
+
+    .depoimento-header {
+        gap: 0.75rem;
+    }
+
+    .depoimento-avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 0.9rem;
+    }
+
+    .depoimento-info h4 {
+        font-size: 0.95rem;
+    }
+
+    .depoimento-info p {
+        font-size: 0.75rem;
+    }
+
+    .depoimento-avaliacao i {
+        font-size: 1rem;
+    }
+
+    .depoimento-texto {
+        font-size: 0.85rem;
+    }
+
+    .cta-content h3 {
+        font-size: 1.5rem;
+    }
+
+    .cta-content p {
+        font-size: 1rem;
+    }
+}
+

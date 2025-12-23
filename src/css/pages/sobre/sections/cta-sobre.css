@@ -1,0 +1,42 @@
+/* =========================================
+   CTA SOBRE
+   ========================================= */
+.secao-cta-sobre {
+    background-color: var(--cor-azul-hero);
+    color: white;
+    padding: 4rem 0;
+}
+
+.box-cta-sobre {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.box-cta-sobre h3 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.box-cta-sobre p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    color: white;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cta-actions .botao {
+    min-width: 200px;
+}
+

@@ -1,0 +1,198 @@
+/* =========================================
+   HERO SERVIÇOS
+   ========================================= */
+.hero-servicos {
+    background: linear-gradient(135deg, var(--cor-azul-hero) 0%, var(--cor-azul-escuro) 100%);
+    color: var(--cor-branco);
+    padding: 8rem 0 6rem;
+    margin-top: -2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-servicos::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(80, 141, 202, 0.2) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.hero-servicos .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-servicos .cabecalho-secao.centro {
+    max-width: 800px;
+    margin: 0 auto;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.badge-hero-servicos {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cor-branco);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.hero-servicos .titulo-hero {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--cor-branco);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-servicos .subtitulo-hero {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Decoração de fundo */
+.hero-servicos::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1));
+    pointer-events: none;
+}
+
+/* Elementos Decorativos */
+.hero-servicos-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hero-servicos-pattern {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+.decoration-icon-servicos {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.08);
+    z-index: 0;
+}
+
+.icon-truck {
+    top: 15%;
+    left: 10%;
+    font-size: 12rem;
+    transform: rotate(-15deg);
+    animation: floatIcon 8s ease-in-out infinite;
+}
+
+.icon-warehouse {
+    bottom: 20%;
+    right: 15%;
+    font-size: 10rem;
+    transform: rotate(10deg);
+    animation: floatIcon 6s ease-in-out infinite reverse;
+}
+
+.icon-globe {
+    top: 50%;
+    right: 5%;
+    font-size: 14rem;
+    opacity: 0.06;
+    transform: rotate(5deg);
+    animation: floatIcon 10s ease-in-out infinite;
+}
+
+/* Esconder decorações no mobile */
+@media (max-width: 768px) {
+    .hero-servicos-decorations {
+        display: none;
+    }
+}
+
+/* Responsivo */
+@media (max-width: 968px) {
+    .hero-servicos {
+        padding: 6rem 0 4rem;
+    }
+
+    .hero-servicos .titulo-hero {
+        font-size: 2.5rem;
+    }
+
+    .hero-servicos .subtitulo-hero {
+        font-size: 1.15rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-servicos {
+        padding: 5rem 0 3rem;
+    }
+
+    .badge-hero-servicos {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .hero-servicos .titulo-hero {
+        font-size: 2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .hero-servicos .subtitulo-hero {
+        font-size: 1.05rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-servicos {
+        padding: 4rem 0 2.5rem;
+    }
+
+    .badge-hero-servicos {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-servicos .titulo-hero {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-servicos .subtitulo-hero {
+        font-size: 1rem;
+    }
+}
+

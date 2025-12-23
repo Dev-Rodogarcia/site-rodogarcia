@@ -1,0 +1,217 @@
+/* =========================================
+   DEPOIMENTOS - CARROSSEL AUTOMÁTICO
+   ========================================= */
+.secao-depoimentos {
+    background-color: var(--cor-branco);
+    padding: 3rem 0;
+    overflow: hidden;
+}
+
+.carousel-depoimentos-container {
+    width: calc(100% + 8rem);
+    margin-left: -4rem;
+    margin-right: -4rem;
+    overflow: hidden;
+    position: relative;
+    margin-top: 3rem;
+    padding: 0 4rem;
+    mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+}
+
+.carousel-depoimentos-track {
+    display: flex;
+    width: fit-content;
+    gap: 2.5rem;
+    padding: 0 1rem;
+    animation: scrollDepoimentos 40s linear infinite;
+}
+
+.carousel-depoimentos-track:hover {
+    animation-play-state: paused;
+}
+
+.card-depoimento {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cor-borda);
+    transition: transform 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+    width: 420px;
+    min-width: 420px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: visible;
+}
+
+.card-depoimento:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: transparent;
+}
+
+.depoimento-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.depoimento-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cor-azul-hero), var(--cor-destaque));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.depoimento-info h4 {
+    font-size: 1.1rem;
+    color: var(--cor-texto-principal);
+    margin-bottom: 0.25rem;
+}
+
+.depoimento-info p {
+    font-size: 0.85rem;
+    color: var(--cor-texto-secundario);
+    margin: 0;
+}
+
+.depoimento-avaliacao {
+    display: flex !important;
+    gap: 0.2rem;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 10;
+}
+
+.depoimento-avaliacao i {
+    font-size: 1.1rem;
+    display: inline-block;
+}
+
+/* Estrelas de avaliação - Amarelas */
+.depoimento-avaliacao i {
+    color: #FFB800 !important;
+    /* Amarelo vibrante para todas as estrelas */
+}
+
+.depoimento-avaliacao i.ph-star-fill {
+    color: #FFB800 !important;
+    /* Amarelo vibrante para estrelas preenchidas */
+}
+
+.depoimento-avaliacao i.ph-star:not(.ph-star-fill) {
+    color: #E0E0E0 !important;
+    /* Cinza claro para estrelas vazias */
+}
+
+/* Garantir que os ícones sejam visíveis */
+.depoimento-avaliacao i[class*="star"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+}
+
+.depoimento-texto {
+    color: var(--cor-texto-secundario);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    margin: 0;
+    font-style: italic;
+}
+
+.depoimento-texto::before {
+    content: '"';
+    font-size: 2rem;
+    color: var(--cor-azul-hero);
+    opacity: 0.3;
+    line-height: 0;
+    margin-right: 0.25rem;
+}
+
+.depoimento-texto::after {
+    content: '"';
+    font-size: 2rem;
+    color: var(--cor-azul-hero);
+    opacity: 0.3;
+    line-height: 0;
+    margin-left: 0.25rem;
+}
+
+/* Badges de Depoimento - Removidos, estrelas estão no lugar */
+.depoimento-badge {
+    display: none;
+}
+
+/* Resultados dos Depoimentos */
+.depoimento-resultado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cor-borda);
+    color: var(--cor-azul-hero);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.depoimento-resultado i {
+    font-size: 1.2rem;
+}
+
+/* Estatísticas do Cabeçalho */
+.stats-depoimentos {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-item strong {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--cor-azul-hero);
+    margin-bottom: 0.25rem;
+}
+
+.stat-item span {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
+}
+
+.cabecalho-secao .subtitulo-secao strong {
+    color: var(--cor-azul-hero);
+    font-weight: 700;
+}
+
+/* Animação do Carrossel - Loop Infinito */
+@keyframes scrollDepoimentos {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-420px * 6 - 2.5rem * 6 - 1rem * 6 - 8rem));
+    }
+}
+
+/* A animação move exatamente metade dos depoimentos (6 de 12) para criar loop infinito perfeito */
+

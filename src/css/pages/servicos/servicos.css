@@ -1,0 +1,13 @@
+/* =========================================
+   SERVIÇOS PAGE - Estilos específicos da página de serviços
+   ========================================= */
+
+/* Importa as seções da página de serviços */
+@import 'sections/hero-servicos.css';
+@import 'sections/diferenciais-servicos.css';
+@import 'sections/servicos-principais.css';
+@import 'sections/rastreamento-servicos.css';
+@import 'sections/depoimentos.css';
+@import 'sections/cta-servicos.css';
+@import 'sections/responsive-servicos.css';
+

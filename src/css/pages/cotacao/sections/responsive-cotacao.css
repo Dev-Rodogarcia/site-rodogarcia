@@ -1,0 +1,28 @@
+/* =========================================
+   RESPONSIVE - COTAÇÃO
+   ========================================= */
+
+/* Responsivo - Mobile */
+@media (max-width: 768px) {
+    .hero-cotacao {
+        padding: 3rem 0 1.5rem;
+    }
+
+    .secao-cotacao {
+        padding: 0 0 3rem;
+        margin-top: -60px;
+    }
+}
+
+/* Responsivo - Mobile Pequeno */
+@media (max-width: 480px) {
+    .hero-cotacao {
+        padding: 2.5rem 0 1rem;
+    }
+
+    .secao-cotacao {
+        padding: 0 0 3rem;
+        margin-top: -50px;
+    }
+}
+

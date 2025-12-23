@@ -19,5 +19,5 @@ export const CORES = {
 };
 
 // Caminho do SVG do mapa
-export const CAMINHO_SVG = './src/script/mapas/map.svg';
+export const CAMINHO_SVG = './script/mapas/map.svg';
 

@@ -1,0 +1,12 @@
+/* =========================================
+   SOBRE PAGE - Estilos específicos da página sobre nós
+   ========================================= */
+
+/* Importa as seções da página sobre */
+@import 'sections/hero-sobre.css';
+@import 'sections/historia.css';
+@import 'sections/valores.css';
+@import 'sections/certificacoes-sobre.css';
+@import 'sections/cta-sobre.css';
+@import 'sections/responsive-sobre.css';
+

@@ -107,6 +107,16 @@ export function configurarCliquesEstados(svgElement) {
                 
                 console.log(`📍 Estado clicado: ${estadoId.toUpperCase()} (índice ${index})`);
                 
+                // PRIMEIRO: Desmarcar TODOS os estados selecionados anteriormente
+                const estadosSelecionados = svgElement.querySelectorAll('[data-estado-selecionado="true"]');
+                estadosSelecionados.forEach(estadoAnterior => {
+                    const estadoAnteriorId = estadoAnterior.getAttribute('data-estado-id');
+                    if (estadoAnteriorId) {
+                        removerDestaqueEstado(svgElement, estadoAnteriorId);
+                    }
+                    estadoAnterior.removeAttribute('data-estado-selecionado');
+                });
+                
                 // Buscar filiais deste estado
                 const filiaisEstado = getFiliaisPorEstado(estadoId);
                 
@@ -121,7 +131,7 @@ export function configurarCliquesEstados(svgElement) {
                         atualizarCardFilial(filialId);
                     }
                     
-                    // Destacar estado
+                    // Destacar NOVO estado
                     destacarEstado(svgElement, estadoId);
                     path.setAttribute('data-estado-selecionado', 'true');
                 } else {

@@ -1,0 +1,54 @@
+/* =========================================
+   VALORES
+   ========================================= */
+.secao-valores {
+    background-color: var(--cor-cinza-claro);
+}
+
+.grid-valores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.card-valor {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cor-borda);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: left;
+}
+
+.card-valor:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: transparent;
+}
+
+.card-valor .icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-valor h3 {
+    font-size: 1.3rem;
+    color: var(--cor-texto-principal);
+    margin-bottom: 1rem;
+}
+
+.card-valor p {
+    color: var(--cor-texto-secundario);
+    line-height: 1.6;
+}
+

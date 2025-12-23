@@ -1,0 +1,44 @@
+/* =========================================
+   VARIÁVEIS (Design System - Loggi Style)
+   ========================================= */
+:root {
+    /* Paleta de Cores Oficial - Rodogarcia */
+    --cor-azul-hero: #2E2882;
+    /* Azul Institucional - Primária */
+    --cor-azul-escuro: #1A164D;
+    /* Variação mais escura da primária */
+    --cor-azul-medio: #414D82;
+    /* Azul Secundário */
+
+    --cor-destaque: #508DCA;
+    /* Azul Claro - Destaque (antigo amarelo) */
+    --cor-apoio-escuro: #4B6970;
+    /* Cinza azulado */
+
+    --cor-texto-principal: #504E53;
+    /* Cinza Neutro / Texto */
+    --cor-texto-secundario: #666666;
+
+    --cor-branco: #ffffff;
+    --cor-cinza-claro: #f5f7fa;
+    --cor-borda: #e0e0e0;
+
+    /* Acentos Cards (Derivados do Destaque/Apoio) */
+    --accent-azul: #eef5fc;
+    /* Clareamento de #508DCA */
+    --accent-roxo: #f0eff7;
+    /* Clareamento de #2E2882 */
+    --accent-verde: #edf5f6;
+    /* Clareamento de #4B6970 */
+
+    /* Espaçamento e Layout */
+    --container-width: 1200px;
+    --espaco-padrao: 1rem;
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+
+    /* Tipografia */
+    --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
+}
+

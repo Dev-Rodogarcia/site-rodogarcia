@@ -49,8 +49,19 @@
     text-decoration: underline;
 }
 
+/* Menu Mobile - Escondido por padrão (desktop) */
 .menu-toggle,
 .nav-header-mobile,
 .nav-acoes-mobile {
     display: none;
+}
+
+/* Garantir que o menu desktop seja visível por padrão */
+.nav-principal {
+    display: flex;
+    align-items: center;
+}
+
+.cabecalho__acoes-desktop {
+    display: flex;
 }

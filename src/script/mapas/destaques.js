@@ -64,7 +64,7 @@ export function aplicarDestaquesFixos(svgElement) {
 }
 
 /**
- * Destaca um estado específico (para interações)
+ * Destaca um estado específico (para interações - estado selecionado)
  */
 export function destacarEstado(svgElement, estadoId) {
     const indice = getIndicePorEstado(estadoId);
@@ -75,8 +75,11 @@ export function destacarEstado(svgElement, estadoId) {
     const elemento = pathsArray[indice];
     
     if (elemento) {
-        elemento.style.setProperty('fill', CORES.hover, 'important');
+        // Aplicar cor de destaque (azul escuro) para estado selecionado
+        elemento.style.setProperty('fill', CORES.destaque, 'important');
+        elemento.style.setProperty('stroke', CORES.stroke, 'important');
         elemento.style.setProperty('stroke-width', CORES.strokeWidth.destacado, 'important');
+        elemento.classList.add('state-highlight');
     }
 }
 

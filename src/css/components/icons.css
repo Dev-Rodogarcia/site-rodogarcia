@@ -1,0 +1,65 @@
+/* =========================================
+   COMPONENTE ICON-WRAPPER - Reutilizável
+   ========================================= */
+
+/* Base */
+.icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Variações de Cor */
+.icon-wrapper.azul {
+    background: var(--accent-azul);
+    color: var(--cor-azul-hero);
+}
+
+.icon-wrapper.roxo {
+    background: var(--accent-roxo);
+    color: var(--cor-azul-medio);
+}
+
+.icon-wrapper.laranja {
+    background: var(--accent-verde);
+    color: var(--cor-apoio-escuro);
+}
+
+/* Variações de Tamanho */
+.icon-wrapper--small {
+    width: 50px;
+    height: 50px;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.icon-wrapper--large {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        font-size: 1.75rem;
+    }
+}
+

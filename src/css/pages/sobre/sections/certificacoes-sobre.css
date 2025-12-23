@@ -1,0 +1,47 @@
+/* =========================================
+   CERTIFICAÇÕES SOBRE
+   ========================================= */
+.secao-certificacoes-sobre {
+    background-color: var(--cor-branco);
+}
+
+.grid-certificacoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.card-certificacao {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cor-borda);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card-certificacao:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    border-color: transparent;
+}
+
+.card-certificacao img {
+    max-width: 120px;
+    height: auto;
+    margin: 0 auto 1.5rem;
+    display: block;
+}
+
+.card-certificacao h4 {
+    font-size: 1.2rem;
+    color: var(--cor-texto-principal);
+    margin-bottom: 0.5rem;
+}
+
+.card-certificacao p {
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
+}
+

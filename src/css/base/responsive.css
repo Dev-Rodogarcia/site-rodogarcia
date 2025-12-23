@@ -1,0 +1,522 @@
+/* =========================================
+   📱 MOBILE FIRST & MEDIA QUERIES
+   ========================================= */
+@media (max-width: 900px) {
+
+    /* Ajustes Gerais */
+    .hero {
+        text-align: center;
+        padding-top: 3rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        margin-top: 0 !important; /* Mobile: remove margin negativo */
+        min-height: auto;
+    }
+
+    .hero__container {
+        display: flex;
+        flex-direction: column;
+        padding: 0 1rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .hero__texto {
+        max-width: 100%;
+        padding: 0;
+        width: 100%;
+        margin-bottom: 0;
+        display: contents;
+    }
+
+    .titulo-hero {
+        font-size: 1.75rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 1rem !important;
+        margin-top: 0 !important;
+        order: 1 !important;
+        font-weight: 800 !important;
+    }
+
+    .subtitulo-hero {
+        font-size: 1rem !important;
+        margin: 0 auto 1.5rem !important;
+        line-height: 1.5 !important;
+        max-width: 100% !important;
+        order: 2 !important;
+        opacity: 0.95 !important;
+    }
+
+    .card-acao-hero {
+        order: 3 !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .hero__imagem {
+        order: 4 !important;
+    }
+
+    .botoes-acao {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .botoes-acao .botao {
+        width: 100% !important;
+        flex: none !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        font-size: 0.95rem !important;
+        padding: 0.75rem 1.25rem !important;
+        border-radius: 12px !important;
+    }
+
+
+    .hero__imagem {
+        width: 100%;
+        overflow: hidden;
+        margin-top: 1rem;
+        margin-bottom: 0;
+        order: 4 !important;
+    }
+
+    .img-hero-destaque {
+        transform: none !important;
+        max-width: 100% !important;
+        width: 100%;
+        margin-top: 0;
+        margin-left: 0;
+        margin-right: 0;
+        filter: none !important;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    /* Esconde o ícone de localização gigante no mobile */
+    .icon-pin,
+    .icon-box,
+    .icon-plane {
+        display: none;
+    }
+
+    .hero-decorations {
+        display: none;
+    }
+
+    .hero-glow {
+        display: none;
+    }
+
+    .hero-pattern-dots {
+        display: none;
+    }
+
+    /* Suavizar onda decorativa no mobile */
+    .custom-shape-divider-bottom-16789 svg {
+        height: 60px !important;
+    }
+
+    /* Esconde menu desktop */
+    .cabecalho__acoes-desktop {
+        display: none !important;
+    }
+    
+    .nav-principal:not(.ativo) {
+        display: none !important;
+    }
+
+    /* Exibe Toggle Button */
+    .menu-toggle {
+        display: block !important;
+        background: transparent;
+        padding: 0.5rem;
+        border: none;
+        cursor: pointer;
+        z-index: 2002 !important;
+        position: relative !important;
+    }
+    
+    /* Garantir que o botão funcione mesmo com scroll */
+    body.menu-aberto .menu-toggle {
+        z-index: 2002 !important;
+        position: relative !important;
+    }
+    
+    .nav-header-mobile {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
+    }
+    
+    .nav-acoes-mobile {
+        display: flex !important;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: auto;
+        padding-top: 2rem;
+    }
+
+    .hamburger {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: white;
+        position: relative;
+    }
+
+    .hamburger::before,
+    .hamburger::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: white;
+        transition: 0.3s;
+    }
+
+    .hamburger::before {
+        top: -8px;
+    }
+
+    .hamburger::after {
+        top: 8px;
+    }
+
+    /* Overlay escuro quando menu está aberto - via body */
+    body.menu-aberto::before {
+        content: '';
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important; /* Dynamic viewport height para mobile */
+        background: rgba(0, 0, 0, 0.5) !important;
+        z-index: 1998 !important;
+        animation: fadeIn 0.3s ease-out;
+        pointer-events: auto;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* MENU DRAWER (Lateral/Cheio) - Deve estar acima do overlay */
+    .nav-principal.ativo {
+        display: flex !important;
+        flex-direction: column;
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        left: auto !important;
+        bottom: auto !important;
+        /* Entra da direita */
+        width: 80% !important;
+        max-width: 400px !important;
+        /* Drawer ocupa 80% da tela */
+        height: 100vh !important;
+        height: 100dvh !important; /* Dynamic viewport height para mobile */
+        background: var(--cor-azul-hero) !important;
+        z-index: 2000 !important;
+        padding: 2rem !important;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2) !important;
+        animation: slideIn 0.3s ease-out;
+        overflow-y: auto !important;
+        pointer-events: auto !important;
+        isolation: isolate; /* Cria novo contexto de empilhamento */
+        margin: 0 !important;
+        transform: translateX(0) !important;
+        /* Garantir que saia do contexto do header */
+        position: fixed !important;
+        contain: layout style paint !important;
+    }
+    
+    /* Garantir que o header não interfira no posicionamento do menu */
+    .cabecalho .nav-principal.ativo {
+        position: fixed !important;
+    }
+    
+    /* Garantir que body e html não interfiram no posicionamento */
+    body.menu-aberto,
+    html.menu-aberto {
+        overflow: hidden !important;
+        position: relative !important;
+        height: 100% !important;
+    }
+    
+    /* Garantir que todos os elementos do menu recebam cliques */
+    body.menu-aberto .nav-principal.ativo * {
+        pointer-events: auto !important;
+    }
+    
+    /* Garantir que o header também funcione */
+    body.menu-aberto .cabecalho {
+        z-index: 2001 !important;
+        pointer-events: auto;
+        position: sticky !important;
+        top: 0 !important;
+    }
+    
+    body.menu-aberto .menu-toggle {
+        z-index: 2002 !important;
+        pointer-events: auto !important;
+        position: relative !important;
+    }
+
+    .titulo-menu {
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .fechar-menu {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .fechar-menu:hover {
+        opacity: 0.8;
+    }
+
+    /* Links Mobile */
+    .nav-principal .lista-nav {
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .nav-principal .link-nav {
+        font-size: 1.1rem;
+        color: white;
+        display: block;
+        padding: 0.5rem 0;
+    }
+    
+    .nav-principal .link-nav:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+
+    .grid-dna,
+    .grid-rodape {
+        grid-template-columns: 1fr;
+    }
+
+    .box-rastreio-wide {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .form-rastreio-row {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    /* Footer já está ajustado em footer.css com media queries específicas */
+
+    /* Filiais Mobile */
+    .mapa-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .info-filiais {
+        max-width: 100%;
+    }
+
+    .mapa-visual {
+        max-width: 100%;
+    }
+
+    .svg-mapa-brasil {
+        max-height: 350px;
+    }
+
+    .svg-mapa-brasil svg {
+        max-height: 350px;
+    }
+}
+
+/* Responsividade Certificados */
+@media (max-width: 768px) {
+    .secao-certificados {
+        padding: 1rem 0;
+    }
+
+    .carousel-slide {
+        gap: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .carousel-slide img {
+        height: 50px;
+    }
+
+    /* Hero Mobile Pequeno */
+    .hero {
+        padding-top: 2.5rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .hero__texto {
+        display: contents;
+        margin-bottom: 0;
+    }
+
+    .titulo-hero {
+        font-size: 1.5rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 1rem !important;
+        margin-top: 0 !important;
+        order: 1 !important;
+        font-weight: 800 !important;
+    }
+
+    .subtitulo-hero {
+        font-size: 0.95rem !important;
+        margin-bottom: 1.5rem !important;
+        max-width: 100% !important;
+        line-height: 1.5 !important;
+        order: 2 !important;
+        opacity: 0.95 !important;
+    }
+
+    .card-acao-hero {
+        order: 3 !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .botoes-acao {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+
+    .botoes-acao .botao {
+        width: 100% !important;
+        flex: none !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        border-radius: 12px !important;
+    }
+
+    .hero__imagem {
+        width: 100%;
+        overflow: visible;
+        margin-top: 1.75rem;
+        margin-bottom: 0;
+        order: 4 !important;
+    }
+
+    .img-hero-destaque {
+        transform: none !important;
+        max-width: 100% !important;
+        width: 100%;
+        margin: 0;
+        filter: none !important;
+        border-radius: 0;
+        box-shadow: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
+
+/* Mobile Muito Pequeno */
+@media (max-width: 480px) {
+    .hero {
+        padding-top: 2rem !important;
+        padding-bottom: 5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .hero__texto {
+        display: contents;
+        margin-bottom: 0;
+        padding-top: 0 !important;
+    }
+
+    .titulo-hero {
+        font-size: 1.4rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0.875rem !important;
+        margin-top: 0 !important;
+        order: 1 !important;
+        font-weight: 800 !important;
+    }
+
+    .subtitulo-hero {
+        font-size: 0.9rem !important;
+        margin-bottom: 1.25rem !important;
+        line-height: 1.5 !important;
+        max-width: 100% !important;
+        order: 2 !important;
+        opacity: 0.95 !important;
+    }
+
+    .card-acao-hero {
+        order: 3 !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    .botoes-acao {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+
+    .botoes-acao .botao {
+        width: 100% !important;
+        flex: none !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        font-size: 0.9rem !important;
+        padding: 0.7rem 1.2rem !important;
+        border-radius: 12px !important;
+    }
+
+    .hero__imagem {
+        width: 100%;
+        overflow: visible;
+        margin-top: 1.5rem;
+        margin-bottom: 0;
+        order: 4 !important;
+    }
+
+    .img-hero-destaque {
+        transform: none !important;
+        max-width: 100% !important;
+        width: 100%;
+        margin: 0;
+        filter: none !important;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
+

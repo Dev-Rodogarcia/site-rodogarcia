@@ -1,0 +1,61 @@
+/* =========================================
+   SERVIÇOS PRINCIPAIS
+   ========================================= */
+.secao-servicos-principais {
+    background-color: var(--cor-branco);
+}
+
+.grid-servicos-principais {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+    margin-top: 3rem;
+}
+
+.card-servico-principal {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cor-borda);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+.card-servico-principal:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: transparent;
+}
+
+.card-servico-principal .icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-servico-principal h3 {
+    font-size: 1.5rem;
+    color: var(--cor-texto-principal);
+    margin-bottom: 1rem;
+}
+
+.card-servico-principal > p {
+    color: var(--cor-texto-secundario);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    flex: 1;
+}
+
+.card-servico-principal .botao {
+    margin-top: auto;
+    width: 100%;
+}
+
+

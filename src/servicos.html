@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Serviços de Transporte - Rodogarcia Transportes. Soluções completas em logística para todo o Brasil.">
+    <title>Serviços - Rodogarcia Transportes</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../public/favicon.ico">
+    <link rel="manifest" href="../public/manifest.json">
+
+    <!-- Fontes Google (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Phosphor Icons (Ícones Modernos) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- CSS Base (genérico) -->
+    <link rel="stylesheet" href="./css/main.css">
+    <!-- CSS Específico da Página -->
+    <link rel="stylesheet" href="./css/pages/servicos/servicos.css">
+</head>
+
+<body>
+
+    <header class="cabecalho">
+        <div class="container cabecalho__container">
+            <a href="index.html" class="cabecalho__logo">
+                <!-- Logo Branco para fundo azul -->
+                <img src="../public/logo.png" alt="Rodogarcia Logística" class="logo-img">
+            </a>
+
+            <!-- Botão Menu Mobile (Sanduíche) -->
+            <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+                <span class="hamburger"></span>
+            </button>
+
+            <!-- Navegação Desktop & Mobile Drawer -->
+            <nav class="nav-principal">
+                <div class="nav-header-mobile">
+                    <span class="titulo-menu">Menu</span>
+                    <button class="fechar-menu" aria-label="Fechar menu">
+                        <i class="ph ph-x"></i>
+                    </button>
+                </div>
+
+                <ul class="lista-nav">
+                    <li><a href="index.html" class="link-nav">Início</a></li>
+                    <li><a href="servicos.html" class="link-nav">Serviços</a></li>
+                    <li><a href="sobre.html" class="link-nav">Sobre Nós</a></li>
+                    <li><a href="cotacao.html" class="link-nav">Cotação</a></li>
+                    <li><a href="trabalhe-conosco.html" class="link-nav">Trabalhe Conosco</a></li>
+                </ul>
+
+                <div class="nav-acoes-mobile">
+                    <a href="#" class="botao botao--outline-branco">Área do Cliente</a>
+                    <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                        class="botao botao--secundario">Rastrear</a>
+                </div>
+            </nav>
+
+            <!-- Ações Desktop -->
+            <div class="cabecalho__acoes-desktop">
+                <a href="#" class="botao botao--texto-branco">Entrar</a>
+                <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                    class="botao botao--branco">Criar Conta</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Seção Hero para Serviços -->
+        <section class="hero hero-servicos">
+            <!-- Elementos Decorativos -->
+            <div class="hero-servicos-decorations">
+                <div class="hero-servicos-pattern"></div>
+                <i class="ph ph-truck decoration-icon-servicos icon-truck"></i>
+                <i class="ph ph-warehouse decoration-icon-servicos icon-warehouse"></i>
+                <i class="ph ph-globe-hemisphere-west decoration-icon-servicos icon-globe"></i>
+            </div>
+            
+            <div class="container">
+                <div class="cabecalho-secao centro">
+                    <span class="badge-hero-servicos">+30 Anos de Experiência</span>
+                    <h1 class="titulo-hero">Soluções 360º em Logística</h1>
+                    <p class="subtitulo-hero">Aplicamos a expertise de mais de 30 anos em logística para criar soluções
+                        completas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Diferenciais -->
+        <section class="secao secao-diferenciais-servicos">
+            <div class="container">
+                <div class="grid-diferenciais-servicos">
+                    <div class="card-diferencial-servico">
+                        <div class="icon-wrapper azul">
+                            <i class="ph ph-user-circle"></i>
+                        </div>
+                        <h3>Atendimento personalizado</h3>
+                        <p>Soluções sob medida para cada necessidade do seu negócio.</p>
+                    </div>
+
+                    <div class="card-diferencial-servico">
+                        <div class="icon-wrapper roxo">
+                            <i class="ph ph-map-trifold"></i>
+                        </div>
+                        <h3>Abrangência nacional</h3>
+                        <p>Cobertura completa em todo o território brasileiro.</p>
+                    </div>
+
+                    <div class="card-diferencial-servico">
+                        <div class="icon-wrapper laranja">
+                            <i class="ph ph-medal"></i>
+                        </div>
+                        <h3>Foco em qualidade</h3>
+                        <p>Excelência em cada etapa do processo logístico.</p>
+                    </div>
+
+                    <div class="card-diferencial-servico">
+                        <div class="icon-wrapper azul">
+                            <i class="ph ph-leaf"></i>
+                        </div>
+                        <h3>Atuação sustentável</h3>
+                        <p>Compromisso com práticas ambientais responsáveis.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Serviços Principais -->
+        <section class="secao secao-servicos-principais">
+            <div class="container">
+                <div class="cabecalho-secao centro">
+                    <h2 class="titulo-secao">Nossos Serviços</h2>
+                    <p class="subtitulo-secao">Soluções completas para todas as necessidades logísticas</p>
+                </div>
+
+                <div class="grid-servicos-principais">
+                    <!-- Serviço 1 -->
+                    <div class="card-servico-principal">
+                        <div class="icon-wrapper azul">
+                            <i class="ph ph-truck"></i>
+                        </div>
+                        <h3>Distribuição</h3>
+                        <p>Garanta eficiência com nossos serviços completos de coleta, transferência e distribuição.
+                            Rapidez e segurança que conectam seu negócio ao mercado.</p>
+                        <a href="cotacao.html" class="botao botao--secundario">Solicitar Cotação</a>
+                    </div>
+
+                    <!-- Serviço 2 -->
+                    <div class="card-servico-principal">
+                        <div class="icon-wrapper roxo">
+                            <i class="ph ph-warehouse"></i>
+                        </div>
+                        <h3>Operação In Door</h3>
+                        <p>Otimize seu armazenamento com nossos serviços de paletização, armazenagem e cross docking.
+                            Soluções inteligentes de logística indoor para seu sucesso.</p>
+                        <a href="cotacao.html" class="botao botao--secundario">Solicitar Cotação</a>
+                    </div>
+
+                    <!-- Serviço 3 -->
+                    <div class="card-servico-principal">
+                        <div class="icon-wrapper laranja">
+                            <i class="ph ph-flask"></i>
+                        </div>
+                        <h3>Químico</h3>
+                        <p>Transporte seguro para a indústria química com nossa frota especializada. Confiabilidade e
+                            conformidade para atender às demandas mais exigentes.</p>
+                        <a href="cotacao.html" class="botao botao--secundario">Solicitar Cotação</a>
+                    </div>
+
+                    <!-- Serviço 4 -->
+                    <div class="card-servico-principal">
+                        <div class="icon-wrapper azul">
+                            <i class="ph ph-link"></i>
+                        </div>
+                        <h3>Supply Chain</h3>
+                        <p>Reforce sua cadeia de suprimentos com nossos projetos logísticos integrados. Parceria
+                            estratégica para um fluxo contínuo e eficiente.</p>
+                        <a href="cotacao.html" class="botao botao--secundario">Solicitar Cotação</a>
+                    </div>
+
+                    <!-- Serviço 5 -->
+                    <div class="card-servico-principal">
+                        <div class="icon-wrapper roxo">
+                            <i class="ph ph-globe"></i>
+                        </div>
+                        <h3>Importação e Exportação</h3>
+                        <p>Agilidade e precisão nas operações de coleta em portos e aeroportos. Conectamos o mundo ao
+                            seu negócio com segurança e eficiência.</p>
+                        <a href="cotacao.html" class="botao botao--secundario">Solicitar Cotação</a>
+                    </div>
+
+                    <!-- Serviço 6 -->
+                    <div class="card-servico-principal">
+                        <div class="icon-wrapper laranja">
+                            <i class="ph ph-truck"></i>
+                        </div>
+                        <h3>Carga lotação</h3>
+                        <p>Transporte inteligente de carga dedicada para todo o Brasil. Soluções sob medida para que sua
+                            carga chegue rápida e seguramente ao destino.</p>
+                        <a href="cotacao.html" class="botao botao--secundario">Solicitar Cotação</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Rastreamento -->
+        <section class="secao secao-rastreamento-servicos">
+            <div class="container">
+                <div class="box-rastreamento-servicos">
+                    <div class="rastreamento-content">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <h3>Tenha controle total sobre sua logística rastreando suas entregas.</h3>
+                    </div>
+                    <div class="rastreamento-action">
+                        <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                            class="botao botao--zafir">Quero rastrear</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Depoimentos -->
+        <section class="secao secao-depoimentos">
+            <div class="container">
+                <div class="cabecalho-secao centro">
+                    <h2 class="titulo-secao">A escolha certa para a sua logística!</h2>
+                    <p class="subtitulo-secao">Mais de <strong>2.500 clientes</strong> confiam na Rodogarcia. Veja o que
+                        eles dizem:</p>
+                    <div class="stats-depoimentos">
+                        <div class="stat-item">
+                            <strong>98%</strong>
+                            <span>de satisfação</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>4.8/5</strong>
+                            <span>avaliação média</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>2.500+</strong>
+                            <span>clientes ativos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-depoimentos-container">
+                    <div class="carousel-depoimentos-track">
+                        <div class="card-depoimento">
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>RC</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Roberto Campos</h4>
+                                    <p>Diretor de Logística - TechCorp</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Reduzimos nossos custos logísticos em <strong>35%</strong>
+                                desde que começamos a trabalhar com a Rodogarcia. A confiabilidade deles é
+                                impressionante - <strong>zero atrasos</strong> em 7 anos. Isso mudou completamente nosso
+                                negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-down"></i>
+                                <span>35% de redução de custos</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>MS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Maria Silva</h4>
+                                    <p>Gerente de Operações - Indústria Química</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Transportamos produtos perigosos há <strong>4 anos</strong> com
+                                a Rodogarcia. <strong>100% de conformidade</strong> com todas as normas. Eles são os
+                                únicos que confiamos para nossas cargas mais sensíveis. Segurança em primeiro lugar!"
+                            </p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-shield-check"></i>
+                                <span>100% de conformidade</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>JP</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>João Pereira</h4>
+                                    <p>CEO - E-commerce Brasil</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <p class="depoimento-texto">"Nossa empresa <strong>cresceu 280%</strong> nos últimos 3 anos
+                                e a Rodogarcia acompanhou cada passo. A abrangência nacional foi decisiva - conseguimos
+                                atender clientes em <strong>todos os 27 estados</strong> com a mesma qualidade. O
+                                rastreamento em tempo real aumentou nossa taxa de satisfação do cliente em
+                                <strong>42%</strong>!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-up"></i>
+                                <span>280% de crescimento</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>AF</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Ana Ferreira</h4>
+                                    <p>Coordenadora de Supply Chain</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star"></i>
+                            </div>
+                            <p class="depoimento-texto">"A operação In Door da Rodogarcia <strong>reduziu nosso tempo de
+                                    processamento em 60%</strong>. Antes levávamos 3 dias para processar um pedido,
+                                agora fazemos em <strong>menos de 1 dia</strong>. A eficiência deles é impressionante e
+                                isso impactou diretamente na satisfação dos nossos clientes!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-clock"></i>
+                                <span>60% mais rápido</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>CL</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Carlos Lima</h4>
+                                    <p>Diretor Comercial - Importadora</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <p class="depoimento-texto">"Trabalhamos com importação e exportação há mais de 10 anos. A
+                                Rodogarcia é a <strong>única transportadora</strong> que conseguimos confiar 100%. Em 5
+                                anos de parceria, <strong>zero problemas</strong> com documentação ou atrasos. Eles
+                                entendem a urgência do nosso negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-check-circle"></i>
+                                <span>Zero problemas em 5 anos</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>PS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Patrícia Santos</h4>
+                                    <p>Gerente de Distribuição</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star"></i>
+                            </div>
+                            <p class="depoimento-texto">"A experiência de <strong>35 anos</strong> da Rodogarcia faz
+                                toda a diferença. Eles não apenas transportam, mas <strong>otimizam nossos
+                                    processos</strong>. Reduzimos estoque em <strong>45%</strong> e aumentamos a
+                                rotatividade. Parceiros estratégicos que realmente entendem de logística!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-package"></i>
+                                <span>45% menos estoque</span>
+                            </div>
+                        </div>
+
+                    <!-- Duplicação para loop infinito -->
+                        <div class="card-depoimento">
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>RC</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Roberto Campos</h4>
+                                    <p>Diretor de Logística - TechCorp</p>
+                                </div>
+                            </div>
+                        <p class="depoimento-texto">"Reduzimos nossos custos logísticos em <strong>35%</strong> desde que começamos a trabalhar com a Rodogarcia. A confiabilidade deles é impressionante - <strong>zero atrasos</strong> em 7 anos. Isso mudou completamente nosso negócio!"</p>
+                        <div class="depoimento-resultado">
+                            <i class="ph ph-trend-down"></i>
+                            <span>35% de redução de custos</span>
+                        </div>
+                    </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>MS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Maria Silva</h4>
+                                    <p>Gerente de Operações - Indústria Química</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Transportamos produtos perigosos há <strong>4 anos</strong> com a Rodogarcia. <strong>100% de conformidade</strong> com todas as normas. Eles são os únicos que confiamos para nossas cargas mais sensíveis. Segurança em primeiro lugar!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-shield-check"></i>
+                                <span>100% de conformidade</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>JP</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>João Pereira</h4>
+                                    <p>CEO - E-commerce Brasil</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <p class="depoimento-texto">"Nossa empresa <strong>cresceu 280%</strong> nos últimos 3 anos e a Rodogarcia acompanhou cada passo. A abrangência nacional foi decisiva - conseguimos atender clientes em <strong>todos os 27 estados</strong> com a mesma qualidade. O rastreamento em tempo real aumentou nossa taxa de satisfação do cliente em <strong>42%</strong>!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-up"></i>
+                                <span>280% de crescimento</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>AF</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Ana Ferreira</h4>
+                                    <p>Coordenadora de Supply Chain</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star"></i>
+                            </div>
+                            <p class="depoimento-texto">"A operação In Door da Rodogarcia <strong>reduziu nosso tempo de processamento em 60%</strong>. Antes levávamos 3 dias para processar um pedido, agora fazemos em <strong>menos de 1 dia</strong>. A eficiência deles é impressionante e isso impactou diretamente na satisfação dos nossos clientes!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-clock"></i>
+                                <span>60% mais rápido</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>CL</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Carlos Lima</h4>
+                                    <p>Diretor Comercial - Importadora</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                            </div>
+                            <p class="depoimento-texto">"Trabalhamos com importação e exportação há mais de 10 anos. A Rodogarcia é a <strong>única transportadora</strong> que conseguimos confiar 100%. Em 5 anos de parceria, <strong>zero problemas</strong> com documentação ou atrasos. Eles entendem a urgência do nosso negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-check-circle"></i>
+                                <span>Zero problemas em 5 anos</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>PS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Patrícia Santos</h4>
+                                    <p>Gerente de Distribuição</p>
+                                </div>
+                            </div>
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star-fill"></i>
+                                <i class="ph ph-star"></i>
+                            </div>
+                            <p class="depoimento-texto">"A experiência de <strong>35 anos</strong> da Rodogarcia faz toda a diferença. Eles não apenas transportam, mas <strong>otimizam nossos processos</strong>. Reduzimos estoque em <strong>45%</strong> e aumentamos a rotatividade. Parceiros estratégicos que realmente entendem de logística!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-package"></i>
+                                <span>45% menos estoque</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção CTA -->
+        <section class="secao secao-cta-servicos">
+            <div class="container">
+                <div class="box-cta-servicos">
+                    <div class="cta-content">
+                        <h3>Pronto para começar?</h3>
+                        <p>Solicite uma cotação personalizada e descubra como podemos ajudar seu negócio</p>
+                    </div>
+                    <div class="cta-actions">
+                        <a href="cotacao.html" class="botao botao--zafir">Solicitar Cotação</a>
+                        <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                            class="botao botao--outline-zafir">Rastrear Encomenda</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer id="contato" class="rodape">
+        <div class="container grid-rodape">
+            <div class="col-rodape">
+                <img src="../public/logo.png" alt="Rodogarcia" class="logo-rodape">
+                <p class="texto-rodape">Conectando o Brasil com eficiência e tecnologia.</p>
+                <div class="social-links">
+                    <a href="#"><i class="ph ph-instagram-logo"></i></a>
+                    <a href="#"><i class="ph ph-linkedin-logo"></i></a>
+                    <a href="#"><i class="ph ph-facebook-logo"></i></a>
+                </div>
+            </div>
+            <div class="col-rodape">
+                <h4>Institucional</h4>
+                <ul>
+                    <li><a href="index.html#inicio">Início</a></li>
+                    <li><a href="sobre.html">Quem somos</a></li>
+                    <li><a href="trabalhe-conosco.html">Trabalhe Conosco</a></li>
+                    <li><a href="#">Imprensa</a></li>
+                </ul>
+            </div>
+            <div class="col-rodape">
+                <h4>Serviços</h4>
+                <ul>
+                    <li><a href="servicos.html">Nossos Serviços</a></li>
+                    <li><a href="cotacao.html">Solicitar Cotação</a></li>
+                    <li><a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank">Rastrear
+                            Encomenda</a></li>
+                    <li><a href="#">Para empresas</a></li>
+                </ul>
+            </div>
+            <div class="col-rodape">
+                <h4>Ajuda</h4>
+                <ul>
+                    <li><a href="#">Central de Ajuda</a></li>
+                    <li><a href="#">Fale Conosco</a></li>
+                    <li><a href="#">Termos de Uso</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="rodape-bottom container">
+            <p>&copy; 2025 Rodogarcia Transportes. Todos os direitos reservados. Desenvolvido por <a
+                    href="https://www.linkedin.com/in/dev-lucasandrade/" target="_blank">Lucas Andrade ❤️</a></p>
+        </div>
+    </footer>
+
+    <script src="./script/main.js"></script>
+</body>
+
+</html>
