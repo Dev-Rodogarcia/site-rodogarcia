@@ -1,0 +1,86 @@
+/* =========================================
+   CARROSSEL DE CERTIFICADOS E LICENÇAS
+   ========================================= */
+.secao-certificados {
+    background-color: var(--cor-branco);
+    padding: 1.5rem 0;
+    /* Mais fino verticalmente */
+    border-bottom: 1px solid var(--cor-borda);
+    overflow: hidden;
+}
+
+.container-certificados {
+    text-align: center;
+    max-width: var(--container-width);
+    /* Volta ao padrão (1200px) */
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.titulo-certificados {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    color: var(--cor-texto-secundario);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.carousel-track-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    /* Fade maior nas bordas */
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+
+.carousel-track {
+    display: flex;
+    width: fit-content;
+    animation: scrollCarousel 60s linear infinite;
+    /* Mais lento e fluido */
+}
+
+.carousel-track:hover {
+    animation-play-state: paused;
+}
+
+.carousel-slide {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    /* Espaço reduzido (era 4rem) */
+    padding-right: 3rem;
+    /* Igual ao gap para o loop */
+}
+
+.carousel-slide img {
+    height: 85px;
+    /* Aumentado consideravelmente para destaque */
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    filter: grayscale(100%) opacity(0.85);
+    /* Mais visível */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.carousel-slide img:hover {
+    filter: grayscale(0%) opacity(1);
+    transform: scale(1.1);
+}
+
+/* Animação Infinita */
+@keyframes scrollCarousel {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-25%);
+        /* Move 1/4 (um grupo) e reseta */
+    }
+}

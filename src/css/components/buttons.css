@@ -1,0 +1,94 @@
+/* =========================================
+   COMPONENTES (Botões e Inputs)
+   ========================================= */
+.botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.botao:hover {
+    transform: translateY(-2px);
+}
+
+.botao--zafir {
+    background-color: var(--cor-branco);
+    color: var(--cor-azul-hero);
+}
+
+.botao--zafir:hover {
+    background-color: #f0f0f0;
+}
+
+.botao--outline-zafir {
+    border: 2px solid var(--cor-branco);
+    color: var(--cor-branco);
+}
+
+.botao--outline-zafir:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.botao--texto-branco {
+    color: var(--cor-branco);
+}
+
+.botao--texto-branco:hover {
+    opacity: 0.8;
+}
+
+.botao--branco {
+    background-color: var(--cor-branco);
+    color: var(--cor-azul-hero);
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.botao--secundario {
+    background-color: var(--cor-destaque);
+    color: white;
+}
+
+.botao--secundario:hover {
+    filter: brightness(0.9);
+}
+
+.botao--outline-branco {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--cor-branco);
+}
+
+.botao-mini {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    text-align: center;
+    background-color: var(--cor-azul-hero);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.botao-mini:hover {
+    background-color: var(--cor-azul-escuro);
+}
+
+.link-seta {
+    color: var(--cor-azul-hero);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.link-seta:hover {
+    gap: 0.8rem;
+}

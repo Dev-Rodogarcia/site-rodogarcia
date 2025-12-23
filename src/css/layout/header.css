@@ -1,0 +1,56 @@
+/* =========================================
+   HEADER / MENU
+   ========================================= */
+.cabecalho {
+    background-color: rgba(46, 40, 130, 0.98);
+    /* Quase sólido, bem "leitoso" e denso */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--cor-branco);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cabecalho__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-img {
+    height: 32px;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+
+.cabecalho__acoes-desktop {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Menu Desktop Padrão */
+.nav-principal .lista-nav {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-principal .link-nav {
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.nav-principal .link-nav:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.menu-toggle,
+.nav-header-mobile,
+.nav-acoes-mobile {
+    display: none;
+}

@@ -1,0 +1,12 @@
+# Arquivos de desenvolvimento
+node_modules/
+.DS_Store
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos do sistema
+Thumbs.db
+desktop.ini

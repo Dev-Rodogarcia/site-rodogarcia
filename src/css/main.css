@@ -1,0 +1,29 @@
+/* ==========================================================================
+   MAIN CSS - Arquivo Principal
+   Importa todos os módulos de estilo do sistema.
+   ========================================================================== */
+
+/* 1. Configurações e Base */
+@import 'variables.css';
+@import 'base.css';
+
+/* 2. Componentes Reutilizáveis */
+@import 'components/buttons.css';
+
+/* 3. Layout Global (Header e Footer) */
+@import 'layout/header.css';
+@import 'layout/footer.css';
+
+/* 4. Seções Específicas */
+@import 'sections/hero.css';
+@import 'sections/certificados.css';
+/* Ordem customizada: aparece logo após hero? Não importa estilo, mas import pode afetar cascade. */
+@import 'sections/diferenciais.css';
+@import 'mapa.css';
+@import 'sections/filiais.css';
+@import 'sections/dna.css';
+@import 'sections/servicos.css';
+@import 'sections/rastreio.css';
+
+/* 5. Responsividade (Sobrescritas Finais) */
+@import 'responsive.css';

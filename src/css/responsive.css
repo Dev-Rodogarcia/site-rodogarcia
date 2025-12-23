@@ -1,0 +1,257 @@
+/* =========================================
+   📱 MOBILE FIRST & MEDIA QUERIES
+   ========================================= */
+@media (max-width: 900px) {
+
+    /* Ajustes Gerais */
+    .titulo-hero {
+        font-size: 2rem;
+        line-height: 1.3;
+        margin-bottom: 1.2rem;
+    }
+
+    .hero {
+        text-align: center;
+        padding-top: 4rem;
+        padding-bottom: 3rem;
+        margin-top: 0; /* Mobile: remove margin negativo */
+    }
+
+    .hero__container {
+        flex-direction: column;
+    }
+
+    .subtitulo-hero {
+        margin: 0 auto 2rem;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .botoes-acao {
+        justify-content: center;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .img-hero-destaque {
+        transform: none;
+        max-width: 100%;
+        margin-top: -5.4rem;
+        /* Puxa mais para cima */
+    }
+
+    /* Esconde o ícone de localização gigante no mobile */
+    .icon-pin {
+        display: none;
+    }
+
+    .botao--largo {
+        width: 100%;
+    }
+
+    /* Esconde menu desktop */
+    .cabecalho__acoes-desktop,
+    .nav-principal {
+        display: none;
+    }
+
+    /* Exibe Toggle Button */
+    .menu-toggle {
+        display: block;
+        background: transparent;
+        padding: 0.5rem;
+    }
+
+    .hamburger {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: white;
+        position: relative;
+    }
+
+    .hamburger::before,
+    .hamburger::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: white;
+        transition: 0.3s;
+    }
+
+    .hamburger::before {
+        top: -8px;
+    }
+
+    .hamburger::after {
+        top: 8px;
+    }
+
+    /* MENU DRAWER (Lateral/Cheio) */
+    .nav-principal.ativo {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        /* Entra da direita */
+        width: 80%;
+        /* Drawer ocupa 80% da tela */
+        height: 100vh;
+        background: var(--cor-azul-hero);
+        z-index: 2000;
+        padding: 2rem;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .nav-header-mobile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
+    }
+
+    .titulo-menu {
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .fechar-menu {
+        background: none;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    /* Links Mobile */
+    .nav-principal .lista-nav {
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .nav-principal .link-nav {
+        font-size: 1.1rem;
+        color: white;
+        display: block;
+    }
+
+    /* Ações Mobile Inseridas no Menu */
+    .nav-acoes-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: auto;
+        /* Empurra p/ fundo */
+        padding-top: 2rem;
+    }
+
+    .grid-dna,
+    .grid-rodape {
+        grid-template-columns: 1fr;
+    }
+
+    .box-rastreio-wide {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .form-rastreio-row {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    /* Footer já está ajustado em footer.css com media queries específicas */
+
+    /* Filiais Mobile */
+    .mapa-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .info-filiais {
+        max-width: 100%;
+    }
+
+    .mapa-visual {
+        max-width: 100%;
+        max-height: 400px;
+        min-height: 250px;
+    }
+
+    .svg-mapa-brasil {
+        max-height: 400px;
+    }
+
+    .svg-mapa-brasil svg {
+        max-height: 400px;
+    }
+}
+
+/* Responsividade Certificados */
+@media (max-width: 768px) {
+    .secao-certificados {
+        padding: 1rem 0;
+    }
+
+    .carousel-slide {
+        gap: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .carousel-slide img {
+        height: 50px;
+    }
+
+    /* Hero Mobile Pequeno */
+    .hero {
+        padding-top: 3.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    .titulo-hero {
+        font-size: 1.75rem;
+        line-height: 1.3;
+        margin-bottom: 1rem;
+    }
+
+    .subtitulo-hero {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Mobile Muito Pequeno */
+@media (max-width: 480px) {
+    .hero {
+        padding-top: 3rem;
+        padding-bottom: 2rem;
+    }
+
+    .titulo-hero {
+        font-size: 1.5rem;
+        line-height: 1.3;
+        margin-bottom: 0.875rem;
+    }
+
+    .subtitulo-hero {
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+        line-height: 1.4;
+    }
+}
