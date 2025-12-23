@@ -19,6 +19,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+    z-index: 1001;
 }
 
 .logo-img {
@@ -54,6 +56,19 @@
 .nav-header-mobile,
 .nav-acoes-mobile {
     display: none;
+}
+
+/* Garantir que o botão do menu seja sempre clicável */
+.menu-toggle {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 10000 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 /* Garantir que o menu desktop seja visível por padrão */

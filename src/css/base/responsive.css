@@ -140,6 +140,12 @@
         cursor: pointer;
         z-index: 2002 !important;
         position: relative !important;
+        pointer-events: auto !important;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .menu-toggle .hamburger {
+        pointer-events: none;
     }
     
     /* Garantir que o botão funcione mesmo com scroll */
@@ -209,6 +215,13 @@
         pointer-events: auto;
         margin: 0 !important;
         padding: 0 !important;
+    }
+    
+    /* Garantir que o botão do menu fique acima do overlay */
+    body.menu-aberto .menu-toggle {
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        position: relative !important;
     }
     
     /* MENU DRAWER (Lateral/Cheio) - Deve estar acima do overlay */

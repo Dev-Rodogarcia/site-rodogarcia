@@ -5,22 +5,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const fecharMenu = document.querySelector('.fechar-menu');
     const linksMobile = document.querySelectorAll('.nav-principal .link-nav'); // Seleciona links dentro do nav
 
-    function abrirMenu() {
-        navPrincipal.classList.add('ativo');
-        menuToggle.setAttribute('aria-expanded', 'true');
+    function abrirMenu(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (navPrincipal) {
+            navPrincipal.classList.add('ativo');
+        }
+        if (menuToggle) {
+            menuToggle.setAttribute('aria-expanded', 'true');
+        }
         document.body.classList.add('menu-aberto');
         document.body.style.overflow = 'hidden'; // Previne scroll no fundo
     }
 
-    function fecharMenuFunc() {
-        navPrincipal.classList.remove('ativo');
-        menuToggle.setAttribute('aria-expanded', 'false');
+    function fecharMenuFunc(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (navPrincipal) {
+            navPrincipal.classList.remove('ativo');
+        }
+        if (menuToggle) {
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
         document.body.classList.remove('menu-aberto');
         document.body.style.overflow = ''; // Libera scroll
     }
 
-    if (menuToggle) {
-        menuToggle.addEventListener('click', abrirMenu);
+    if (menuToggle && navPrincipal) {
+        const abrirMenuHandler = function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            console.log('Menu clicado!');
+            navPrincipal.classList.add('ativo');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('menu-aberto');
+            document.body.style.overflow = 'hidden';
+        };
+        
+        // Remover listeners antigos se existirem
+        const novoToggle = menuToggle.cloneNode(true);
+        menuToggle.parentNode.replaceChild(novoToggle, menuToggle);
+        
+        // Adicionar listeners no novo elemento
+        novoToggle.addEventListener('click', abrirMenuHandler, true);
+        novoToggle.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            abrirMenuHandler(e);
+        }, { passive: false, capture: true });
+        
+        // Garantir propriedades
+        novoToggle.style.pointerEvents = 'auto';
+        novoToggle.style.cursor = 'pointer';
+        novoToggle.style.zIndex = '10000';
+        novoToggle.style.position = 'relative';
+        
+        console.log('Menu configurado:', novoToggle);
+    } else {
+        console.error('Menu não encontrado:', { menuToggle, navPrincipal });
     }
 
     if (fecharMenu) {
@@ -75,96 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // === MAPA INTERATIVO REMOVIDO (Mavido para src/script/mapa.js) ===
-
-    // === FORMULÁRIO DE COTAÇÃO ===
-    const formCotacao = document.getElementById('formCotacao');
-    
-    if (formCotacao) {
-        formCotacao.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Validação básica
-            const remetenteNome = document.getElementById('remetente-nome').value.trim();
-            const remetenteEmail = document.getElementById('remetente-email').value.trim();
-            const peso = document.getElementById('peso').value;
-            const volume = document.getElementById('volume').value;
-            
-            if (!remetenteNome || !remetenteEmail || !peso || !volume) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return;
-            }
-            
-            // Feedback visual
-            const btnSubmit = formCotacao.querySelector('.botao-submit-cotacao');
-            const textoOriginal = btnSubmit.innerHTML;
-            
-            btnSubmit.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Enviando...';
-            btnSubmit.disabled = true;
-            
-            // Simulação de envio
-            setTimeout(() => {
-                alert('Cotação solicitada com sucesso! Entraremos em contato em até 24 horas.');
-                formCotacao.reset();
-                btnSubmit.innerHTML = textoOriginal;
-                btnSubmit.disabled = false;
-            }, 1500);
-        });
-        
-        // Máscaras de entrada
-        const cpfCnpjInputs = document.querySelectorAll('input[id*="cpf-cnpj"]');
-        cpfCnpjInputs.forEach(input => {
-            input.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length <= 11) {
-                    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-                } else {
-                    value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-                }
-                e.target.value = value;
-            });
-        });
-        
-        // Máscara de CEP
-        const cepInput = document.getElementById('destinatario-cep');
-        if (cepInput) {
-            cepInput.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length <= 8) {
-                    value = value.replace(/(\d{5})(\d{0,3})/, '$1-$2');
-                }
-                e.target.value = value;
-            });
-        }
-        
-        // Máscara de telefone
-        const telefoneInputs = document.querySelectorAll('input[type="tel"]');
-        telefoneInputs.forEach(input => {
-            input.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length <= 11) {
-                    if (value.length <= 10) {
-                        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-                    } else {
-                        value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-                    }
-                    e.target.value = value;
-                }
-            });
-        });
-        
-        // Máscara de valor monetário
-        const valorInput = document.getElementById('valor-nota');
-        if (valorInput) {
-            valorInput.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                value = (parseInt(value) / 100).toFixed(2) + '';
-                value = value.replace('.', ',');
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                e.target.value = value;
-            });
-        }
-    }
+    // === MAPA INTERATIVO REMOVIDO (Movido para src/script/mapa.js) ===
 
     // === FORMULÁRIO DE CANDIDATURA - TRABALHE CONOSCO ===
     const formCandidatura = document.getElementById('formCandidatura');
