@@ -4,6 +4,7 @@
 .dna-bg-azul {
     background-color: var(--cor-azul-hero);
     color: white;
+    overflow: hidden;
 }
 
 .grid-dna {
@@ -22,6 +23,9 @@
     letter-spacing: 1px;
     font-weight: 700;
     display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    align-self: flex-start;
     margin-bottom: 1rem;
 }
 
@@ -29,6 +33,92 @@
     color: white;
     font-size: 2.5rem;
     margin-bottom: 3rem;
+}
+
+.carrossel-dna {
+    position: relative;
+    --dna-slide-height: 520px;
+}
+
+.carrossel-dna__slides {
+    position: relative;
+    width: 100%;
+    height: var(--dna-slide-height);
+    overflow: hidden;
+}
+
+.carrossel-dna__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity 0.45s ease,
+        visibility 0s linear 0.45s;
+}
+
+.carrossel-dna__slide--ativo {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+        opacity 0.45s ease,
+        visibility 0s linear 0s;
+}
+
+.carrossel-dna__slide .grid-dna {
+    height: 100%;
+}
+
+.carrossel-dna__slide .dna-info {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.carrossel-dna__slide .titulo-branco {
+    line-height: 1.2;
+    min-height: 2.4em;
+    margin-bottom: 2rem;
+}
+
+.carrossel-dna__slide .lista-dna {
+    gap: 1.35rem;
+}
+
+.carrossel-dna__slide .lista-dna li {
+    align-items: flex-start;
+}
+
+.carrossel-dna__controles {
+    position: absolute;
+    top: 50%;
+    left: calc((100vw - 100%) / -2);
+    right: calc((100vw - 100%) / -2);
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    z-index: 20;
+    pointer-events: none;
+    padding: 0 4rem;
+    margin: 0 auto;
+}
+
+.carrossel-dna__btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+    line-height: 1;
+}
+
+.carrossel-dna__btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
 }
 
 .lista-dna {
@@ -62,17 +152,35 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
+}
+
+.dna-img>div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.5rem, 1.2vw, 1rem);
+    overflow: hidden;
 }
 
 .img-dna {
     width: 100%;
-    height: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     border-radius: var(--radius-md);
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
 }
 
 /* Responsivo - Tablet */
 @media (max-width: 968px) {
+    .carrossel-dna {
+        --dna-slide-height: 500px;
+    }
+
     .grid-dna {
         gap: 3rem;
     }
@@ -93,12 +201,18 @@
     .lista-dna strong {
         font-size: 1.3rem;
     }
+
 }
 
 /* Responsivo - Mobile */
 @media (max-width: 768px) {
+    .carrossel-dna {
+        --dna-slide-height: 680px;
+    }
+
     .grid-dna {
         grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
         gap: 2.5rem;
     }
 
@@ -108,6 +222,7 @@
 
     .dna-img {
         order: 2;
+        min-height: 0;
     }
 
     .tag-dna {
@@ -120,6 +235,7 @@
         font-size: 1.75rem;
         margin-bottom: 1.5rem;
         line-height: 1.3;
+        min-height: 0;
     }
 
     .lista-dna {
@@ -151,13 +267,24 @@
 
     .img-dna {
         width: 100%;
-        height: auto;
+        height: 100%;
         border-radius: var(--radius-md);
+    }
+
+}
+
+@media (max-width: 1024px) {
+    .carrossel-dna__controles {
+        display: none;
     }
 }
 
 /* Responsivo - Mobile Pequeno */
 @media (max-width: 480px) {
+    .carrossel-dna {
+        --dna-slide-height: 620px;
+    }
+
     .grid-dna {
         gap: 2rem;
     }
@@ -199,4 +326,5 @@
         font-size: 0.85rem;
         line-height: 1.4;
     }
+
 }

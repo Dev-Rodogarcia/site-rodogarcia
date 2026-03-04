@@ -566,3 +566,88 @@
         box-shadow: none;
     }
 }
+
+/* Padrão de Blocos Hero (Mobile First) */
+@media (max-width: 900px) {
+    .hero__container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 1.25rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 1rem !important;
+    }
+
+    .hero__texto {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: min(100%, 390px) !important;
+        max-width: 390px !important;
+        min-height: 260px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        text-align: center !important;
+    }
+
+    .titulo-hero,
+    .subtitulo-hero,
+    .card-acao-hero {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .hero__imagem {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: min(100%, 390px) !important;
+        max-width: 390px !important;
+        aspect-ratio: 1 / 1 !important;
+        min-height: 260px !important;
+        margin: 0 auto !important;
+        overflow: hidden !important;
+    }
+
+    .img-hero-destaque {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        object-fit: contain !important;
+        transform: none !important;
+        filter: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero__texto {
+        width: min(100%, 360px) !important;
+        max-width: 360px !important;
+        min-height: 240px !important;
+    }
+
+    .hero__imagem {
+        width: min(100%, 360px) !important;
+        max-width: 360px !important;
+        min-height: 240px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero__texto {
+        width: min(100%, 340px) !important;
+        max-width: 340px !important;
+        min-height: 220px !important;
+    }
+
+    .hero__imagem {
+        width: min(100%, 340px) !important;
+        max-width: 340px !important;
+        min-height: 220px !important;
+    }
+}

@@ -1,0 +1,150 @@
+﻿/* =========================================
+   CARROSSEL HERO
+   ========================================= */
+
+.hero#inicio {
+    height: 80vh;
+    min-height: 680px;
+}
+
+.carrossel-hero {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+.carrossel-hero__slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        opacity 0.65s ease,
+        visibility 0s linear 0.65s;
+    padding: 2rem 0;
+}
+
+.carrossel-hero__slide--ativo {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+        opacity 0.65s ease,
+        visibility 0s linear 0s;
+}
+
+.carrossel-hero__slide--ativo .hero__texto {
+    animation: carrosselFadeInUp 0.65s ease-out both;
+}
+
+.carrossel-hero__slide--ativo .hero__imagem {
+    animation: carrosselFadeInDireita 0.75s ease-out 0.08s both;
+}
+
+@keyframes carrosselFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes carrosselFadeInDireita {
+    from {
+        opacity: 0;
+        transform: translateX(36px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-5%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .carrossel-hero__slide,
+    .carrossel-hero__slide--ativo .hero__texto,
+    .carrossel-hero__slide--ativo .hero__imagem {
+        transition: none;
+        animation: none;
+    }
+}
+
+.carrossel-hero__controles {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    z-index: 20;
+    pointer-events: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 4rem;
+    margin: 0 auto;
+}
+
+.carrossel-hero__btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    pointer-events: auto;
+    line-height: 1;
+}
+
+.seta {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg);
+}
+
+
+
+
+@media (max-width: 900px) {
+    .hero#inicio {
+        height: 720px;
+        min-height: 720px;
+    }
+}
+
+@media (max-width: 768px) {
+    .carrossel-hero__controles {
+        display: none;
+    }
+
+    .carrossel-hero__slide {
+        padding: 1rem 0;
+    }
+
+    .hero#inicio {
+        height: 700px;
+        min-height: 700px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero#inicio {
+        height: 660px;
+        min-height: 660px;
+    }
+}
