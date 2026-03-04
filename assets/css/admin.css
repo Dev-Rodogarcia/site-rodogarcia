@@ -1,0 +1,277 @@
+﻿:root {
+  --panel-bg: #f3f7fc;
+  --card-bg: #ffffff;
+  --line: #d7e0ee;
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #0b5fa5;
+  --accent-dark: #084779;
+  --danger: #b91c1c;
+  --ok: #15803d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.admin-body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #eef5ff 0%, var(--panel-bg) 100%);
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #0b2742;
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-brand strong {
+  font-size: 1rem;
+}
+
+.admin-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-nav a,
+.admin-nav button {
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-nav a[aria-current='page'] {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.admin-main {
+  width: min(1200px, 100% - 32px);
+  margin: 20px auto 28px;
+  display: grid;
+  gap: 20px;
+}
+
+.panel-message {
+  min-height: 20px;
+  font-size: 0.92rem;
+}
+
+.panel-message[data-state='error'] {
+  color: var(--danger);
+}
+
+.panel-message[data-state='success'] {
+  color: var(--ok);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+}
+
+.admin-card {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.admin-card h2,
+.admin-card h3 {
+  margin-top: 0;
+}
+
+.admin-form {
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  padding: 9px 10px;
+  font: inherit;
+}
+
+.admin-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.check-row input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-small {
+  border: none;
+  border-radius: 9px;
+  padding: 9px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dark);
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: var(--ink);
+}
+
+.btn-small {
+  background: #e8eff8;
+  color: var(--ink);
+  font-size: 0.85rem;
+  padding: 7px 10px;
+}
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.item-meta p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.status-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-pill.on {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.off {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.cards-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.overview-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--card-bg);
+}
+
+.overview-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .cards-overview {
+    grid-template-columns: 1fr;
+  }
+}

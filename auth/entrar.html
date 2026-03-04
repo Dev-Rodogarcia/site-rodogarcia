@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Entrar | Funcionarios e Dev</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/auth.css">
+</head>
+<body class="auth-body" data-page="login">
+  <main class="auth-card" aria-label="Formulario de acesso">
+    <h1>Acesso Restrito</h1>
+    <p class="auth-subtitle">Escolha a area de acesso. Atualmente apenas funcionarios e desenvolvimento estao habilitados.</p>
+
+    <nav class="auth-access-switch" aria-label="Tipo de acesso">
+      <a href="/auth/entrar.html?area=staff" data-access-link="staff">Funcionarios e Dev</a>
+      <a href="/auth/entrar.html?area=client" data-access-link="client">Clientes (em breve)</a>
+    </nav>
+
+    <p id="auth-message" class="auth-message" aria-live="polite"></p>
+
+    <section id="staff-login-block">
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="auth-field">
+          <label for="email">E-mail corporativo</label>
+          <input id="email" name="email" type="email" autocomplete="username" required>
+        </div>
+
+        <div class="auth-field">
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+
+        <button class="auth-button" type="submit">Entrar na Area de Funcionarios/Dev</button>
+      </form>
+
+      <div class="auth-links">
+        <a href="/auth/criar-conta.html?area=staff">Criar conta (controlado)</a>
+        <a href="/">Voltar ao site</a>
+      </div>
+    </section>
+
+    <section id="client-coming-soon" class="auth-client-block" hidden>
+      <h2>Area do Cliente em desenvolvimento</h2>
+      <p>Este login ainda nao esta habilitado. No momento, o acesso liberado e apenas para equipe interna e desenvolvimento.</p>
+      <div class="auth-links">
+        <a href="/auth/entrar.html?area=staff">Ir para login de Funcionarios/Dev</a>
+        <a href="/">Voltar ao site</a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/js/auth.js"></script>
+</body>
+</html>

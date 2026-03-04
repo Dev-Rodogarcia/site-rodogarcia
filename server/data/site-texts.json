@@ -1,0 +1,14 @@
+﻿{
+  "dashboardTitle": "Painel de gerenciamento de conteudo",
+  "dashboardSubtitle": "Atualize conteudo do site com controle e seguranca.",
+  "heroSectionTitle": "Destaques do Hero",
+  "heroSectionSubtitle": "Edite titulos, descricoes, botoes e imagens do carrossel principal.",
+  "dnaSectionTitle": "DNA da Rodogarcia",
+  "dnaSectionSubtitle": "Mantenha os destaques institucionais sempre atualizados.",
+  "vagasSectionTitle": "Vagas em destaque",
+  "vagasSectionSubtitle": "Gerencie vagas em destaque com status e ordenacao.",
+  "ctaPrimaryLabel": "Solicitar Cotacao",
+  "ctaPrimaryUrl": "/cotacao.html",
+  "ctaSecondaryLabel": "Fale Conosco",
+  "ctaSecondaryUrl": "/fale-conosco.html"
+}

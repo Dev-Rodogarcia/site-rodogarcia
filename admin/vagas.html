@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Vagas | Rodogarcia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <div class="admin-brand">
+      <strong>Rodogarcia Admin</strong>
+      <span id="session-user"></span>
+    </div>
+
+    <nav class="admin-nav" aria-label="Navegacao administrativa">
+      <a href="/admin/index.html">Painel</a>
+      <a href="/admin/carrosseis.html">Carrosseis</a>
+      <a href="/admin/vagas.html" aria-current="page">Vagas</a>
+      <button id="logout-btn" type="button">Sair</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <p id="panel-message" class="panel-message" aria-live="polite"></p>
+
+    <section class="admin-grid">
+      <article class="admin-card">
+        <h2>Cadastro de vagas em destaque</h2>
+        <form id="vaga-form" class="admin-form" novalidate>
+          <input type="hidden" id="vagaId" name="vagaId">
+
+          <label>
+            Titulo da vaga
+            <input id="vagaTitle" name="vagaTitle" type="text" required maxlength="120">
+          </label>
+
+          <div class="form-grid-2">
+            <label>
+              Status
+              <select id="vagaStatus" name="vagaStatus" required>
+                <option value="Novo">Novo</option>
+                <option value="Disponivel">Disponivel</option>
+                <option value="Encerrado">Encerrado</option>
+              </select>
+            </label>
+
+            <label>
+              Localizacao
+              <input id="vagaLocation" name="vagaLocation" type="text" required maxlength="120">
+            </label>
+          </div>
+
+          <div class="form-grid-2">
+            <label>
+              Tipo de trabalho
+              <select id="vagaWorkType" name="vagaWorkType" required>
+                <option value="Presencial">Presencial</option>
+                <option value="Remoto">Remoto</option>
+                <option value="Hibrido">Hibrido</option>
+              </select>
+            </label>
+
+            <label>
+              Tipo de contrato
+              <select id="vagaContractType" name="vagaContractType" required>
+                <option value="Integral">Integral</option>
+                <option value="Meio periodo">Meio periodo</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Descricao
+            <textarea id="vagaDescription" name="vagaDescription" required maxlength="600"></textarea>
+          </label>
+
+          <label>
+            URL do botao Candidatar-se
+            <input id="vagaApplyUrl" name="vagaApplyUrl" type="url" required>
+          </label>
+
+          <label class="check-row">
+            <input id="vagaFeatured" name="vagaFeatured" type="checkbox" checked>
+            Marcar como destaque
+          </label>
+
+          <label class="check-row">
+            <input id="vagaActive" name="vagaActive" type="checkbox" checked>
+            Vaga ativa
+          </label>
+
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">Salvar vaga</button>
+            <button class="btn-secondary" type="button" id="vaga-clear-btn">Limpar</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="admin-card">
+        <h3>Lista de vagas</h3>
+        <ul id="vagas-list" class="admin-list"></ul>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/js/admin-vagas.js"></script>
+</body>
+</html>

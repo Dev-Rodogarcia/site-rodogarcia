@@ -1,0 +1,78 @@
+<section class="panel-grid two-col">
+  <article class="panel-card">
+    <h2>Gerenciar Vagas em Destaque</h2>
+    <p>Crie, edite, destaque, ative/desative e reordene vagas.</p>
+
+    <form id="vaga-form" class="form-section mt-14" novalidate>
+      <input id="vagaId" name="vagaId" type="hidden">
+
+      <label class="form-field">
+        <span>Titulo da vaga</span>
+        <input id="vagaTitle" name="vagaTitle" type="text" maxlength="120" required>
+      </label>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Status</span>
+          <select id="vagaStatus" name="vagaStatus" required>
+            <option value="Novo">Novo</option>
+            <option value="Disponivel">Disponivel</option>
+            <option value="Encerrado">Encerrado</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>Localizacao</span>
+          <input id="vagaLocation" name="vagaLocation" type="text" maxlength="120" required>
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Tipo de trabalho</span>
+          <select id="vagaWorkType" name="vagaWorkType" required>
+            <option value="Presencial">Presencial</option>
+            <option value="Remoto">Remoto</option>
+            <option value="Hibrido">Hibrido</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>Tipo de contrato</span>
+          <select id="vagaContractType" name="vagaContractType" required>
+            <option value="Integral">Integral</option>
+            <option value="Meio periodo">Meio periodo</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="form-field">
+        <span>Descricao</span>
+        <textarea id="vagaDescription" name="vagaDescription" maxlength="600" required></textarea>
+      </label>
+
+      <label class="form-field">
+        <span>Link do botao Candidatar-se</span>
+        <input id="vagaApplyUrl" name="vagaApplyUrl" type="url" required>
+      </label>
+
+      <label class="check-field">
+        <input id="vagaFeatured" name="vagaFeatured" type="checkbox" checked>
+        Marcar como destaque
+      </label>
+
+      <label class="check-field">
+        <input id="vagaActive" name="vagaActive" type="checkbox" checked>
+        Vaga ativa
+      </label>
+
+      <div class="form-actions">
+        <button class="btn-primary" type="submit">Salvar vaga</button>
+        <button class="btn-secondary" type="button" id="vaga-clear-btn">Limpar</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <h3>Lista de vagas</h3>
+    <ul id="vagas-list" class="entity-list mt-10"></ul>
+  </article>
+</section>

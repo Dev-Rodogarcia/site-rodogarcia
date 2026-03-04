@@ -74,18 +74,27 @@
                 </ul>
 
                 <div class="nav-acoes-mobile">
-                    <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
-                        rel="noopener noreferrer" class="botao botao--outline-branco">Area do Cliente</a>
-                    <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
-                        rel="noopener noreferrer" class="botao botao--secundario">Rastrear</a>
+                    <div class="nav-mobile-grupo nav-mobile-grupo--acesso">
+                        <p class="nav-mobile-label">Acesso interno</p>
+                        <div class="nav-mobile-auth">
+                            <a href="/auth/entrar.html?area=staff" class="botao botao--texto-branco nav-mobile-btn">Entrar</a>
+                            <a href="/auth/criar-conta.html?area=staff" class="botao botao--branco nav-mobile-btn">Criar conta</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-mobile-grupo">
+                        <p class="nav-mobile-label">Atalhos</p>
+                        <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                            rel="noopener noreferrer" class="botao botao--outline-branco nav-mobile-btn">Area do Cliente</a>
+                        <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                            rel="noopener noreferrer" class="botao botao--secundario nav-mobile-btn">Rastrear</a>
+                    </div>
                 </div>
             </nav>
 
             <div class="cabecalho__acoes-desktop">
-                <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
-                    rel="noopener noreferrer" class="botao botao--texto-branco">Entrar</a>
-                <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
-                    rel="noopener noreferrer" class="botao botao--branco">Criar Conta</a>
+                <a href="/auth/entrar.html?area=staff" class="botao botao--texto-branco">Entrar</a>
+                <a href="/auth/criar-conta.html?area=staff" class="botao botao--branco">Criar Conta</a>
             </div>
         </div>
     </header>
@@ -227,3 +236,8 @@
 </body>
 
 </html>
+
+
+
+
+

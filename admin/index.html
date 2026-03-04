@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Painel Admin | Rodogarcia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <div class="admin-brand">
+      <strong>Rodogarcia Admin</strong>
+      <span id="session-user"></span>
+    </div>
+
+    <nav class="admin-nav" aria-label="Navegacao administrativa">
+      <a href="/admin/index.html" aria-current="page">Painel</a>
+      <a href="/admin/carrosseis.html">Carrosseis</a>
+      <a href="/admin/vagas.html">Vagas</a>
+      <button id="logout-btn" type="button">Sair</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-card">
+      <h1>Painel administrativo seguro</h1>
+      <p>Gerencie os conteudos exibidos no site publico com validacao no backend e sessao protegida.</p>
+    </section>
+
+    <section class="cards-overview" aria-label="Atalhos">
+      <article class="overview-card">
+        <h2>Carrossel Hero</h2>
+        <p>Criar, editar, ordenar e ativar slides da secao principal.</p>
+        <p><a href="/admin/carrosseis.html">Abrir modulo</a></p>
+      </article>
+
+      <article class="overview-card">
+        <h2>Carrossel DNA</h2>
+        <p>Atualizar os destaques institucionais da secao azul.</p>
+        <p><a href="/admin/carrosseis.html">Abrir modulo</a></p>
+      </article>
+
+      <article class="overview-card">
+        <h2>Vagas em Destaque</h2>
+        <p>Gerenciar cards, status, ordem e destaque das vagas.</p>
+        <p><a href="/admin/vagas.html">Abrir modulo</a></p>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/js/admin-dashboard.js"></script>
+</body>
+</html>

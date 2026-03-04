@@ -1,0 +1,130 @@
+.form-section {
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+label.form-field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+label.form-field > span {
+  color: var(--title);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  min-height: 42px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  outline: none;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(80, 141, 202, 0.18);
+}
+
+.check-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--title);
+}
+
+.check-field input {
+  width: 16px;
+  height: 16px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-ghost {
+  min-height: 38px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0 14px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: var(--brand);
+  border-color: var(--brand-dark);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--brand-dark);
+}
+
+.btn-secondary {
+  background: #eef5fc;
+  border-color: #c7dced;
+  color: var(--brand);
+}
+
+.btn-secondary:hover {
+  background: #e3eefb;
+}
+
+.btn-danger {
+  background: #fdebec;
+  border-color: #e5b8bc;
+  color: #9b2d34;
+}
+
+.btn-danger:hover {
+  background: #f9dde0;
+}
+
+.btn-ghost {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--brand-mid);
+}
+
+.btn-ghost:hover {
+  background: #f8f9fb;
+}
+
+@media (max-width: 920px) {
+  .form-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+}

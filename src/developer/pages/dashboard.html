@@ -1,0 +1,108 @@
+<section class="panel-stack">
+  <section class="panel-grid cards">
+    <article class="metric-card">
+      <p class="metric-card__title">Slides Hero</p>
+      <p class="metric-card__value" id="metric-hero">0</p>
+    </article>
+    <article class="metric-card">
+      <p class="metric-card__title">Slides DNA</p>
+      <p class="metric-card__value" id="metric-dna">0</p>
+    </article>
+    <article class="metric-card">
+      <p class="metric-card__title">Vagas</p>
+      <p class="metric-card__value" id="metric-vagas">0</p>
+    </article>
+    <article class="metric-card">
+      <p class="metric-card__title">Imagens</p>
+      <p class="metric-card__value" id="metric-imagens">0</p>
+    </article>
+  </section>
+
+  <section class="panel-card">
+    <h2>Acesso rapido</h2>
+    <p>Escolha um modulo de edicao de conteudo.</p>
+    <div class="quick-links mt-12">
+      <button class="btn-primary" type="button" data-go-page="carrossel-hero">Editar Hero</button>
+      <button class="btn-secondary" type="button" data-go-page="carrossel-dna">Editar DNA</button>
+      <button class="btn-secondary" type="button" data-go-page="vagas">Editar Vagas</button>
+      <button class="btn-secondary" type="button" data-go-page="imagens">Gerenciar Imagens</button>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <h2>Textos editaveis do site</h2>
+    <p>Edite textos institucionais e CTAs sem mexer no codigo da pagina publica.</p>
+
+    <form id="site-texts-form" class="form-section mt-14" novalidate>
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Titulo do Dashboard</span>
+          <input id="dashboardTitle" name="dashboardTitle" type="text" maxlength="80" required>
+        </label>
+        <label class="form-field">
+          <span>Subtitulo do Dashboard</span>
+          <input id="dashboardSubtitle" name="dashboardSubtitle" type="text" maxlength="180" required>
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Titulo da secao Hero</span>
+          <input id="heroSectionTitle" name="heroSectionTitle" type="text" maxlength="120">
+        </label>
+        <label class="form-field">
+          <span>Subtitulo da secao Hero</span>
+          <input id="heroSectionSubtitle" name="heroSectionSubtitle" type="text" maxlength="220">
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Titulo da secao DNA</span>
+          <input id="dnaSectionTitle" name="dnaSectionTitle" type="text" maxlength="120">
+        </label>
+        <label class="form-field">
+          <span>Subtitulo da secao DNA</span>
+          <input id="dnaSectionSubtitle" name="dnaSectionSubtitle" type="text" maxlength="220">
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Titulo da secao Vagas</span>
+          <input id="vagasSectionTitle" name="vagasSectionTitle" type="text" maxlength="120">
+        </label>
+        <label class="form-field">
+          <span>Subtitulo da secao Vagas</span>
+          <input id="vagasSectionSubtitle" name="vagasSectionSubtitle" type="text" maxlength="220">
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>CTA principal (texto)</span>
+          <input id="ctaPrimaryLabel" name="ctaPrimaryLabel" type="text" maxlength="40">
+        </label>
+        <label class="form-field">
+          <span>CTA principal (link)</span>
+          <input id="ctaPrimaryUrl" name="ctaPrimaryUrl" type="url">
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>CTA secundario (texto)</span>
+          <input id="ctaSecondaryLabel" name="ctaSecondaryLabel" type="text" maxlength="40">
+        </label>
+        <label class="form-field">
+          <span>CTA secundario (link)</span>
+          <input id="ctaSecondaryUrl" name="ctaSecondaryUrl" type="url">
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" type="submit">Salvar textos</button>
+      </div>
+    </form>
+  </section>
+</section>

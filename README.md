@@ -55,6 +55,19 @@ site-rodogarcia/
 |   |-- imagem.png
 |   |-- manifest.json
 |   `-- ...
+|-- auth/
+|   |-- entrar.html
+|   `-- criar-conta.html
+|-- admin/
+|   |-- index.html
+|   |-- carrosseis.html
+|   `-- vagas.html
+|-- assets/
+|   |-- css/
+|   `-- js/
+|-- server/
+|   |-- data/
+|   `-- README.md
 |-- src/
 |   |-- css/
 |   |   |-- base/
@@ -80,7 +93,8 @@ site-rodogarcia/
 |-- scripts/
 |   `-- generate-sitemap.js
 |-- docs/
-|   `-- checklist-tecnico.md
+|   |-- checklist-tecnico.md
+|   `-- seguranca-admin-node.md
 `-- package.json
 ```
 
@@ -101,7 +115,23 @@ node server.js
 ```
 
 Acesse:
-- `http://localhost:3000/`
+- `http://localhost:5010/`
+
+### Area restrita (Node backend)
+
+- Login: `http://localhost:5010/auth/entrar.html`
+- Cadastro controlado: `http://localhost:5010/auth/criar-conta.html`
+- Painel: `http://localhost:5010/admin/index.html`
+
+Configuracao inicial:
+
+```bash
+# copie .env.example para .env e ajuste os valores
+# (PORT, NODE_ENV e ADMIN_SETUP_CODE)
+npm start
+```
+
+O `server.js` carrega o arquivo `.env` automaticamente, sem dependencias externas.
 
 ### Opcao 2: Vercel Dev (mais proximo de producao)
 

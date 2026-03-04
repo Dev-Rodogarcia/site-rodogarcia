@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Painel de Conteudo | Rodogarcia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/developer/css/layout.css">
+  <link rel="stylesheet" href="/developer/css/sidebar.css">
+  <link rel="stylesheet" href="/developer/css/forms.css">
+  <link rel="stylesheet" href="/developer/css/components.css">
+</head>
+<body class="dev-body">
+  <div class="dev-shell">
+    <aside class="dev-sidebar" id="dev-sidebar">
+      <div class="dev-sidebar__top">
+        <div class="dev-brand">
+          <strong>RODOGARCIA CMS</strong>
+          <small>Funcionarios e Dev</small>
+        </div>
+        <button id="sidebar-collapse-btn" class="icon-button" type="button" aria-label="Colapsar menu">&lt;&lt;</button>
+      </div>
+
+      <nav class="dev-nav" aria-label="Navegacao do painel">
+        <a href="/developer/index.html?page=dashboard" class="dev-nav__item" data-nav-page="dashboard">
+          <span class="dev-nav__icon" aria-hidden="true">DS</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/developer/index.html?page=carrossel-hero" class="dev-nav__item" data-nav-page="carrossel-hero">
+          <span class="dev-nav__icon" aria-hidden="true">HR</span>
+          <span>Carrossel Hero</span>
+        </a>
+        <a href="/developer/index.html?page=carrossel-dna" class="dev-nav__item" data-nav-page="carrossel-dna">
+          <span class="dev-nav__icon" aria-hidden="true">DN</span>
+          <span>Carrossel DNA</span>
+        </a>
+        <a href="/developer/index.html?page=vagas" class="dev-nav__item" data-nav-page="vagas">
+          <span class="dev-nav__icon" aria-hidden="true">VG</span>
+          <span>Vagas</span>
+        </a>
+        <a href="/developer/index.html?page=imagens" class="dev-nav__item" data-nav-page="imagens">
+          <span class="dev-nav__icon" aria-hidden="true">IM</span>
+          <span>Imagens</span>
+        </a>
+      </nav>
+
+      <div class="dev-sidebar__bottom">
+        <a href="/" class="dev-nav__item">
+          <span class="dev-nav__icon" aria-hidden="true">VT</span>
+          <span>Voltar para o Site</span>
+        </a>
+        <button id="logout-btn" class="dev-nav__item dev-nav__item--danger" type="button">
+          <span class="dev-nav__icon" aria-hidden="true">SX</span>
+          <span>Sair</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="dev-main">
+      <header class="dev-header">
+        <div class="dev-header__left">
+          <button id="mobile-menu-btn" class="icon-button mobile-only" type="button" aria-label="Abrir menu">&#9776;</button>
+          <div>
+            <h1 id="page-title">Dashboard</h1>
+            <ol id="page-breadcrumb" class="breadcrumb" aria-label="Breadcrumb">
+              <li>Gerenciamento</li>
+              <li>Dashboard</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="dev-header__user" id="session-user"></div>
+      </header>
+
+      <div id="dev-message" class="flash-message" aria-live="polite"></div>
+
+      <main id="page-container" class="dev-content" aria-live="polite">
+        <section class="panel-card">
+          <h2>Carregando painel...</h2>
+          <p>Aguarde enquanto a sessao e validada.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="sidebar-overlay" class="sidebar-overlay" hidden></div>
+
+  <script type="module" src="/developer/js/navigation.js"></script>
+</body>
+</html>

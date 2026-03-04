@@ -1,0 +1,72 @@
+<section class="panel-grid two-col">
+  <article class="panel-card">
+    <h2>Gerenciar Carrossel Hero</h2>
+    <p>Crie, edite, ative/desative e reordene os slides principais.</p>
+
+    <form id="hero-form" class="form-section mt-14" novalidate>
+      <input id="heroId" name="heroId" type="hidden">
+
+      <label class="form-field">
+        <span>Titulo</span>
+        <input id="heroTitle" name="heroTitle" type="text" maxlength="120" required>
+      </label>
+
+      <label class="form-field">
+        <span>Descricao</span>
+        <textarea id="heroDescription" name="heroDescription" maxlength="420" required></textarea>
+      </label>
+
+      <label class="form-field">
+        <span>URL da imagem</span>
+        <input id="heroImage" name="heroImage" type="url" required>
+      </label>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Botao 1 texto</span>
+          <input id="heroBtn1Text" name="heroBtn1Text" type="text" maxlength="40">
+        </label>
+        <label class="form-field">
+          <span>Botao 1 link</span>
+          <input id="heroBtn1Url" name="heroBtn1Url" type="url">
+        </label>
+      </div>
+
+      <label class="check-field">
+        <input id="heroBtn1Enabled" name="heroBtn1Enabled" type="checkbox">
+        Ativar botao 1
+      </label>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Botao 2 texto</span>
+          <input id="heroBtn2Text" name="heroBtn2Text" type="text" maxlength="40">
+        </label>
+        <label class="form-field">
+          <span>Botao 2 link</span>
+          <input id="heroBtn2Url" name="heroBtn2Url" type="url">
+        </label>
+      </div>
+
+      <label class="check-field">
+        <input id="heroBtn2Enabled" name="heroBtn2Enabled" type="checkbox">
+        Ativar botao 2
+      </label>
+
+      <label class="check-field">
+        <input id="heroActive" name="heroActive" type="checkbox" checked>
+        Slide ativo
+      </label>
+
+      <div class="form-actions">
+        <button class="btn-primary" type="submit">Salvar slide</button>
+        <button class="btn-secondary" type="button" id="hero-clear-btn">Limpar</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <h3>Slides cadastrados</h3>
+    <ul id="hero-list" class="entity-list mt-10"></ul>
+  </article>
+</section>

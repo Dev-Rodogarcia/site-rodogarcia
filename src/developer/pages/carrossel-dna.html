@@ -1,0 +1,40 @@
+<section class="panel-grid two-col">
+  <article class="panel-card">
+    <h2>Gerenciar Carrossel DNA</h2>
+    <p>Atualize os destaques da secao institucional azul.</p>
+
+    <form id="dna-form" class="form-section mt-14" novalidate>
+      <input id="dnaId" name="dnaId" type="hidden">
+
+      <label class="form-field">
+        <span>Titulo</span>
+        <input id="dnaTitle" name="dnaTitle" type="text" maxlength="120" required>
+      </label>
+
+      <label class="form-field">
+        <span>Texto</span>
+        <textarea id="dnaText" name="dnaText" maxlength="420" required></textarea>
+      </label>
+
+      <label class="form-field">
+        <span>URL da imagem</span>
+        <input id="dnaImage" name="dnaImage" type="url" required>
+      </label>
+
+      <label class="check-field">
+        <input id="dnaActive" name="dnaActive" type="checkbox" checked>
+        Slide ativo
+      </label>
+
+      <div class="form-actions">
+        <button class="btn-primary" type="submit">Salvar slide</button>
+        <button class="btn-secondary" type="button" id="dna-clear-btn">Limpar</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <h3>Slides cadastrados</h3>
+    <ul id="dna-list" class="entity-list mt-10"></ul>
+  </article>
+</section>

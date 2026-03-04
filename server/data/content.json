@@ -1,0 +1,131 @@
+﻿{
+  "heroSlides": [
+    {
+      "id": "hero-1",
+      "title": "Frete rapido sem interrupcoes.",
+      "description": "Seguranca e eficiencia em movimento para todo o Brasil desde 1989.",
+      "image": "/public/foto5.png",
+      "active": true,
+      "order": 1,
+      "buttons": [
+        {
+          "label": "Fazer Cotacao",
+          "url": "/cotacao.html",
+          "enabled": true
+        },
+        {
+          "label": "Rastrear Carga",
+          "url": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "hero-2",
+      "title": "Cobertura em todo o Brasil.",
+      "description": "De Norte a Sul, a Rodogarcia leva sua carga com pontualidade e rastreamento em tempo real.",
+      "image": "/public/foto4-semfundo.png",
+      "active": true,
+      "order": 2,
+      "buttons": [
+        {
+          "label": "Conheca Nossa Rede",
+          "url": "/sobre.html",
+          "enabled": true
+        },
+        {
+          "label": "Nossos Servicos",
+          "url": "/servicos.html",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "hero-3",
+      "title": "Cotacao em minutos.",
+      "description": "Solicite seu frete de forma simples e receba a melhor proposta para sua carga.",
+      "image": "/public/foto6-semfundo.png",
+      "active": true,
+      "order": 3,
+      "buttons": [
+        {
+          "label": "Solicitar Cotacao",
+          "url": "/cotacao.html",
+          "enabled": true
+        },
+        {
+          "label": "Fale Conosco",
+          "url": "/fale-conosco.html",
+          "enabled": true
+        }
+      ]
+    }
+  ],
+  "dnaSlides": [
+    {
+      "id": "dna-1",
+      "title": "Nossa excelencia e comprovada",
+      "text": "Mais de 1500 pontos de coleta e distribuicao, com cobertura nacional e operacao previsivel.",
+      "image": "/public/foto4.png",
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "dna-2",
+      "title": "Capilaridade para chegar mais longe",
+      "text": "Estrutura robusta para entregas em todo o Brasil com padrao de qualidade em cada etapa.",
+      "image": "/public/foto5.png",
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "dna-3",
+      "title": "Cobertura total com previsibilidade",
+      "text": "Tecnologia e equipe especializada para manter sua operacao no prazo certo.",
+      "image": "/public/foto6.png",
+      "active": true,
+      "order": 3
+    }
+  ],
+  "vagas": [
+    {
+      "id": "vaga-1",
+      "title": "Motorista Categoria C/D/E",
+      "status": "Novo",
+      "location": "Agudos/SP",
+      "workType": "Presencial",
+      "contractType": "Integral",
+      "description": "Buscamos motorista experiente para transporte de cargas. Experiencia minima de 2 anos.",
+      "applyUrl": "/trabalhe-conosco.html#formulario",
+      "featured": true,
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "vaga-2",
+      "title": "Analista de Logistica",
+      "status": "Disponivel",
+      "location": "Campinas/SP",
+      "workType": "Hibrido",
+      "contractType": "Integral",
+      "description": "Oportunidade para analista com experiencia em gestao de rotas e otimizacao de processos.",
+      "applyUrl": "/trabalhe-conosco.html#formulario",
+      "featured": true,
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "vaga-3",
+      "title": "Assistente Administrativo",
+      "status": "Disponivel",
+      "location": "Osasco/SP",
+      "workType": "Presencial",
+      "contractType": "Integral",
+      "description": "Vaga para assistente com conhecimentos em gestao de documentos e atendimento ao cliente.",
+      "applyUrl": "/trabalhe-conosco.html#formulario",
+      "featured": true,
+      "active": true,
+      "order": 3
+    }
+  ]
+}

@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navPrincipal = document.querySelector('.nav-principal');
     const fecharMenu = document.querySelector('.fechar-menu');
     const linksMobile = document.querySelectorAll('.nav-principal .link-nav');
+    const actionLinksMobile = document.querySelectorAll('.nav-acoes-mobile a');
 
     const abrirMenu = () => {
         if (!navPrincipal || !menuToggle) {
@@ -116,6 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            fecharMenuFunc();
+        });
+    });
+
+    actionLinksMobile.forEach((link) => {
+        link.addEventListener('click', () => {
             fecharMenuFunc();
         });
     });
