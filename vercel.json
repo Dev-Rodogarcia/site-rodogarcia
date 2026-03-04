@@ -193,10 +193,6 @@
       "destination": "/src/script/$1"
     },
     {
-      "source": "/components/(.*)",
-      "destination": "/src/components/$1"
-    },
-    {
       "source": "/public/(.*)",
       "destination": "/public/$1"
     }

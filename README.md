@@ -37,7 +37,7 @@ Site institucional estatico da Rodogarcia, pensado para converter visitas em con
 | Ajuda | Fale Conosco | `/fale-conosco` | `/fale-conosco.html` |
 | Ajuda | Termos de Uso | `/termos-de-uso` | `/termos-de-uso.html` |
 
-Observacao: as rotas amigaveis e canonicas sao controladas por `vercel.json`.
+Observacao: as rotas amigaveis e canonicas sao controladas por `vercel.json` (producao) e espelhadas em `server.js` (local).
 
 ## Stack
 
@@ -56,9 +56,6 @@ site-rodogarcia/
 |   |-- manifest.json
 |   `-- ...
 |-- src/
-|   |-- components/
-|   |   |-- header.html
-|   |   `-- footer.html
 |   |-- css/
 |   |   |-- base/
 |   |   |-- components/
@@ -80,6 +77,10 @@ site-rodogarcia/
 |-- sitemap.xml
 |-- vercel.json
 |-- server.js
+|-- scripts/
+|   `-- generate-sitemap.js
+|-- docs/
+|   `-- checklist-tecnico.md
 `-- package.json
 ```
 
@@ -100,7 +101,7 @@ node server.js
 ```
 
 Acesse:
-- `http://localhost:3000/src/index.html`
+- `http://localhost:3000/`
 
 ### Opcao 2: Vercel Dev (mais proximo de producao)
 
@@ -159,6 +160,16 @@ Arquivos-chave:
 - `vercel.json`
 - `robots.txt`
 - `sitemap.xml`
+
+## Manutencao rapida
+
+- Gerar sitemap a partir da lista oficial de paginas publicas:
+
+```bash
+npm run sitemap:generate
+```
+
+- Checklist tecnico interno: `docs/checklist-tecnico.md`
 
 ## Licenca
 

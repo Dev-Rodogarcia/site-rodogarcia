@@ -8,9 +8,27 @@ const path = require('path');
 const PORT = 3000;
 const ROOT_DIR = __dirname;
 
+const redirectMap = new Map([
+    ['/index.html', { destination: '/', statusCode: 301 }],
+    ['/inicio', { destination: '/', statusCode: 301 }],
+    ['/institucional', { destination: '/sobre.html', statusCode: 301 }],
+    ['/quem-somos', { destination: '/sobre.html', statusCode: 301 }],
+    ['/trabalhe-conosco', { destination: '/trabalhe-conosco.html', statusCode: 301 }],
+    ['/imprensa', { destination: '/imprensa.html', statusCode: 301 }],
+    ['/servicos', { destination: '/servicos.html', statusCode: 301 }],
+    ['/nossos-servicos', { destination: '/servicos.html', statusCode: 301 }],
+    ['/solicitar-cotacao', { destination: '/cotacao.html', statusCode: 301 }],
+    ['/rastrear-encomenda', { destination: 'https://rodogarcia.eslcloud.com.br/recipient_tracking', statusCode: 302 }],
+    ['/para-empresas', { destination: '/para-empresas.html', statusCode: 301 }],
+    ['/ajuda', { destination: '/central-ajuda.html', statusCode: 301 }],
+    ['/central-ajuda', { destination: '/central-ajuda.html', statusCode: 301 }],
+    ['/central-de-ajuda', { destination: '/central-ajuda.html', statusCode: 301 }],
+    ['/fale-conosco', { destination: '/fale-conosco.html', statusCode: 301 }],
+    ['/termos-de-uso', { destination: '/termos-de-uso.html', statusCode: 301 }]
+]);
+
 const routeMap = new Map([
     ['/', '/src/index.html'],
-    ['/index.html', '/src/index.html'],
     ['/servicos.html', '/src/servicos.html'],
     ['/sobre.html', '/src/sobre.html'],
     ['/cotacao.html', '/src/cotacao.html'],
@@ -43,15 +61,10 @@ const mimeTypes = {
     '.xml': 'application/xml; charset=utf-8'
 };
 
-function resolveFilePath(requestUrl) {
-    const parsedUrl = new URL(requestUrl, `http://localhost:${PORT}`);
-    let pathname = decodeURIComponent(parsedUrl.pathname);
+function resolveFilePath(pathname) {
+    const mappedPath = routeMap.get(pathname) || pathname;
 
-    if (routeMap.has(pathname)) {
-        pathname = routeMap.get(pathname);
-    }
-
-    const filePath = path.normalize(path.join(ROOT_DIR, pathname));
+    const filePath = path.normalize(path.join(ROOT_DIR, mappedPath));
 
     // Bloqueia path traversal.
     if (!filePath.startsWith(ROOT_DIR)) {
@@ -62,7 +75,18 @@ function resolveFilePath(requestUrl) {
 }
 
 const server = http.createServer((req, res) => {
-    const filePath = resolveFilePath(req.url);
+    const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
+    const pathname = decodeURIComponent(parsedUrl.pathname);
+    const redirect = redirectMap.get(pathname);
+
+    if (redirect) {
+        const destination = `${redirect.destination}${parsedUrl.search}`;
+        res.writeHead(redirect.statusCode, { Location: destination });
+        res.end();
+        return;
+    }
+
+    const filePath = resolveFilePath(pathname);
 
     if (!filePath) {
         res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });

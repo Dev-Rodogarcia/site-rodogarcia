@@ -5,9 +5,14 @@
   "main": "src/index.html",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "sitemap:generate": "node scripts/generate-sitemap.js"
   },
-  "keywords": ["rodogarcia", "transportes", "logística"],
+  "keywords": [
+    "rodogarcia",
+    "transportes",
+    "logistica"
+  ],
   "author": "Lucas Andrade",
   "license": "ISC"
 }
