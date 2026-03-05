@@ -3,7 +3,7 @@
 ## O que esta implementado
 
 - Sessao em cookie `HttpOnly` (`SameSite=Strict`, `Secure` em producao).
-- Bloqueio de acesso direto a `/admin/*` sem sessao valida.
+- Painel oficial em `/developer/*`, com redirecionamento legado de `/admin/*`.
 - Validacao de origem para metodos mutaveis (`POST`, `PUT`, `DELETE`, `PATCH`).
 - Protecao CSRF via token enviado no header `X-CSRF-Token`.
 - Hash de senha com `PBKDF2` (`sha512`, 120k iteracoes, salt aleatorio).
@@ -24,9 +24,9 @@ RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Evitar cache do admin/auth
+# Evitar cache do developer/auth
 <IfModule mod_headers.c>
-  <FilesMatch "^(index\.html|carrosseis\.html|vagas\.html|entrar\.html|criar-conta\.html)$">
+  <FilesMatch "^(index\.html|entrar\.html|criar-conta\.html)$">
     Header set Cache-Control "no-store"
   </FilesMatch>
 </IfModule>
@@ -39,7 +39,7 @@ location ~ ^/(server|backups|\.git|\.vscode) {
   deny all;
 }
 
-location /admin/ {
+location /developer/ {
   add_header Cache-Control "no-store";
 }
 

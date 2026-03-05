@@ -25,6 +25,11 @@ Thumbs.db
 # Logs
 *.log
 
+# Sensitive local persistence
+server/storage/private/*
+!server/storage/private/.gitkeep
+server/private/*
+
 # Build
 .vercel
 .vercelignore

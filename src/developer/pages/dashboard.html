@@ -1,3 +1,25 @@
+﻿<!-- ==[DOC-FILE]=============================================================
+Arquivo : src/developer/pages/dashboard.html
+Modulo  : Frontend - templates do painel developer
+Papel   : Declara estrutura da pagina, ancoragens (id/class/data-*) e assets carregados.
+
+Responsabilidades:
+- Define a hierarquia semantica da tela e os blocos de conteudo.
+- Expone ids/classes/data-* usados por CSS e JavaScript.
+- Declara os assets (styles/scripts) necessarios para a pagina funcionar.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: #metric-hero, #metric-dna, #metric-vagas, #metric-imagens, #site-texts-form, #dashboardTitle, #dashboardSubtitle, #heroSectionTitle, #heroSectionSubtitle, #dnaSectionTitle
+
+Entradas e saidas:
+- Entradas: Dados estaticos da marcacao + atributos usados por CSS/JS.
+- Saidas  : Estrutura DOM inicial renderizada para o navegador.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== -->
+
 <section class="panel-stack">
   <section class="panel-grid cards">
     <article class="metric-card">
@@ -106,3 +128,4 @@
     </form>
   </section>
 </section>
+

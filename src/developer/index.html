@@ -1,4 +1,26 @@
 <!DOCTYPE html>
+<!-- ==[DOC-FILE]=============================================================
+Arquivo : src/developer/index.html
+Modulo  : Frontend - estrutura base do painel developer
+Papel   : Declara estrutura da pagina, ancoragens (id/class/data-*) e assets carregados.
+
+Responsabilidades:
+- Define a hierarquia semantica da tela e os blocos de conteudo.
+- Expone ids/classes/data-* usados por CSS e JavaScript.
+- Declara os assets (styles/scripts) necessarios para a pagina funcionar.
+
+Integracoes:
+- Dependencias: /developer/css/layout.css, /developer/css/sidebar.css, /developer/css/forms.css, /developer/css/components.css, /developer/js/navigation.js
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: #dev-sidebar, #sidebar-collapse-btn, #logout-btn, #mobile-menu-btn, #page-title, #page-breadcrumb, #session-user, #dev-message, #page-container, #sidebar-overlay
+
+Entradas e saidas:
+- Entradas: Dados estaticos da marcacao + atributos usados por CSS/JS.
+- Saidas  : Estrutura DOM inicial renderizada para o navegador.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== -->
+
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">

@@ -1,0 +1,204 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/auth/css/auth.css
+Modulo  : Frontend - estilos de autenticacao
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .auth-body, .auth-card, .auth-subtitle, .auth-access-switch, .active, .auth-form, .is-disabled, .auth-field, .auth-button, .auth-links
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
+:root {
+  --bg: #f2f5f8;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --primary: #0b4f84;
+  --primary-dark: #083a61;
+  --danger: #b91c1c;
+  --success: #15803d;
+  --border: #d5deeb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.auth-body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at top right, #e0ecff 0%, var(--bg) 50%);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.auth-card {
+  width: min(100%, 560px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.auth-card h1 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+}
+
+.auth-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.auth-subtitle {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.96rem;
+}
+
+.auth-access-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.auth-access-switch a {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.auth-access-switch a.active {
+  background: #e1efff;
+  border-color: #8db4e6;
+  color: var(--primary-dark);
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+}
+.auth-form.is-disabled {
+  opacity: 0.55;
+  filter: grayscale(0.2);
+}
+
+.auth-field {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-field input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+}
+
+.auth-button {
+  min-height: 44px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background: var(--primary-dark);
+}
+
+.auth-links {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auth-links a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-message {
+  min-height: 20px;
+  margin: 4px 0 10px;
+  font-size: 0.9rem;
+}
+
+.auth-message[data-state='error'] {
+  color: var(--danger);
+}
+
+.auth-message[data-state='success'] {
+  color: var(--success);
+}
+
+.auth-notice {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.auth-locked {
+  margin: 0 0 14px;
+  border: 1px solid #f1c2c2;
+  border-radius: 10px;
+  background: #fff3f3;
+  color: #8d2020;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-client-block {
+  margin-top: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  background: #fbfdff;
+}
+
+.auth-client-block p {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .auth-card {
+    padding: 20px;
+  }
+
+  .auth-access-switch {
+    grid-template-columns: 1fr;
+  }
+}
+

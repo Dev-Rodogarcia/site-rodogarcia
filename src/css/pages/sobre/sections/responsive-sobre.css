@@ -1,3 +1,25 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/sobre/sections/responsive-sobre.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .hero-sobre, .hero-sobre__container, .hero-sobre__imagem, .titulo-hero, .subtitulo-hero, .numeros-hero-sobre, .numero-hero-item, .numero-grande, .grid-historia, .historia-imagem
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
    RESPONSIVE - SOBRE
    ========================================= */
@@ -121,7 +143,7 @@
 
     /* Badge removido */
 
-    /* Esconde ícones decorativos no mobile */
+    /* Esconde Ã­cones decorativos no mobile */
     .decoration-icon {
         display: none;
     }
@@ -279,4 +301,5 @@
         font-size: 1rem;
     }
 }
+
 

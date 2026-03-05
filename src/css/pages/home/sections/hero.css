@@ -1,3 +1,25 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/home/sections/hero.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .hero, .custom-shape-divider-bottom-16789, .shape-fill, .hero__container, .hero__texto, .titulo-hero, .subtitulo-hero, .card-acao-hero, .botoes-acao, .botao--largo
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
    HERO SECTION (Azul)
    ========================================= */
@@ -48,7 +70,7 @@
 .hero__texto {
     z-index: 2;
     min-width: 0;
-    /* Animação removida: controlada pelo carrossel (hero-carrossel.css) */
+    /* AnimaÃ§Ã£o removida: controlada pelo carrossel (hero-carrossel.css) */
 }
 
 .titulo-hero {
@@ -66,7 +88,7 @@
     max-width: 480px;
 }
 
-/* Card Ações Hero (Botões Grandes) */
+/* Card AÃ§Ãµes Hero (BotÃµes Grandes) */
 .card-acao-hero {
     background: transparent;
 }
@@ -99,7 +121,7 @@
     filter: none;
     transition: transform 0.3s ease;
     border-radius: 12px;
-    /* Animação removida: controlada pelo carrossel (hero-carrossel.css) */
+    /* AnimaÃ§Ã£o removida: controlada pelo carrossel (hero-carrossel.css) */
 }
 
 .img-hero-destaque:hover {
@@ -140,7 +162,7 @@
 }
 
 /* =========================================
-   DECORAÇÃO HERO (Background Vivo)
+   DECORAÃ‡ÃƒO HERO (Background Vivo)
    ========================================= */
 .hero-decorations {
     position: absolute;
@@ -153,7 +175,7 @@
     z-index: 0;
 }
 
-/* Padrão de Pontos (Mapa Logístico) - Mais nítido */
+/* PadrÃ£o de Pontos (Mapa LogÃ­stico) - Mais nÃ­tido */
 .hero-pattern-dots {
     position: absolute;
     width: 100%;
@@ -177,7 +199,7 @@
     filter: blur(60px);
 }
 
-/* Ícones Flutuantes - Mais Visíveis */
+/* Ãcones Flutuantes - Mais VisÃ­veis */
 .decoration-icon {
     position: absolute;
     color: rgba(255, 255, 255, 0.1);
@@ -209,3 +231,4 @@
     transform: rotate(10deg);
     animation: floatIcon 9s ease-in-out infinite;
 }
+

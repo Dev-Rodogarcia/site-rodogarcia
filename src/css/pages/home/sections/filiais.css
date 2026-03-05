@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/home/sections/filiais.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .secao-filiais, .mapa-container, .info-filiais, .cabecalho-secao, .select-filial, .detalhes-filial-card, .btn-contato-filial, .mapa-visual, .svg-mapa-brasil, .titulo-secao
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   SEÇÃO FILIAIS (Layout e Estrutura)
+   SEÃ‡ÃƒO FILIAIS (Layout e Estrutura)
    ========================================= */
 .secao-filiais {
     background-color: var(--cor-branco);
@@ -17,7 +39,7 @@
     overflow-x: hidden; /* Prevenir overflow horizontal */
 }
 
-/* Área de Texto / Lista */
+/* Ãrea de Texto / Lista */
 .info-filiais {
     flex: 1;
     min-width: 350px;
@@ -27,7 +49,7 @@
     gap: 2rem;
 }
 
-/* Ajustar o cabeçalho quando está dentro do info-filiais */
+/* Ajustar o cabeÃ§alho quando estÃ¡ dentro do info-filiais */
 .info-filiais .cabecalho-secao {
     margin-bottom: 1.5rem;
 }
@@ -101,7 +123,7 @@
     text-align: center;
 }
 
-/* Área do Mapa (Brasil SVG Container) */
+/* Ãrea do Mapa (Brasil SVG Container) */
 .mapa-visual {
     flex: 1;
     max-width: 550px;
@@ -111,7 +133,7 @@
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-    gap: 1rem; /* Espaço entre o mapa e o label */
+    gap: 1rem; /* EspaÃ§o entre o mapa e o label */
 }
 
 /* Container do SVG do Brasil */
@@ -122,7 +144,7 @@
     align-items: center;
     justify-content: center;
     filter: none;
-    flex-shrink: 0; /* Não encolhe */
+    flex-shrink: 0; /* NÃ£o encolhe */
 }
 
 .svg-mapa-brasil svg {
@@ -304,6 +326,7 @@
 }
 
 /* =========================================
-   Estilos específicos do mapa (SVG)
-   estão em src/css/mapa.css
+   Estilos especÃ­ficos do mapa (SVG)
+   estÃ£o em src/css/mapa.css
    ========================================= */
+

@@ -1,4 +1,4 @@
-<!-- PORTFOLIO-FEATURED
+﻿<!-- PORTFOLIO-FEATURED
 title: Site Institucional Rodogarcia Transportes
 description: Site institucional estatico focado em geracao de contatos, solicitacao de cotacao e reforco de marca, com SEO tecnico, performance e seguranca no deploy via Vercel.
 technologies: HTML5, CSS3, JavaScript ES Modules, Node.js, Vercel
@@ -55,26 +55,28 @@ site-rodogarcia/
 |   |-- imagem.png
 |   |-- manifest.json
 |   `-- ...
-|-- auth/
-|   |-- entrar.html
-|   `-- criar-conta.html
-|-- admin/
-|   |-- index.html
-|   |-- carrosseis.html
-|   `-- vagas.html
-|-- assets/
-|   |-- css/
-|   `-- js/
 |-- server/
-|   |-- data/
+|   |-- config/
+|   |-- middleware/
+|   |-- repositories/
+|   |-- routes/
+|   |-- storage/
+|   |   `-- private/
+|   |-- validation/
 |   `-- README.md
 |-- src/
+|   |-- auth/
+|   |   |-- css/
+|   |   |-- js/
+|   |   |-- entrar.html
+|   |   `-- criar-conta.html
 |   |-- css/
 |   |   |-- base/
 |   |   |-- components/
 |   |   |-- layout/
 |   |   `-- pages/
-|   |-- script/
+|   |-- developer/
+|   |-- js/
 |   |   `-- mapas/
 |   |-- index.html
 |   |-- servicos.html
@@ -91,7 +93,10 @@ site-rodogarcia/
 |-- vercel.json
 |-- server.js
 |-- scripts/
-|   `-- generate-sitemap.js
+|   |-- maintenance/
+|   |   `-- generate-sitemap.js
+|   `-- tests/
+|       `-- test-basic.js
 |-- docs/
 |   |-- checklist-tecnico.md
 |   `-- seguranca-admin-node.md
@@ -121,13 +126,15 @@ Acesse:
 
 - Login: `http://localhost:5010/auth/entrar.html`
 - Cadastro controlado: `http://localhost:5010/auth/criar-conta.html`
-- Painel: `http://localhost:5010/admin/index.html`
+- Painel oficial: `http://localhost:5010/developer/index.html`
+- Compatibilidade legado: acessos em `/admin/*` redirecionam para `/developer/*`
 
 Configuracao inicial:
 
 ```bash
 # copie .env.example para .env e ajuste os valores
 # (PORT, NODE_ENV e ADMIN_SETUP_CODE)
+# opcional para dev sem setup code: ALLOW_INSECURE_DEV_SETUP=true
 npm start
 ```
 
@@ -169,18 +176,18 @@ Acesse:
 
 ## Mapa interativo
 
-Modulo em `src/script/mapas/`.
+Modulo em `src/js/mapas/`.
 
 Arquivos principais:
-- `src/script/mapas/config.js`
-- `src/script/mapas/filiais.js`
-- `src/script/mapas/mapeamento.js`
-- `src/script/mapas/interacoes.js`
-- `src/script/mapas/carregamento.js`
-- `src/script/mapas/mapa.js`
+- `src/js/mapas/config.js`
+- `src/js/mapas/filiais.js`
+- `src/js/mapas/mapeamento.js`
+- `src/js/mapas/interacoes.js`
+- `src/js/mapas/carregamento.js`
+- `src/js/mapas/mapa.js`
 
 Documentacao especifica:
-- `src/script/mapas/README.md`
+- `src/js/mapas/README.md`
 
 ## Deploy
 
@@ -199,8 +206,15 @@ Arquivos-chave:
 npm run sitemap:generate
 ```
 
+- Executar testes basicos de backend (rotas, auth, upload e CRUD Hero):
+
+```bash
+npm run test:basic
+```
+
 - Checklist tecnico interno: `docs/checklist-tecnico.md`
 
 ## Licenca
 
 Uso interno do projeto Rodogarcia Transportes.
+

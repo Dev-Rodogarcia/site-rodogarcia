@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/sobre/sections/historia.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .secao-historia, .grid-historia, .historia-content, .titulo-secao, .texto-historia, .destaques-historia, .destaque-item, .historia-imagem, .img-historia
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   HISTÓRIA
+   HISTÃ“RIA
    ========================================= */
 .secao-historia {
     background-color: var(--cor-branco);
@@ -93,4 +115,5 @@
 .img-historia:hover {
     transform: scale(1.02);
 }
+
 

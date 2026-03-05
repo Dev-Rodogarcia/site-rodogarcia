@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/components/mapa.css
+Modulo  : Frontend - estilos de componentes
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .state, .state-highlight, .pin-mapa, .ativo, .pin-overlay, .pin-pulse, .label-brasil-container, .label-brasil, #A9D4EF, #ffffff
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   ESTILOS DO MAPA (SVG e Interações)
+   ESTILOS DO MAPA (SVG e InteraÃ§Ãµes)
    ========================================= */
 
 /* Estado Base */
@@ -68,7 +90,7 @@
     animation: bounce 2s infinite;
 }
 
-/* Animação de pulso nos pinos SVG */
+/* AnimaÃ§Ã£o de pulso nos pinos SVG */
 @keyframes pin-pulse {
 
     0%,
@@ -92,8 +114,8 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    flex-shrink: 0; /* Não encolhe */
-    margin-top: 0; /* O gap do mapa-visual já controla o espaçamento */
+    flex-shrink: 0; /* NÃ£o encolhe */
+    margin-top: 0; /* O gap do mapa-visual jÃ¡ controla o espaÃ§amento */
 }
 
 /* Label "Atendemos Brasil" */

@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/components/buttons.css
+Modulo  : Frontend - estilos de componentes
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .botao, .botao--zafir, .botao--outline-zafir, .botao--texto-branco, .botao--branco, .botao--outline-branco, .botao--azul, .botao--outline-azul, .botao--secundario, .botao-mini
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   COMPONENTES (Botões e Inputs)
+   COMPONENTES (BotÃµes e Inputs)
    ========================================= */
 .botao {
     display: inline-flex;
@@ -18,7 +40,7 @@
     transform: translateY(-2px);
 }
 
-/* --- Botões para fundos ESCUROS (Hero, CTA Dark) --- */
+/* --- BotÃµes para fundos ESCUROS (Hero, CTA Dark) --- */
 
 .botao--zafir {
     background-color: var(--cor-branco);
@@ -60,7 +82,7 @@
 }
 
 
-/* --- Botões para fundos CLAROS (Cards, Seções brancas) --- */
+/* --- BotÃµes para fundos CLAROS (Cards, SeÃ§Ãµes brancas) --- */
 
 .botao--azul {
     background-color: var(--cor-azul-hero);
@@ -93,7 +115,7 @@
 }
 
 
-/* --- Variantes Específicas e Pequenas --- */
+/* --- Variantes EspecÃ­ficas e Pequenas --- */
 
 .botao-mini {
     display: block;

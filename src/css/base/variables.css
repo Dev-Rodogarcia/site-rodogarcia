@@ -1,14 +1,36 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/base/variables.css
+Modulo  : Frontend - estilos base
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: #ffffff, #f5f7fa, #e0e0e0, #eef5fc, #f0eff7, #edf5f6
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   VARIÁVEIS (Design System - Loggi Style)
+   VARIÃVEIS (Design System - Loggi Style)
    ========================================= */
 :root {
     /* Paleta de Cores Oficial - Rodogarcia */
     --cor-azul-hero: #2E2882;
-    /* Azul Institucional - Primária */
+    /* Azul Institucional - PrimÃ¡ria */
     --cor-azul-escuro: #1A164D;
-    /* Variação mais escura da primária */
+    /* VariaÃ§Ã£o mais escura da primÃ¡ria */
     --cor-azul-medio: #414D82;
-    /* Azul Secundário */
+    /* Azul SecundÃ¡rio */
 
     --cor-destaque: #508DCA;
     /* Azul Claro - Destaque (antigo amarelo) */
@@ -31,7 +53,7 @@
     --accent-verde: #edf5f6;
     /* Clareamento de #4B6970 */
 
-    /* Espaçamento e Layout */
+    /* EspaÃ§amento e Layout */
     --container-width: 1200px;
     --espaco-padrao: 1rem;
     --radius-sm: 8px;
@@ -41,4 +63,5 @@
     /* Tipografia */
     --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
 

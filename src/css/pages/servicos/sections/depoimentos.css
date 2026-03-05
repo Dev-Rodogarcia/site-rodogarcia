@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/servicos/sections/depoimentos.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .secao-depoimentos, .carousel-depoimentos-container, .carousel-depoimentos-track, .card-depoimento, .depoimento-header, .depoimento-avatar, .depoimento-info, .depoimento-avaliacao, .ph-star-fill, .ph-star
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   DEPOIMENTOS - CARROSSEL AUTOMÁTICO
+   DEPOIMENTOS - CARROSSEL AUTOMÃTICO
    ========================================= */
 .secao-depoimentos {
     background-color: var(--cor-branco);
@@ -100,7 +122,7 @@
     display: inline-block;
 }
 
-/* Estrelas de avaliação - Amarelas */
+/* Estrelas de avaliaÃ§Ã£o - Amarelas */
 .depoimento-avaliacao i {
     color: #FFB800 !important;
     /* Amarelo vibrante para todas as estrelas */
@@ -116,7 +138,7 @@
     /* Cinza claro para estrelas vazias */
 }
 
-/* Garantir que os ícones sejam visíveis */
+/* Garantir que os Ã­cones sejam visÃ­veis */
 .depoimento-avaliacao i[class*="star"] {
     opacity: 1 !important;
     visibility: visible !important;
@@ -149,7 +171,7 @@
     margin-left: 0.25rem;
 }
 
-/* Badges de Depoimento - Removidos, estrelas estão no lugar */
+/* Badges de Depoimento - Removidos, estrelas estÃ£o no lugar */
 .depoimento-badge {
     display: none;
 }
@@ -171,7 +193,7 @@
     font-size: 1.2rem;
 }
 
-/* Estatísticas do Cabeçalho */
+/* EstatÃ­sticas do CabeÃ§alho */
 .stats-depoimentos {
     display: flex;
     justify-content: center;
@@ -203,7 +225,7 @@
     font-weight: 700;
 }
 
-/* Animação do Carrossel - Loop Infinito */
+/* AnimaÃ§Ã£o do Carrossel - Loop Infinito */
 @keyframes scrollDepoimentos {
     0% {
         transform: translateX(0);
@@ -213,5 +235,6 @@
     }
 }
 
-/* A animação move exatamente metade dos depoimentos (6 de 12) para criar loop infinito perfeito */
+/* A animaÃ§Ã£o move exatamente metade dos depoimentos (6 de 12) para criar loop infinito perfeito */
+
 

@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/base/responsive.css
+Modulo  : Frontend - estilos base
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .hero, .hero__container, .hero__texto, .titulo-hero, .subtitulo-hero, .card-acao-hero, .hero__imagem, .botoes-acao, .botao, .img-hero-destaque
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   📱 MOBILE FIRST & MEDIA QUERIES
+   ðŸ“± MOBILE FIRST & MEDIA QUERIES
    ========================================= */
 @media (max-width: 900px) {
 
@@ -110,7 +132,7 @@
         box-shadow: none;
     }
 
-    /* Esconde o ícone de localização gigante no mobile */
+    /* Esconde o Ã­cone de localizaÃ§Ã£o gigante no mobile */
     .icon-pin,
     .icon-box,
     .icon-plane {
@@ -160,7 +182,7 @@
         pointer-events: none;
     }
     
-    /* Garantir que o botão funcione mesmo com scroll */
+    /* Garantir que o botÃ£o funcione mesmo com scroll */
     body.menu-aberto .menu-toggle {
         z-index: 2002 !important;
         position: relative !important;
@@ -210,7 +232,7 @@
         top: 8px;
     }
 
-    /* Overlay escuro quando menu está aberto - via body */
+    /* Overlay escuro quando menu estÃ¡ aberto - via body */
     body.menu-aberto::before {
         content: '';
         position: fixed !important;
@@ -229,7 +251,7 @@
         padding: 0 !important;
     }
     
-    /* Garantir que o botão do menu fique acima do overlay */
+    /* Garantir que o botÃ£o do menu fique acima do overlay */
     body.menu-aberto .menu-toggle {
         z-index: 9999 !important;
         pointer-events: auto !important;
@@ -266,12 +288,12 @@
         contain: layout style paint !important;
     }
     
-    /* Garantir que o header não interfira no posicionamento do menu */
+    /* Garantir que o header nÃ£o interfira no posicionamento do menu */
     .cabecalho .nav-principal.ativo {
         position: fixed !important;
     }
     
-    /* Garantir que body e html não interfiram no posicionamento */
+    /* Garantir que body e html nÃ£o interfiram no posicionamento */
     body.menu-aberto,
     html.menu-aberto {
         overflow: hidden !important;
@@ -284,7 +306,7 @@
         pointer-events: auto !important;
     }
     
-    /* Garantir que o header também funcione */
+    /* Garantir que o header tambÃ©m funcione */
     body.menu-aberto .cabecalho {
         z-index: 2001 !important;
         pointer-events: auto;
@@ -355,7 +377,7 @@
         flex-direction: column;
     }
 
-    /* Footer já está ajustado em footer.css com media queries específicas */
+    /* Footer jÃ¡ estÃ¡ ajustado em footer.css com media queries especÃ­ficas */
 
     /* Filiais Mobile */
     .mapa-container {
@@ -567,7 +589,7 @@
     }
 }
 
-/* Padrão de Blocos Hero (Mobile First) */
+/* PadrÃ£o de Blocos Hero (Mobile First) */
 @media (max-width: 900px) {
     .hero__container {
         display: flex !important;
@@ -818,3 +840,4 @@
         pointer-events: none !important;
     }
 }
+

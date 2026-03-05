@@ -79,6 +79,36 @@
       "source": "/termos-de-uso",
       "destination": "/termos-de-uso.html",
       "permanent": true
+    },
+    {
+      "source": "/entrar.html",
+      "destination": "/auth/entrar.html",
+      "permanent": true
+    },
+    {
+      "source": "/criar-conta.html",
+      "destination": "/auth/criar-conta.html",
+      "permanent": true
+    },
+    {
+      "source": "/admin",
+      "destination": "/developer/index.html?page=dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/admin/index.html",
+      "destination": "/developer/index.html?page=dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/admin/carrosseis.html",
+      "destination": "/developer/index.html?page=carrossel-hero",
+      "permanent": false
+    },
+    {
+      "source": "/admin/vagas.html",
+      "destination": "/developer/index.html?page=vagas",
+      "permanent": false
     }
   ],
   "headers": [
@@ -130,7 +160,7 @@
       ]
     },
     {
-      "source": "/src/script/(.*)",
+      "source": "/src/js/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -190,7 +220,39 @@
     },
     {
       "source": "/script/(.*)",
-      "destination": "/src/script/$1"
+      "destination": "/src/js/$1"
+    },
+    {
+      "source": "/js/(.*)",
+      "destination": "/src/js/$1"
+    },
+    {
+      "source": "/assets/css/auth.css",
+      "destination": "/src/auth/css/auth.css"
+    },
+    {
+      "source": "/assets/js/auth.js",
+      "destination": "/src/auth/js/auth.js"
+    },
+    {
+      "source": "/assets/js/public-content.js",
+      "destination": "/src/js/public-content.js"
+    },
+    {
+      "source": "/assets/js/api.js",
+      "destination": "/src/js/shared/api.js"
+    },
+    {
+      "source": "/assets/js/utils/(.*)",
+      "destination": "/src/js/shared/utils/$1"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "/src/auth/$1"
+    },
+    {
+      "source": "/developer/(.*)",
+      "destination": "/src/developer/$1"
     },
     {
       "source": "/public/(.*)",

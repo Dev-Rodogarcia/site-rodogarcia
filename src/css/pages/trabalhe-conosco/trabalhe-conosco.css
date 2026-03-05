@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/trabalhe-conosco/trabalhe-conosco.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .hero-trabalhe-conosco, .container, .hero-trabalhe-conosco__content, .tag-hero-trabalhe, .titulo-hero, .subtitulo-hero, .hero-stats, .stat-item, .stat-number, .stat-label
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   TRABALHE CONOSCO PAGE - Estilos específicos
+   TRABALHE CONOSCO PAGE - Estilos especÃ­ficos
    ========================================= */
 
 /* =========================================
@@ -97,7 +119,7 @@
 }
 
 /* =========================================
-   SEÇÃO POR QUE TRABALHAR CONOSCO
+   SEÃ‡ÃƒO POR QUE TRABALHAR CONOSCO
    ========================================= */
 .secao-porque-trabalhar {
     background: white;
@@ -192,7 +214,7 @@
 }
 
 /* =========================================
-   SEÇÃO VAGAS
+   SEÃ‡ÃƒO VAGAS
    ========================================= */
 .secao-vagas {
     background: white;
@@ -310,14 +332,14 @@
 }
 
 /* =========================================
-   SEÇÃO FORMULÁRIO
+   SEÃ‡ÃƒO FORMULÃRIO
    ========================================= */
 .secao-formulario {
     background: linear-gradient(135deg, rgba(46, 40, 130, 0.03) 0%, rgba(80, 141, 202, 0.03) 100%);
     padding: 6rem 0;
 }
 
-/* Cards de Opções de Candidatura */
+/* Cards de OpÃ§Ãµes de Candidatura */
 .grid-opcoes-candidatura {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -868,3 +890,4 @@
         font-size: 1rem;
     }
 }
+

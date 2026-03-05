@@ -1,9 +1,31 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/layout/header.css
+Modulo  : Frontend - estilos de layout
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .cabecalho, .cabecalho__container, .logo-img, .cabecalho__acoes-desktop, .nav-principal, .lista-nav, .link-nav, .menu-toggle, .nav-header-mobile, .nav-acoes-mobile
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
    HEADER / MENU
    ========================================= */
 .cabecalho {
     background-color: rgba(46, 40, 130, 0.98);
-    /* Quase sólido, bem "leitoso" e denso */
+    /* Quase sÃ³lido, bem "leitoso" e denso */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     color: var(--cor-branco);
@@ -35,7 +57,7 @@
     align-items: center;
 }
 
-/* Menu Desktop Padrão */
+/* Menu Desktop PadrÃ£o */
 .nav-principal .lista-nav {
     display: flex;
     gap: 2rem;
@@ -53,14 +75,14 @@
     text-decoration: underline;
 }
 
-/* Menu Mobile - Escondido por padrão (desktop) */
+/* Menu Mobile - Escondido por padrÃ£o (desktop) */
 .menu-toggle,
 .nav-header-mobile,
 .nav-acoes-mobile {
     display: none;
 }
 
-/* Garantir que o botão do menu seja sempre clicável */
+/* Garantir que o botÃ£o do menu seja sempre clicÃ¡vel */
 .menu-toggle {
     pointer-events: auto !important;
     cursor: pointer !important;
@@ -73,7 +95,7 @@
     touch-action: manipulation;
 }
 
-/* Garantir que o menu desktop seja visível por padrão */
+/* Garantir que o menu desktop seja visÃ­vel por padrÃ£o */
 .nav-principal {
     display: flex;
     align-items: center;

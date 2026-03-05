@@ -1,12 +1,35 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/sobre/sobre.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .css
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   SOBRE PAGE - Estilos específicos da página sobre nós
+   SOBRE PAGE - Estilos especÃ­ficos da pÃ¡gina sobre nÃ³s
    ========================================= */
 
-/* Importa as seções da página sobre */
+/* Importa as seÃ§Ãµes da pÃ¡gina sobre */
 @import 'sections/hero-sobre.css';
 @import 'sections/historia.css';
 @import 'sections/valores.css';
 @import 'sections/certificacoes-sobre.css';
 @import 'sections/cta-sobre.css';
 @import 'sections/responsive-sobre.css';
+
 

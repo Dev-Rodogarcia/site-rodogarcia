@@ -1,8 +1,31 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/cotacao/cotacao.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .css
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   COTAÇÃO PAGE - Estilos específicos da página de cotação
+   COTAÃ‡ÃƒO PAGE - Estilos especÃ­ficos da pÃ¡gina de cotaÃ§Ã£o
    ========================================= */
 
-/* Importa as seções da página de cotação */
+/* Importa as seÃ§Ãµes da pÃ¡gina de cotaÃ§Ã£o */
 @import 'sections/whatsapp-contatos.css';
 @import 'sections/formulario-cotacao.css';
 @import 'sections/responsive-cotacao.css';
+

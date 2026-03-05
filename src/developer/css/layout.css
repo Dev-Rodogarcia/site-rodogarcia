@@ -1,3 +1,25 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/developer/css/layout.css
+Modulo  : Frontend - estilos painel developer
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .dev-body, .dev-shell, .dev-main, .dev-header, .dev-header__left, .dev-header__user, .breadcrumb, .dev-content, .flash-message, .is-visible
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 :root {
   --bg: #f5f7fa;
   --bg-soft: #ffffff;
@@ -31,6 +53,7 @@ body.dev-body {
   font-family: 'Manrope', 'Segoe UI', Tahoma, sans-serif;
   color: var(--text);
   background: var(--bg);
+  overflow-x: hidden;
 }
 
 .dev-shell {
@@ -176,6 +199,8 @@ body.sidebar-collapsed .dev-shell {
 
   .dev-header {
     padding: 14px 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
   }
 
   .dev-content {
@@ -192,7 +217,15 @@ body.sidebar-collapsed .dev-shell {
     justify-content: center;
   }
 
+  .dev-header__user {
+    max-width: 100%;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+  }
+
   body.sidebar-collapsed .dev-shell {
     grid-template-columns: 1fr;
   }
 }
+

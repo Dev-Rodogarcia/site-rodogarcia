@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/pages/cotacao/sections/whatsapp-contatos.css
+Modulo  : Frontend - estilos por pagina
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .secao-whatsapp, .secao-formulario-cotacao, .whatsapp-container, .whatsapp-header, .whatsapp-icon-wrapper, .whatsapp-title, .whatsapp-subtitle, .whatsapp-cards, .whatsapp-card, .whatsapp-card-header
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   SEÇÃO WHATSAPP - Contatos Diretos
+   SEÃ‡ÃƒO WHATSAPP - Contatos Diretos
    ========================================= */
 .secao-whatsapp {
     background: linear-gradient(135deg, rgba(37, 211, 102, 0.08) 0%, rgba(18, 140, 126, 0.12) 50%, rgba(255, 255, 255, 0) 100%);
@@ -298,4 +320,5 @@
         font-size: 1.2rem;
     }
 }
+
 

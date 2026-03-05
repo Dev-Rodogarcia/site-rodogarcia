@@ -1,3 +1,25 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/developer/css/sidebar.css
+Modulo  : Frontend - estilos painel developer
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .dev-sidebar, .dev-sidebar__top, .dev-brand, .dev-nav, .dev-nav__item, .is-active, .dev-nav__item--danger, .dev-nav__icon, .dev-sidebar__bottom, .sidebar-collapsed
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 .dev-sidebar {
   background: var(--brand-dark);
   color: #e7f0ff;
@@ -135,3 +157,4 @@ body.sidebar-collapsed .dev-nav__item {
     justify-items: start;
   }
 }
+

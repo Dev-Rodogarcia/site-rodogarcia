@@ -1,3 +1,25 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/base/base.css
+Modulo  : Frontend - estilos base
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .container, .secao, .cabecalho-secao, .centro, .titulo-secao, .subtitulo-secao
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
    RESET E BASE
    ========================================= */
@@ -13,6 +35,7 @@ body {
     color: var(--cor-texto-principal);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
 }
 
 a {
@@ -45,7 +68,7 @@ button {
 }
 
 /* =========================================
-   ESTILOS GERAIS DE SEÇÃO
+   ESTILOS GERAIS DE SEÃ‡ÃƒO
    ========================================= */
 .secao {
     padding: 5rem 0;
@@ -69,3 +92,4 @@ button {
     color: var(--cor-texto-secundario);
     font-size: 1.1rem;
 }
+

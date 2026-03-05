@@ -1,25 +1,65 @@
-﻿const http = require('http');
+/* ==[DOC-FILE]===============================================================
+Arquivo : server.js
+Modulo  : Servidor HTTP principal
+Papel   : Orquestra o backend HTTP (rotas publicas, auth, admin e arquivos estaticos) com persistencia local.
+
+Responsabilidades:
+- Carrega configuracao de ambiente, seguranca e stores locais de dados.
+- Roteia acessos publicos, autenticados e endpoints administrativos.
+- Aplica sessao, CSRF, validacao de payload e leitura/escrita de conteudo.
+
+Integracoes:
+- Dependencias: http, fs, path, crypto, ./server/routes/developerRoutes, ./server/config/adminSetup, ./server/repositories/userStore
+- Endpoints/rotas: /api/public/content, /api/auth/session, /api/auth/login, /api/auth/register, /api/auth/logout, /api/admin/content, /api/admin/
+- Classes/seletores/chaves: nao se aplica para este modulo.
+
+Entradas e saidas:
+- Entradas: Requisicoes HTTP, cookies, payload JSON e variaveis de ambiente.
+- Saidas  : Respostas HTTP, persistencia em JSON e cabecalhos de seguranca.
+
+Elementos tecnicos: loadEnvFile, resolveStorePath, resolveLegacyAdminDestination, handleRequest, handleApi, handleLogin, handleRegister, handleLogout, handleAdminEntityRoutes, createEntityItem
+[DOC-FILE-END]============================================================== */
+
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { createDeveloperRoutes } = require('./server/developerRoutes');
+const { createDeveloperRoutes } = require('./server/routes/developerRoutes');
+const { resolveAdminSetupConfig } = require('./server/config/adminSetup');
+const { createUserStore } = require('./server/repositories/userStore');
 
 loadEnvFile(path.join(__dirname, '.env'));
 
 const PORT = Number(process.env.PORT) || 5010;
 const ROOT_DIR = __dirname;
-const DATA_DIR = path.join(ROOT_DIR, 'server', 'data');
-const CONTENT_FILE = path.join(DATA_DIR, 'content.json');
-const SITE_TEXTS_FILE = path.join(DATA_DIR, 'site-texts.json');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const DATA_DIR = path.join(ROOT_DIR, 'server', 'storage');
+const CONTENT_FILE = resolveStorePath(path.join(DATA_DIR, 'content.json'), process.env.CONTENT_STORE_PATH);
+const SITE_TEXTS_FILE = resolveStorePath(path.join(DATA_DIR, 'site-texts.json'), process.env.SITE_TEXTS_STORE_PATH);
+const LEGACY_USERS_FILE = path.join(ROOT_DIR, 'server', 'private', 'users.json');
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
-const MAX_BODY_BYTES = 1024 * 1024;
+const MAX_BODY_BYTES = 4 * 1024 * 1024;
 const LOGIN_WINDOW_MS = 10 * 60 * 1000;
 const LOGIN_MAX_ATTEMPTS = 8;
 const PBKDF2_ITERATIONS = 120000;
-const ADMIN_SETUP_CODE = (process.env.ADMIN_SETUP_CODE || 'troque-este-codigo').trim();
+let adminSetupConfig;
+try {
+  adminSetupConfig = resolveAdminSetupConfig({
+    env: process.env,
+    isProduction: IS_PROD
+  });
+} catch (error) {
+  console.error(`[config] ${error.message}`);
+  process.exit(1);
+}
+
+const ADMIN_SETUP_CODE = adminSetupConfig.code;
+const userStore = createUserStore({
+  rootDir: ROOT_DIR,
+  usersFilePath: process.env.USERS_STORE_PATH,
+  legacyFilePath: LEGACY_USERS_FILE
+});
 
 const sessions = new Map();
 const loginAttempts = new Map();
@@ -55,6 +95,12 @@ function loadEnvFile(filePath) {
     }
   }
 }
+
+function resolveStorePath(defaultPath, customPath) {
+  if (!customPath) return defaultPath;
+  if (path.isAbsolute(customPath)) return path.normalize(customPath);
+  return path.normalize(path.join(ROOT_DIR, customPath));
+}
 const redirectMap = new Map([
   ['/index.html', { destination: '/', statusCode: 301 }],
   ['/inicio', { destination: '/', statusCode: 301 }],
@@ -75,7 +121,6 @@ const redirectMap = new Map([
   ['/entrar.html', { destination: '/auth/entrar.html', statusCode: 301 }],
   ['/criar-conta.html', { destination: '/auth/criar-conta.html', statusCode: 301 }],
   ['/auth', { destination: '/auth/entrar.html', statusCode: 302 }],
-  ['/admin', { destination: '/admin/index.html', statusCode: 302 }],
   ['/developer', { destination: '/developer/index.html', statusCode: 302 }]
 ]);
 
@@ -128,7 +173,6 @@ const DEFAULT_SITE_TEXTS = {
   ctaSecondaryLabel: 'Fale Conosco',
   ctaSecondaryUrl: '/fale-conosco.html'
 };
-const DEFAULT_USERS = { users: [] };
 const RESTRICTED_PREFIXES = ['/server/', '/backups/', '/.git', '/.vscode'];
 const RESTRICTED_EXACT = new Set(['/server.js', '/package.json', '/.gitignore', '/vercel.json']);
 
@@ -186,10 +230,29 @@ server.on('error', (error) => {
 server.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
   console.log(`Modo: ${IS_PROD ? 'producao' : 'desenvolvimento'}`);
-  if (ADMIN_SETUP_CODE === 'troque-este-codigo') {
-    console.log('Aviso: defina ADMIN_SETUP_CODE em ambiente para cadastro inicial seguro.');
+  console.log(`Store de usuarios: ${userStore.filePath}`);
+  if (adminSetupConfig.source === 'generated-dev') {
+    adminSetupConfig.warnings.forEach((warning) => {
+      console.warn(`[config] ${warning}`);
+    });
   }
 });
+
+function resolveLegacyAdminDestination(pathname) {
+  if (pathname !== '/admin' && !pathname.startsWith('/admin/')) {
+    return '';
+  }
+
+  const legacyMap = new Map([
+    ['/admin', '/developer/index.html?page=dashboard'],
+    ['/admin/', '/developer/index.html?page=dashboard'],
+    ['/admin/index.html', '/developer/index.html?page=dashboard'],
+    ['/admin/carrosseis.html', '/developer/index.html?page=carrossel-hero'],
+    ['/admin/vagas.html', '/developer/index.html?page=vagas']
+  ]);
+
+  return legacyMap.get(pathname) || '/developer/index.html?page=dashboard';
+}
 
 async function handleRequest(req, res) {
   const host = req.headers.host || `localhost:${PORT}`;
@@ -200,6 +263,12 @@ async function handleRequest(req, res) {
     pathname = decodeURIComponent(parsedUrl.pathname);
   } catch {
     sendJson(res, 400, { error: 'URL invalida.' });
+    return;
+  }
+
+  const legacyAdminDestination = resolveLegacyAdminDestination(pathname);
+  if (legacyAdminDestination) {
+    redirectResponse(res, 302, legacyAdminDestination);
     return;
   }
 
@@ -217,15 +286,6 @@ async function handleRequest(req, res) {
   if (pathname.startsWith('/api/')) {
     await handleApi(req, res, pathname);
     return;
-  }
-
-  if (pathname.startsWith('/admin/')) {
-    const authContext = getAuthContext(req);
-    if (!authContext) {
-      const nextPath = encodeURIComponent(pathname + parsedUrl.search);
-      redirectResponse(res, 302, `/auth/entrar.html?next=${nextPath}`);
-      return;
-    }
   }
 
   if (developerRoutes.guardDeveloperPages(req, res, pathname, parsedUrl.search)) {
@@ -1089,10 +1149,7 @@ function ensureDataFiles() {
   if (!fs.existsSync(SITE_TEXTS_FILE)) {
     writeJsonFile(SITE_TEXTS_FILE, DEFAULT_SITE_TEXTS);
   }
-
-  if (!fs.existsSync(USERS_FILE)) {
-    writeJsonFile(USERS_FILE, DEFAULT_USERS);
-  }
+  userStore.ensure();
 }
 
 function readContentData() {
@@ -1152,18 +1209,11 @@ function writeSiteTextsData(siteTexts) {
 }
 
 function readUsersData() {
-  const data = readJsonFile(USERS_FILE, DEFAULT_USERS);
-  return {
-    users: Array.isArray(data.users) ? data.users : []
-  };
+  return userStore.read();
 }
 
 function writeUsersData(usersData) {
-  const safePayload = {
-    users: Array.isArray(usersData.users) ? usersData.users : []
-  };
-
-  writeJsonFile(USERS_FILE, safePayload);
+  userStore.write(usersData);
 }
 
 function readJsonFile(filePath, fallback) {
@@ -1279,8 +1329,24 @@ function resolveStaticFilePath(pathname) {
 
   let mappedPath = routeMap.get(pathname) || pathname;
   if (pathname.startsWith('/developer/')) mappedPath = `/src${pathname}`;
-  if (pathname.startsWith('/script/')) mappedPath = `/src${pathname}`;
+  if (pathname.startsWith('/auth/')) mappedPath = `/src${pathname}`;
   if (pathname.startsWith('/css/')) mappedPath = `/src${pathname}`;
+  if (pathname.startsWith('/js/')) mappedPath = `/src${pathname}`;
+
+  // Compatibilidade legada para caminhos antigos.
+  if (pathname.startsWith('/script/')) {
+    mappedPath = `/src/js/${pathname.slice('/script/'.length)}`;
+  }
+
+  if (pathname === '/assets/css/auth.css') mappedPath = '/src/auth/css/auth.css';
+  if (pathname === '/assets/js/auth.js') mappedPath = '/src/auth/js/auth.js';
+  if (pathname === '/assets/js/public-content.js') mappedPath = '/src/js/public-content.js';
+  if (pathname === '/assets/js/api.js') mappedPath = '/src/js/shared/api.js';
+  if (pathname.startsWith('/assets/js/utils/')) {
+    mappedPath = `/src/js/shared/${pathname.slice('/assets/js/'.length)}`;
+  }
+  if (pathname.startsWith('/assets/')) mappedPath = `/src${pathname}`;
+
   const relativePath = mappedPath.startsWith('/') ? mappedPath.slice(1) : mappedPath;
   const normalizedRelative = path.normalize(relativePath);
   const filePath = path.normalize(path.join(ROOT_DIR, normalizedRelative));
@@ -1320,7 +1386,6 @@ function serveStaticFile(req, res, pathname) {
 
       const isHtml = extension === '.html';
       const shouldDisableCache =
-        pathname.startsWith('/admin/') ||
         pathname.startsWith('/auth/') ||
         pathname.startsWith('/developer/');
 

@@ -1,5 +1,27 @@
+﻿/* ==[DOC-FILE]===============================================================
+Arquivo : src/css/components/cards.css
+Modulo  : Frontend - estilos de componentes
+Papel   : Concentra regras visuais, estados e responsividade das classes do modulo.
+
+Responsabilidades:
+- Padroniza a apresentacao visual do modulo (tipografia, espacos e cores).
+- Define estados visuais e variacoes dos blocos/componentes.
+- Aplica ajustes responsivos para diferentes larguras de viewport.
+
+Integracoes:
+- Dependencias: nao ha dependencias explicitas no arquivo.
+- Endpoints/rotas: nao se aplica para este modulo.
+- Classes/seletores/chaves: .card, .card--compact, .card--large, .card--center, @media
+
+Entradas e saidas:
+- Entradas: Classes/atributos presentes no HTML da pagina ou componente.
+- Saidas  : Composicao visual final aplicada no render da interface.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== */
+
 /* =========================================
-   COMPONENTE CARD - Base Reutilizável
+   COMPONENTE CARD - Base ReutilizÃ¡vel
    ========================================= */
 
 /* Card Base */
@@ -21,7 +43,7 @@
     border-color: transparent;
 }
 
-/* Variações de Tamanho */
+/* VariaÃ§Ãµes de Tamanho */
 .card--compact {
     padding: 1.5rem;
 }
@@ -30,13 +52,13 @@
     padding: 3rem;
 }
 
-/* Variações de Estilo */
+/* VariaÃ§Ãµes de Estilo */
 .card--center {
     align-items: center;
     text-align: center;
 }
 
-/* Estilos de Conteúdo */
+/* Estilos de ConteÃºdo */
 .card h3 {
     margin-bottom: 1rem;
     font-size: 1.3rem;
@@ -73,4 +95,5 @@
         transform: none;
     }
 }
+
 
