@@ -61,24 +61,31 @@
       ]
     },
     {
-      "id": "hero_1e96b06e-37e9-4204-9dd9-fcb7350605fe",
+      "id": "hero_e38e37a6-f3eb-47ca-88f8-242661ecea6f",
       "order": 4,
-      "createdAt": "2026-03-05T13:03:28.049Z",
-      "updatedAt": "2026-03-05T13:03:28.049Z",
-      "title": "Testando se dá certo",
-      "description": "asdasdasdasdasdasdasdasd",
-      "image": "/public/foto4-semfundo.png",
+      "createdAt": "2026-03-05T18:22:45.352Z",
+      "updatedAt": "2026-03-05T18:22:45.352Z",
+      "title": "",
+      "description": "",
+      "image": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
       "active": true,
+      "layoutMode": "full-image",
+      "fullImageButtonsEnabled": false,
+      "fullImageBackgroundType": "wavy",
       "buttons": [
         {
           "label": "",
           "url": "",
-          "enabled": false
+          "enabled": false,
+          "color": "#FFFFFF",
+          "variant": "solid"
         },
         {
           "label": "",
           "url": "",
-          "enabled": false
+          "enabled": false,
+          "color": "",
+          "variant": "outline"
         }
       ]
     }
@@ -107,6 +114,17 @@
       "image": "/public/foto6.png",
       "active": true,
       "order": 3
+    },
+    {
+      "id": "dna_e4d1725a-7681-43e7-8b27-32305344c22d",
+      "order": 4,
+      "createdAt": "2026-03-05T18:30:03.639Z",
+      "updatedAt": "2026-03-05T18:30:03.639Z",
+      "title": "",
+      "text": "",
+      "image": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
+      "active": true,
+      "layoutMode": "full-image"
     }
   ],
   "vagas": [
@@ -146,6 +164,38 @@
       "description": "Vaga para assistente com conhecimentos em gestao de documentos e atendimento ao cliente.",
       "applyUrl": "/trabalhe-conosco.html#formulario",
       "featured": true,
+      "active": true,
+      "order": 3
+    }
+  ],
+  "feedbacks": [
+    {
+      "id": "feedback-1",
+      "name": "Roberto Campos",
+      "role": "Diretor de Logistica",
+      "company": "TechCorp",
+      "comment": "Reduzimos custos logisticos em 35% com previsibilidade e zero atrasos nas entregas.",
+      "photo": "",
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "feedback-2",
+      "name": "Maria Silva",
+      "role": "Gerente de Operacoes",
+      "company": "Industria Quimica",
+      "comment": "Transporte de produtos perigosos com 100% de conformidade e atendimento muito rapido.",
+      "photo": "",
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "feedback-3",
+      "name": "Joao Pereira",
+      "role": "CEO",
+      "company": "E-commerce Brasil",
+      "comment": "A abrangencia nacional ajudou nosso crescimento com rastreio em tempo real.",
+      "photo": "",
       "active": true,
       "order": 3
     }

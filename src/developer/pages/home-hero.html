@@ -1,0 +1,149 @@
+﻿<!-- ==[DOC-FILE]=============================================================
+Arquivo : src/developer/pages/home-hero.html
+Modulo  : Frontend - templates do painel developer
+Papel   : Formulario e lista para editar os slides da secao Hero da Home.
+
+Responsabilidades:
+- Coletar dados de titulo, descricao, imagem e botoes de cada slide.
+- Permitir cadastro, edicao, ativacao e ordenacao dos slides.
+- Disponibilizar ancoragens consumidas pelo manager de Hero.
+
+Integracoes:
+- Dependencias: /developer/js/managers/hero-manager.js
+- Endpoints/rotas: nao se aplica neste template.
+- Classes/seletores/chaves: #hero-form, #hero-list, #hero-clear-btn, #heroTitle, #heroDescription, #heroImage
+
+Entradas e saidas:
+- Entradas: interacao do usuario nos campos e botoes.
+- Saidas  : estrutura DOM para hidratacao do manager.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== -->
+
+<section class="panel-grid two-col">
+  <article class="panel-card">
+    <h2>Home / Hero</h2>
+    <p>Edite os slides principais do topo da pagina inicial.</p>
+
+    <form id="hero-form" class="form-section mt-14" novalidate>
+      <input id="heroId" name="heroId" type="hidden">
+
+      <div class="form-field">
+        <span>Tipo de layout</span>
+        <div class="form-grid two-col">
+          <label class="check-field">
+            <input id="heroLayoutTextImage" name="heroLayoutMode" type="radio" value="text-image" checked>
+            Texto + Imagem
+          </label>
+          <label class="check-field">
+            <input id="heroLayoutFullImage" name="heroLayoutMode" type="radio" value="full-image">
+            Imagem Completa
+          </label>
+        </div>
+        <small class="field-hint">
+          No modo Imagem Completa, a imagem ocupa todo o slide e os textos ficam desativados.
+        </small>
+      </div>
+
+      <label class="form-field" id="hero-full-background-wrap">
+        <span>Fundo da imagem completa</span>
+        <select id="heroFullBackgroundType" name="heroFullBackgroundType">
+          <option value="wavy">Ondulado (mantem shape)</option>
+          <option value="straight">Reto (sem onda)</option>
+        </select>
+        <small class="field-hint">
+          Ondulado segue o shape da secao. Reto usa a imagem inteira sem o recorte de onda.
+        </small>
+      </label>
+
+      <label class="form-field">
+        <span>Titulo (interno)</span>
+        <input id="heroTitle" name="heroTitle" type="text" maxlength="120" required>
+        <small class="field-hint">Obrigatorio para identificar o slide no painel. Nao aparece no layout Imagem Completa.</small>
+      </label>
+
+      <div id="hero-description-wrap" class="form-section">
+        <label class="form-field">
+          <span>Descricao</span>
+          <textarea id="heroDescription" name="heroDescription" maxlength="420" required></textarea>
+        </label>
+      </div>
+
+      <label class="form-field">
+        <span>URL da imagem</span>
+        <input id="heroImage" name="heroImage" type="url" required>
+      </label>
+
+      <div id="hero-full-options" class="form-section">
+        <label class="check-field">
+          <input id="heroFullButtonsEnabled" name="heroFullButtonsEnabled" type="checkbox">
+          Adicionar botoes centralizados sobre a imagem
+        </label>
+        <small class="field-hint">
+          Quando ativo, os botoes aparecem no centro do banner.
+        </small>
+      </div>
+
+      <div id="hero-buttons-fields" class="form-section">
+        <div class="form-grid two-col">
+          <label class="form-field">
+            <span>Botao 1 texto</span>
+            <input id="heroBtn1Text" name="heroBtn1Text" type="text" maxlength="40">
+          </label>
+          <label class="form-field">
+            <span>Botao 1 link</span>
+            <input id="heroBtn1Url" name="heroBtn1Url" type="url">
+          </label>
+        </div>
+
+        <div class="form-grid two-col">
+          <label class="check-field">
+            <input id="heroBtn1Enabled" name="heroBtn1Enabled" type="checkbox">
+            Ativar botao 1
+          </label>
+          <label class="form-field">
+            <span>Cor do botao 1</span>
+            <input id="heroBtn1Color" name="heroBtn1Color" type="color" value="#FFFFFF">
+          </label>
+        </div>
+
+        <div class="form-grid two-col">
+          <label class="form-field">
+            <span>Botao 2 texto</span>
+            <input id="heroBtn2Text" name="heroBtn2Text" type="text" maxlength="40">
+          </label>
+          <label class="form-field">
+            <span>Botao 2 link</span>
+            <input id="heroBtn2Url" name="heroBtn2Url" type="url">
+          </label>
+        </div>
+
+        <div class="form-grid two-col">
+          <label class="check-field">
+            <input id="heroBtn2Enabled" name="heroBtn2Enabled" type="checkbox">
+            Ativar botao 2
+          </label>
+          <label class="check-field">
+            <input id="heroBtn2Outline" name="heroBtn2Outline" type="checkbox" checked>
+            Botao 2 estilo outline
+          </label>
+        </div>
+      </div>
+
+      <label class="check-field">
+        <input id="heroActive" name="heroActive" type="checkbox" checked>
+        Slide ativo
+      </label>
+
+      <div class="form-actions">
+        <button class="btn-primary" type="submit">Salvar slide</button>
+        <button class="btn-secondary" type="button" id="hero-clear-btn">Limpar</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <h3>Slides cadastrados</h3>
+    <ul id="hero-list" class="entity-list mt-10"></ul>
+  </article>
+</section>

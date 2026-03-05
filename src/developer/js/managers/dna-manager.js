@@ -28,6 +28,47 @@ const estadoDna = {
   slides: []
 };
 
+const DNA_LAYOUT_TEXT_IMAGE = 'text-image';
+const DNA_LAYOUT_FULL_IMAGE = 'full-image';
+
+function normalizarLayoutDna(valor) {
+  return String(valor || '').trim().toLowerCase() === DNA_LAYOUT_FULL_IMAGE
+    ? DNA_LAYOUT_FULL_IMAGE
+    : DNA_LAYOUT_TEXT_IMAGE;
+}
+
+function obterLayoutSelecionado(form) {
+  const selecionado = form.querySelector('input[name="dnaLayoutMode"]:checked');
+  return normalizarLayoutDna(selecionado ? selecionado.value : DNA_LAYOUT_TEXT_IMAGE);
+}
+
+function alternarDesabilitado(elemento, desabilitar) {
+  if (!elemento) return;
+  const campos = elemento.querySelectorAll('input, textarea, select, button');
+  campos.forEach((campo) => {
+    if (!(campo instanceof HTMLInputElement || campo instanceof HTMLTextAreaElement || campo instanceof HTMLSelectElement || campo instanceof HTMLButtonElement)) {
+      return;
+    }
+    campo.disabled = Boolean(desabilitar);
+  });
+}
+
+function atualizarVisibilidadeCamposDna(form) {
+  if (!form) return;
+  const layout = obterLayoutSelecionado(form);
+  const modoImagemCompleta = layout === DNA_LAYOUT_FULL_IMAGE;
+  const blocoTexto = document.getElementById('dna-text-field-wrap');
+  if (blocoTexto) blocoTexto.hidden = modoImagemCompleta;
+  alternarDesabilitado(blocoTexto, modoImagemCompleta);
+
+  if (form.dnaText instanceof HTMLTextAreaElement) {
+    form.dnaText.required = !modoImagemCompleta;
+  }
+  if (form.dnaTitle instanceof HTMLInputElement) {
+    form.dnaTitle.required = true;
+  }
+}
+
 function ordenarPorOrdem(a, b) {
   return (Number(a.order) || 0) - (Number(b.order) || 0);
 }
@@ -42,24 +83,33 @@ function limparFormularioDna() {
   form.reset();
   form.dnaId.value = '';
   form.dnaActive.checked = true;
+  if (form.dnaLayoutTextImage) form.dnaLayoutTextImage.checked = true;
+  if (form.dnaLayoutFullImage) form.dnaLayoutFullImage.checked = false;
+  atualizarVisibilidadeCamposDna(form);
 }
 
 function preencherFormularioDna(item) {
   const form = document.getElementById('dna-form');
   if (!form || !item) return;
+  const layout = normalizarLayoutDna(item.layoutMode);
   form.dnaId.value = item.id;
   form.dnaTitle.value = item.title || '';
   form.dnaText.value = item.text || '';
   form.dnaImage.value = item.image || '';
   form.dnaActive.checked = Boolean(item.active);
+  if (form.dnaLayoutTextImage) form.dnaLayoutTextImage.checked = layout === DNA_LAYOUT_TEXT_IMAGE;
+  if (form.dnaLayoutFullImage) form.dnaLayoutFullImage.checked = layout === DNA_LAYOUT_FULL_IMAGE;
+  atualizarVisibilidadeCamposDna(form);
 }
 
 function montarPayloadDna(form) {
+  const layoutMode = obterLayoutSelecionado(form);
   return {
     title: sanitizarTexto(form.dnaTitle.value, 120),
     text: sanitizarTexto(form.dnaText.value, 420),
     image: sanitizarUrl(form.dnaImage.value),
-    active: form.dnaActive.checked
+    active: form.dnaActive.checked,
+    layoutMode
   };
 }
 
@@ -125,7 +175,15 @@ function renderizarListaDna() {
     const cabecalho = criarElemento('div', 'entity-item__head');
     const meta = criarElemento('div');
     const titulo = criarElemento('h4', 'entity-item__title', item.title || 'Sem titulo');
-    const detalhe = criarElemento('p', 'entity-item__meta', `Ordem: ${item.order}`);
+    const detalhe = criarElemento(
+      'p',
+      'entity-item__meta',
+      `Ordem: ${item.order} | Layout: ${
+        normalizarLayoutDna(item.layoutMode) === DNA_LAYOUT_FULL_IMAGE
+          ? 'Imagem completa'
+          : 'Texto + imagem'
+      }`
+    );
     meta.append(titulo, detalhe);
 
     const pills = criarElemento('div', 'status-pills');
@@ -160,6 +218,14 @@ function renderizarListaDna() {
 function vincularFormularioDna(contexto) {
   const form = document.getElementById('dna-form');
   if (!form) return;
+
+  form.querySelectorAll('input[name="dnaLayoutMode"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      atualizarVisibilidadeCamposDna(form);
+    });
+  });
+
+  atualizarVisibilidadeCamposDna(form);
 
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();

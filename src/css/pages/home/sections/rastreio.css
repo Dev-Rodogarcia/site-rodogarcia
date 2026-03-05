@@ -11,7 +11,7 @@ Responsabilidades:
 Integracoes:
 - Dependencias: nao ha dependencias explicitas no arquivo.
 - Endpoints/rotas: nao se aplica para este modulo.
-- Classes/seletores/chaves: .rastreio-rapido, .box-rastreio-wide, .texto, .form-rastreio-row, .botao, @media
+- Classes/seletores/chaves: .rastreio-rapido, .box-rastreio-wide, .texto, .form-rastreio-row, .rastreio-acao-row, .botao, @media
 
 Entradas e saidas:
 - Entradas: Classes/atributos presentes no HTML da pagina ou componente.
@@ -28,64 +28,57 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     padding: 3rem 0;
 }
 
+.rastreio-rapido>.container {
+    max-width: none;
+    padding: 0;
+}
+
 .box-rastreio-wide {
     background: linear-gradient(135deg, rgba(46, 40, 130, 0.08), rgba(80, 141, 202, 0.2));
     color: var(--cor-texto-principal);
-    padding: 3rem;
-    border-radius: var(--radius-md);
+    border-radius: 0;
     border: 1px solid rgba(46, 40, 130, 0.12);
+}
+
+.box-rastreio-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 2rem;
+    gap: 1rem 2.5rem;
 }
 
-.box-rastreio-wide .texto h3 {
-    font-size: 1.5rem;
+.box-rastreio-wide .texto {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.box-rastreio-wide .texto p {
-    font-size: 1rem;
-    opacity: 0.9;
-    line-height: 1.5;
-}
-
-.form-rastreio-row {
-    display: flex;
     gap: 1rem;
-    flex: 1;
-    min-width: 300px;
+    max-width: 620px;
 }
 
-.form-rastreio-row input {
-    flex: 1;
-    padding: 1rem;
-    border-radius: var(--radius-sm);
-    border: none;
-    outline: none;
-    font-size: 1rem;
+.box-rastreio-wide .texto>i {
+    font-size: 2.35rem;
+    line-height: 1;
+    flex: 0 0 auto;
+    color: #2e2882;
 }
 
-.form-rastreio-row button {
-    padding: 1rem 2rem;
-    border-radius: var(--radius-sm);
-    border: none;
-    background: var(--cor-azul-hero);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-    white-space: nowrap;
+.box-rastreio-wide .texto .rastreio-titulo {
+    font-size: clamp(1.08rem, 1.45vw, 1.42rem);
+    font-weight: 700;
+    line-height: 1.3;
+    color: #22304a;
+    letter-spacing: -0.01em;
+    margin: 0;
 }
 
-.form-rastreio-row button:hover {
-    background: var(--cor-destaque);
-    transform: translateY(-2px);
+.rastreio-acao-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 0 0 auto;
+    min-width: 0;
 }
 
 /* Responsivo - Tablet */
@@ -94,17 +87,18 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         padding: 2rem 0;
     }
 
-    .box-rastreio-wide {
-        padding: 2.5rem;
+    .box-rastreio-inner {
+        padding-top: 2.5rem;
+        padding-bottom: 2.5rem;
         gap: 1.5rem;
     }
 
-    .box-rastreio-wide .texto h3 {
-        font-size: 1.3rem;
+    .box-rastreio-wide .texto>i {
+        font-size: 2.2rem;
     }
 
-    .form-rastreio-row {
-        min-width: 100%;
+    .rastreio-acao-row {
+        justify-content: center;
     }
 }
 
@@ -114,44 +108,34 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         padding: 1.5rem 0;
     }
 
-    .box-rastreio-wide {
-        padding: 2rem 1.5rem;
-        gap: 1.5rem;
+    .box-rastreio-inner {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        gap: 1.25rem;
         text-align: center;
+        flex-direction: column;
     }
 
     .box-rastreio-wide .texto {
         width: 100%;
-    }
-
-    .box-rastreio-wide .texto h3 {
-        font-size: 1.2rem;
         justify-content: center;
     }
 
+    .box-rastreio-wide .texto>i {
+        font-size: 1.9rem;
+    }
+
     .box-rastreio-wide .texto p {
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+        font-size: 1rem;
     }
 
-    .form-rastreio-row {
-        width: 100%;
-        flex-direction: column;
-        gap: 1rem;
-        min-width: 100%;
+    .rastreio-acao-row {
+        justify-content: center;
     }
 
-    .form-rastreio-row input {
-        width: 100%;
-        padding: 0.875rem;
-        font-size: 0.95rem;
-    }
-
-    .form-rastreio-row button,
-    .form-rastreio-row .botao {
-        width: 100%;
-        padding: 0.875rem 1.5rem;
-        font-size: 0.95rem;
+    .rastreio-acao-row .botao {
+        padding: 0.9rem 1.5rem;
+        width: min(100%, 260px);
     }
 }
 
@@ -161,41 +145,30 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         padding: 1rem 0;
     }
 
-    .box-rastreio-wide {
-        padding: 1.5rem 1rem;
+    .box-rastreio-inner {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
         gap: 1rem;
-        border-radius: var(--radius-sm);
     }
 
-    .box-rastreio-wide .texto h3 {
-        font-size: 1.1rem;
-        flex-direction: row;
-        justify-content: center;
-        gap: 0.5rem;
+    .box-rastreio-wide .texto {
+        gap: 0.7rem;
+        align-items: flex-start;
+        text-align: left;
     }
 
-    .box-rastreio-wide .texto h3 i {
-        font-size: 1.3rem;
-    }
-
-    .box-rastreio-wide .texto p {
-        font-size: 0.85rem;
+    .box-rastreio-wide .texto .rastreio-titulo {
+        font-size: 0.95rem;
         line-height: 1.4;
     }
 
-    .form-rastreio-row {
-        gap: 0.75rem;
+    .rastreio-acao-row {
+        width: 100%;
     }
 
-    .form-rastreio-row input {
-        padding: 0.75rem;
-        font-size: 0.9rem;
-    }
-
-    .form-rastreio-row button,
-    .form-rastreio-row .botao {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.9rem;
+    .rastreio-acao-row .botao {
+        padding: 0.8rem 1.2rem;
+        font-size: 0.92rem;
         width: 100%;
     }
 }

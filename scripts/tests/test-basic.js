@@ -1,21 +1,21 @@
 /* ==[DOC-FILE]===============================================================
 Arquivo : scripts/tests/test-basic.js
 Modulo  : Automacao - testes
-Papel   : Executa tarefa operacional com leitura/escrita local e saida no console.
+Papel   : Executa smoke test automatizado da aplicacao (rotas publicas, auth, area developer e CRUD admin basico).
 
 Responsabilidades:
-- Executa uma tarefa operacional reutilizavel fora do fluxo de runtime web.
-- Le/escreve arquivos do projeto quando necessario.
-- Retorna status claro via console para uso em rotina de desenvolvimento.
+- Subir servidor temporario com stores isolados em diretorio provisiorio.
+- Validar fluxo de autenticacao inicial, sessao, CSRF e restricao de endpoints privados.
+- Exercitar operacoes CRUD de Hero e validar respostas esperadas de cada endpoint.
 
 Integracoes:
 - Dependencias: child_process, fs, os, path
 - Endpoints/rotas: /api/admin/content, /api/developer/imagens, /api/auth/register, /api/developer/imagens/upload, /api/admin/hero
-- Classes/seletores/chaves: nao se aplica para este modulo.
+- Classes/seletores/chaves: HttpClient, waitForServer, startServer, run, TESTE_BASICO_OK.
 
 Entradas e saidas:
-- Entradas: Arquivos locais, constantes internas e parametros fixos do script.
-- Saidas  : Arquivo gerado/validado e feedback de execucao no terminal.
+- Entradas: variaveis de ambiente temporarias + payloads de teste definidos no script.
+- Saidas  : status final (`TESTE_BASICO_OK` ou `TESTE_BASICO_FALHOU`) e logs de diagnostico.
 
 Elementos tecnicos: sleep, assert, waitForServer, startServer, run
 [DOC-FILE-END]============================================================== */

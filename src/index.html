@@ -12,7 +12,7 @@ Responsabilidades:
 Integracoes:
 - Dependencias: /src/css/base/variables.css, /src/css/base/base.css, /src/css/base/animations.css, /src/css/base/responsive.css, /src/css/components/buttons.css, /src/css/components/cards.css, /src/css/components/icons.css, /src/css/components/mapa.css, /src/css/layout/header.css, /src/css/layout/footer.css
 - Endpoints/rotas: nao se aplica para este modulo.
-- Classes/seletores/chaves: #nav-principal, #inicio, #carrossel-hero, #diferenciais, #carrossel-dna, #filiais, #selectFilial, #cardDetalhesFilial, #rastreio, #contato
+- Classes/seletores/chaves: #nav-principal, #inicio, #carrossel-hero, #diferenciais, #carrossel-dna, #filiais, #selectFilial, #cardDetalhesFilial, #rastreio, #feedbacks-home, #cta-final-home, #contato
 
 Entradas e saidas:
 - Entradas: Dados estaticos da marcacao + atributos usados por CSS/JS.
@@ -30,6 +30,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         content="Rodogarcia Transportes: frete e logistica nacional com seguranca, eficiencia e tecnologia desde 1989.">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <title>Rodogarcia Transportes - Logistica e Transporte</title>
+  <link rel="icon" type="image/x-icon" href="/public/favicon.ico?v=20260305c">
     <link rel="canonical" href="https://rodogarcia.com.br/">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:type" content="website">
@@ -45,7 +46,6 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         content="Rodogarcia Transportes: frete e logistica nacional com seguranca, eficiencia e tecnologia desde 1989.">
     <meta name="twitter:image" content="https://rodogarcia.com.br/public/foto5.png">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <link rel="shortcut icon" type="image/x-icon" href="/public/favicon.ico">
     <link rel="manifest" href="/public/manifest.json">
 
     <!-- Fontes Google (Inter) -->
@@ -76,6 +76,17 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     <link rel="stylesheet" href="/src/css/pages/home/sections/filiais.css">
     <link rel="stylesheet" href="/src/css/pages/home/sections/servicos.css">
     <link rel="stylesheet" href="/src/css/pages/home/sections/rastreio.css">
+    <link rel="stylesheet" href="/src/css/pages/home/sections/feedbacks-home.css">
+    <link rel="stylesheet" href="/src/css/pages/home/sections/cta-final-home.css">
+    <noscript>
+        <style>
+            #carrossel-dna.is-hydrating {
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+            }
+        </style>
+    </noscript>
 
     <script type="application/ld+json">
 {
@@ -343,7 +354,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         <!-- Seção DNA / Estatísticas (Fundo Azul) -->
         <section class="secao dna-bg-azul">
             <div class="container">
-                <div id="carrossel-dna" class="carrossel-dna" role="region" aria-roledescription="carrossel"
+                <div id="carrossel-dna" class="carrossel-dna is-hydrating" role="region" aria-roledescription="carrossel"
                     aria-label="Destaques da Rodogarcia" tabindex="0">
                     <div class="carrossel-dna__slides">
                         <article class="carrossel-dna__slide carrossel-dna__slide--ativo" data-dna-slide
@@ -613,14 +624,95 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         <section id="rastreio" class="secao rastreio-rapido">
             <div class="container">
                 <div class="box-rastreio-wide">
-                    <div class="texto">
-                        <h3><i class="ph ph-magnifying-glass"></i> Rastrear Encomenda</h3>
-                        <p>Digite seu código ou CPF/CNPJ para localizar sua carga.</p>
+                    <div class="box-rastreio-inner">
+                        <div class="texto">
+                            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                            <h3 class="rastreio-titulo">Tenha controle total sobre sua logística rastreando suas entregas.</h3>
+                        </div>
+                        <div class="rastreio-acao-row">
+                            <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                                rel="noopener noreferrer" class="botao botao--branco">Quero rastrear</a>
+                        </div>
                     </div>
-                    <form class="form-rastreio-row">
-                        <input type="text" placeholder="Código de Rastreio" required>
-                        <button type="submit" class="botao botao--secundario">Buscar</button>
-                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Depoimentos (Replicado de Serviços) -->
+        <section id="feedbacks-home" class="secao secao-feedbacks-home">
+            <div class="container">
+                <div class="cabecalho-secao centro">
+                    <h2 class="titulo-secao" data-services-feedback-title>A escolha certa para a sua logística!</h2>
+                    <p class="subtitulo-secao" data-services-feedback-subtitle>Mais de <strong>2.500 clientes</strong>
+                        confiam na Rodogarcia. Veja o que eles dizem:</p>
+                    <div class="stats-depoimentos">
+                        <div class="stat-item">
+                            <strong>98%</strong>
+                            <span>de satisfação</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>4.8/5</strong>
+                            <span>avaliação média</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>2.500+</strong>
+                            <span>clientes ativos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-depoimentos-container">
+                    <div class="carousel-depoimentos-track" data-feedback-track>
+                        <div class="card-depoimento">
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i
+                                    class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i>
+                            </div>
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar"><span>RC</span></div>
+                                <div class="depoimento-info">
+                                    <h4>Roberto Campos</h4>
+                                    <p>Diretor de Logística - ABC Indústria</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Reduzimos nossos custos logísticos em 35% com previsibilidade e
+                                rastreio em tempo real."</p>
+                        </div>
+                        <div class="card-depoimento">
+                            <div class="depoimento-avaliacao">
+                                <i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i
+                                    class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i>
+                            </div>
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar"><span>AM</span></div>
+                                <div class="depoimento-info">
+                                    <h4>Ana Martins</h4>
+                                    <p>Gerente de Operações - PharmaLog</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Conseguimos operar com 100% de conformidade em cargas sensíveis
+                                e atendimento muito acima da média."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Final -->
+        <section id="cta-final-home" class="secao secao-cta-final-home">
+            <div class="container">
+                <div class="box-cta-final-home">
+                    <div class="box-cta-final-home__inner">
+                        <div class="cta-content">
+                            <h3>Pronto para começar?</h3>
+                            <p>Solicite uma cotação personalizada e descubra como podemos ajudar seu negócio</p>
+                        </div>
+                        <div class="cta-actions">
+                            <a href="cotacao.html" class="botao botao--zafir">Solicitar Cotação</a>
+                            <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
+                                rel="noopener noreferrer" class="botao botao--outline-zafir">Rastrear Encomenda</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -676,16 +768,11 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     </main>
 
     <script src="/src/js/main.js"></script>
-    <script src="/src/js/carousels.js"></script>
     <script type="module" src="/src/js/public-content.js"></script>
     <script type="module" src="/src/js/mapas/mapa.js"></script>
 </body>
 
 </html>
-
-
-
-
 
 
 

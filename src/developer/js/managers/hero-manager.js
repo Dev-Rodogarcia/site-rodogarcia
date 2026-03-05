@@ -28,6 +28,91 @@ const estadoHero = {
   slides: []
 };
 
+const HERO_LAYOUT_TEXT_IMAGE = 'text-image';
+const HERO_LAYOUT_FULL_IMAGE = 'full-image';
+
+function normalizarLayoutHero(valor) {
+  return String(valor || '').trim().toLowerCase() === HERO_LAYOUT_FULL_IMAGE
+    ? HERO_LAYOUT_FULL_IMAGE
+    : HERO_LAYOUT_TEXT_IMAGE;
+}
+
+function normalizarFundoHero(valor) {
+  return String(valor || '').trim().toLowerCase() === 'straight'
+    ? 'straight'
+    : 'wavy';
+}
+
+function normalizarVarianteBotao(valor) {
+  return String(valor || '').trim().toLowerCase() === 'outline'
+    ? 'outline'
+    : 'solid';
+}
+
+function sanitizarCorHex(valor) {
+  const texto = String(valor || '').trim();
+  const match = texto.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+  if (!match) return '';
+
+  const hex = match[1];
+  if (hex.length === 3) {
+    return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toUpperCase();
+  }
+  return `#${hex}`.toUpperCase();
+}
+
+function corPadraoBotao1() {
+  return '#FFFFFF';
+}
+
+function obterLayoutSelecionado(form) {
+  const selecionado = form.querySelector('input[name="heroLayoutMode"]:checked');
+  return normalizarLayoutHero(selecionado ? selecionado.value : HERO_LAYOUT_TEXT_IMAGE);
+}
+
+function alternarDesabilitado(elemento, desabilitar) {
+  if (!elemento) return;
+  const campos = elemento.querySelectorAll('input, textarea, select, button');
+  campos.forEach((campo) => {
+    if (!(campo instanceof HTMLInputElement || campo instanceof HTMLTextAreaElement || campo instanceof HTMLSelectElement || campo instanceof HTMLButtonElement)) {
+      return;
+    }
+    campo.disabled = Boolean(desabilitar);
+  });
+}
+
+function atualizarVisibilidadeCamposHero(form) {
+  if (!form) return;
+
+  const layout = obterLayoutSelecionado(form);
+  const modoImagemCompleta = layout === HERO_LAYOUT_FULL_IMAGE;
+  const botoesSobreImagemAtivos = Boolean(form.heroFullButtonsEnabled && form.heroFullButtonsEnabled.checked);
+
+  const blocoDescricao = document.getElementById('hero-description-wrap');
+  const blocoFundo = document.getElementById('hero-full-background-wrap');
+  const blocoOpcoesFull = document.getElementById('hero-full-options');
+  const blocoBotoes = document.getElementById('hero-buttons-fields');
+
+  if (blocoDescricao) blocoDescricao.hidden = modoImagemCompleta;
+  if (blocoFundo) blocoFundo.hidden = !modoImagemCompleta;
+  if (blocoOpcoesFull) blocoOpcoesFull.hidden = !modoImagemCompleta;
+
+  const exibirBotoes = !modoImagemCompleta || botoesSobreImagemAtivos;
+  if (blocoBotoes) blocoBotoes.hidden = !exibirBotoes;
+
+  alternarDesabilitado(blocoDescricao, modoImagemCompleta);
+  alternarDesabilitado(blocoFundo, !modoImagemCompleta);
+  alternarDesabilitado(blocoOpcoesFull, !modoImagemCompleta);
+  alternarDesabilitado(blocoBotoes, !exibirBotoes);
+
+  if (form.heroDescription instanceof HTMLTextAreaElement) {
+    form.heroDescription.required = !modoImagemCompleta;
+  }
+  if (form.heroTitle instanceof HTMLInputElement) {
+    form.heroTitle.required = true;
+  }
+}
+
 function ordenarPorOrdem(a, b) {
   return (Number(a.order) || 0) - (Number(b.order) || 0);
 }
@@ -45,7 +130,9 @@ function normalizarBotoesHero(botoesBrutos) {
     saida.push({
       label: sanitizarTexto(atual.label || '', 40),
       url: sanitizarUrl(atual.url || ''),
-      enabled: Boolean(atual.enabled)
+      enabled: Boolean(atual.enabled),
+      color: sanitizarCorHex(atual.color || ''),
+      variant: normalizarVarianteBotao(atual.variant || '')
     });
   }
 
@@ -58,8 +145,15 @@ function limparFormularioHero() {
   form.reset();
   form.heroId.value = '';
   form.heroActive.checked = true;
+  if (form.heroLayoutTextImage) form.heroLayoutTextImage.checked = true;
+  if (form.heroLayoutFullImage) form.heroLayoutFullImage.checked = false;
+  if (form.heroFullBackgroundType) form.heroFullBackgroundType.value = 'wavy';
+  if (form.heroFullButtonsEnabled) form.heroFullButtonsEnabled.checked = false;
   form.heroBtn1Enabled.checked = false;
   form.heroBtn2Enabled.checked = false;
+  if (form.heroBtn1Color) form.heroBtn1Color.value = corPadraoBotao1();
+  if (form.heroBtn2Outline) form.heroBtn2Outline.checked = true;
+  atualizarVisibilidadeCamposHero(form);
 }
 
 function preencherFormularioHero(item) {
@@ -67,35 +161,66 @@ function preencherFormularioHero(item) {
   if (!form || !item) return;
 
   const botoes = normalizarBotoesHero(item.buttons);
+  const layout = normalizarLayoutHero(item.layoutMode);
   form.heroId.value = item.id;
   form.heroTitle.value = item.title || '';
   form.heroDescription.value = item.description || '';
   form.heroImage.value = item.image || '';
   form.heroActive.checked = Boolean(item.active);
+  if (form.heroLayoutTextImage) form.heroLayoutTextImage.checked = layout === HERO_LAYOUT_TEXT_IMAGE;
+  if (form.heroLayoutFullImage) form.heroLayoutFullImage.checked = layout === HERO_LAYOUT_FULL_IMAGE;
+  if (form.heroFullBackgroundType) {
+    form.heroFullBackgroundType.value = normalizarFundoHero(item.fullImageBackgroundType);
+  }
+  if (form.heroFullButtonsEnabled) {
+    form.heroFullButtonsEnabled.checked = Boolean(item.fullImageButtonsEnabled);
+  }
   form.heroBtn1Text.value = botoes[0].label || '';
   form.heroBtn1Url.value = botoes[0].url || '';
   form.heroBtn1Enabled.checked = Boolean(botoes[0].enabled);
+  if (form.heroBtn1Color) {
+    form.heroBtn1Color.value = botoes[0].color || corPadraoBotao1();
+  }
   form.heroBtn2Text.value = botoes[1].label || '';
   form.heroBtn2Url.value = botoes[1].url || '';
   form.heroBtn2Enabled.checked = Boolean(botoes[1].enabled);
+  if (form.heroBtn2Outline) {
+    form.heroBtn2Outline.checked = normalizarVarianteBotao(botoes[1].variant) === 'outline';
+  }
+  atualizarVisibilidadeCamposHero(form);
 }
 
 function montarPayloadHero(form) {
+  const layoutMode = obterLayoutSelecionado(form);
+  const modoImagemCompleta = layoutMode === HERO_LAYOUT_FULL_IMAGE;
+  const fullImageButtonsEnabled = modoImagemCompleta && form.heroFullButtonsEnabled.checked;
+  const habilitarBotoesNoPayload = !modoImagemCompleta || fullImageButtonsEnabled;
+
+  const botao1Cor = sanitizarCorHex(form.heroBtn1Color.value) || corPadraoBotao1();
+  const botao2Variant = form.heroBtn2Outline.checked ? 'outline' : 'solid';
+
   return {
     title: sanitizarTexto(form.heroTitle.value, 120),
     description: sanitizarTexto(form.heroDescription.value, 420),
     image: sanitizarUrl(form.heroImage.value),
     active: form.heroActive.checked,
+    layoutMode,
+    fullImageButtonsEnabled,
+    fullImageBackgroundType: normalizarFundoHero(form.heroFullBackgroundType.value),
     buttons: [
       {
         label: sanitizarTexto(form.heroBtn1Text.value, 40),
         url: sanitizarUrl(form.heroBtn1Url.value),
-        enabled: form.heroBtn1Enabled.checked
+        enabled: habilitarBotoesNoPayload && form.heroBtn1Enabled.checked,
+        color: botao1Cor,
+        variant: 'solid'
       },
       {
         label: sanitizarTexto(form.heroBtn2Text.value, 40),
         url: sanitizarUrl(form.heroBtn2Url.value),
-        enabled: form.heroBtn2Enabled.checked
+        enabled: habilitarBotoesNoPayload && form.heroBtn2Enabled.checked,
+        color: '',
+        variant: botao2Variant
       }
     ]
   };
@@ -166,7 +291,15 @@ function renderizarListaHero() {
     const detalhe = criarElemento(
       'p',
       'entity-item__meta',
-      `Ordem: ${item.order} | Botoes ativos: ${
+      `Ordem: ${item.order} | Layout: ${
+        normalizarLayoutHero(item.layoutMode) === HERO_LAYOUT_FULL_IMAGE
+          ? 'Imagem completa'
+          : 'Texto + imagem'
+      }${
+        normalizarLayoutHero(item.layoutMode) === HERO_LAYOUT_FULL_IMAGE
+          ? ` | Fundo: ${normalizarFundoHero(item.fullImageBackgroundType) === 'straight' ? 'Reto' : 'Ondulado'}`
+          : ''
+      } | Botoes ativos: ${
         (Array.isArray(item.buttons) ? item.buttons : []).filter((botao) => botao.enabled).length
       }`
     );
@@ -205,6 +338,20 @@ function renderizarListaHero() {
 function vincularFormularioHero(contexto) {
   const form = document.getElementById('hero-form');
   if (!form) return;
+
+  form.querySelectorAll('input[name="heroLayoutMode"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      atualizarVisibilidadeCamposHero(form);
+    });
+  });
+
+  if (form.heroFullButtonsEnabled) {
+    form.heroFullButtonsEnabled.addEventListener('change', () => {
+      atualizarVisibilidadeCamposHero(form);
+    });
+  }
+
+  atualizarVisibilidadeCamposHero(form);
 
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();

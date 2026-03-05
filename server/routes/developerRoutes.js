@@ -131,7 +131,13 @@ function createDeveloperRoutes(deps) {
         return true;
       }
 
-      const sanitized = sanitizeSiteTexts(body, sanitizeText, sanitizeUrl);
+      const currentTexts = readSiteTextsData();
+      const merged = {
+        ...currentTexts,
+        ...(body && typeof body === 'object' ? body : {})
+      };
+
+      const sanitized = sanitizeSiteTexts(merged, sanitizeText, sanitizeUrl);
       writeSiteTextsData(sanitized);
       sendJson(res, 200, { message: 'Textos atualizados com sucesso.', texts: sanitized });
       return true;
@@ -139,7 +145,8 @@ function createDeveloperRoutes(deps) {
 
     if (pathname === '/api/developer/imagens' && req.method === 'GET') {
       const content = readContentData();
-      const images = collectAvailableImages(content, uploadDir, sanitizeUrl);
+      const siteTexts = readSiteTextsData();
+      const images = collectAvailableImages(content, siteTexts, uploadDir, sanitizeUrl);
       sendJson(res, 200, { images });
       return true;
     }
@@ -195,8 +202,10 @@ function createDeveloperRoutes(deps) {
       }
 
       const content = readContentData();
+      const siteTexts = readSiteTextsData();
       const nowIso = new Date().toISOString();
       let changed = 0;
+      let changedSiteTexts = false;
 
       for (const slide of content.heroSlides) {
         if (slide.image === fromUrl) {
@@ -214,8 +223,18 @@ function createDeveloperRoutes(deps) {
         }
       }
 
+      if (siteTexts.aboutHeroImage === fromUrl) {
+        siteTexts.aboutHeroImage = toUrl;
+        changed += 1;
+        changedSiteTexts = true;
+      }
+
       if (changed > 0) {
         writeContentData(content);
+      }
+
+      if (changedSiteTexts) {
+        writeSiteTextsData(siteTexts);
       }
 
       sendJson(res, 200, {
@@ -252,11 +271,36 @@ function sanitizeSiteTexts(payload, sanitizeText, sanitizeUrl) {
     ctaPrimaryLabel: sanitizeText(source.ctaPrimaryLabel, 40),
     ctaPrimaryUrl: sanitizeUrl(source.ctaPrimaryUrl),
     ctaSecondaryLabel: sanitizeText(source.ctaSecondaryLabel, 40),
-    ctaSecondaryUrl: sanitizeUrl(source.ctaSecondaryUrl)
+    ctaSecondaryUrl: sanitizeUrl(source.ctaSecondaryUrl),
+    servicesFeedbackTitle: sanitizeText(source.servicesFeedbackTitle, 140),
+    servicesFeedbackSubtitle: sanitizeText(source.servicesFeedbackSubtitle, 220),
+    aboutHeroTag: sanitizeText(source.aboutHeroTag, 60),
+    aboutHeroTitle: sanitizeText(source.aboutHeroTitle, 140),
+    aboutHeroSubtitle: sanitizeText(source.aboutHeroSubtitle, 320),
+    aboutHeroImage: sanitizeUrl(source.aboutHeroImage),
+    aboutStat1Number: sanitizeText(source.aboutStat1Number, 20),
+    aboutStat1Description: sanitizeText(source.aboutStat1Description, 80),
+    aboutStat2Number: sanitizeText(source.aboutStat2Number, 20),
+    aboutStat2Description: sanitizeText(source.aboutStat2Description, 80),
+    aboutStat3Number: sanitizeText(source.aboutStat3Number, 20),
+    aboutStat3Description: sanitizeText(source.aboutStat3Description, 80),
+    contactPageTitle: sanitizeText(source.contactPageTitle, 120),
+    contactPageSubtitle: sanitizeText(source.contactPageSubtitle, 280),
+    contactPhoneNumber: sanitizeText(source.contactPhoneNumber, 60),
+    contactPhoneHours: sanitizeText(source.contactPhoneHours, 120),
+    contactEmailAddress: sanitizeText(source.contactEmailAddress, 160),
+    contactEmailResponse: sanitizeText(source.contactEmailResponse, 120),
+    contactWhatsappUrl: sanitizeUrl(source.contactWhatsappUrl),
+    contactWhatsappLabel: sanitizeText(source.contactWhatsappLabel, 80),
+    contactAddressLine: sanitizeText(source.contactAddressLine, 180),
+    contactAddressZip: sanitizeText(source.contactAddressZip, 20),
+    contactAddressCountry: sanitizeText(source.contactAddressCountry, 60),
+    contactCtaLabel: sanitizeText(source.contactCtaLabel, 40),
+    contactCtaUrl: sanitizeUrl(source.contactCtaUrl)
   };
 }
 
-function collectAvailableImages(content, uploadDir, sanitizeUrl) {
+function collectAvailableImages(content, siteTexts, uploadDir, sanitizeUrl) {
   const imageMap = new Map();
   const allowedExtensions = new Set(Object.values(ALLOWED_IMAGE_MIME).map((value) => value.toLowerCase()));
 
@@ -276,6 +320,9 @@ function collectAvailableImages(content, uploadDir, sanitizeUrl) {
 
   heroSlides.forEach((slide) => addImage(slide.image, 'conteudo'));
   dnaSlides.forEach((slide) => addImage(slide.image, 'conteudo'));
+  if (siteTexts && siteTexts.aboutHeroImage) {
+    addImage(siteTexts.aboutHeroImage, 'conteudo');
+  }
 
   if (fs.existsSync(uploadDir)) {
     const files = fs.readdirSync(uploadDir, { withFileTypes: true });

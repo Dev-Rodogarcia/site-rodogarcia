@@ -9,7 +9,7 @@ Responsabilidades:
 - Atualiza estado/DOM preservando previsibilidade de execucao.
 
 Integracoes:
-- Dependencias: /src/js/shared/api.js, /src/js/shared/utils/sanitize.js, /src/js/shared/utils/dom.js
+- Dependencias: /src/js/shared/api.js, /src/js/shared/utils/sanitize.js, /src/js/shared/utils/dom.js, /src/js/image-processing/upload-optimizer.js
 - Endpoints/rotas: /api/developer/imagens, /api/developer/imagens/upload, /api/developer/imagens/replace-reference
 - Classes/seletores/chaves: button[type=, #image-url-options, #image-grid, #toImageUrl, #image-preview, #image-preview-empty, #image-upload-form, #imageFile
 
@@ -23,30 +23,21 @@ Elementos tecnicos: validarArquivoUpload, carregarImagens, preencherDatalistImag
 import { requisicaoApi } from '/src/js/shared/api.js';
 import { sanitizarUrl } from '/src/js/shared/utils/sanitize.js';
 import { criarElemento, limparElemento } from '/src/js/shared/utils/dom.js';
+import {
+  IMAGE_UPLOAD_MAX_BYTES,
+  formatarTamanhoBytes,
+  validarArquivoParaOtimizacao,
+  otimizarImagemParaUpload
+} from '/src/js/image-processing/upload-optimizer.js';
 
 const estadoImagens = {
   imagens: [],
-  dataUrlSelecionada: ''
+  dataUrlSelecionada: '',
+  resumoOtimizacao: null
 };
 
-const LIMITE_UPLOAD_BYTES = 2 * 1024 * 1024;
-const TIPOS_UPLOAD_PERMITIDOS = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']);
-
 function validarArquivoUpload(file) {
-  if (!file) {
-    return 'Selecione uma imagem para enviar.';
-  }
-
-  const tipo = String(file.type || '').toLowerCase();
-  if (!TIPOS_UPLOAD_PERMITIDOS.has(tipo)) {
-    return 'Tipo invalido. Envie apenas PNG, JPEG, WEBP ou GIF.';
-  }
-
-  if (Number(file.size) > LIMITE_UPLOAD_BYTES) {
-    return 'Imagem excede limite de 2MB.';
-  }
-
-  return '';
+  return validarArquivoParaOtimizacao(file);
 }
 
 async function carregarImagens(contexto) {
@@ -152,13 +143,22 @@ function atualizarPreviewImagem(dataUrl) {
   labelVazio.hidden = true;
 }
 
-function arquivoParaDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Falha ao ler arquivo de imagem.'));
-    reader.readAsDataURL(file);
-  });
+function montarResumoOtimizacao(payload) {
+  if (!payload) return '';
+
+  const original = formatarTamanhoBytes(payload.bytesOriginais);
+  const final = formatarTamanhoBytes(payload.bytesFinal);
+  const tipoFinal = String(payload.mimeType || '').replace('image/', '').toUpperCase() || 'IMAGEM';
+  const dimensoes = payload.width && payload.height ? `${payload.width}x${payload.height}px` : '';
+
+  if (!payload.optimized) {
+    return `Imagem pronta para upload (${final}).`;
+  }
+
+  const partes = [`Imagem otimizada: ${original} -> ${final}`];
+  if (dimensoes) partes.push(dimensoes);
+  partes.push(tipoFinal);
+  return partes.join(' | ');
 }
 
 function vincularFormularioUpload(contexto) {
@@ -170,6 +170,7 @@ function vincularFormularioUpload(contexto) {
     const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
     if (!file) {
       estadoImagens.dataUrlSelecionada = '';
+      estadoImagens.resumoOtimizacao = null;
       atualizarPreviewImagem('');
       return;
     }
@@ -179,16 +180,30 @@ function vincularFormularioUpload(contexto) {
       contexto.flash(erroValidacao, 'error');
       form.reset();
       estadoImagens.dataUrlSelecionada = '';
+      estadoImagens.resumoOtimizacao = null;
       atualizarPreviewImagem('');
       return;
     }
 
     try {
-      estadoImagens.dataUrlSelecionada = await arquivoParaDataUrl(file);
+      const otimizada = await otimizarImagemParaUpload(file, {
+        maxBytes: IMAGE_UPLOAD_MAX_BYTES
+      });
+      estadoImagens.dataUrlSelecionada = otimizada.dataUrl;
+      estadoImagens.resumoOtimizacao = otimizada;
       atualizarPreviewImagem(estadoImagens.dataUrlSelecionada);
+
+      const resumo = montarResumoOtimizacao(otimizada);
+      if (resumo) {
+        contexto.flash(resumo, 'info');
+      }
+      if (otimizada.warning) {
+        contexto.flash(otimizada.warning, 'info');
+      }
     } catch (erro) {
       contexto.flash(erro.message, 'error');
       estadoImagens.dataUrlSelecionada = '';
+      estadoImagens.resumoOtimizacao = null;
       atualizarPreviewImagem('');
     }
   });
@@ -205,7 +220,12 @@ function vincularFormularioUpload(contexto) {
     let dataUrl = estadoImagens.dataUrlSelecionada;
     if (!dataUrl) {
       try {
-        dataUrl = await arquivoParaDataUrl(file);
+        const otimizada = await otimizarImagemParaUpload(file, {
+          maxBytes: IMAGE_UPLOAD_MAX_BYTES
+        });
+        dataUrl = otimizada.dataUrl;
+        estadoImagens.dataUrlSelecionada = otimizada.dataUrl;
+        estadoImagens.resumoOtimizacao = otimizada;
       } catch (erro) {
         contexto.flash(erro.message, 'error');
         return;
@@ -223,6 +243,7 @@ function vincularFormularioUpload(contexto) {
 
       form.reset();
       estadoImagens.dataUrlSelecionada = '';
+      estadoImagens.resumoOtimizacao = null;
       atualizarPreviewImagem('');
       contexto.flash('Imagem enviada com sucesso.', 'success');
       await carregarImagens(contexto);
@@ -277,6 +298,7 @@ function vincularFormularioSubstituicao(contexto) {
 export async function iniciarGerenciadorImagens(contexto) {
   estadoImagens.imagens = [];
   estadoImagens.dataUrlSelecionada = '';
+  estadoImagens.resumoOtimizacao = null;
   vincularFormularioUpload(contexto);
   vincularFormularioSubstituicao(contexto);
   await carregarImagens(contexto);

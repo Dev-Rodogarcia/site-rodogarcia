@@ -60,6 +60,7 @@ body.dev-body {
   display: grid;
   grid-template-columns: 292px minmax(0, 1fr);
   min-height: 100vh;
+  transition: grid-template-columns 0.25s ease;
 }
 
 .dev-main {

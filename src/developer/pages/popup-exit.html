@@ -1,0 +1,136 @@
+﻿<!-- ==[DOC-FILE]=============================================================
+Arquivo : src/developer/pages/popup-exit.html
+Modulo  : Frontend - templates do painel developer
+Papel   : Editor do Exit Intent Popup com configuracao, metricas e leads dentro do painel developer.
+
+Responsabilidades:
+- Permitir editar textos, triggers e limites de exibicao do popup.
+- Exibir indicadores de conversao e comportamento (eventos e leads).
+- Mostrar leads recentes capturados pelo formulario do popup.
+
+Integracoes:
+- Dependencias: /developer/js/managers/popup-manager.js
+- Endpoints/rotas: nao se aplica neste template (consumo ocorre no manager)
+- Classes/seletores/chaves: #popup-config-form, #popup-top-pages, #popup-leads-list, #popup-open-test-link
+
+Entradas e saidas:
+- Entradas: dados de formulario do usuario logado no CMS.
+- Saidas  : estrutura DOM para leitura/escrita de configuracao via API.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== -->
+
+<section class="panel-stack popup-exit-page">
+  <section class="panel-card popup-exit-page__config">
+    <h2 class="help-title">
+      Automacoes / Exit Intent Popup
+      <span class="help-icon" data-help-id="popup-configuracao-geral">?</span>
+    </h2>
+    <p class="microcopy">Edite texto, tempo e regras para mostrar o popup sem incomodar o visitante.</p>
+    <details class="help-details mt-10" data-help-example-id="popup-configuracao-geral">
+      <summary>Ver exemplo simples</summary>
+    </details>
+    <div class="popup-map-box mt-10">
+      <p class="popup-map-box__title">Mapa rapido de integracao</p>
+      <p>
+        Origem: <strong>/api/popup-config</strong>, <strong>/api/popup-events</strong> e <strong>/api/leads</strong>.
+        Destino: popup no site publico + relatorio de conversao no painel.
+      </p>
+    </div>
+
+    <form id="popup-config-form" class="form-section mt-14" novalidate>
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Titulo do popup</span>
+          <input name="title" type="text" maxlength="80" required>
+        </label>
+        <label class="form-field">
+          <span>Descricao do popup</span>
+          <input name="description" type="text" maxlength="220" required>
+        </label>
+      </div>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Texto do botao principal</span>
+          <input name="buttonText" type="text" maxlength="40" required>
+        </label>
+        <label class="form-field">
+          <span>Texto de fechar</span>
+          <input name="closeText" type="text" maxlength="24" required>
+        </label>
+      </div>
+
+      <label class="form-field">
+        <span>Mensagem de sucesso</span>
+        <input name="successMessage" type="text" maxlength="160" required>
+      </label>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Delay minimo (segundos)</span>
+          <input name="delaySeconds" type="number" min="3" max="90" required>
+          <small class="field-hint">Tempo minimo para o popup aparecer. Exemplo: 10 segundos.</small>
+        </label>
+        <label class="form-field">
+          <span>Cooldown (horas)</span>
+          <input name="cooldownHours" type="number" min="1" max="720" required>
+          <small class="field-hint">Intervalo para nao repetir popup no mesmo navegador. Exemplo: 24 horas.</small>
+        </label>
+      </div>
+
+      <label class="form-field">
+        <span>Maximo de exibicoes por sessao</span>
+        <input name="maxShowsPerSession" type="number" min="1" max="3" required>
+      </label>
+
+      <div class="form-grid two-col popup-toggle-grid">
+        <label class="check-field popup-toggle"><input name="enableName" type="checkbox"> Campo Nome habilitado</label>
+        <label class="check-field popup-toggle"><input name="enableEmail" type="checkbox"> Campo Email habilitado</label>
+        <label class="check-field popup-toggle"><input name="enablePhone" type="checkbox"> Campo Telefone habilitado</label>
+        <label class="check-field popup-toggle"><input name="mobileScrollTrigger" type="checkbox"> Trigger mobile por scroll ao topo</label>
+        <label class="check-field popup-toggle"><input name="mobileBackButtonTrigger" type="checkbox"> Trigger mobile por botao voltar</label>
+      </div>
+
+      <div class="form-actions popup-actions">
+        <button class="btn-primary" type="submit">Salvar configuracao do popup</button>
+        <button id="popup-open-test-btn" class="btn-secondary" type="button">Abrir teste rapido do popup</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel-grid two-col">
+    <article class="panel-card">
+      <h3 class="help-title">
+        Analise Exit Popup
+        <span class="help-icon" data-help-id="popup-analise-conversao">?</span>
+      </h3>
+      <p class="microcopy">Numeros para ver se o popup esta ajudando a captar leads.</p>
+      <ul class="analysis-list analysis-list--popup mt-10">
+        <li><span>Popup exibido</span><strong id="popup-metric-shown">0</strong></li>
+        <li><span>Popup fechado</span><strong id="popup-metric-closed">0</strong></li>
+        <li><span>Popup enviado</span><strong id="popup-metric-submitted">0</strong></li>
+        <li><span>Popup ignorado</span><strong id="popup-metric-ignored">0</strong></li>
+        <li><span>Conversao</span><strong id="popup-metric-conversion">0%</strong></li>
+        <li><span>Leads totais</span><strong id="popup-metric-leads-total">0</strong></li>
+        <li><span>Eventos (7 dias)</span><strong id="popup-metric-events-7d">0</strong></li>
+        <li><span>Leads (7 dias)</span><strong id="popup-metric-leads-7d">0</strong></li>
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <h3 class="help-title">
+        Top paginas do Exit Popup
+        <span class="help-icon" data-help-id="popup-top-paginas">?</span>
+      </h3>
+      <p class="microcopy">Mostra em quais paginas vale ajustar o popup primeiro.</p>
+      <ul id="popup-top-pages" class="analysis-list mt-10"></ul>
+    </article>
+  </section>
+
+  <section class="panel-card">
+    <h3>Leads recentes do popup</h3>
+    <p>Lista dos ultimos contatos capturados pelo formulario do Exit Intent.</p>
+    <div id="popup-leads-list" class="entity-list mt-12"></div>
+  </section>
+</section>

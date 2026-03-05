@@ -1,4 +1,4 @@
-﻿{
+{
   "dashboardTitle": "Painel de gerenciamento de conteudo",
   "dashboardSubtitle": "Atualize conteudo do site com controle e seguranca.",
   "heroSectionTitle": "Destaques do Hero",
@@ -10,5 +10,30 @@
   "ctaPrimaryLabel": "Solicitar Cotacao",
   "ctaPrimaryUrl": "/cotacao.html",
   "ctaSecondaryLabel": "Fale Conosco",
-  "ctaSecondaryUrl": "/fale-conosco.html"
+  "ctaSecondaryUrl": "/fale-conosco.html",
+  "servicesFeedbackTitle": "A escolha certa para a sua logistica!",
+  "servicesFeedbackSubtitle": "Mais de 2.500 clientes confiam na Rodogarcia. Veja o que eles dizem:",
+  "aboutHeroTag": "Nossa Historia",
+  "aboutHeroTitle": "Mais de 35 anos conectando o Brasil",
+  "aboutHeroSubtitle": "Desde 1989, transformando a logistica com excelencia, tecnologia e compromisso com cada entrega.",
+  "aboutHeroImage": "/public/caminhoneiro1.png",
+  "aboutStat1Number": "35+",
+  "aboutStat1Description": "Anos de experiencia",
+  "aboutStat2Number": "1.500+",
+  "aboutStat2Description": "Pontos de coleta",
+  "aboutStat3Number": "1M+",
+  "aboutStat3Description": "Pacotes processados",
+  "contactPageTitle": "Fale Conosco",
+  "contactPageSubtitle": "Estamos prontos para apoiar voce com cotacoes, suporte operacional e orientacoes gerais.",
+  "contactPhoneNumber": "0800 591 4557",
+  "contactPhoneHours": "segunda a sexta, das 8h as 18h",
+  "contactEmailAddress": "gerente.financeiro@rodogarcia.com.br",
+  "contactEmailResponse": "conforme ordem de atendimento",
+  "contactWhatsappUrl": "https://wa.me/5514999999999",
+  "contactWhatsappLabel": "atendimento Rodogarcia",
+  "contactAddressLine": "Rua Pedro Carmine Deo, 156, Agudos - SP",
+  "contactAddressZip": "17123-210",
+  "contactAddressCountry": "Brasil",
+  "contactCtaLabel": "Solicitar Cotacao",
+  "contactCtaUrl": "/cotacao.html"
 }

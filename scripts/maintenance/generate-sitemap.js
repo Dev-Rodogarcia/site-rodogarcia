@@ -1,23 +1,23 @@
 ﻿/* ==[DOC-FILE]===============================================================
 Arquivo : scripts/maintenance/generate-sitemap.js
 Modulo  : Automacao - manutencao
-Papel   : Executa tarefa operacional com leitura/escrita local e saida no console.
+Papel   : Gera o `sitemap.xml` oficial com base na lista de rotas publicas do projeto.
 
 Responsabilidades:
-- Executa uma tarefa operacional reutilizavel fora do fluxo de runtime web.
-- Le/escreve arquivos do projeto quando necessario.
-- Retorna status claro via console para uso em rotina de desenvolvimento.
+- Definir metadados de indexacao (`changefreq`, `priority`, `lastmod`) por rota.
+- Montar o XML no formato `urlset` compativel com motores de busca.
+- Persistir o arquivo final na raiz e registrar resumo da operacao no terminal.
 
 Integracoes:
 - Dependencias: fs, path
 - Endpoints/rotas: nao se aplica para este modulo.
-- Classes/seletores/chaves: nao se aplica para este modulo.
+- Classes/seletores/chaves: BASE_URL, OUTPUT_PATH, LASTMOD, routes, xmlLines.
 
 Entradas e saidas:
-- Entradas: Arquivos locais, constantes internas e parametros fixos do script.
-- Saidas  : Arquivo gerado/validado e feedback de execucao no terminal.
+- Entradas: constante `BASE_URL` e vetor `routes` com `path`, `changefreq` e `priority`.
+- Saidas  : arquivo `sitemap.xml` atualizado + mensagem de confirmacao com total de URLs.
 
-Elementos tecnicos: sem funcoes nomeadas; fluxo concentrado em expressoes inline.
+Elementos tecnicos: fluxo linear (declaracao de rotas -> montagem XML -> escrita em disco).
 [DOC-FILE-END]============================================================== */
 
 const fs = require('fs');

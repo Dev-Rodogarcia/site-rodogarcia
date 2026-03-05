@@ -27,6 +27,12 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     background-color: var(--cor-azul-hero);
     color: white;
     overflow: hidden;
+    padding: 0;
+}
+
+.dna-bg-azul .container {
+    max-width: none;
+    padding: 0;
 }
 
 .grid-dna {
@@ -59,7 +65,17 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
 .carrossel-dna {
     position: relative;
-    --dna-slide-height: 520px;
+    --dna-base-slide-height: 520px;
+    --dna-section-padding-y: 5rem;
+    --dna-content-padding-x: 1.5rem;
+    --dna-slide-height: calc(var(--dna-base-slide-height) + (var(--dna-section-padding-y) * 2));
+    opacity: 1;
+    transition: opacity 0.18s ease;
+}
+
+.carrossel-dna.is-hydrating {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .carrossel-dna__slides {
@@ -91,6 +107,28 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
 .carrossel-dna__slide .grid-dna {
     height: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: var(--dna-section-padding-y) var(--dna-content-padding-x);
+}
+
+.carrossel-dna__slide--full {
+    background: transparent;
+}
+
+.dna-full-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.dna-full-image__media {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
 }
 
 .carrossel-dna__slide .dna-info {
@@ -200,7 +238,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Tablet */
 @media (max-width: 968px) {
     .carrossel-dna {
-        --dna-slide-height: 500px;
+        --dna-base-slide-height: 500px;
+        --dna-section-padding-y: 4rem;
     }
 
     .grid-dna {
@@ -229,7 +268,9 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Mobile */
 @media (max-width: 768px) {
     .carrossel-dna {
-        --dna-slide-height: 680px;
+        --dna-base-slide-height: 680px;
+        --dna-section-padding-y: 0;
+        --dna-content-padding-x: 1.5rem;
     }
 
     .grid-dna {
@@ -304,7 +345,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Mobile Pequeno */
 @media (max-width: 480px) {
     .carrossel-dna {
-        --dna-slide-height: 620px;
+        --dna-base-slide-height: 620px;
+        --dna-content-padding-x: 1rem;
     }
 
     .grid-dna {

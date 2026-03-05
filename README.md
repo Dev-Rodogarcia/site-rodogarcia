@@ -77,6 +77,7 @@ site-rodogarcia/
 |   |   `-- pages/
 |   |-- developer/
 |   |-- js/
+|   |   |-- analytics/
 |   |   `-- mapas/
 |   |-- index.html
 |   |-- servicos.html
@@ -90,6 +91,9 @@ site-rodogarcia/
 |   `-- termos-de-uso.html
 |-- robots.txt
 |-- sitemap.xml
+|-- data/
+|   |-- analytics.json
+|   `-- analytics-config.json
 |-- vercel.json
 |-- server.js
 |-- scripts/
@@ -127,7 +131,9 @@ Acesse:
 - Login: `http://localhost:5010/auth/entrar.html`
 - Cadastro controlado: `http://localhost:5010/auth/criar-conta.html`
 - Painel oficial: `http://localhost:5010/developer/index.html`
-- Compatibilidade legado: acessos em `/admin/*` redirecionam para `/developer/*`
+- Analytics no painel oficial: `http://localhost:5010/developer/index.html?page=analytics-dashboard`
+- Exit Intent no painel oficial: `http://localhost:5010/developer/index.html?page=popup-exit`
+- Compatibilidade legado: `/admin`, `/admin/index.html`, `/admin/dashboard.html`, `/admin/carrosseis.html` e `/admin/vagas.html` redirecionam para `/developer/*`
 
 Configuracao inicial:
 
@@ -164,6 +170,13 @@ Acesse:
 - `preconnect` para origens criticas
 - `defer` em scripts externos
 - Cache configurado por tipo de asset no `vercel.json`
+
+### Analytics e LGPD
+
+- Sistema proprio de eventos: `click`, `scroll`, `form_submit`, `download`, `cta_click`, `popup_open`, `popup_submit`, `page_view`, `session_start`, `session_end`
+- Endpoints locais: `/api/analytics/event`, `/api/analytics/session`, `/api/analytics/stats`
+- Configuracao no CMS: `/developer/index.html?page=analytics-dashboard`
+- Consentimento LGPD por categorias (`necessarios`, `analytics`, `marketing`, `performance`) antes de carregar scripts externos
 
 ### Seguranca (headers)
 

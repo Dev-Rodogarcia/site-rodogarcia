@@ -1,0 +1,82 @@
+﻿<!-- ==[DOC-FILE]=============================================================
+Arquivo : src/developer/pages/home-dna.html
+Modulo  : Frontend - templates do painel developer
+Papel   : Formulario e lista para editar os destaques da secao DNA na Home.
+
+Responsabilidades:
+- Capturar conteudo de cada card/slide do DNA (titulo, texto e imagem).
+- Permitir ativacao e ordenacao dos itens exibidos no carrossel.
+- Expor ids/classes consumidos pelo manager de DNA.
+
+Integracoes:
+- Dependencias: /developer/js/managers/dna-manager.js
+- Endpoints/rotas: nao se aplica neste template.
+- Classes/seletores/chaves: #dna-form, #dna-list, #dna-clear-btn
+
+Entradas e saidas:
+- Entradas: dados digitados no formulario e cliques de acao.
+- Saidas  : estrutura DOM para hidratacao via JavaScript.
+
+Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
+[DOC-FILE-END]============================================================== -->
+
+<section class="panel-grid two-col">
+  <article class="panel-card">
+    <h2>Home / DNA da empresa</h2>
+    <p>Atualize os destaques institucionais exibidos na faixa azul da Home.</p>
+
+    <form id="dna-form" class="form-section mt-14" novalidate>
+      <input id="dnaId" name="dnaId" type="hidden">
+
+      <div class="form-field">
+        <span>Tipo de layout</span>
+        <div class="form-grid two-col">
+          <label class="check-field">
+            <input id="dnaLayoutTextImage" name="dnaLayoutMode" type="radio" value="text-image" checked>
+            Texto + Imagem
+          </label>
+          <label class="check-field">
+            <input id="dnaLayoutFullImage" name="dnaLayoutMode" type="radio" value="full-image">
+            Imagem Completa
+          </label>
+        </div>
+        <small class="field-hint">
+          No modo Imagem Completa, a imagem ocupa todo o slide e os textos ficam desativados.
+        </small>
+      </div>
+
+      <label class="form-field">
+        <span>Titulo (interno)</span>
+        <input id="dnaTitle" name="dnaTitle" type="text" maxlength="120" required>
+        <small class="field-hint">Obrigatorio para identificar o slide no painel. Nao aparece no layout Imagem Completa.</small>
+      </label>
+
+      <div id="dna-text-field-wrap" class="form-section">
+        <label class="form-field">
+          <span>Texto</span>
+          <textarea id="dnaText" name="dnaText" maxlength="420" required></textarea>
+        </label>
+      </div>
+
+      <label class="form-field">
+        <span>URL da imagem</span>
+        <input id="dnaImage" name="dnaImage" type="url" required>
+      </label>
+
+      <label class="check-field">
+        <input id="dnaActive" name="dnaActive" type="checkbox" checked>
+        Slide ativo
+      </label>
+
+      <div class="form-actions">
+        <button class="btn-primary" type="submit">Salvar slide</button>
+        <button class="btn-secondary" type="button" id="dna-clear-btn">Limpar</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <h3>Slides cadastrados</h3>
+    <ul id="dna-list" class="entity-list mt-10"></ul>
+  </article>
+</section>

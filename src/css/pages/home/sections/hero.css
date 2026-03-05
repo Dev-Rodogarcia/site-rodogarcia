@@ -103,6 +103,56 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     min-width: 160px;
 }
 
+.hero-full-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hero-full-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(2, 6, 23, 0.44) 0%, rgba(2, 6, 23, 0.2) 52%, rgba(2, 6, 23, 0.44) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hero-full-image__media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-full-image__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem;
+}
+
+.hero-full-image__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-full-image__btn {
+    min-width: 190px;
+    backdrop-filter: blur(2px);
+}
+
+.hero-full-image__btn--outline {
+    border-width: 2px;
+}
+
 .hero__imagem {
     min-width: 0;
     display: flex;
@@ -126,6 +176,14 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
 .img-hero-destaque:hover {
     transform: scale(1.02);
+}
+
+.hero.hero--full-image-active .hero-decorations {
+    opacity: 0.15;
+}
+
+.hero.hero--straight-active .custom-shape-divider-bottom-16789 {
+    display: none;
 }
 
 @media (min-width: 901px) {
@@ -158,6 +216,12 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
     .subtitulo-hero {
         max-width: 36ch;
+    }
+}
+
+@media (max-width: 900px) {
+    .hero-full-image__btn {
+        min-width: 150px;
     }
 }
 

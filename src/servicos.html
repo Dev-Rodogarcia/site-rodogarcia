@@ -29,6 +29,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     <meta name="description" content="Solucoes completas em logistica e transporte para todo o Brasil com atendimento especializado.">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <title>Servicos de Transporte - Rodogarcia Transportes</title>
+  <link rel="icon" type="image/x-icon" href="/public/favicon.ico?v=20260305c">
     <link rel="canonical" href="https://rodogarcia.com.br/servicos.html">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:type" content="website">
@@ -42,7 +43,6 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     <meta name="twitter:description" content="Solucoes completas em logistica e transporte para todo o Brasil com atendimento especializado.">
     <meta name="twitter:image" content="https://rodogarcia.com.br/public/foto4.png">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <link rel="shortcut icon" type="image/x-icon" href="/public/favicon.ico">
     <link rel="manifest" href="/public/manifest.json">
 
     <!-- Fontes Google (Inter) -->
@@ -335,8 +335,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         <section class="secao secao-depoimentos">
             <div class="container">
                 <div class="cabecalho-secao centro">
-                    <h2 class="titulo-secao">A escolha certa para a sua logística!</h2>
-                    <p class="subtitulo-secao">Mais de <strong>2.500 clientes</strong> confiam na Rodogarcia. Veja o que
+                    <h2 class="titulo-secao" data-services-feedback-title>A escolha certa para a sua logística!</h2>
+                    <p class="subtitulo-secao" data-services-feedback-subtitle>Mais de <strong>2.500 clientes</strong> confiam na Rodogarcia. Veja o que
                         eles dizem:</p>
                     <div class="stats-depoimentos">
                         <div class="stat-item">
@@ -355,7 +355,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                 </div>
 
                 <div class="carousel-depoimentos-container">
-                    <div class="carousel-depoimentos-track">
+                    <div class="carousel-depoimentos-track" data-feedback-track>
                         <div class="card-depoimento">
                             <div class="depoimento-avaliacao">
                                 <i class="ph ph-star-fill"></i>
@@ -731,15 +731,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 </footer>
 
     <script src="/src/js/main.js"></script>
+    <script type="module" src="/src/js/public-content.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
 
 
 

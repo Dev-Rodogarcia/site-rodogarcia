@@ -20,6 +20,33 @@ Entradas e saidas:
 Elementos tecnicos: openExternalInNewTab, applyPhoneMask, extractWhatsAppNumber, abrirMenu, fecharMenuFunc
 [DOC-FILE-END]============================================================== */
 
+const currentPathname = window.location.pathname || '/';
+const shouldLoadExitPopup =
+    !currentPathname.startsWith('/auth/') &&
+    !currentPathname.startsWith('/developer/') &&
+    !currentPathname.startsWith('/admin');
+const shouldLoadAnalytics = shouldLoadExitPopup;
+
+if (shouldLoadExitPopup) {
+    import('/src/js/exit-intent/exit-popup.js').catch(() => {
+        // Falha silenciosa: popup e complementar, nao deve bloquear scripts principais.
+    });
+}
+
+if (shouldLoadAnalytics) {
+    import('/src/js/analytics/index.js')
+        .then((module) => {
+            if (module && typeof module.initAnalytics === 'function') {
+                module.initAnalytics().catch(() => {
+                    // Analytics deve falhar silenciosamente para nao bloquear a pagina.
+                });
+            }
+        })
+        .catch(() => {
+            // Falha silenciosa: analytics e complementar.
+        });
+}
+
 function openExternalInNewTab(url) {
     const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
     if (openedWindow) {

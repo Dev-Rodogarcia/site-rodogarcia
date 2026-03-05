@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!-- ==[DOC-FILE]=============================================================
 Arquivo : src/developer/index.html
 Modulo  : Frontend - estrutura base do painel developer
@@ -10,9 +10,9 @@ Responsabilidades:
 - Declara os assets (styles/scripts) necessarios para a pagina funcionar.
 
 Integracoes:
-- Dependencias: /developer/css/layout.css, /developer/css/sidebar.css, /developer/css/forms.css, /developer/css/components.css, /developer/js/navigation.js
+- Dependencias: /developer/css/layout.css, /developer/css/sidebar.css, /developer/css/forms.css, /developer/css/components.css, /developer/js/navigation.js?v=20260305d
 - Endpoints/rotas: nao se aplica para este modulo.
-- Classes/seletores/chaves: #dev-sidebar, #sidebar-collapse-btn, #logout-btn, #mobile-menu-btn, #page-title, #page-breadcrumb, #session-user, #dev-message, #page-container, #sidebar-overlay
+- Classes/seletores/chaves: #dev-sidebar, #sidebar-collapse-btn, #logout-btn, #mobile-menu-btn, #page-title, #page-breadcrumb, #session-user, #dev-message, #page-container, #sidebar-overlay, .dev-nav-group
 
 Entradas e saidas:
 - Entradas: Dados estaticos da marcacao + atributos usados por CSS/JS.
@@ -27,6 +27,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Painel de Conteudo | Rodogarcia</title>
+  <link rel="icon" type="image/x-icon" href="/public/favicon.ico?v=20260305c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -51,22 +52,62 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
           <span class="dev-nav__icon" aria-hidden="true">DS</span>
           <span>Dashboard</span>
         </a>
-        <a href="/developer/index.html?page=carrossel-hero" class="dev-nav__item" data-nav-page="carrossel-hero">
-          <span class="dev-nav__icon" aria-hidden="true">HR</span>
-          <span>Carrossel Hero</span>
-        </a>
-        <a href="/developer/index.html?page=carrossel-dna" class="dev-nav__item" data-nav-page="carrossel-dna">
-          <span class="dev-nav__icon" aria-hidden="true">DN</span>
-          <span>Carrossel DNA</span>
-        </a>
-        <a href="/developer/index.html?page=vagas" class="dev-nav__item" data-nav-page="vagas">
-          <span class="dev-nav__icon" aria-hidden="true">VG</span>
-          <span>Vagas</span>
-        </a>
-        <a href="/developer/index.html?page=imagens" class="dev-nav__item" data-nav-page="imagens">
-          <span class="dev-nav__icon" aria-hidden="true">IM</span>
-          <span>Imagens</span>
-        </a>
+
+        <div class="dev-nav-group">
+          <p class="dev-nav-group__title">Home</p>
+          <a href="/developer/index.html?page=home-hero" class="dev-nav__item dev-nav__item--sub" data-nav-page="home-hero">
+            <span class="dev-nav__icon" aria-hidden="true">HR</span>
+            <span>Hero</span>
+          </a>
+          <a href="/developer/index.html?page=home-dna" class="dev-nav__item dev-nav__item--sub" data-nav-page="home-dna">
+            <span class="dev-nav__icon" aria-hidden="true">DN</span>
+            <span>DNA da empresa</span>
+          </a>
+        </div>
+
+        <div class="dev-nav-group">
+          <p class="dev-nav-group__title">Servicos</p>
+          <a href="/developer/index.html?page=servicos-feedbacks" class="dev-nav__item dev-nav__item--sub" data-nav-page="servicos-feedbacks">
+            <span class="dev-nav__icon" aria-hidden="true">FB</span>
+            <span>Feedbacks</span>
+          </a>
+        </div>
+
+        <div class="dev-nav-group">
+          <p class="dev-nav-group__title">Sobre Nos</p>
+          <a href="/developer/index.html?page=sobre-hero" class="dev-nav__item dev-nav__item--sub" data-nav-page="sobre-hero">
+            <span class="dev-nav__icon" aria-hidden="true">SB</span>
+            <span>Hero institucional</span>
+          </a>
+        </div>
+
+        <div class="dev-nav-group">
+          <p class="dev-nav-group__title">Contato</p>
+          <a href="/developer/index.html?page=contato-info" class="dev-nav__item dev-nav__item--sub" data-nav-page="contato-info">
+            <span class="dev-nav__icon" aria-hidden="true">CT</span>
+            <span>Informacoes</span>
+          </a>
+        </div>
+
+        <div class="dev-nav-group">
+          <p class="dev-nav-group__title">Midia</p>
+          <a href="/developer/index.html?page=imagens" class="dev-nav__item dev-nav__item--sub" data-nav-page="imagens">
+            <span class="dev-nav__icon" aria-hidden="true">IM</span>
+            <span>Biblioteca</span>
+          </a>
+        </div>
+
+        <div class="dev-nav-group">
+          <p class="dev-nav-group__title">Automacoes</p>
+          <a href="/developer/index.html?page=analytics-dashboard" class="dev-nav__item dev-nav__item--sub" data-nav-page="analytics-dashboard">
+            <span class="dev-nav__icon" aria-hidden="true">AN</span>
+            <span>Analytics</span>
+          </a>
+          <a href="/developer/index.html?page=popup-exit" class="dev-nav__item dev-nav__item--sub" data-nav-page="popup-exit">
+            <span class="dev-nav__icon" aria-hidden="true">PX</span>
+            <span>Exit Popup</span>
+          </a>
+        </div>
       </nav>
 
       <div class="dev-sidebar__bottom">
@@ -110,6 +151,11 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
   <div id="sidebar-overlay" class="sidebar-overlay" hidden></div>
 
-  <script type="module" src="/developer/js/navigation.js"></script>
+  <script type="module" src="/developer/js/navigation.js?v=20260305d"></script>
 </body>
 </html>
+
+
+
+
+

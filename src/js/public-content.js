@@ -1,29 +1,76 @@
 ﻿/* ==[DOC-FILE]===============================================================
 Arquivo : src/js/public-content.js
 Modulo  : Frontend - scripts publicos
-Papel   : Implementa logica de interface, integracao com APIs e manipulacao de estado/DOM.
+Papel   : Hidrata conteudo dinamico do site publico (Home, Servicos, Sobre e Contato) a partir da API.
 
 Responsabilidades:
-- Controla o comportamento principal do modulo na interface.
-- Integra dados vindos de API e valida entradas antes de uso.
-- Atualiza estado/DOM preservando previsibilidade de execucao.
+- Renderizar Hero, DNA e vagas da Home com dados do backend.
+- Renderizar feedbacks da pagina Servicos sem alterar a estrutura visual fixa.
+- Aplicar textos editaveis de Sobre e Contato em elementos mapeados por `data-*`.
 
 Integracoes:
 - Dependencias: /src/js/shared/utils/sanitize.js, /src/js/shared/utils/dom.js
 - Endpoints/rotas: /api/public/content
-- Classes/seletores/chaves: .grid-vagas, #carrossel-hero, #carrossel-dna
+- Classes/seletores/chaves: #carrossel-hero, #carrossel-dna, .grid-vagas, [data-feedback-track], [data-about-*], [data-contact-*]
 
 Entradas e saidas:
-- Entradas: Eventos de usuario, estado da pagina e dados retornados por API.
-- Saidas  : Mutacao de DOM, feedback visual e chamadas de rede subsequentes.
+- Entradas: payload JSON da API publica e DOM existente em cada pagina.
+- Saidas  : mutacao de DOM para refletir o conteudo salvo no CMS.
 
-Elementos tecnicos: criarBotaoLink, montarSlideHero, montarSlideDna, iniciarCarrosselBasico, renderizarSlidesHero, renderizarSlidesDna, classeBadgeVaga, montarCardVaga, renderizarVagasDestaque, carregarConteudoPublico
+Elementos tecnicos: montarSlideHero, montarSlideDna, renderizarFeedbacks, aplicarConteudoSobre, aplicarConteudoContato
 [DOC-FILE-END]============================================================== */
 
 import { sanitizarTexto, sanitizarUrl } from '/src/js/shared/utils/sanitize.js';
 import { limparElemento, criarElemento } from '/src/js/shared/utils/dom.js';
 
-function criarBotaoLink(rotulo, url, classeCss) {
+function normalizarLayoutHero(valor) {
+  return String(valor || '').trim().toLowerCase() === 'full-image'
+    ? 'full-image'
+    : 'text-image';
+}
+
+function normalizarLayoutDna(valor) {
+  return String(valor || '').trim().toLowerCase() === 'full-image'
+    ? 'full-image'
+    : 'text-image';
+}
+
+function normalizarFundoHero(valor) {
+  return String(valor || '').trim().toLowerCase() === 'straight'
+    ? 'straight'
+    : 'wavy';
+}
+
+function normalizarVarianteBotao(valor) {
+  return String(valor || '').trim().toLowerCase() === 'outline'
+    ? 'outline'
+    : 'solid';
+}
+
+function sanitizarCorHex(valor) {
+  const texto = String(valor || '').trim();
+  const match = texto.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+  if (!match) return '';
+
+  const hex = match[1];
+  if (hex.length === 3) {
+    return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toUpperCase();
+  }
+  return `#${hex}`.toUpperCase();
+}
+
+function corContraste(hexColor) {
+  const cor = sanitizarCorHex(hexColor);
+  if (!cor) return '#1E293B';
+  const semHash = cor.slice(1);
+  const r = Number.parseInt(semHash.slice(0, 2), 16);
+  const g = Number.parseInt(semHash.slice(2, 4), 16);
+  const b = Number.parseInt(semHash.slice(4, 6), 16);
+  const brilho = (r * 299 + g * 587 + b * 114) / 1000;
+  return brilho >= 148 ? '#0F172A' : '#FFFFFF';
+}
+
+function criarBotaoLink(rotulo, url, classeCss, opcoes = {}) {
   const link = criarElemento('a', classeCss, sanitizarTexto(rotulo, 40));
   const hrefSeguro = sanitizarUrl(url);
   link.href = hrefSeguro || '#';
@@ -33,13 +80,35 @@ function criarBotaoLink(rotulo, url, classeCss) {
     link.rel = 'noopener noreferrer';
   }
 
+  const variant = normalizarVarianteBotao(opcoes.variant || '');
+  const color = sanitizarCorHex(opcoes.color || '');
+
+  if (color) {
+    if (variant === 'outline') {
+      link.style.borderColor = color;
+      link.style.color = color;
+      link.style.backgroundColor = 'rgba(15, 23, 42, 0.12)';
+    } else {
+      link.style.backgroundColor = color;
+      link.style.borderColor = color;
+      link.style.color = corContraste(color);
+    }
+  }
+
   return link;
 }
 
 function montarSlideHero(slide, indice) {
+  const layoutMode = normalizarLayoutHero(slide.layoutMode);
+  if (layoutMode === 'full-image') {
+    return montarSlideHeroImagemCompleta(slide, indice);
+  }
+
   const wrapper = criarElemento('div', 'carrossel-hero__slide');
   wrapper.dataset.carrosselSlide = '';
   wrapper.setAttribute('aria-hidden', indice === 0 ? 'false' : 'true');
+  wrapper.dataset.heroLayoutMode = 'text-image';
+  wrapper.dataset.heroBackgroundType = 'wavy';
 
   const container = criarElemento('div', 'container hero__container');
   const areaTexto = criarElemento('div', 'hero__texto');
@@ -83,9 +152,67 @@ function montarSlideHero(slide, indice) {
   return wrapper;
 }
 
+function montarSlideHeroImagemCompleta(slide, indice) {
+  const wrapper = criarElemento('div', 'carrossel-hero__slide carrossel-hero__slide--full');
+  wrapper.dataset.carrosselSlide = '';
+  wrapper.setAttribute('aria-hidden', indice === 0 ? 'false' : 'true');
+  wrapper.dataset.heroLayoutMode = 'full-image';
+
+  const backgroundType = normalizarFundoHero(slide.fullImageBackgroundType);
+  wrapper.dataset.heroBackgroundType = backgroundType;
+
+  const fullHero = criarElemento('div', `hero-full-image hero-full-image--${backgroundType}`);
+  const imagem = criarElemento('img', 'hero-full-image__media');
+  imagem.src = sanitizarUrl(slide.image) || '/public/foto5.png';
+  imagem.alt = sanitizarTexto(slide.title, 120) || 'Banner Rodogarcia';
+  imagem.loading = indice === 0 ? 'eager' : 'lazy';
+  imagem.decoding = 'async';
+  imagem.width = 2048;
+  imagem.height = 882;
+  if (indice === 0) {
+    imagem.setAttribute('fetchpriority', 'high');
+  }
+  fullHero.appendChild(imagem);
+
+  const botoesAtivos = Array.isArray(slide.buttons) ? slide.buttons.filter((btn) => btn.enabled) : [];
+  const exibirBotoes = Boolean(slide.fullImageButtonsEnabled) && botoesAtivos.length > 0;
+
+  if (exibirBotoes) {
+    const overlay = criarElemento('div', 'hero-full-image__overlay');
+    const acoes = criarElemento('div', 'hero-full-image__actions');
+
+    botoesAtivos.slice(0, 2).forEach((botao, idx) => {
+      const variant = normalizarVarianteBotao(botao.variant || (idx === 1 ? 'outline' : 'solid'));
+      const classeBase =
+        variant === 'outline'
+          ? 'botao botao--outline-zafir botao--largo hero-full-image__btn hero-full-image__btn--outline'
+          : 'botao botao--zafir botao--largo hero-full-image__btn';
+
+      const color = idx === 0 ? sanitizarCorHex(botao.color) : '';
+      const btn = criarBotaoLink(botao.label, botao.url, classeBase, {
+        color,
+        variant
+      });
+      acoes.appendChild(btn);
+    });
+
+    overlay.appendChild(acoes);
+    fullHero.appendChild(overlay);
+  }
+
+  wrapper.appendChild(fullHero);
+  return wrapper;
+}
+
 function montarSlideDna(slide, indice) {
+  const layoutMode = normalizarLayoutDna(slide.layoutMode);
+  if (layoutMode === 'full-image') {
+    return montarSlideDnaImagemCompleta(slide, indice);
+  }
+
   const artigo = criarElemento('article', `carrossel-dna__slide${indice === 0 ? ' carrossel-dna__slide--ativo' : ''}`);
   artigo.dataset.dnaSlide = '';
+  artigo.dataset.dnaLayoutMode = 'text-image';
   artigo.setAttribute('aria-hidden', indice === 0 ? 'false' : 'true');
 
   const grid = criarElemento('div', 'grid-dna');
@@ -113,6 +240,29 @@ function montarSlideDna(slide, indice) {
   return artigo;
 }
 
+function montarSlideDnaImagemCompleta(slide, indice) {
+  const artigo = criarElemento(
+    'article',
+    `carrossel-dna__slide carrossel-dna__slide--full${indice === 0 ? ' carrossel-dna__slide--ativo' : ''}`
+  );
+  artigo.dataset.dnaSlide = '';
+  artigo.dataset.dnaLayoutMode = 'full-image';
+  artigo.setAttribute('aria-hidden', indice === 0 ? 'false' : 'true');
+
+  const wrapper = criarElemento('div', 'dna-full-image');
+  const imagem = criarElemento('img', 'dna-full-image__media');
+  imagem.src = sanitizarUrl(slide.image) || '/public/foto4.png';
+  imagem.alt = sanitizarTexto(slide.title, 120) || 'Destaque DNA Rodogarcia';
+  imagem.loading = 'lazy';
+  imagem.decoding = 'async';
+  imagem.width = 2048;
+  imagem.height = 882;
+
+  wrapper.appendChild(imagem);
+  artigo.appendChild(wrapper);
+  return artigo;
+}
+
 function iniciarCarrosselBasico(opcoes) {
   const {
     raiz,
@@ -120,7 +270,8 @@ function iniciarCarrosselBasico(opcoes) {
     classeAtiva,
     seletorAnterior,
     seletorProximo,
-    intervaloMs = 5500
+    intervaloMs = 5500,
+    onChange = null
   } = opcoes;
 
   if (!raiz) return;
@@ -140,6 +291,13 @@ function iniciarCarrosselBasico(opcoes) {
       slide.classList.toggle(classeAtiva, ativo);
       slide.setAttribute('aria-hidden', ativo ? 'false' : 'true');
     });
+    if (typeof onChange === 'function') {
+      onChange({
+        index: indiceAtual,
+        slide: slides[indiceAtual],
+        slides
+      });
+    }
   };
 
   const pausar = () => {
@@ -179,6 +337,19 @@ function iniciarCarrosselBasico(opcoes) {
   retomar();
 }
 
+function sincronizarModoVisualHero(slideAtivo) {
+  const secaoHero = document.getElementById('inicio');
+  if (!secaoHero || !slideAtivo) return;
+
+  const layout = normalizarLayoutHero(slideAtivo.dataset.heroLayoutMode);
+  const background = normalizarFundoHero(slideAtivo.dataset.heroBackgroundType);
+  const fullMode = layout === 'full-image';
+  const straightMode = fullMode && background === 'straight';
+
+  secaoHero.classList.toggle('hero--full-image-active', fullMode);
+  secaoHero.classList.toggle('hero--straight-active', straightMode);
+}
+
 function renderizarSlidesHero(slidesHero) {
   const container = document.getElementById('carrossel-hero');
   if (!container || !Array.isArray(slidesHero) || slidesHero.length === 0) return;
@@ -206,19 +377,33 @@ function renderizarSlidesHero(slidesHero) {
   controles.append(anterior, proximo);
   container.appendChild(controles);
 
+  const primeiroSlide = container.querySelector('[data-carrossel-slide]');
+  if (primeiroSlide) {
+    sincronizarModoVisualHero(primeiroSlide);
+  }
+
   iniciarCarrosselBasico({
     raiz: container,
     seletorSlide: '[data-carrossel-slide]',
     classeAtiva: 'carrossel-hero__slide--ativo',
     seletorAnterior: '[data-carrossel-anterior]',
     seletorProximo: '[data-carrossel-proximo]',
-    intervaloMs: 5500
+    intervaloMs: 5500,
+    onChange: ({ slide }) => {
+      sincronizarModoVisualHero(slide);
+    }
   });
 }
 
 function renderizarSlidesDna(slidesDna) {
   const container = document.getElementById('carrossel-dna');
-  if (!container || !Array.isArray(slidesDna) || slidesDna.length === 0) return;
+  if (!container || !Array.isArray(slidesDna) || slidesDna.length === 0) {
+    if (container) {
+      container.classList.remove('is-hydrating');
+      container.classList.add('is-hydrated');
+    }
+    return;
+  }
 
   limparElemento(container);
 
@@ -253,6 +438,9 @@ function renderizarSlidesDna(slidesDna) {
     seletorProximo: '[data-dna-proximo]',
     intervaloMs: 5000
   });
+
+  container.classList.remove('is-hydrating');
+  container.classList.add('is-hydrated');
 }
 
 function classeBadgeVaga(status) {
@@ -292,6 +480,160 @@ function renderizarVagasDestaque(vagas) {
   });
 }
 
+function extrairIniciais(nome) {
+  const texto = sanitizarTexto(nome, 80);
+  if (!texto) return 'CL';
+  return texto
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte) => parte[0].toUpperCase())
+    .join('');
+}
+
+function montarCardFeedback(feedback) {
+  const card = criarElemento('div', 'card-depoimento');
+
+  const avaliacao = criarElemento('div', 'depoimento-avaliacao');
+  for (let i = 0; i < 5; i += 1) {
+    const estrela = criarElemento('i', 'ph ph-star-fill');
+    avaliacao.appendChild(estrela);
+  }
+
+  const header = criarElemento('div', 'depoimento-header');
+  const avatar = criarElemento('div', 'depoimento-avatar');
+  const foto = sanitizarUrl(feedback.photo);
+
+  if (foto) {
+    const img = criarElemento('img');
+    img.src = foto;
+    img.alt = sanitizarTexto(feedback.name, 80) || 'Cliente';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    avatar.appendChild(img);
+  } else {
+    const iniciais = criarElemento('span', '', extrairIniciais(feedback.name));
+    avatar.appendChild(iniciais);
+  }
+
+  const info = criarElemento('div', 'depoimento-info');
+  const nome = criarElemento('h4', '', sanitizarTexto(feedback.name, 80));
+  const cargoEmpresa = criarElemento(
+    'p',
+    '',
+    `${sanitizarTexto(feedback.role, 80)} - ${sanitizarTexto(feedback.company, 120)}`
+  );
+  info.append(nome, cargoEmpresa);
+
+  const texto = criarElemento('p', 'depoimento-texto', sanitizarTexto(feedback.comment, 800));
+
+  header.append(avatar, info);
+  card.append(avaliacao, header, texto);
+  return card;
+}
+
+function renderizarFeedbacks(feedbacks) {
+  const trilha = document.querySelector('[data-feedback-track]');
+  if (!trilha || !Array.isArray(feedbacks) || feedbacks.length === 0) return;
+
+  limparElemento(trilha);
+
+  const base = [];
+  const quantidadeBase = 6;
+  for (let i = 0; i < quantidadeBase; i += 1) {
+    base.push(feedbacks[i % feedbacks.length]);
+  }
+
+  [...base, ...base].forEach((feedback) => {
+    trilha.appendChild(montarCardFeedback(feedback));
+  });
+}
+
+function atualizarTextoSeletor(seletor, valor, tamanhoMaximo) {
+  const elemento = document.querySelector(seletor);
+  if (!elemento) return;
+
+  const textoSeguro = sanitizarTexto(valor, tamanhoMaximo);
+  if (!textoSeguro) return;
+  elemento.textContent = textoSeguro;
+}
+
+function atualizarLinkSeletor(seletor, valorUrl) {
+  const elemento = document.querySelector(seletor);
+  if (!elemento) return;
+
+  const urlSegura = sanitizarUrl(valorUrl);
+  if (!urlSegura) return;
+
+  elemento.href = urlSegura;
+  if (urlSegura.startsWith('http')) {
+    elemento.target = '_blank';
+    elemento.rel = 'noopener noreferrer';
+  }
+}
+
+function aplicarConteudoServicos(siteTexts) {
+  if (!siteTexts || typeof siteTexts !== 'object') return;
+  atualizarTextoSeletor('[data-services-feedback-title]', siteTexts.servicesFeedbackTitle, 140);
+  atualizarTextoSeletor('[data-services-feedback-subtitle]', siteTexts.servicesFeedbackSubtitle, 220);
+}
+
+function aplicarConteudoSobre(siteTexts) {
+  if (!siteTexts || typeof siteTexts !== 'object') return;
+
+  atualizarTextoSeletor('[data-about-hero-tag]', siteTexts.aboutHeroTag, 60);
+  atualizarTextoSeletor('[data-about-hero-title]', siteTexts.aboutHeroTitle, 140);
+  atualizarTextoSeletor('[data-about-hero-subtitle]', siteTexts.aboutHeroSubtitle, 320);
+
+  atualizarTextoSeletor('[data-about-stat1-number]', siteTexts.aboutStat1Number, 20);
+  atualizarTextoSeletor('[data-about-stat1-description]', siteTexts.aboutStat1Description, 80);
+  atualizarTextoSeletor('[data-about-stat2-number]', siteTexts.aboutStat2Number, 20);
+  atualizarTextoSeletor('[data-about-stat2-description]', siteTexts.aboutStat2Description, 80);
+  atualizarTextoSeletor('[data-about-stat3-number]', siteTexts.aboutStat3Number, 20);
+  atualizarTextoSeletor('[data-about-stat3-description]', siteTexts.aboutStat3Description, 80);
+
+  const imagem = document.querySelector('[data-about-hero-image]');
+  if (imagem) {
+    const urlImagem = sanitizarUrl(siteTexts.aboutHeroImage);
+    if (urlImagem) {
+      imagem.src = urlImagem;
+    }
+  }
+}
+
+function emailValido(email) {
+  const texto = sanitizarTexto(email, 160).toLowerCase();
+  if (!texto) return '';
+
+  const regexBasico = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regexBasico.test(texto) ? texto : '';
+}
+
+function aplicarConteudoContato(siteTexts) {
+  if (!siteTexts || typeof siteTexts !== 'object') return;
+
+  atualizarTextoSeletor('[data-contact-page-title]', siteTexts.contactPageTitle, 120);
+  atualizarTextoSeletor('[data-contact-page-subtitle]', siteTexts.contactPageSubtitle, 280);
+  atualizarTextoSeletor('[data-contact-phone-number]', siteTexts.contactPhoneNumber, 60);
+  atualizarTextoSeletor('[data-contact-phone-hours]', siteTexts.contactPhoneHours, 120);
+  atualizarTextoSeletor('[data-contact-email-address]', siteTexts.contactEmailAddress, 160);
+  atualizarTextoSeletor('[data-contact-email-response]', siteTexts.contactEmailResponse, 120);
+  atualizarTextoSeletor('[data-contact-whatsapp-label]', siteTexts.contactWhatsappLabel, 80);
+  atualizarTextoSeletor('[data-contact-address-line]', siteTexts.contactAddressLine, 180);
+  atualizarTextoSeletor('[data-contact-address-zip]', siteTexts.contactAddressZip, 20);
+  atualizarTextoSeletor('[data-contact-address-country]', siteTexts.contactAddressCountry, 60);
+
+  atualizarLinkSeletor('[data-contact-whatsapp-url]', siteTexts.contactWhatsappUrl);
+  atualizarLinkSeletor('[data-contact-cta]', siteTexts.contactCtaUrl);
+  atualizarTextoSeletor('[data-contact-cta]', siteTexts.contactCtaLabel, 40);
+
+  const email = emailValido(siteTexts.contactEmailAddress);
+  const linkEmail = document.querySelector('[data-contact-email-link]');
+  if (linkEmail && email) {
+    linkEmail.href = `mailto:${email}`;
+  }
+}
+
 async function carregarConteudoPublico() {
   const resposta = await fetch('/api/public/content', {
     method: 'GET',
@@ -307,16 +649,30 @@ async function carregarConteudoPublico() {
 }
 
 async function iniciarConteudoPublico() {
+  const dnaContainer = document.getElementById('carrossel-dna');
+  if (dnaContainer) {
+    dnaContainer.classList.add('is-hydrating');
+    dnaContainer.classList.remove('is-hydrated');
+  }
+
   try {
     const conteudo = await carregarConteudoPublico();
     renderizarSlidesHero(conteudo.heroSlides || []);
     renderizarSlidesDna(conteudo.dnaSlides || []);
     renderizarVagasDestaque(conteudo.featuredJobs || []);
+    renderizarFeedbacks(conteudo.feedbacks || []);
+
+    const siteTexts = conteudo.siteTexts || {};
+    aplicarConteudoServicos(siteTexts);
+    aplicarConteudoSobre(siteTexts);
+    aplicarConteudoContato(siteTexts);
   } catch {
     // Mantem o HTML estatico em caso de falha.
+    if (dnaContainer) {
+      dnaContainer.classList.remove('is-hydrating');
+      dnaContainer.classList.add('is-hydrated');
+    }
   }
 }
 
 document.addEventListener('DOMContentLoaded', iniciarConteudoPublico);
-
-

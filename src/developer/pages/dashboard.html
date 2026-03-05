@@ -1,131 +1,263 @@
 ﻿<!-- ==[DOC-FILE]=============================================================
 Arquivo : src/developer/pages/dashboard.html
 Modulo  : Frontend - templates do painel developer
-Papel   : Declara estrutura da pagina, ancoragens (id/class/data-*) e assets carregados.
+Papel   : Dashboard analitico do CMS com visao operacional, cobertura de modulos e atalhos de edicao.
 
 Responsabilidades:
-- Define a hierarquia semantica da tela e os blocos de conteudo.
-- Expone ids/classes/data-* usados por CSS e JavaScript.
-- Declara os assets (styles/scripts) necessarios para a pagina funcionar.
+- Exibir indicadores de volume, publicacao ativa e saude do conteudo.
+- Mostrar cobertura de preenchimento por pagina do site (Home, Servicos, Sobre e Contato).
+- Oferecer atalhos rapidos para os modulos de edicao e referencias de governanca.
 
 Integracoes:
-- Dependencias: nao ha dependencias explicitas no arquivo.
-- Endpoints/rotas: nao se aplica para este modulo.
-- Classes/seletores/chaves: #metric-hero, #metric-dna, #metric-vagas, #metric-imagens, #site-texts-form, #dashboardTitle, #dashboardSubtitle, #heroSectionTitle, #heroSectionSubtitle, #dnaSectionTitle
+- Dependencias: /developer/js/navigation.js (hidrata metricas, barras e status)
+- Endpoints/rotas: nao se aplica neste template (consumo ocorre no JS)
+- Classes/seletores/chaves: #metric-hero, #metric-dna, #metric-vagas, #metric-feedbacks, #metric-imagens, #metric-total-itens, #metric-publicacao, #metric-uploads, #ana-hero-active, #ana-dna-active, #ana-vagas-destaque, #ana-feedbacks-active, #ana-imagens-conteudo, #cov-home, #cov-servicos, #cov-sobre, #cov-contato, #cov-geral, #dash-updated-at, [data-go-page]
 
 Entradas e saidas:
-- Entradas: Dados estaticos da marcacao + atributos usados por CSS/JS.
-- Saidas  : Estrutura DOM inicial renderizada para o navegador.
+- Entradas: dados de API injetados por JavaScript apos carregar a pagina.
+- Saidas  : estrutura DOM base para visualizacao do painel analitico.
 
 Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 [DOC-FILE-END]============================================================== -->
 
 <section class="panel-stack">
-  <section class="panel-grid cards">
+  <section class="panel-card dashboard-hero">
+    <div>
+      <h2>Visao executiva do CMS</h2>
+      <p id="dashboard-summary">Resumo rapido do que esta publicado e do que ainda precisa ajuste.</p>
+    </div>
+    <div class="status-pills">
+      <span class="status-pill on" id="dash-updated-at">Atualizado agora</span>
+    </div>
+  </section>
+
+  <section class="panel-grid cards cards--dash">
     <article class="metric-card">
-      <p class="metric-card__title">Slides Hero</p>
+      <p class="metric-card__title">Home / Hero</p>
       <p class="metric-card__value" id="metric-hero">0</p>
     </article>
     <article class="metric-card">
-      <p class="metric-card__title">Slides DNA</p>
+      <p class="metric-card__title">Home / DNA</p>
       <p class="metric-card__value" id="metric-dna">0</p>
     </article>
     <article class="metric-card">
-      <p class="metric-card__title">Vagas</p>
+      <p class="metric-card__title">Home / Vagas</p>
       <p class="metric-card__value" id="metric-vagas">0</p>
     </article>
     <article class="metric-card">
-      <p class="metric-card__title">Imagens</p>
+      <p class="metric-card__title">Servicos / Feedbacks</p>
+      <p class="metric-card__value" id="metric-feedbacks">0</p>
+    </article>
+    <article class="metric-card">
+      <p class="metric-card__title">Biblioteca de imagens</p>
       <p class="metric-card__value" id="metric-imagens">0</p>
+    </article>
+    <article class="metric-card metric-card--accent">
+      <p class="metric-card__title">Itens editaveis totais</p>
+      <p class="metric-card__value" id="metric-total-itens">0</p>
+    </article>
+  </section>
+  <section class="panel-card">
+    <h3 class="help-title">
+      Origem e destino
+      <span class="help-icon" data-help-id="dashboard-origem-destino">?</span>
+    </h3>
+    <p class="microcopy">
+      Origem dos dados: <strong>/api/admin/content</strong> e <strong>/api/developer/imagens</strong>.
+      Destino dos dados: secoes publicas da Home, Servicos, Sobre e Contato.
+    </p>
+    <details class="help-details mt-10" data-help-example-id="dashboard-origem-destino">
+      <summary>Ver exemplo simples</summary>
+    </details>
+  </section>
+
+  <section class="panel-grid two-col">
+    <article class="panel-card">
+      <h3 class="help-title">
+        Saude do conteudo
+        <span class="help-icon" data-help-id="dashboard-saude-conteudo">?</span>
+      </h3>
+      <p class="microcopy">Mostra o que esta ativo para aparecer no site.</p>
+      <details class="help-details mt-10" data-help-example-id="dashboard-saude-conteudo">
+        <summary>Ver exemplo simples</summary>
+      </details>
+      <ul class="analysis-list mt-10">
+        <li><span>Slides Hero ativos</span><strong id="ana-hero-active">0</strong></li>
+        <li><span>Slides DNA ativos</span><strong id="ana-dna-active">0</strong></li>
+        <li><span>Vagas em destaque</span><strong id="ana-vagas-destaque">0</strong></li>
+        <li><span>Feedbacks publicados</span><strong id="ana-feedbacks-active">0</strong></li>
+        <li><span>Imagens em uso no conteudo</span><strong id="ana-imagens-conteudo">0</strong></li>
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <h3 class="help-title">
+        Cobertura por modulo
+        <span class="help-icon" data-help-id="dashboard-cobertura-modulo">?</span>
+      </h3>
+      <p class="microcopy">Barra P (barra de progresso): mostra quanto de cada pagina esta completo.</p>
+      <p class="microcopy">Leitura baseada em conteudo: olha campos obrigatorios preenchidos.</p>
+      <details class="help-details mt-10" data-help-example-id="dashboard-cobertura-modulo">
+        <summary>Ver exemplo simples</summary>
+      </details>
+      <div class="coverage-list mt-10">
+        <div class="coverage-item">
+          <div class="coverage-head">
+            <p>Home</p>
+            <span id="cov-home-value" class="coverage-value">0%</span>
+          </div>
+          <div class="coverage-track"><div id="cov-home" class="coverage-fill"></div></div>
+        </div>
+        <div class="coverage-item">
+          <div class="coverage-head">
+            <p>Servicos</p>
+            <span id="cov-servicos-value" class="coverage-value">0%</span>
+          </div>
+          <div class="coverage-track"><div id="cov-servicos" class="coverage-fill"></div></div>
+        </div>
+        <div class="coverage-item">
+          <div class="coverage-head">
+            <p>Sobre Nos</p>
+            <span id="cov-sobre-value" class="coverage-value">0%</span>
+          </div>
+          <div class="coverage-track"><div id="cov-sobre" class="coverage-fill"></div></div>
+        </div>
+        <div class="coverage-item">
+          <div class="coverage-head">
+            <p>Contato</p>
+            <span id="cov-contato-value" class="coverage-value">0%</span>
+          </div>
+          <div class="coverage-track"><div id="cov-contato" class="coverage-fill"></div></div>
+        </div>
+        <div class="coverage-item coverage-item--total">
+          <div class="coverage-head">
+            <p>Cobertura geral</p>
+            <span id="cov-geral-value" class="coverage-value">0%</span>
+          </div>
+          <div class="coverage-track"><div id="cov-geral" class="coverage-fill"></div></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel-grid two-col">
+    <article class="panel-card">
+      <h3 class="help-title">
+        Insights operacionais
+        <span class="help-icon" data-help-id="dashboard-insights-operacionais">?</span>
+      </h3>
+      <p class="microcopy">Indicadores rapidos para publicar conteudo com seguranca.</p>
+      <div class="insight-grid mt-10">
+        <div class="insight-item">
+          <span>Taxa de publicacao ativa</span>
+          <strong id="metric-publicacao">0%</strong>
+        </div>
+        <div class="insight-item">
+          <span>Imagens de upload</span>
+          <strong id="metric-uploads">0</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel-card">
+      <h3 class="help-title">
+        Origem dos dados e destino dos dados
+        <span class="help-icon" data-help-id="dashboard-origem-dados-destino-dados">?</span>
+      </h3>
+      <p class="microcopy">De onde vem cada numero do painel e onde isso impacta no site.</p>
+      <ul class="analysis-list mt-10">
+        <li><span>Metricas de conteudo</span><strong>Vem de /api/admin/content</strong></li>
+        <li><span>Biblioteca e uso de imagem</span><strong>Vem de /api/developer/imagens</strong></li>
+        <li><span>Textos institucionais</span><strong>Vem de /api/developer/textos</strong></li>
+        <li><span>Analises do popup</span><strong>Vem de /api/popup-events e /api/leads</strong></li>
+        <li><span>Destino final</span><strong>Home, Servicos, Sobre, Contato e Exit Popup no site publico</strong></li>
+      </ul>
     </article>
   </section>
 
   <section class="panel-card">
-    <h2>Acesso rapido</h2>
-    <p>Escolha um modulo de edicao de conteudo.</p>
+    <h3 class="help-title">
+      Sites operacionais
+      <span class="help-icon" data-help-id="dashboard-sites-operacionais">?</span>
+    </h3>
+    <p class="microcopy">Acesso rapido para checar painel, site publico e paginas de edicao.</p>
+    <details class="help-details mt-10" data-help-example-id="dashboard-sites-operacionais">
+      <summary>Ver exemplo simples</summary>
+    </details>
+    <ul class="analysis-list mt-10">
+      <li><span>Painel Developer</span><strong><a href="/developer/index.html?page=dashboard">/developer/index.html?page=dashboard</a></strong></li>
+      <li><span>Site publico</span><strong><a href="/">/</a></strong></li>
+      <li><span>Edicao de Analytics</span><strong><a href="/developer/index.html?page=analytics-dashboard">/developer/index.html?page=analytics-dashboard</a></strong></li>
+      <li><span>Edicao de Exit Popup</span><strong><a href="/developer/index.html?page=popup-exit">/developer/index.html?page=popup-exit</a></strong></li>
+    </ul>
+  </section>
+
+  <section class="panel-grid two-col">
+    <article class="panel-card">
+      <h3 class="help-title">
+        Analise Exit Popup
+        <span class="help-icon" data-help-id="dashboard-analise-exit-popup">?</span>
+      </h3>
+      <p class="microcopy">Mostra se o popup esta sendo visto, fechado ou enviado.</p>
+      <details class="help-details mt-10" data-help-example-id="dashboard-analise-exit-popup">
+        <summary>Ver exemplo simples</summary>
+      </details>
+      <ul class="analysis-list mt-10">
+        <li><span>Popup exibido</span><strong id="dash-popup-shown">0</strong></li>
+        <li><span>Popup fechado</span><strong id="dash-popup-closed">0</strong></li>
+        <li><span>Popup enviado</span><strong id="dash-popup-submitted">0</strong></li>
+        <li><span>Popup ignorado</span><strong id="dash-popup-ignored">0</strong></li>
+        <li><span>Conversao</span><strong id="dash-popup-conversion">0%</strong></li>
+        <li><span>Leads totais</span><strong id="dash-popup-leads">0</strong></li>
+        <li><span>Eventos (7 dias)</span><strong id="dash-popup-events-7d">0</strong></li>
+        <li><span>Leads (7 dias)</span><strong id="dash-popup-leads-7d">0</strong></li>
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <h3 class="help-title">
+        Top paginas do Exit Popup
+        <span class="help-icon" data-help-id="dashboard-top-paginas-exit-popup">?</span>
+      </h3>
+      <p class="microcopy">Mostra em quais paginas o popup teve mais movimento.</p>
+      <details class="help-details mt-10" data-help-example-id="dashboard-top-paginas-exit-popup">
+        <summary>Ver exemplo simples</summary>
+      </details>
+      <ul id="dash-popup-top-pages" class="analysis-list mt-10"></ul>
+    </article>
+  </section>
+
+  <section class="panel-card">
+    <h2>Acesso rapido por pagina</h2>
+    <p>Escolha exatamente a secao que voce quer editar no site.</p>
     <div class="quick-links mt-12">
-      <button class="btn-primary" type="button" data-go-page="carrossel-hero">Editar Hero</button>
-      <button class="btn-secondary" type="button" data-go-page="carrossel-dna">Editar DNA</button>
-      <button class="btn-secondary" type="button" data-go-page="vagas">Editar Vagas</button>
-      <button class="btn-secondary" type="button" data-go-page="imagens">Gerenciar Imagens</button>
+      <button class="btn-primary" type="button" data-go-page="home-hero">Home / Hero</button>
+      <button class="btn-secondary" type="button" data-go-page="home-dna">Home / DNA</button>
+      <button class="btn-secondary" type="button" data-go-page="servicos-feedbacks">Servicos / Feedbacks</button>
+      <button class="btn-secondary" type="button" data-go-page="sobre-hero">Sobre / Hero</button>
+      <button class="btn-secondary" type="button" data-go-page="contato-info">Contato / Informacoes</button>
+      <button class="btn-secondary" type="button" data-go-page="analytics-dashboard">Automacoes / Analytics</button>
+      <button class="btn-secondary" type="button" data-go-page="popup-exit">Automacoes / Exit Popup</button>
+      <button class="btn-ghost" type="button" data-go-page="imagens">Midia / Biblioteca</button>
     </div>
   </section>
 
   <section class="panel-card">
-    <h2>Textos editaveis do site</h2>
-    <p>Edite textos institucionais e CTAs sem mexer no codigo da pagina publica.</p>
-
-    <form id="site-texts-form" class="form-section mt-14" novalidate>
-      <div class="form-grid two-col">
-        <label class="form-field">
-          <span>Titulo do Dashboard</span>
-          <input id="dashboardTitle" name="dashboardTitle" type="text" maxlength="80" required>
-        </label>
-        <label class="form-field">
-          <span>Subtitulo do Dashboard</span>
-          <input id="dashboardSubtitle" name="dashboardSubtitle" type="text" maxlength="180" required>
-        </label>
-      </div>
-
-      <div class="form-grid two-col">
-        <label class="form-field">
-          <span>Titulo da secao Hero</span>
-          <input id="heroSectionTitle" name="heroSectionTitle" type="text" maxlength="120">
-        </label>
-        <label class="form-field">
-          <span>Subtitulo da secao Hero</span>
-          <input id="heroSectionSubtitle" name="heroSectionSubtitle" type="text" maxlength="220">
-        </label>
-      </div>
-
-      <div class="form-grid two-col">
-        <label class="form-field">
-          <span>Titulo da secao DNA</span>
-          <input id="dnaSectionTitle" name="dnaSectionTitle" type="text" maxlength="120">
-        </label>
-        <label class="form-field">
-          <span>Subtitulo da secao DNA</span>
-          <input id="dnaSectionSubtitle" name="dnaSectionSubtitle" type="text" maxlength="220">
-        </label>
-      </div>
-
-      <div class="form-grid two-col">
-        <label class="form-field">
-          <span>Titulo da secao Vagas</span>
-          <input id="vagasSectionTitle" name="vagasSectionTitle" type="text" maxlength="120">
-        </label>
-        <label class="form-field">
-          <span>Subtitulo da secao Vagas</span>
-          <input id="vagasSectionSubtitle" name="vagasSectionSubtitle" type="text" maxlength="220">
-        </label>
-      </div>
-
-      <div class="form-grid two-col">
-        <label class="form-field">
-          <span>CTA principal (texto)</span>
-          <input id="ctaPrimaryLabel" name="ctaPrimaryLabel" type="text" maxlength="40">
-        </label>
-        <label class="form-field">
-          <span>CTA principal (link)</span>
-          <input id="ctaPrimaryUrl" name="ctaPrimaryUrl" type="url">
-        </label>
-      </div>
-
-      <div class="form-grid two-col">
-        <label class="form-field">
-          <span>CTA secundario (texto)</span>
-          <input id="ctaSecondaryLabel" name="ctaSecondaryLabel" type="text" maxlength="40">
-        </label>
-        <label class="form-field">
-          <span>CTA secundario (link)</span>
-          <input id="ctaSecondaryUrl" name="ctaSecondaryUrl" type="url">
-        </label>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-primary" type="submit">Salvar textos</button>
-      </div>
-    </form>
+    <h2>Governanca de edicao</h2>
+    <p>
+      Este CMS permite editar apenas conteudo estrategico: textos, numeros, imagens e feedbacks.
+      Estrutura visual, HTML e CSS permanecem protegidos para evitar quebra de layout.
+    </p>
   </section>
-</section>
 
+  <footer class="dashboard-footer">
+    <div class="dashboard-footer__left">
+      <span class="dashboard-footer__chip">Projeto assinado por</span>
+      <strong>Lucas Andrade</strong>
+    </div>
+    <div class="dashboard-footer__right">
+      <span>Contato tecnico:</span>
+      <a href="mailto:lucasmac.dev@gmail.com">lucasmac.dev@gmail.com</a>
+    </div>
+  </footer>
+</section>

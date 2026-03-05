@@ -29,6 +29,15 @@ Thumbs.db
 server/storage/private/*
 !server/storage/private/.gitkeep
 server/private/*
+server/storage/popup-config.json
+server/storage/popup-events.json
+server/storage/popup-leads.json
+
+# Runtime analytics persistence (local)
+data/
+
+# Runtime uploads
+public/uploads/
 
 # Build
 .vercel

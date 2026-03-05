@@ -11,7 +11,7 @@ Responsabilidades:
 Integracoes:
 - Dependencias: nao ha dependencias explicitas no arquivo.
 - Endpoints/rotas: nao se aplica para este modulo.
-- Classes/seletores/chaves: .form-section, .form-grid, .two-col, .form-field, .check-field, .form-actions, .btn-primary, .btn-secondary, .btn-danger, .btn-ghost
+- Classes/seletores/chaves: .form-section, .form-grid, .two-col, .form-field, .field-hint, .check-field, .form-actions, .btn-primary, .btn-secondary, .btn-danger, .btn-ghost
 
 Entradas e saidas:
 - Entradas: Classes/atributos presentes no HTML da pagina ou componente.
@@ -44,6 +44,13 @@ label.form-field {
 
 label.form-field > span {
   color: var(--title);
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 .form-field input,

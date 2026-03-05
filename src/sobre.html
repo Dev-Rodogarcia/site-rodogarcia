@@ -29,6 +29,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     <meta name="description" content="Conheca a historia, os valores e o compromisso da Rodogarcia com excelencia em logistica desde 1989.">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <title>Sobre a Rodogarcia - Logistica Nacional</title>
+  <link rel="icon" type="image/x-icon" href="/public/favicon.ico?v=20260305c">
     <link rel="canonical" href="https://rodogarcia.com.br/sobre.html">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:type" content="website">
@@ -42,7 +43,6 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     <meta name="twitter:description" content="Conheca a historia, os valores e o compromisso da Rodogarcia com excelencia em logistica desde 1989.">
     <meta name="twitter:image" content="https://rodogarcia.com.br/public/caminhoneiro1.png">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <link rel="shortcut icon" type="image/x-icon" href="/public/favicon.ico">
     <link rel="manifest" href="/public/manifest.json">
 
     <!-- Fontes Google (Inter) -->
@@ -170,30 +170,30 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         <section class="hero hero-sobre">
             <div class="container hero-sobre__container">
                 <div class="hero-sobre__content">
-                    <span class="tag-hero-sobre">Nossa História</span>
-                    <h1 class="titulo-hero">Mais de 35 anos<br>conectando o Brasil</h1>
-                    <p class="subtitulo-hero">Desde 1989, transformando a logística com excelência, tecnologia e
+                    <span class="tag-hero-sobre" data-about-hero-tag>Nossa História</span>
+                    <h1 class="titulo-hero" data-about-hero-title>Mais de 35 anos<br>conectando o Brasil</h1>
+                    <p class="subtitulo-hero" data-about-hero-subtitle>Desde 1989, transformando a logística com excelência, tecnologia e
                         compromisso com cada entrega.</p>
 
                     <!-- Números em Destaque no Hero -->
                     <div class="numeros-hero-sobre">
                         <div class="numero-hero-item">
-                            <strong class="numero-grande">35+</strong>
-                            <span>Anos de experiência</span>
+                            <strong class="numero-grande" data-about-stat1-number>35+</strong>
+                            <span data-about-stat1-description>Anos de experiência</span>
                         </div>
                         <div class="numero-hero-item">
-                            <strong class="numero-grande">1.500+</strong>
-                            <span>Pontos de coleta</span>
+                            <strong class="numero-grande" data-about-stat2-number>1.500+</strong>
+                            <span data-about-stat2-description>Pontos de coleta</span>
                         </div>
                         <div class="numero-hero-item">
-                            <strong class="numero-grande">1M+</strong>
-                            <span>Pacotes processados</span>
+                            <strong class="numero-grande" data-about-stat3-number>1M+</strong>
+                            <span data-about-stat3-description>Pacotes processados</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="hero-sobre__imagem">
-                    <img src="/public/caminhoneiro1.png" alt="Equipe e frota Rodogarcia" class="img-hero-sobre" loading="eager" decoding="async" fetchpriority="high" width="3168" height="1344">
+                    <img src="/public/caminhoneiro1.png" alt="Equipe e frota Rodogarcia" class="img-hero-sobre" data-about-hero-image loading="eager" decoding="async" fetchpriority="high" width="3168" height="1344">
                 </div>
             </div>
 
@@ -430,15 +430,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 </footer>
 
     <script src="/src/js/main.js"></script>
+    <script type="module" src="/src/js/public-content.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
 
 
 
