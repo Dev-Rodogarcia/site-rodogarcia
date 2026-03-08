@@ -1,5 +1,4 @@
-﻿<!DOCTYPE html>
-<!-- ==[DOC-FILE]=============================================================
+﻿<!-- ==[DOC-FILE]=============================================================
 Arquivo : src/fale-conosco.html
 Modulo  : Frontend - pagina publica
 Papel   : Declara estrutura da pagina, ancoragens (id/class/data-*) e assets carregados.
@@ -21,6 +20,7 @@ Entradas e saidas:
 Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 [DOC-FILE-END]============================================================== -->
 
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -92,6 +92,14 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                 </ul>
 
                 <div class="nav-acoes-mobile">
+                    <div class="nav-mobile-grupo nav-mobile-grupo--acesso">
+                        <p class="nav-mobile-label">Acesso</p>
+                        <div class="nav-mobile-auth">
+                            <a href="/auth/entrar.html" class="botao botao--texto-branco nav-mobile-btn">Entrar</a>
+                            <a href="/auth/criar-conta.html" class="botao botao--branco nav-mobile-btn">Criar conta</a>
+                        </div>
+                    </div>
+
                     <div class="nav-mobile-grupo">
                         <p class="nav-mobile-label">Atalhos</p>
                         <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
@@ -102,6 +110,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                 </div>
             </nav>
 
+            <div class="cabecalho__acoes-desktop">
+                <a href="/auth/entrar.html" class="botao botao--texto-branco">Entrar</a>
+                <a href="/auth/criar-conta.html" class="botao botao--branco">Criar Conta</a>
+            </div>
         </div>
     </header>
 
