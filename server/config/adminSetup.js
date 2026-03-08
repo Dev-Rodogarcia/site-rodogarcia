@@ -45,13 +45,13 @@ function resolveAdminSetupConfig(options = {}) {
 
   if (isProduction) {
     throw new Error(
-      'ADMIN_SETUP_CODE nao definido. Em producao o servidor nao pode iniciar sem esse valor.'
+      'Codigo de setup administrativo nao definido. Em producao o servidor nao pode iniciar sem esse valor.'
     );
   }
 
   if (!allowInsecureDev) {
     throw new Error(
-      'ADMIN_SETUP_CODE nao definido. Em desenvolvimento use ALLOW_INSECURE_DEV_SETUP=true apenas de forma explicita.'
+      'Codigo de setup administrativo nao definido. Em desenvolvimento habilite o setup inseguro apenas de forma explicita.'
     );
   }
 
@@ -61,7 +61,7 @@ function resolveAdminSetupConfig(options = {}) {
     source: 'generated-dev',
     warnings: [
       'Modo de desenvolvimento inseguro ativado (ALLOW_INSECURE_DEV_SETUP=true).',
-      `ADMIN_SETUP_CODE temporario desta execucao: ${generatedCode}`
+      'Um codigo temporario foi gerado apenas em memoria para esta execucao.'
     ]
   };
 }

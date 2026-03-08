@@ -92,15 +92,20 @@ site-rodogarcia/
 |-- robots.txt
 |-- sitemap.xml
 |-- data/
-|   |-- analytics.json
-|   `-- analytics-config.json
+|   `-- .gitkeep
 |-- vercel.json
 |-- server.js
 |-- scripts/
 |   |-- maintenance/
 |   |   `-- generate-sitemap.js
 |   `-- tests/
-|       `-- test-basic.js
+|       |-- test-basic.js
+|       `-- test-security-hardening.js
+|-- server/
+|   `-- storage/
+|       `-- private/
+|           |-- analytics.json
+|           `-- analytics-config.json
 |-- docs/
 |   |-- checklist-tecnico.md
 |   `-- seguranca-admin-node.md

@@ -314,7 +314,7 @@ const AJUDAS = {
     ],
     bom: 'Configuracao enxuta e rastreavel.',
     ruim: 'Ativar ferramentas sem estrategia.',
-    dev: 'Persistido em data/analytics-config.json.'
+    dev: 'Persistido em server/storage/private/analytics-config.json.'
   },
   'analytics-lgpd': {
     titulo: 'LGPD em linguagem simples',
@@ -357,7 +357,7 @@ const AJUDAS = {
     ],
     bom: 'Consentimento claro e rastreavel.',
     ruim: 'Categorias sensiveis ativadas por padrao sem justificativa.',
-    dev: 'Campos consent.* e tracking.* no analytics-config.json.'
+    dev: 'Campos consent.* e tracking.* no store privado de analytics.'
   },
   'analytics-provider-ga4': {
     titulo: 'Google Analytics 4 (GA4)',

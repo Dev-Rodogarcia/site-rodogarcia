@@ -14,8 +14,8 @@ Esta pasta concentra o backend da area autenticada.
 - `server/storage/popup-config.json`: configuracao do Exit Intent Popup.
 - `server/storage/popup-leads.json`: leads enviados pelo popup.
 - `server/storage/popup-events.json`: eventos de analytics do popup.
-- `data/analytics.json`: eventos/sessoes do tracking proprio do site.
-- `data/analytics-config.json`: configuracao de consentimento, tracking e providers externos.
+- `server/storage/private/analytics.json`: eventos/sessoes do tracking proprio do site.
+- `server/storage/private/analytics-config.json`: configuracao de consentimento, tracking e providers externos.
 - `server/storage/users.example.json`: exemplo de estrutura de usuarios.
 - `server/storage/private/users.json`: usuarios administrativos (nao versionado).
 

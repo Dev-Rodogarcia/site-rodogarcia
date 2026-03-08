@@ -54,14 +54,7 @@ function createDeveloperRoutes(deps) {
 
   function guardDeveloperPages(req, res, pathname, search = '') {
     if (pathname.startsWith('/src/developer/')) {
-      const authContext = getAuthContext(req);
-      if (!authContext) {
-        const next = encodeURIComponent('/developer/index.html');
-        redirectResponse(res, 302, `/auth/entrar.html?area=staff&next=${next}`);
-        return true;
-      }
-
-      redirectResponse(res, 302, '/developer/index.html');
+      sendJson(res, 404, { error: 'Recurso nao encontrado.' });
       return true;
     }
 

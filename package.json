@@ -7,7 +7,8 @@
     "start": "node server.js",
     "dev": "node server.js",
     "sitemap:generate": "node scripts/maintenance/generate-sitemap.js",
-    "test:basic": "node scripts/tests/test-basic.js"
+    "test:basic": "node scripts/tests/test-basic.js",
+    "test:security": "node scripts/tests/test-security-hardening.js"
   },
   "keywords": [
     "rodogarcia",

@@ -34,13 +34,16 @@ loadEnvFile(path.join(__dirname, '.env'));
 const PORT = Number(process.env.PORT) || 5010;
 const ROOT_DIR = __dirname;
 const DATA_DIR = path.join(ROOT_DIR, 'server', 'storage');
+const PRIVATE_DATA_DIR = path.join(DATA_DIR, 'private');
 const CONTENT_FILE = resolveStorePath(path.join(DATA_DIR, 'content.json'), process.env.CONTENT_STORE_PATH);
 const SITE_TEXTS_FILE = resolveStorePath(path.join(DATA_DIR, 'site-texts.json'), process.env.SITE_TEXTS_STORE_PATH);
 const POPUP_CONFIG_FILE = resolveStorePath(path.join(DATA_DIR, 'popup-config.json'), process.env.POPUP_CONFIG_STORE_PATH);
 const POPUP_LEADS_FILE = resolveStorePath(path.join(DATA_DIR, 'popup-leads.json'), process.env.POPUP_LEADS_STORE_PATH);
 const POPUP_EVENTS_FILE = resolveStorePath(path.join(DATA_DIR, 'popup-events.json'), process.env.POPUP_EVENTS_STORE_PATH);
-const ANALYTICS_FILE = resolveStorePath(path.join(ROOT_DIR, 'data', 'analytics.json'), process.env.ANALYTICS_STORE_PATH);
-const ANALYTICS_CONFIG_FILE = resolveStorePath(path.join(ROOT_DIR, 'data', 'analytics-config.json'), process.env.ANALYTICS_CONFIG_PATH);
+const LEGACY_ANALYTICS_FILE = path.join(ROOT_DIR, 'data', 'analytics.json');
+const LEGACY_ANALYTICS_CONFIG_FILE = path.join(ROOT_DIR, 'data', 'analytics-config.json');
+const ANALYTICS_FILE = resolveStorePath(path.join(PRIVATE_DATA_DIR, 'analytics.json'), process.env.ANALYTICS_STORE_PATH);
+const ANALYTICS_CONFIG_FILE = resolveStorePath(path.join(PRIVATE_DATA_DIR, 'analytics-config.json'), process.env.ANALYTICS_CONFIG_PATH);
 const LEGACY_USERS_FILE = path.join(ROOT_DIR, 'server', 'private', 'users.json');
 
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -117,7 +120,6 @@ function resolveStorePath(defaultPath, customPath) {
   return path.normalize(path.join(ROOT_DIR, customPath));
 }
 const redirectMap = new Map([
-  ['/index.html', { destination: '/', statusCode: 301 }],
   ['/inicio', { destination: '/', statusCode: 301 }],
   ['/institucional', { destination: '/sobre.html', statusCode: 301 }],
   ['/quem-somos', { destination: '/sobre.html', statusCode: 301 }],
@@ -141,6 +143,7 @@ const redirectMap = new Map([
 
 const routeMap = new Map([
   ['/', '/src/index.html'],
+  ['/index.html', '/src/index.html'],
   ['/servicos.html', '/src/servicos.html'],
   ['/sobre.html', '/src/sobre.html'],
   ['/cotacao.html', '/src/cotacao.html'],
@@ -172,6 +175,26 @@ const mimeTypes = {
   '.woff2': 'font/woff2',
   '.xml': 'application/xml; charset=utf-8'
 };
+const STATIC_ROOT_FILE_MAP = new Map([
+  ['/favicon.ico', '/public/favicon.ico'],
+  ['/robots.txt', '/robots.txt'],
+  ['/sitemap.xml', '/sitemap.xml']
+]);
+const STATIC_COMPAT_FILE_MAP = new Map([
+  ['/assets/css/auth.css', '/src/auth/css/auth.css'],
+  ['/assets/js/auth.js', '/src/auth/js/auth.js'],
+  ['/assets/js/public-content.js', '/src/js/public-content.js'],
+  ['/assets/js/api.js', '/src/js/shared/api.js']
+]);
+const STATIC_PREFIX_MAPS = [
+  { urlPrefix: '/public/', diskDir: path.join(ROOT_DIR, 'public') },
+  { urlPrefix: '/src/css/', diskDir: path.join(ROOT_DIR, 'src', 'css') },
+  { urlPrefix: '/src/js/', diskDir: path.join(ROOT_DIR, 'src', 'js') },
+  { urlPrefix: '/css/', diskDir: path.join(ROOT_DIR, 'src', 'css') },
+  { urlPrefix: '/js/', diskDir: path.join(ROOT_DIR, 'src', 'js') },
+  { urlPrefix: '/auth/', diskDir: path.join(ROOT_DIR, 'src', 'auth') },
+  { urlPrefix: '/developer/', diskDir: path.join(ROOT_DIR, 'src', 'developer') }
+];
 
 const DEFAULT_CONTENT = { heroSlides: [], dnaSlides: [], vagas: [], feedbacks: [] };
 const DEFAULT_SITE_TEXTS = {
@@ -333,26 +356,29 @@ setInterval(() => {
 
 const server = http.createServer((req, res) => {
   handleRequest(req, res).catch((error) => {
-    console.error('[server] erro nao tratado:', error);
-    sendJson(res, 500, { error: 'Erro interno do servidor.' });
+    const requestId = createLogRequestId();
+    logServerError('server.unhandled', error, { requestId });
+    sendJson(res, 500, {
+      error: 'Erro interno do servidor.',
+      requestId
+    });
   });
 });
 
 server.on('error', (error) => {
   if (error && error.code === 'EADDRINUSE') {
-    console.error(`Porta ${PORT} ja esta em uso. Feche o processo atual ou altere PORT no .env.`);
+    console.error(`Porta ${PORT} ja esta em uso. Feche o processo atual ou altere a configuracao da porta.`);
     process.exit(1);
     return;
   }
 
-  console.error('Falha ao iniciar servidor:', error);
+  logServerError('server.startup', error);
   process.exit(1);
 });
 
 server.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
   console.log(`Modo: ${IS_PROD ? 'producao' : 'desenvolvimento'}`);
-  console.log(`Store de usuarios: ${userStore.filePath}`);
   if (adminSetupConfig.source === 'generated-dev') {
     adminSetupConfig.warnings.forEach((warning) => {
       console.warn(`[config] ${warning}`);
@@ -1878,8 +1904,11 @@ function timingSafeEqualString(a, b) {
 
 function ensureDataFiles() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.mkdirSync(PRIVATE_DATA_DIR, { recursive: true });
   fs.mkdirSync(path.dirname(ANALYTICS_FILE), { recursive: true });
   fs.mkdirSync(path.dirname(ANALYTICS_CONFIG_FILE), { recursive: true });
+  migrateLegacyStoreFile(LEGACY_ANALYTICS_FILE, ANALYTICS_FILE);
+  migrateLegacyStoreFile(LEGACY_ANALYTICS_CONFIG_FILE, ANALYTICS_CONFIG_FILE);
 
   if (!fs.existsSync(CONTENT_FILE)) {
     writeJsonFile(CONTENT_FILE, DEFAULT_CONTENT);
@@ -2888,6 +2917,20 @@ function writeUsersData(usersData) {
   userStore.write(usersData);
 }
 
+function migrateLegacyStoreFile(sourcePath, targetPath) {
+  if (!sourcePath || !targetPath || sourcePath === targetPath) return;
+  if (!fs.existsSync(sourcePath) || fs.existsSync(targetPath)) return;
+
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+  try {
+    fs.renameSync(sourcePath, targetPath);
+  } catch {
+    fs.copyFileSync(sourcePath, targetPath);
+    fs.unlinkSync(sourcePath);
+  }
+}
+
 function readJsonFile(filePath, fallback) {
   try {
     const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '');
@@ -2899,6 +2942,35 @@ function readJsonFile(filePath, fallback) {
 
 function writeJsonFile(filePath, payload) {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+}
+
+function createLogRequestId() {
+  if (typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return crypto.randomBytes(16).toString('hex');
+}
+
+function buildLogErrorPayload(error, context = {}) {
+  const payload = {
+    timestamp: new Date().toISOString(),
+    message: sanitizeText(error && error.message, 240) || 'Erro inesperado.'
+  };
+
+  if (context.requestId) {
+    payload.requestId = sanitizeText(context.requestId, 80);
+  }
+
+  if (!IS_PROD && error && error.stack) {
+    payload.stack = String(error.stack);
+  }
+
+  return payload;
+}
+
+function logServerError(label, error, context = {}) {
+  console.error(`[${label}]`, buildLogErrorPayload(error, context));
 }
 
 function sortByOrder(items) {
@@ -3190,48 +3262,70 @@ function isRestrictedPath(pathname) {
   return false;
 }
 
-function resolveStaticFilePath(pathname) {
-  if (!pathname || pathname.includes('\u0000')) return null;
+function resolvePathWithin(baseDir, relativePath) {
+  const relative = String(relativePath || '').replace(/^\/+/, '');
+  if (!relative || relative.includes('\u0000')) return null;
 
-  let mappedPath = routeMap.get(pathname) || pathname;
-  if (pathname.startsWith('/developer/')) mappedPath = `/src${pathname}`;
-  if (pathname.startsWith('/auth/')) mappedPath = `/src${pathname}`;
-  if (pathname.startsWith('/css/')) mappedPath = `/src${pathname}`;
-  if (pathname.startsWith('/js/')) mappedPath = `/src${pathname}`;
+  const normalizedRelative = path.normalize(relative);
+  const basePath = path.normalize(baseDir);
+  const filePath = path.normalize(path.join(basePath, normalizedRelative));
+  const baseWithSeparator = basePath.endsWith(path.sep) ? basePath : `${basePath}${path.sep}`;
 
-  // Compatibilidade legada para caminhos antigos.
-  if (pathname.startsWith('/script/')) {
-    mappedPath = `/src/js/${pathname.slice('/script/'.length)}`;
+  if (filePath !== basePath && !filePath.startsWith(baseWithSeparator)) {
+    return null;
   }
-
-  if (pathname === '/assets/css/auth.css') mappedPath = '/src/auth/css/auth.css';
-  if (pathname === '/assets/js/auth.js') mappedPath = '/src/auth/js/auth.js';
-  if (pathname === '/assets/js/public-content.js') mappedPath = '/src/js/public-content.js';
-  if (pathname === '/assets/js/api.js') mappedPath = '/src/js/shared/api.js';
-  if (pathname.startsWith('/assets/js/utils/')) {
-    mappedPath = `/src/js/shared/${pathname.slice('/assets/js/'.length)}`;
-  }
-  if (pathname.startsWith('/assets/')) mappedPath = `/src${pathname}`;
-
-  const relativePath = mappedPath.startsWith('/') ? mappedPath.slice(1) : mappedPath;
-  const normalizedRelative = path.normalize(relativePath);
-  const filePath = path.normalize(path.join(ROOT_DIR, normalizedRelative));
-
-  const rootWithSeparator = ROOT_DIR.endsWith(path.sep) ? ROOT_DIR : `${ROOT_DIR}${path.sep}`;
-  if (filePath !== ROOT_DIR && !filePath.startsWith(rootWithSeparator)) return null;
 
   return filePath;
 }
 
+function hasHiddenPathSegment(pathname) {
+  return String(pathname || '').split('/').some((segment) => segment.startsWith('.'));
+}
+
+function resolveStaticFilePath(pathname) {
+  if (!pathname || pathname.includes('\u0000')) return null;
+  if (hasHiddenPathSegment(pathname)) return null;
+
+  const exactRoute = routeMap.get(pathname) || STATIC_ROOT_FILE_MAP.get(pathname) || STATIC_COMPAT_FILE_MAP.get(pathname);
+  if (exactRoute) {
+    return resolvePathWithin(ROOT_DIR, exactRoute);
+  }
+
+  if (pathname.startsWith('/assets/js/utils/')) {
+    return resolvePathWithin(ROOT_DIR, `/src/js/shared/${pathname.slice('/assets/js/'.length)}`);
+  }
+
+  if (
+    pathname === '/src' ||
+    pathname.startsWith('/src/developer/') ||
+    pathname.startsWith('/src/auth/') ||
+    pathname.startsWith('/data/') ||
+    pathname.startsWith('/docs/') ||
+    pathname.startsWith('/scripts/') ||
+    pathname.startsWith('/server/') ||
+    pathname.startsWith('/.claude/')
+  ) {
+    return null;
+  }
+
+  for (const mapping of STATIC_PREFIX_MAPS) {
+    if (!pathname.startsWith(mapping.urlPrefix)) continue;
+    const relativePath = pathname.slice(mapping.urlPrefix.length);
+    return resolvePathWithin(mapping.diskDir, relativePath);
+  }
+
+  return null;
+}
+
 function serveStaticFile(req, res, pathname) {
   if (isRestrictedPath(pathname)) {
-    sendText(res, 403, '403 - Acesso negado', 'text/plain; charset=utf-8');
+    sendText(res, 404, '404 - Arquivo nao encontrado', 'text/plain; charset=utf-8');
     return;
   }
 
   const filePath = resolveStaticFilePath(pathname);
   if (!filePath) {
-    sendText(res, 403, '403 - Acesso negado', 'text/plain; charset=utf-8');
+    sendText(res, 404, '404 - Arquivo nao encontrado', 'text/plain; charset=utf-8');
     return;
   }
 
@@ -3327,4 +3421,3 @@ function redirectResponse(res, statusCode, destination) {
 module.exports = {
   server
 };
-
