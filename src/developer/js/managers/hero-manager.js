@@ -166,6 +166,8 @@ function preencherFormularioHero(item) {
   form.heroTitle.value = item.title || '';
   form.heroDescription.value = item.description || '';
   form.heroImage.value = item.image || '';
+  if (form.heroDesktopImage) form.heroDesktopImage.value = item.desktopImage || '';
+  if (form.heroMobileImage) form.heroMobileImage.value = item.mobileImage || '';
   form.heroActive.checked = Boolean(item.active);
   if (form.heroLayoutTextImage) form.heroLayoutTextImage.checked = layout === HERO_LAYOUT_TEXT_IMAGE;
   if (form.heroLayoutFullImage) form.heroLayoutFullImage.checked = layout === HERO_LAYOUT_FULL_IMAGE;
@@ -203,6 +205,8 @@ function montarPayloadHero(form) {
     title: sanitizarTexto(form.heroTitle.value, 120),
     description: sanitizarTexto(form.heroDescription.value, 420),
     image: sanitizarUrl(form.heroImage.value),
+    desktopImage: sanitizarUrl(form.heroDesktopImage ? form.heroDesktopImage.value : ''),
+    mobileImage: sanitizarUrl(form.heroMobileImage ? form.heroMobileImage.value : ''),
     active: form.heroActive.checked,
     layoutMode,
     fullImageButtonsEnabled,
@@ -301,6 +305,8 @@ function renderizarListaHero() {
           : ''
       } | Botoes ativos: ${
         (Array.isArray(item.buttons) ? item.buttons : []).filter((botao) => botao.enabled).length
+      } | Imagens responsivas: ${
+        item.desktopImage || item.mobileImage ? 'Configuradas' : 'Usando imagem padrao'
       }`
     );
     meta.append(titulo, detalhe);

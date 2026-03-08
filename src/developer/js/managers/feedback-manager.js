@@ -42,6 +42,8 @@ function limparFormularioFeedback() {
 
   form.reset();
   form.feedbackId.value = '';
+  form.feedbackResultadoIcon.value = '';
+  form.feedbackResultadoTexto.value = '';
   form.feedbackActive.checked = true;
 }
 
@@ -55,6 +57,8 @@ function preencherFormularioFeedback(item) {
   form.feedbackCompany.value = item.company || '';
   form.feedbackComment.value = item.comment || '';
   form.feedbackPhoto.value = item.photo || '';
+  form.feedbackResultadoIcon.value = item.resultadoIcon || '';
+  form.feedbackResultadoTexto.value = item.resultadoTexto || '';
   form.feedbackActive.checked = Boolean(item.active);
 }
 
@@ -65,6 +69,8 @@ function montarPayloadFeedback(form) {
     company: sanitizarTexto(form.feedbackCompany.value, 120),
     comment: sanitizarTexto(form.feedbackComment.value, 800),
     photo: sanitizarUrl(form.feedbackPhoto.value),
+    resultadoIcon: sanitizarTexto(form.feedbackResultadoIcon.value, 40),
+    resultadoTexto: sanitizarTexto(form.feedbackResultadoTexto.value, 120),
     active: form.feedbackActive.checked
   };
 }

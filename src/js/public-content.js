@@ -59,6 +59,68 @@ function sanitizarCorHex(valor) {
   return `#${hex}`.toUpperCase();
 }
 
+function resolverImagemResponsiva(slide, imagemFallback) {
+  const base =
+    sanitizarUrl(slide.image) ||
+    sanitizarUrl(slide.desktopImage || slide.imageDesktop) ||
+    sanitizarUrl(slide.mobileImage || slide.imageMobile) ||
+    imagemFallback;
+  const desktop = sanitizarUrl(slide.desktopImage || slide.imageDesktop) || base;
+  const mobile = sanitizarUrl(slide.mobileImage || slide.imageMobile) || base;
+  const principal = base || desktop || mobile || imagemFallback;
+
+  return {
+    principal,
+    desktop: desktop || principal,
+    mobile: mobile || principal
+  };
+}
+
+function montarPictureResponsivo(opcoes) {
+  const {
+    desktopSrc,
+    mobileSrc,
+    fallbackSrc,
+    alt,
+    pictureClass,
+    imgClass,
+    loading = 'lazy',
+    decoding = 'async',
+    fetchPriority = '',
+    width = 0,
+    height = 0
+  } = opcoes;
+
+  const picture = criarElemento('picture', pictureClass);
+
+  if (mobileSrc) {
+    const sourceMobile = criarElemento('source');
+    sourceMobile.media = '(max-width: 768px)';
+    sourceMobile.srcset = mobileSrc;
+    picture.appendChild(sourceMobile);
+  }
+
+  if (desktopSrc) {
+    const sourceDesktop = criarElemento('source');
+    sourceDesktop.media = '(min-width: 769px)';
+    sourceDesktop.srcset = desktopSrc;
+    picture.appendChild(sourceDesktop);
+  }
+
+  const img = criarElemento('img', imgClass);
+  img.src = fallbackSrc || desktopSrc || mobileSrc;
+  img.alt = alt;
+  img.loading = loading;
+  img.decoding = decoding;
+
+  if (width > 0) img.width = width;
+  if (height > 0) img.height = height;
+  if (fetchPriority) img.setAttribute('fetchpriority', fetchPriority);
+
+  picture.appendChild(img);
+  return picture;
+}
+
 function corContraste(hexColor) {
   const cor = sanitizarCorHex(hexColor);
   if (!cor) return '#1E293B';
@@ -98,6 +160,57 @@ function criarBotaoLink(rotulo, url, classeCss, opcoes = {}) {
   return link;
 }
 
+function criarIconePhosphor(classeIcone) {
+  const icone = criarElemento('i', `ph ${classeIcone}`);
+  icone.setAttribute('aria-hidden', 'true');
+  return icone;
+}
+
+function criarBotaoControleCarrossel(opcoes) {
+  const {
+    classeBotao,
+    dataAttribute,
+    ariaLabel,
+    icone
+  } = opcoes;
+
+  const botao = criarElemento('button', classeBotao);
+  botao.type = 'button';
+  botao.dataset[dataAttribute] = '';
+  botao.setAttribute('aria-label', ariaLabel);
+  botao.appendChild(criarIconePhosphor(icone));
+  return botao;
+}
+
+function criarControlesCarrossel(opcoes) {
+  const {
+    classeControles,
+    classeBotao,
+    ariaLabel,
+    anterior,
+    proximo
+  } = opcoes;
+
+  const controles = criarElemento('div', classeControles);
+  controles.setAttribute('aria-label', ariaLabel);
+  controles.append(
+    criarBotaoControleCarrossel({
+      classeBotao,
+      dataAttribute: anterior.dataAttribute,
+      ariaLabel: anterior.ariaLabel,
+      icone: anterior.icone
+    }),
+    criarBotaoControleCarrossel({
+      classeBotao,
+      dataAttribute: proximo.dataAttribute,
+      ariaLabel: proximo.ariaLabel,
+      icone: proximo.icone
+    })
+  );
+
+  return controles;
+}
+
 function montarSlideHero(slide, indice) {
   const layoutMode = normalizarLayoutHero(slide.layoutMode);
   if (layoutMode === 'full-image') {
@@ -134,19 +247,22 @@ function montarSlideHero(slide, indice) {
   }
 
   const areaImagem = criarElemento('div', 'hero__imagem');
-  const imagem = criarElemento('img', 'img-hero-destaque');
-  imagem.src = sanitizarUrl(slide.image) || '/public/foto5.png';
-  imagem.alt = sanitizarTexto(slide.title, 120) || 'Destaque Rodogarcia';
-  imagem.loading = indice === 0 ? 'eager' : 'lazy';
-  imagem.decoding = 'async';
-  imagem.width = 2048;
-  imagem.height = 882;
+  const imagens = resolverImagemResponsiva(slide, '/public/foto5.png');
+  const picture = montarPictureResponsivo({
+    desktopSrc: imagens.desktop,
+    mobileSrc: imagens.mobile,
+    fallbackSrc: imagens.principal,
+    alt: sanitizarTexto(slide.title, 120) || 'Destaque Rodogarcia',
+    pictureClass: 'hero__picture',
+    imgClass: 'img-hero-destaque',
+    loading: indice === 0 ? 'eager' : 'lazy',
+    decoding: 'async',
+    fetchPriority: indice === 0 ? 'high' : '',
+    width: 2048,
+    height: 882
+  });
 
-  if (indice === 0) {
-    imagem.setAttribute('fetchpriority', 'high');
-  }
-
-  areaImagem.appendChild(imagem);
+  areaImagem.appendChild(picture);
   container.append(areaTexto, areaImagem);
   wrapper.appendChild(container);
   return wrapper;
@@ -162,17 +278,21 @@ function montarSlideHeroImagemCompleta(slide, indice) {
   wrapper.dataset.heroBackgroundType = backgroundType;
 
   const fullHero = criarElemento('div', `hero-full-image hero-full-image--${backgroundType}`);
-  const imagem = criarElemento('img', 'hero-full-image__media');
-  imagem.src = sanitizarUrl(slide.image) || '/public/foto5.png';
-  imagem.alt = sanitizarTexto(slide.title, 120) || 'Banner Rodogarcia';
-  imagem.loading = indice === 0 ? 'eager' : 'lazy';
-  imagem.decoding = 'async';
-  imagem.width = 2048;
-  imagem.height = 882;
-  if (indice === 0) {
-    imagem.setAttribute('fetchpriority', 'high');
-  }
-  fullHero.appendChild(imagem);
+  const imagens = resolverImagemResponsiva(slide, '/public/foto5.png');
+  const picture = montarPictureResponsivo({
+    desktopSrc: imagens.desktop,
+    mobileSrc: imagens.mobile,
+    fallbackSrc: imagens.principal,
+    alt: sanitizarTexto(slide.title, 120) || 'Banner Rodogarcia',
+    pictureClass: 'hero-full-image__picture',
+    imgClass: 'hero-full-image__media',
+    loading: indice === 0 ? 'eager' : 'lazy',
+    decoding: 'async',
+    fetchPriority: indice === 0 ? 'high' : '',
+    width: 2048,
+    height: 882
+  });
+  fullHero.appendChild(picture);
 
   const botoesAtivos = Array.isArray(slide.buttons) ? slide.buttons.filter((btn) => btn.enabled) : [];
   const exibirBotoes = Boolean(slide.fullImageButtonsEnabled) && botoesAtivos.length > 0;
@@ -224,15 +344,21 @@ function montarSlideDna(slide, indice) {
   info.append(tag, titulo, texto);
 
   const boxImagem = criarElemento('div', 'dna-img');
-  const innerImagem = criarElemento('div');
-  const imagem = criarElemento('img', 'img-dna');
-  imagem.src = sanitizarUrl(slide.image) || '/public/foto4.png';
-  imagem.alt = sanitizarTexto(slide.title, 120) || 'Destaque DNA Rodogarcia';
-  imagem.loading = 'lazy';
-  imagem.decoding = 'async';
-  imagem.width = 2048;
-  imagem.height = 882;
-  innerImagem.appendChild(imagem);
+  const innerImagem = criarElemento('div', 'dna-img__frame');
+  const imagens = resolverImagemResponsiva(slide, '/public/foto4.png');
+  const picture = montarPictureResponsivo({
+    desktopSrc: imagens.desktop,
+    mobileSrc: imagens.mobile,
+    fallbackSrc: imagens.principal,
+    alt: sanitizarTexto(slide.title, 120) || 'Destaque DNA Rodogarcia',
+    pictureClass: 'dna-img__picture',
+    imgClass: 'img-dna',
+    loading: 'lazy',
+    decoding: 'async',
+    width: 2048,
+    height: 882
+  });
+  innerImagem.appendChild(picture);
   boxImagem.appendChild(innerImagem);
 
   grid.append(info, boxImagem);
@@ -250,15 +376,21 @@ function montarSlideDnaImagemCompleta(slide, indice) {
   artigo.setAttribute('aria-hidden', indice === 0 ? 'false' : 'true');
 
   const wrapper = criarElemento('div', 'dna-full-image');
-  const imagem = criarElemento('img', 'dna-full-image__media');
-  imagem.src = sanitizarUrl(slide.image) || '/public/foto4.png';
-  imagem.alt = sanitizarTexto(slide.title, 120) || 'Destaque DNA Rodogarcia';
-  imagem.loading = 'lazy';
-  imagem.decoding = 'async';
-  imagem.width = 2048;
-  imagem.height = 882;
+  const imagens = resolverImagemResponsiva(slide, '/public/foto4.png');
+  const picture = montarPictureResponsivo({
+    desktopSrc: imagens.desktop,
+    mobileSrc: imagens.mobile,
+    fallbackSrc: imagens.principal,
+    alt: sanitizarTexto(slide.title, 120) || 'Destaque DNA Rodogarcia',
+    pictureClass: 'dna-full-image__picture',
+    imgClass: 'dna-full-image__media',
+    loading: 'lazy',
+    decoding: 'async',
+    width: 2048,
+    height: 882
+  });
 
-  wrapper.appendChild(imagem);
+  wrapper.appendChild(picture);
   artigo.appendChild(wrapper);
   return artigo;
 }
@@ -271,26 +403,50 @@ function iniciarCarrosselBasico(opcoes) {
     seletorAnterior,
     seletorProximo,
     intervaloMs = 5500,
-    onChange = null
+    onChange = null,
+    habilitarAutoplay = true,
+    habilitarSwipe = true
   } = opcoes;
 
   if (!raiz) return;
 
-  const slides = Array.from(raiz.querySelectorAll(seletorSlide));
-  if (slides.length <= 1) return;
+  if (typeof raiz.__cleanupCarrossel === 'function') {
+    raiz.__cleanupCarrossel();
+  }
 
+  const slides = Array.from(raiz.querySelectorAll(seletorSlide));
   const botaoAnterior = raiz.querySelector(seletorAnterior);
   const botaoProximo = raiz.querySelector(seletorProximo);
-  let indiceAtual = 0;
+  let indiceAtual = Math.max(0, slides.findIndex((slide) => slide.classList.contains(classeAtiva)));
   let timer = null;
+  let toqueAtivo = false;
+  let toqueInicialX = 0;
+  let toqueFinalX = 0;
+  let toqueInicialY = 0;
+  let toqueFinalY = 0;
+  const listeners = [];
+
+  const adicionarListener = (elemento, evento, handler, options) => {
+    elemento.addEventListener(evento, handler, options);
+    listeners.push(() => {
+      elemento.removeEventListener(evento, handler, options);
+    });
+  };
 
   const atualizar = (novoIndice) => {
+    if (slides.length === 0) {
+      return;
+    }
+
     indiceAtual = (novoIndice + slides.length) % slides.length;
     slides.forEach((slide, idx) => {
       const ativo = idx === indiceAtual;
       slide.classList.toggle(classeAtiva, ativo);
       slide.setAttribute('aria-hidden', ativo ? 'false' : 'true');
     });
+
+    raiz.dataset.currentSlide = String(indiceAtual);
+
     if (typeof onChange === 'function') {
       onChange({
         index: indiceAtual,
@@ -309,32 +465,105 @@ function iniciarCarrosselBasico(opcoes) {
 
   const retomar = () => {
     pausar();
+    if (!habilitarAutoplay || slides.length <= 1 || intervaloMs <= 0) {
+      return;
+    }
+
     timer = window.setInterval(() => {
       atualizar(indiceAtual + 1);
     }, intervaloMs);
   };
 
+  const cleanup = () => {
+    pausar();
+    listeners.splice(0).forEach((remover) => remover());
+    delete raiz.__cleanupCarrossel;
+  };
+
+  raiz.__cleanupCarrossel = cleanup;
+
   if (botaoAnterior) {
-    botaoAnterior.addEventListener('click', () => {
+    botaoAnterior.disabled = slides.length <= 1;
+    adicionarListener(botaoAnterior, 'click', () => {
       atualizar(indiceAtual - 1);
       retomar();
     });
   }
 
   if (botaoProximo) {
-    botaoProximo.addEventListener('click', () => {
+    botaoProximo.disabled = slides.length <= 1;
+    adicionarListener(botaoProximo, 'click', () => {
       atualizar(indiceAtual + 1);
       retomar();
     });
   }
 
-  raiz.addEventListener('mouseenter', pausar);
-  raiz.addEventListener('mouseleave', retomar);
-  raiz.addEventListener('focusin', pausar);
-  raiz.addEventListener('focusout', retomar);
+  if (slides.length === 0) {
+    return cleanup;
+  }
 
-  atualizar(0);
+  if (habilitarAutoplay && slides.length > 1) {
+    adicionarListener(raiz, 'mouseenter', pausar);
+    adicionarListener(raiz, 'mouseleave', retomar);
+    adicionarListener(raiz, 'focusin', pausar);
+    adicionarListener(raiz, 'focusout', (evento) => {
+      if (raiz.contains(evento.relatedTarget)) {
+        return;
+      }
+      retomar();
+    });
+  }
+
+  if (habilitarSwipe && slides.length > 1) {
+    adicionarListener(raiz, 'touchstart', (evento) => {
+      const toque = evento.changedTouches && evento.changedTouches[0];
+      if (!toque) return;
+
+      toqueAtivo = true;
+      toqueInicialX = toque.clientX;
+      toqueFinalX = toque.clientX;
+      toqueInicialY = toque.clientY;
+      toqueFinalY = toque.clientY;
+      pausar();
+    }, { passive: true });
+
+    adicionarListener(raiz, 'touchmove', (evento) => {
+      if (!toqueAtivo) return;
+
+      const toque = evento.changedTouches && evento.changedTouches[0];
+      if (!toque) return;
+
+      toqueFinalX = toque.clientX;
+      toqueFinalY = toque.clientY;
+    }, { passive: true });
+
+    adicionarListener(raiz, 'touchend', () => {
+      if (!toqueAtivo) {
+        return;
+      }
+
+      const deltaX = toqueFinalX - toqueInicialX;
+      const deltaY = toqueFinalY - toqueInicialY;
+      const limite = 48;
+
+      toqueAtivo = false;
+
+      if (Math.abs(deltaX) >= limite && Math.abs(deltaX) > Math.abs(deltaY)) {
+        atualizar(deltaX > 0 ? indiceAtual - 1 : indiceAtual + 1);
+      }
+
+      retomar();
+    }, { passive: true });
+
+    adicionarListener(raiz, 'touchcancel', () => {
+      toqueAtivo = false;
+      retomar();
+    }, { passive: true });
+  }
+
+  atualizar(indiceAtual);
   retomar();
+  return cleanup;
 }
 
 function sincronizarModoVisualHero(slideAtivo) {
@@ -359,23 +588,21 @@ function renderizarSlidesHero(slidesHero) {
     container.appendChild(montarSlideHero(slide, idx));
   });
 
-  const controles = criarElemento('div', 'carrossel-hero__controles');
-  controles.setAttribute('aria-label', 'Controles do carrossel');
-
-  const anterior = criarElemento('button', 'carrossel-hero__btn');
-  anterior.type = 'button';
-  anterior.dataset.carrosselAnterior = '';
-  anterior.setAttribute('aria-label', 'Slide anterior');
-  anterior.textContent = '<';
-
-  const proximo = criarElemento('button', 'carrossel-hero__btn');
-  proximo.type = 'button';
-  proximo.dataset.carrosselProximo = '';
-  proximo.setAttribute('aria-label', 'Proximo slide');
-  proximo.textContent = '>';
-
-  controles.append(anterior, proximo);
-  container.appendChild(controles);
+  container.appendChild(criarControlesCarrossel({
+    classeControles: 'carrossel-hero__controles',
+    classeBotao: 'carrossel-hero__btn',
+    ariaLabel: 'Controles do carrossel',
+    anterior: {
+      dataAttribute: 'carrosselAnterior',
+      ariaLabel: 'Slide anterior',
+      icone: 'ph-caret-left'
+    },
+    proximo: {
+      dataAttribute: 'carrosselProximo',
+      ariaLabel: 'Proximo slide',
+      icone: 'ph-caret-right'
+    }
+  }));
 
   const primeiroSlide = container.querySelector('[data-carrossel-slide]');
   if (primeiroSlide) {
@@ -412,23 +639,24 @@ function renderizarSlidesDna(slidesDna) {
     wrapperSlides.appendChild(montarSlideDna(slide, idx));
   });
 
-  const controles = criarElemento('div', 'carrossel-dna__controles');
-  controles.setAttribute('aria-label', 'Controles do carrossel de destaques');
-
-  const anterior = criarElemento('button', 'carrossel-dna__btn');
-  anterior.type = 'button';
-  anterior.dataset.dnaAnterior = '';
-  anterior.setAttribute('aria-label', 'Destaque anterior');
-  anterior.textContent = '<';
-
-  const proximo = criarElemento('button', 'carrossel-dna__btn');
-  proximo.type = 'button';
-  proximo.dataset.dnaProximo = '';
-  proximo.setAttribute('aria-label', 'Proximo destaque');
-  proximo.textContent = '>';
-
-  controles.append(anterior, proximo);
-  container.append(wrapperSlides, controles);
+  container.append(
+    wrapperSlides,
+    criarControlesCarrossel({
+      classeControles: 'carrossel-dna__controles',
+      classeBotao: 'carrossel-dna__btn',
+      ariaLabel: 'Controles do carrossel de destaques',
+      anterior: {
+        dataAttribute: 'dnaAnterior',
+        ariaLabel: 'Destaque anterior',
+        icone: 'ph-caret-left'
+      },
+      proximo: {
+        dataAttribute: 'dnaProximo',
+        ariaLabel: 'Proximo destaque',
+        icone: 'ph-caret-right'
+      }
+    })
+  );
 
   iniciarCarrosselBasico({
     raiz: container,
@@ -441,6 +669,40 @@ function renderizarSlidesDna(slidesDna) {
 
   container.classList.remove('is-hydrating');
   container.classList.add('is-hydrated');
+}
+
+function inicializarCarrosseisEstaticos() {
+  const hero = document.getElementById('carrossel-hero');
+  if (hero) {
+    const primeiroSlideHero = hero.querySelector('[data-carrossel-slide]');
+    if (primeiroSlideHero) {
+      sincronizarModoVisualHero(primeiroSlideHero);
+    }
+
+    iniciarCarrosselBasico({
+      raiz: hero,
+      seletorSlide: '[data-carrossel-slide]',
+      classeAtiva: 'carrossel-hero__slide--ativo',
+      seletorAnterior: '[data-carrossel-anterior]',
+      seletorProximo: '[data-carrossel-proximo]',
+      intervaloMs: 5500,
+      onChange: ({ slide }) => {
+        sincronizarModoVisualHero(slide);
+      }
+    });
+  }
+
+  const dna = document.getElementById('carrossel-dna');
+  if (dna) {
+    iniciarCarrosselBasico({
+      raiz: dna,
+      seletorSlide: '[data-dna-slide]',
+      classeAtiva: 'carrossel-dna__slide--ativo',
+      seletorAnterior: '[data-dna-anterior]',
+      seletorProximo: '[data-dna-proximo]',
+      intervaloMs: 5000
+    });
+  }
 }
 
 function classeBadgeVaga(status) {
@@ -518,34 +780,77 @@ function montarCardFeedback(feedback) {
 
   const info = criarElemento('div', 'depoimento-info');
   const nome = criarElemento('h4', '', sanitizarTexto(feedback.name, 80));
-  const cargoEmpresa = criarElemento(
-    'p',
-    '',
-    `${sanitizarTexto(feedback.role, 80)} - ${sanitizarTexto(feedback.company, 120)}`
-  );
+  const roleAndCompany = [sanitizarTexto(feedback.role, 80), sanitizarTexto(feedback.company, 120)]
+    .filter(Boolean)
+    .join(' - ');
+  const cargoEmpresa = criarElemento('p', '', roleAndCompany);
   info.append(nome, cargoEmpresa);
 
-  const texto = criarElemento('p', 'depoimento-texto', sanitizarTexto(feedback.comment, 800));
+  const textoOriginal = sanitizarTexto(feedback.comment, 800) || '';
+  const texto = criarElemento('p', 'depoimento-texto');
+  texto.innerHTML = textoOriginal.replace(/\*([^*]*)\*/g, '<strong>$1</strong>');
 
   header.append(avatar, info);
-  card.append(avaliacao, header, texto);
+  card.append(header, avaliacao, texto);
+
+  const iconName = sanitizarTexto(feedback.resultadoIcon, 40);
+  const resultTexto = sanitizarTexto(feedback.resultadoTexto, 120);
+
+  if (iconName || resultTexto) {
+    const resultado = criarElemento('div', 'depoimento-resultado');
+    if (iconName) {
+      const idxClass = iconName.startsWith('ph-') ? iconName : `ph-${iconName}`;
+      const i = criarElemento('i', `ph ${idxClass}`);
+      resultado.appendChild(i);
+    }
+    if (resultTexto) {
+      const span = criarElemento('span', '', resultTexto);
+      resultado.appendChild(span);
+    }
+    card.appendChild(resultado);
+  }
+
   return card;
 }
 
-function renderizarFeedbacks(feedbacks) {
-  const trilha = document.querySelector('[data-feedback-track]');
-  if (!trilha || !Array.isArray(feedbacks) || feedbacks.length === 0) return;
+function montarListaBaseFeedbacks(feedbacks) {
+  if (!Array.isArray(feedbacks) || feedbacks.length === 0) {
+    return [];
+  }
+
+  if (feedbacks.length >= 6) {
+    return feedbacks.slice(0, 6);
+  }
+
+  const lista = [];
+  while (lista.length < 6) {
+    lista.push(feedbacks[lista.length % feedbacks.length]);
+  }
+  return lista;
+}
+
+function renderizarTrackFeedback(trilha, feedbacks) {
+  const baseDesktop = montarListaBaseFeedbacks(feedbacks);
+  const lista = [...baseDesktop, ...baseDesktop];
 
   limparElemento(trilha);
 
-  const base = [];
-  const quantidadeBase = 6;
-  for (let i = 0; i < quantidadeBase; i += 1) {
-    base.push(feedbacks[i % feedbacks.length]);
-  }
+  lista.forEach((feedback, indice) => {
+    const card = montarCardFeedback(feedback);
+    if (indice >= baseDesktop.length) {
+      card.setAttribute('aria-hidden', 'true');
+    }
+    trilha.appendChild(card);
+  });
+  trilha.dataset.feedbackMode = 'autoplay';
+}
 
-  [...base, ...base].forEach((feedback) => {
-    trilha.appendChild(montarCardFeedback(feedback));
+function renderizarFeedbacks(feedbacks) {
+  const trilhas = Array.from(document.querySelectorAll('[data-feedback-track]'));
+  if (trilhas.length === 0 || !Array.isArray(feedbacks) || feedbacks.length === 0) return;
+
+  trilhas.forEach((trilha) => {
+    renderizarTrackFeedback(trilha, feedbacks);
   });
 }
 
@@ -654,6 +959,8 @@ async function iniciarConteudoPublico() {
     dnaContainer.classList.add('is-hydrating');
     dnaContainer.classList.remove('is-hydrated');
   }
+
+  inicializarCarrosseisEstaticos();
 
   try {
     const conteudo = await carregarConteudoPublico();

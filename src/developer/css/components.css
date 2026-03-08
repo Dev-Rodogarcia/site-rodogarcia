@@ -723,6 +723,88 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
   }
 }
 
+@media (max-width: 768px) {
+  /* Metric cards: coluna unica em celulares */
+  .panel-grid.cards {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-page {
+    overflow-x: clip;
+  }
+
+  .analytics-page .panel-grid.two-col,
+  .analytics-page .form-grid.two-col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analytics-page .panel-grid,
+  .analytics-page .form-grid,
+  .analytics-page .form-section {
+    gap: 16px;
+  }
+
+  .analytics-page .panel-card,
+  .analytics-page .panel-grid > *,
+  .analytics-page .form-grid > *,
+  .analytics-page .dashboard-hero > * {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .analytics-page .dashboard-hero {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .analytics-page .status-pills {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .analytics-page .analysis-list li,
+  .analytics-page .insight-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .analytics-page .analysis-list li strong,
+  .analytics-page .analysis-list li span,
+  .analytics-page .insight-item strong,
+  .analytics-page .insight-item span {
+    width: 100%;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  /* Gaps menores no mobile */
+  .panel-stack,
+  .panel-grid {
+    gap: 10px;
+  }
+
+  /* Botoes de acao em largura total */
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary,
+  .form-actions .btn-ghost,
+  .form-actions .btn-danger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Check-field ocupa largura total no contexto analytics */
+  .analytics-page .check-field {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 640px) {
   .panel-grid.cards {
     grid-template-columns: 1fr;
@@ -740,4 +822,3 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     justify-content: center;
   }
 }
-

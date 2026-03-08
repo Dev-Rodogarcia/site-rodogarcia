@@ -171,33 +171,75 @@
   "feedbacks": [
     {
       "id": "feedback-1",
-      "name": "Roberto Campos",
-      "role": "Diretor de Logistica",
-      "company": "TechCorp",
-      "comment": "Reduzimos custos logisticos em 35% com previsibilidade e zero atrasos nas entregas.",
+      "name": "Maria Silva",
+      "role": "Gerente de Operações",
+      "company": "Indústria Química",
+      "comment": "Transportamos produtos perigosos há *4 anos* com a Rodogarcia. *100% de conformidade* com todas as normas. Eles são os únicos que confiamos para nossas cargas mais sensíveis. Segurança em primeiro lugar!",
       "photo": "",
+      "resultadoIcon": "ph-shield-check",
+      "resultadoTexto": "100% de conformidade",
       "active": true,
       "order": 1
     },
     {
       "id": "feedback-2",
-      "name": "Maria Silva",
-      "role": "Gerente de Operacoes",
-      "company": "Industria Quimica",
-      "comment": "Transporte de produtos perigosos com 100% de conformidade e atendimento muito rapido.",
+      "name": "João Pereira",
+      "role": "CEO",
+      "company": "E-commerce Brasil",
+      "comment": "Nossa empresa *cresceu 280%* nos últimos 3 anos e a Rodogarcia acompanhou cada passo. A abrangência nacional foi decisiva - conseguimos atender clientes em *todos os 27 estados* com a mesma qualidade. O rastreamento em tempo real aumentou nossa taxa de satisfação do cliente em *42%*!",
       "photo": "",
+      "resultadoIcon": "ph-trend-up",
+      "resultadoTexto": "280% de crescimento",
       "active": true,
       "order": 2
     },
     {
       "id": "feedback-3",
-      "name": "Joao Pereira",
-      "role": "CEO",
-      "company": "E-commerce Brasil",
-      "comment": "A abrangencia nacional ajudou nosso crescimento com rastreio em tempo real.",
+      "name": "Ana Ferreira",
+      "role": "Coordenadora de Supply Chain",
+      "company": "",
+      "comment": "A operação In Door da Rodogarcia *reduziu nosso tempo de processamento em 60%*. Antes levávamos 3 dias para processar um pedido, agora fazemos em *menos de 1 dia*. A eficiência deles é impressionante e isso impactou diretamente na satisfação dos nossos clientes!",
       "photo": "",
+      "resultadoIcon": "ph-clock",
+      "resultadoTexto": "60% mais rápido",
       "active": true,
       "order": 3
+    },
+    {
+      "id": "feedback-4",
+      "name": "Roberto Campos",
+      "role": "Diretor de Logística",
+      "company": "TechCorp",
+      "comment": "Reduzimos nossos custos logísticos em *35%* desde que começamos a trabalhar com a Rodogarcia. A confiabilidade deles é impressionante - *zero atrasos* em 7 anos. Isso mudou completamente nosso negócio!",
+      "photo": "",
+      "resultadoIcon": "ph-trend-down",
+      "resultadoTexto": "35% de redução de custos",
+      "active": true,
+      "order": 4
+    },
+    {
+      "id": "feedback-5",
+      "name": "Carlos Lima",
+      "role": "Diretor Comercial",
+      "company": "Importadora",
+      "comment": "Trabalhamos com importação e exportação há mais de 10 anos. A Rodogarcia é a *única transportadora* que conseguimos confiar 100%. Em 5 anos de parceria, *zero problemas* com documentação ou atrasos. Eles entendem a urgência do nosso negócio!",
+      "photo": "",
+      "resultadoIcon": "ph-check-circle",
+      "resultadoTexto": "Zero problemas em 5 anos",
+      "active": true,
+      "order": 5
+    },
+    {
+      "id": "feedback-6",
+      "name": "Patrícia Santos",
+      "role": "Gerente de Distribuição",
+      "company": "",
+      "comment": "A experiência de *35 anos* da Rodogarcia faz toda a diferença. Eles não apenas transportam, mas *otimizam nossos processos*. Reduzimos estoque em *45%* e aumentamos a rotatividade. Parceiros estratégicos que realmente entendem de logística!",
+      "photo": "",
+      "resultadoIcon": "ph-package",
+      "resultadoTexto": "45% menos estoque",
+      "active": true,
+      "order": 6
     }
   ]
 }

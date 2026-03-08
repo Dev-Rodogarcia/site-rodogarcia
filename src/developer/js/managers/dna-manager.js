@@ -96,6 +96,8 @@ function preencherFormularioDna(item) {
   form.dnaTitle.value = item.title || '';
   form.dnaText.value = item.text || '';
   form.dnaImage.value = item.image || '';
+  if (form.dnaDesktopImage) form.dnaDesktopImage.value = item.desktopImage || '';
+  if (form.dnaMobileImage) form.dnaMobileImage.value = item.mobileImage || '';
   form.dnaActive.checked = Boolean(item.active);
   if (form.dnaLayoutTextImage) form.dnaLayoutTextImage.checked = layout === DNA_LAYOUT_TEXT_IMAGE;
   if (form.dnaLayoutFullImage) form.dnaLayoutFullImage.checked = layout === DNA_LAYOUT_FULL_IMAGE;
@@ -108,6 +110,8 @@ function montarPayloadDna(form) {
     title: sanitizarTexto(form.dnaTitle.value, 120),
     text: sanitizarTexto(form.dnaText.value, 420),
     image: sanitizarUrl(form.dnaImage.value),
+    desktopImage: sanitizarUrl(form.dnaDesktopImage ? form.dnaDesktopImage.value : ''),
+    mobileImage: sanitizarUrl(form.dnaMobileImage ? form.dnaMobileImage.value : ''),
     active: form.dnaActive.checked,
     layoutMode
   };
@@ -182,6 +186,8 @@ function renderizarListaDna() {
         normalizarLayoutDna(item.layoutMode) === DNA_LAYOUT_FULL_IMAGE
           ? 'Imagem completa'
           : 'Texto + imagem'
+      } | Imagens responsivas: ${
+        item.desktopImage || item.mobileImage ? 'Configuradas' : 'Usando imagem padrao'
       }`
     );
     meta.append(titulo, detalhe);

@@ -129,9 +129,14 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     margin: 0 auto;
 }
 
-.carrossel-hero__btn {
+.carrossel-hero__btn,
+.carrossel-dna__btn {
     background: none;
     border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
     cursor: pointer;
     color: #fff;
     pointer-events: auto;
@@ -152,8 +157,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
 @media (max-width: 900px) {
     .hero#inicio {
-        height: 720px;
-        min-height: 720px;
+        height: 620px;
+        min-height: 620px;
     }
 }
 
@@ -171,15 +176,14 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .hero#inicio {
-        height: 700px;
-        min-height: 700px;
+        height: 620px;
+        min-height: 620px;
     }
 }
 
 @media (max-width: 480px) {
     .hero#inicio {
-        height: 660px;
-        min-height: 660px;
+        height: 560px;
+        min-height: 560px;
     }
 }
-

@@ -26,7 +26,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 .hero-sobre {
     background-color: var(--cor-azul-hero);
     color: var(--cor-branco);
-    padding: 6rem 0 7rem;
+    padding: 6rem 0 clamp(8rem, 12vw, 10rem);
     margin-top: 0;
     position: relative;
     overflow: hidden;
@@ -46,6 +46,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
 .hero-sobre__content {
     animation: fadeInUp 0.8s ease-out;
+    padding-bottom: clamp(1rem, 2vw, 1.75rem);
 }
 
 .tag-hero-sobre {
@@ -83,7 +84,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     margin-top: 3rem;
-    margin-bottom: 2rem;
+    margin-bottom: clamp(2.75rem, 5vw, 4rem);
 }
 
 .numero-hero-item {
@@ -94,6 +95,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: transform 0.3s, background 0.3s;
+    height: 100%;
 }
 
 .numero-hero-item:hover {

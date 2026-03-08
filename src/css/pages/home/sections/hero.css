@@ -110,6 +110,14 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     overflow: hidden;
 }
 
+.hero__picture,
+.hero-full-image__picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+}
+
 .hero-full-image::after {
     content: '';
     position: absolute;
@@ -160,6 +168,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     justify-content: center;
     z-index: 1;
     overflow: hidden;
+    max-width: 100%;
 }
 
 .img-hero-destaque {
@@ -222,6 +231,17 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 @media (max-width: 900px) {
     .hero-full-image__btn {
         min-width: 150px;
+    }
+
+    .hero__imagem {
+        aspect-ratio: 5 / 4 !important;
+        min-height: clamp(240px, 54vw, 320px) !important;
+        border-radius: 16px;
+    }
+
+    .hero__picture {
+        border-radius: inherit;
+        overflow: hidden;
     }
 }
 

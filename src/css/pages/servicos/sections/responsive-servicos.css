@@ -47,6 +47,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .carousel-depoimentos-container {
+        --feedback-card-width: 360px;
+        --feedback-gap: 2rem;
         margin-top: 2rem;
         width: calc(100% + 4rem);
         margin-left: -2rem;
@@ -55,24 +57,12 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .carousel-depoimentos-track {
-        gap: 2rem;
         padding: 0 0.5rem;
     }
 
     .card-depoimento {
-        width: 360px;
-        min-width: 360px;
         padding: 1.75rem;
         margin: 0 0.25rem;
-    }
-
-    @keyframes scrollDepoimentos {
-        0% {
-            transform: translateX(0);
-        }
-        100% {
-            transform: translateX(calc(-360px * 6 - 2rem * 6 - 0.5rem * 6 - 4rem));
-        }
     }
 }
 
@@ -133,6 +123,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .carousel-depoimentos-container {
+        --feedback-card-width: 320px;
+        --feedback-gap: 1.5rem;
         margin-top: 2rem;
         width: calc(100% + 3rem);
         margin-left: -1.5rem;
@@ -140,14 +132,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         padding: 0 1.5rem;
     }
 
-    .carousel-depoimentos-track {
-        gap: 1.5rem;
-        padding: 0 0.5rem;
-    }
-
     .card-depoimento {
-        width: 320px;
-        min-width: 320px;
         padding: 1.5rem;
         margin: 0 0.25rem;
     }
@@ -198,16 +183,6 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     .depoimento-resultado {
         font-size: 0.85rem;
     }
-
-    @keyframes scrollDepoimentos {
-        0% {
-            transform: translateX(0);
-        }
-        100% {
-            transform: translateX(calc(-320px * 6 - 1.5rem * 6 - 1rem));
-        }
-    }
-
     .depoimento-avatar {
         width: 50px;
         height: 50px;
@@ -241,6 +216,46 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
     .cta-actions .botao {
         width: 100%;
+    }
+}
+
+/* Responsivo - Mobile (Carrossel Depoimentos → Scroll Snap) */
+@media (max-width: 640px) {
+    .secao-depoimentos {
+        padding: 2.4rem 0 2.8rem;
+    }
+
+    .carousel-depoimentos-container {
+        --feedback-card-width: 320px;
+        --feedback-gap: 1rem;
+        width: 100%;
+        margin: 1.8rem 0 0;
+        padding: 0 1rem;
+        overflow: hidden;
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+
+    .carousel-depoimentos-track {
+        width: fit-content;
+        min-width: 0;
+        padding: 0;
+        animation: scrollDepoimentos 30s linear infinite;
+        will-change: transform;
+    }
+
+    .card-depoimento {
+        padding: 1.35rem;
+        margin: 0;
+    }
+
+    .stats-depoimentos {
+        gap: 1.5rem !important;
+        margin-top: 1.4rem !important;
+    }
+
+    .stat-item strong {
+        font-size: 1.55rem !important;
     }
 }
 
@@ -290,22 +305,20 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .carousel-depoimentos-container {
-        width: calc(100% + 2rem);
-        margin-left: -1rem;
-        margin-right: -1rem;
-        padding: 0 1rem;
+        --feedback-card-width: 280px;
+        --feedback-gap: 0.875rem;
+        width: 100%;
+        margin: 1.8rem 0 0;
+        padding: 0 0.875rem;
     }
 
     .carousel-depoimentos-track {
-        gap: 1.25rem;
-        padding: 0 0.25rem;
+        animation-duration: 26s;
     }
 
     .card-depoimento {
-        width: 300px;
-        min-width: 300px;
         padding: 1.25rem;
-        margin: 0 0.25rem;
+        margin: 0;
     }
 
     .cabecalho-secao.centro {
@@ -366,16 +379,6 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     .depoimento-resultado i {
         font-size: 1rem;
     }
-
-    @keyframes scrollDepoimentos {
-        0% {
-            transform: translateX(0);
-        }
-        100% {
-            transform: translateX(calc(-300px * 6 - 1.25rem * 6 - 0.5rem));
-        }
-    }
-
     .depoimento-header {
         gap: 0.75rem;
     }
@@ -410,5 +413,3 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         font-size: 1rem;
     }
 }
-
-

@@ -507,7 +507,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 @media (max-width: 480px) {
     .hero {
         padding-top: 2rem !important;
-        padding-bottom: 5rem !important;
+        padding-bottom: 1.5rem !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
@@ -629,8 +629,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         justify-content: center !important;
         width: min(100%, 390px) !important;
         max-width: 390px !important;
-        aspect-ratio: 1 / 1 !important;
-        min-height: 260px !important;
+        aspect-ratio: 4 / 3 !important;
+        min-height: 220px !important;
         margin: 0 auto !important;
         overflow: hidden !important;
     }

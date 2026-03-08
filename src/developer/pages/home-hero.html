@@ -70,9 +70,23 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
       </div>
 
       <label class="form-field">
-        <span>URL da imagem</span>
-        <input id="heroImage" name="heroImage" type="url" required>
+        <span>URL da imagem padrao / fallback</span>
+        <input id="heroImage" name="heroImage" type="url">
       </label>
+
+      <div class="form-grid two-col">
+        <label class="form-field">
+          <span>Imagem desktop (opcional)</span>
+          <input id="heroDesktopImage" name="heroDesktopImage" type="url">
+        </label>
+        <label class="form-field">
+          <span>Imagem mobile (opcional)</span>
+          <input id="heroMobileImage" name="heroMobileImage" type="url">
+        </label>
+      </div>
+      <small class="field-hint">
+        Se vazio, a Home reutiliza a imagem padrao em todos os tamanhos.
+      </small>
 
       <div id="hero-full-options" class="form-section">
         <label class="check-field">

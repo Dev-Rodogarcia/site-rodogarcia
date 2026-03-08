@@ -54,8 +54,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .destaques-historia {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 1.5rem;
     margin-top: 2rem;
     padding-top: 2rem;
@@ -63,38 +62,55 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .destaque-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 1rem;
+    padding: 1.5rem 1.6rem;
     background: var(--cor-cinza-claro);
     border-radius: var(--radius-md);
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .destaque-item:hover {
-    transform: translateX(10px);
+    transform: translateY(-4px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
-.destaque-item i {
-    font-size: 2.5rem;
-    color: var(--cor-azul-hero);
+.destaque-item__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
     flex-shrink: 0;
+    background: rgba(46, 40, 130, 0.08);
+}
+
+.destaque-item__icon i {
+    font-size: 2rem;
+    color: var(--cor-azul-hero);
+    line-height: 1;
+}
+
+.destaque-item__content {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
 }
 
 .destaque-item strong {
     display: block;
     font-size: 1.1rem;
     color: var(--cor-texto-principal);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0;
 }
 
 .destaque-item span {
     display: block;
     font-size: 0.9rem;
     color: var(--cor-texto-secundario);
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .historia-imagem {

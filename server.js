@@ -1299,7 +1299,9 @@ function preparePublicContent(content) {
         id: item.id,
         title: sanitizeText(item.title, 120),
         description: sanitizeText(item.description, 420),
-        image: sanitizeUrl(item.image),
+        image: sanitizeUrl(item.image) || sanitizeUrl(item.desktopImage) || sanitizeUrl(item.mobileImage),
+        desktopImage: sanitizeUrl(item.desktopImage) || sanitizeUrl(item.image),
+        mobileImage: sanitizeUrl(item.mobileImage) || sanitizeUrl(item.image),
         layoutMode,
         fullImageButtonsEnabled,
         fullImageBackgroundType,
@@ -1315,7 +1317,9 @@ function preparePublicContent(content) {
         id: item.id,
         title: sanitizeText(item.title, 120),
         text: sanitizeText(item.text, 420),
-        image: sanitizeUrl(item.image),
+        image: sanitizeUrl(item.image) || sanitizeUrl(item.desktopImage) || sanitizeUrl(item.mobileImage),
+        desktopImage: sanitizeUrl(item.desktopImage) || sanitizeUrl(item.image),
+        mobileImage: sanitizeUrl(item.mobileImage) || sanitizeUrl(item.image),
         layoutMode
       };
     });
@@ -1341,7 +1345,9 @@ function preparePublicContent(content) {
       role: sanitizeText(item.role, 80),
       company: sanitizeText(item.company, 120),
       comment: sanitizeText(item.comment, 800),
-      photo: sanitizeUrl(item.photo)
+      photo: sanitizeUrl(item.photo),
+      resultadoIcon: sanitizeText(item.resultadoIcon, 40),
+      resultadoTexto: sanitizeText(item.resultadoTexto, 120)
     }));
 
   return {
@@ -1367,14 +1373,17 @@ function validateHeroPayload(payload) {
   const title = sanitizeText(payload.title, 120);
   const description = sanitizeText(payload.description, 420);
   const image = sanitizeUrl(payload.image);
+  const desktopImage = sanitizeUrl(payload.desktopImage);
+  const mobileImage = sanitizeUrl(payload.mobileImage);
   const active = Boolean(payload.active);
   const layoutMode = normalizeHeroLayoutMode(payload.layoutMode);
   const fullImageButtonsEnabled = coerceBoolean(payload.fullImageButtonsEnabled, false);
   const fullImageBackgroundType = normalizeHeroBackgroundType(payload.fullImageBackgroundType);
+  const imageFallback = image || desktopImage || mobileImage;
 
   if (!title) errors.push('Titulo do slide Hero e obrigatorio.');
   if (layoutMode === 'text-image' && !description) errors.push('Descricao do slide Hero e obrigatoria.');
-  if (!image) errors.push('Imagem do slide Hero e obrigatoria.');
+  if (!imageFallback) errors.push('Informe ao menos uma imagem para o slide Hero.');
 
   const parsedButtons = normalizeButtons(payload.buttons, {
     defaultSecondOutline: layoutMode === 'full-image'
@@ -1389,7 +1398,9 @@ function validateHeroPayload(payload) {
     value: {
       title,
       description,
-      image,
+      image: imageFallback,
+      desktopImage,
+      mobileImage,
       active,
       layoutMode,
       fullImageButtonsEnabled,
@@ -1405,22 +1416,33 @@ function validateDnaPayload(payload) {
   const title = sanitizeText(payload.title, 120);
   const text = sanitizeText(payload.text, 420);
   const image = sanitizeUrl(payload.image);
+  const desktopImage = sanitizeUrl(payload.desktopImage);
+  const mobileImage = sanitizeUrl(payload.mobileImage);
   const active = Boolean(payload.active);
   const hasLayoutPayload = Object.prototype.hasOwnProperty.call(payload || {}, 'layoutMode');
   let layoutMode = normalizeDnaLayoutMode(payload.layoutMode);
+  const imageFallback = image || desktopImage || mobileImage;
 
   // Compatibilidade: se frontend antigo nao enviar layoutMode e vier apenas imagem,
   // assume Imagem Completa para nao bloquear o fluxo.
-  if (!hasLayoutPayload && image && !text) {
+  if (!hasLayoutPayload && imageFallback && !text) {
     layoutMode = 'full-image';
   }
 
   if (!title) errors.push('Titulo do slide DNA e obrigatorio.');
   if (layoutMode === 'text-image' && !text) errors.push('Texto do slide DNA e obrigatorio.');
-  if (!image) errors.push('Imagem do slide DNA e obrigatoria.');
+  if (!imageFallback) errors.push('Informe ao menos uma imagem para o slide DNA.');
 
   return {
-    value: { title, text, image, active, layoutMode },
+    value: {
+      title,
+      text,
+      image: imageFallback,
+      desktopImage,
+      mobileImage,
+      active,
+      layoutMode
+    },
     errors
   };
 }
@@ -1470,6 +1492,8 @@ function validateFeedbackPayload(payload) {
   const company = sanitizeText(payload.company, 120);
   const comment = sanitizeText(payload.comment, 800);
   const photo = sanitizeUrl(payload.photo);
+  const resultadoIcon = sanitizeText(payload.resultadoIcon, 40);
+  const resultadoTexto = sanitizeText(payload.resultadoTexto, 120);
   const active = Boolean(payload.active);
 
   if (!name) errors.push('Nome do cliente e obrigatorio.');
@@ -1484,6 +1508,8 @@ function validateFeedbackPayload(payload) {
       company,
       comment,
       photo,
+      resultadoIcon,
+      resultadoTexto,
       active
     },
     errors
@@ -3301,5 +3327,4 @@ function redirectResponse(res, statusCode, destination) {
 module.exports = {
   server
 };
-
 

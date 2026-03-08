@@ -27,7 +27,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Tablet */
 @media (max-width: 968px) {
     .hero-sobre {
-        padding: 5rem 0 5rem;
+        padding: 5rem 0 6.75rem;
         min-height: auto;
     }
 
@@ -86,7 +86,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Mobile */
 @media (max-width: 768px) {
     .hero-sobre {
-        padding: 4rem 0 4rem;
+        padding: 4rem 0 6rem;
         min-height: auto;
     }
 
@@ -117,6 +117,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         grid-template-columns: 1fr;
         gap: 1rem;
         margin-top: 2rem;
+        margin-bottom: 2.5rem;
     }
 
     .numero-hero-item {
@@ -165,11 +166,25 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .destaque-item {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        gap: 0.9rem;
         padding: 1.25rem;
     }
 
-    .destaque-item i {
-        font-size: 2rem;
+    .destaque-item__icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+    }
+
+    .destaque-item__icon i {
+        font-size: 1.75rem;
+    }
+
+    .destaque-item__content {
+        justify-items: center;
     }
 
     .grid-valores {
@@ -205,7 +220,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Mobile Pequeno */
 @media (max-width: 480px) {
     .hero-sobre {
-        padding: 3.5rem 0 3rem;
+        padding: 3.5rem 0 5.5rem;
     }
 
     .hero-sobre__container {
@@ -233,6 +248,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     .numeros-hero-sobre {
         gap: 0.75rem;
         margin-top: 1.5rem;
+        margin-bottom: 2rem;
     }
 
     .numero-hero-item {
@@ -262,13 +278,16 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .destaque-item {
-        flex-direction: column;
-        text-align: center;
         padding: 1rem;
     }
 
-    .destaque-item i {
-        font-size: 1.75rem;
+    .destaque-item__icon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .destaque-item__icon i {
+        font-size: 1.6rem;
     }
 
     .card-valor {

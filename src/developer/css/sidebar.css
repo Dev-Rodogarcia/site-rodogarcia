@@ -334,7 +334,7 @@ body.sidebar-collapsed .dev-sidebar__bottom .dev-nav__item {
   .dev-sidebar {
     position: fixed;
     left: 0;
-    width: 292px;
+    width: min(292px, 85vw);
     transform: translateX(-100%);
     box-shadow: 0 20px 40px rgba(8, 8, 30, 0.4);
   }

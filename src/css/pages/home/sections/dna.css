@@ -71,6 +71,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     --dna-slide-height: calc(var(--dna-base-slide-height) + (var(--dna-section-padding-y) * 2));
     opacity: 1;
     transition: opacity 0.18s ease;
+    touch-action: pan-y pinch-zoom;
 }
 
 .carrossel-dna.is-hydrating {
@@ -83,6 +84,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     width: 100%;
     height: var(--dna-slide-height);
     overflow: hidden;
+    touch-action: pan-y pinch-zoom;
 }
 
 .carrossel-dna__slide {
@@ -123,6 +125,14 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     overflow: hidden;
 }
 
+.dna-img__picture,
+.dna-full-image__picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+}
+
 .dna-full-image__media {
     width: 100%;
     height: 100%;
@@ -160,6 +170,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     right: calc((100vw - 100%) / -2);
     transform: translateY(-50%);
     display: flex;
+    align-items: center;
     justify-content: space-between;
     z-index: 20;
     pointer-events: none;
@@ -168,12 +179,19 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .carrossel-dna__btn {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    pointer-events: auto;
-    line-height: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.carrossel-dna__btn i {
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.carrossel-dna__btn:disabled {
+    opacity: 0.45;
+    cursor: default;
 }
 
 .carrossel-dna__btn:focus-visible {
@@ -213,9 +231,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     align-items: center;
     justify-content: center;
     height: 100%;
+    min-width: 0;
 }
 
-.dna-img>div {
+.dna-img__frame {
     width: 100%;
     height: 100%;
     display: flex;
@@ -268,24 +287,94 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 /* Responsivo - Mobile */
 @media (max-width: 768px) {
     .carrossel-dna {
-        --dna-base-slide-height: 680px;
+        --dna-base-slide-height: auto;
         --dna-section-padding-y: 0;
         --dna-content-padding-x: 1.5rem;
+        --dna-mobile-grid-height: 680px;
+        --dna-mobile-padding-top: 1.5rem;
+        --dna-mobile-padding-bottom: 1.75rem;
+        padding-bottom: 0;
+    }
+
+    .carrossel-dna__slides {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    .carrossel-dna__slide {
+        position: static;
+        display: none;
+        opacity: 1;
+        visibility: visible;
+        transition: none;
+    }
+
+    .carrossel-dna__slide--ativo {
+        display: block;
+    }
+
+    .carrossel-dna__slide .grid-dna {
+        height: var(--dna-mobile-grid-height);
+        min-height: var(--dna-mobile-grid-height);
+        align-content: start;
+        overflow: hidden;
+        padding:
+            var(--dna-mobile-padding-top)
+            var(--dna-content-padding-x)
+            var(--dna-mobile-padding-bottom);
     }
 
     .grid-dna {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        gap: 2.5rem;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 1.75rem;
+    }
+
+    .carrossel-dna__slide .dna-info {
+        height: auto;
+        justify-content: flex-start;
+        width: 100%;
+        min-height: 0;
+        padding-bottom: 0.25rem;
     }
 
     .dna-info {
         order: 1;
     }
 
-    .dna-img {
+    .dna-img,
+    .dna-full-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         order: 2;
+        width: 100%;
         min-height: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .dna-img__frame {
+        height: 100%;
+        min-height: 0;
+        max-height: none;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .carrossel-dna__slide--full .dna-full-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: var(--dna-mobile-grid-height);
+        min-height: var(--dna-mobile-grid-height);
+        max-height: var(--dna-mobile-grid-height);
+    }
+
+    .dna-img__frame {
+        padding: 0;
     }
 
     .tag-dna {
@@ -332,25 +421,61 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         width: 100%;
         height: 100%;
         border-radius: var(--radius-md);
+        object-position: center center;
     }
 
-}
+    .dna-full-image__media {
+        object-position: center center;
+    }
 
-@media (max-width: 1024px) {
     .carrossel-dna__controles {
         display: none;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .carrossel-dna {
+        padding-bottom: 4.5rem;
+    }
+
+    .carrossel-dna__controles {
+        top: auto;
+        left: 50%;
+        right: auto;
+        bottom: 0.9rem;
+        transform: translateX(-50%);
+        justify-content: center;
+        gap: 0.9rem;
+        width: auto;
+        padding: 0;
+    }
+
+    .carrossel-dna__btn {
+        padding: 0;
+    }
+
+    .carrossel-dna__btn i {
+        font-size: 1rem;
+    }
+
+    .carrossel-dna__btn:hover,
+    .carrossel-dna__btn:focus-visible {
+        transform: translateY(-1px);
+        opacity: 0.85;
     }
 }
 
 /* Responsivo - Mobile Pequeno */
 @media (max-width: 480px) {
     .carrossel-dna {
-        --dna-base-slide-height: 620px;
         --dna-content-padding-x: 1rem;
+        --dna-mobile-grid-height: 620px;
+        --dna-mobile-padding-top: 1.25rem;
+        --dna-mobile-padding-bottom: 1.5rem;
     }
 
     .grid-dna {
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .tag-dna {
@@ -392,4 +517,3 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
 }
-

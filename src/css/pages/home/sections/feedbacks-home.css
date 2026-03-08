@@ -58,6 +58,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .secao-feedbacks-home .carousel-depoimentos-container {
+    --feedback-card-width: 400px;
+    --feedback-gap: 2rem;
     width: calc(100% + 8rem);
     margin-left: -4rem;
     margin-right: -4rem;
@@ -72,9 +74,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 .secao-feedbacks-home .carousel-depoimentos-track {
     display: flex;
     width: fit-content;
-    gap: 2rem;
+    gap: var(--feedback-gap);
     padding: 0 0.8rem;
     animation: scrollDepoimentosHome 42s linear infinite;
+    will-change: transform;
 }
 
 .secao-feedbacks-home .carousel-depoimentos-track:hover {
@@ -86,11 +89,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     border: 1px solid var(--cor-borda);
     border-radius: var(--radius-md);
     padding: 1.7rem;
-    width: 400px;
-    min-width: 400px;
+    width: var(--feedback-card-width);
+    min-width: var(--feedback-card-width);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
     position: relative;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .secao-feedbacks-home .card-depoimento:hover {
@@ -152,6 +157,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .secao-feedbacks-home .depoimento-texto {
+    flex: 1;
     margin: 0;
     font-size: 0.94rem;
     line-height: 1.65;
@@ -175,6 +181,23 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     font-size: 1.7rem;
     line-height: 0;
     margin-left: 0.22rem;
+    vertical-align: bottom;
+}
+
+.secao-feedbacks-home .depoimento-resultado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--cor-borda);
+    color: var(--cor-azul-hero);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.secao-feedbacks-home .depoimento-resultado i {
+    font-size: 1.2rem;
 }
 
 @keyframes scrollDepoimentosHome {
@@ -183,21 +206,17 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     100% {
-        transform: translateX(calc(-400px * 6 - 2rem * 6));
+        transform: translateX(calc((var(--feedback-card-width) + var(--feedback-gap)) * -6));
     }
 }
 
 @media (max-width: 900px) {
     .secao-feedbacks-home .carousel-depoimentos-container {
+        --feedback-card-width: 350px;
         width: calc(100% + 3rem);
         margin-left: -1.5rem;
         margin-right: -1.5rem;
         padding: 0 1.5rem;
-    }
-
-    .secao-feedbacks-home .card-depoimento {
-        width: 350px;
-        min-width: 350px;
     }
 }
 
@@ -216,25 +235,37 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     }
 
     .secao-feedbacks-home .carousel-depoimentos-container {
+        --feedback-card-width: 320px;
+        --feedback-gap: 1rem;
         width: 100%;
         margin: 1.8rem 0 0;
-        padding: 0;
+        padding: 0 1rem;
+        overflow: hidden;
         mask-image: none;
         -webkit-mask-image: none;
     }
 
     .secao-feedbacks-home .carousel-depoimentos-track {
-        gap: 1rem;
+        width: fit-content;
+        min-width: 0;
         padding: 0;
-        animation: none;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
+        animation: scrollDepoimentosHome 32s linear infinite;
+        will-change: transform;
     }
 
     .secao-feedbacks-home .card-depoimento {
-        width: 88vw;
-        min-width: 88vw;
-        scroll-snap-align: start;
         padding: 1.35rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .secao-feedbacks-home .carousel-depoimentos-container {
+        --feedback-card-width: 280px;
+        --feedback-gap: 0.875rem;
+        padding: 0 0.875rem;
+    }
+
+    .secao-feedbacks-home .carousel-depoimentos-track {
+        animation-duration: 28s;
     }
 }

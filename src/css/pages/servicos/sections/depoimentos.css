@@ -30,6 +30,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .carousel-depoimentos-container {
+    --feedback-card-width: 420px;
+    --feedback-gap: 2.5rem;
     width: calc(100% + 8rem);
     margin-left: -4rem;
     margin-right: -4rem;
@@ -44,9 +46,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 .carousel-depoimentos-track {
     display: flex;
     width: fit-content;
-    gap: 2.5rem;
+    gap: var(--feedback-gap);
     padding: 0 1rem;
     animation: scrollDepoimentos 40s linear infinite;
+    will-change: transform;
 }
 
 .carousel-depoimentos-track:hover {
@@ -60,11 +63,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     border: 1px solid var(--cor-borda);
     transition: transform 0.3s, box-shadow 0.3s;
     flex-shrink: 0;
-    width: 420px;
-    min-width: 420px;
+    width: var(--feedback-card-width);
+    min-width: var(--feedback-card-width);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: visible;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-depoimento:hover {
@@ -153,6 +158,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 }
 
 .depoimento-texto {
+    flex: 1;
     color: var(--cor-texto-secundario);
     line-height: 1.7;
     font-size: 0.95rem;
@@ -176,6 +182,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     opacity: 0.3;
     line-height: 0;
     margin-left: 0.25rem;
+    vertical-align: bottom;
 }
 
 /* Badges de Depoimento - Removidos, estrelas estÃ£o no lugar */
@@ -188,8 +195,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
     border-top: 1px solid var(--cor-borda);
     color: var(--cor-azul-hero);
     font-weight: 600;
@@ -237,11 +244,10 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
     0% {
         transform: translateX(0);
     }
+
     100% {
-        transform: translateX(calc(-420px * 6 - 2.5rem * 6 - 1rem * 6 - 8rem));
+        transform: translateX(calc((var(--feedback-card-width) + var(--feedback-gap)) * -6));
     }
 }
 
 /* A animaÃ§Ã£o move exatamente metade dos depoimentos (6 de 12) para criar loop infinito perfeito */
-
-

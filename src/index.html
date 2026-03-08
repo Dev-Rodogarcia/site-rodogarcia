@@ -30,7 +30,7 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         content="Rodogarcia Transportes: frete e logistica nacional com seguranca, eficiencia e tecnologia desde 1989.">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <title>Rodogarcia Transportes - Logistica e Transporte</title>
-  <link rel="icon" type="image/x-icon" href="/public/favicon.ico?v=20260305c">
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico?v=20260305c">
     <link rel="canonical" href="https://rodogarcia.com.br/">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:type" content="website">
@@ -172,15 +172,18 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                     <div class="nav-mobile-grupo nav-mobile-grupo--acesso">
                         <p class="nav-mobile-label">Acesso interno</p>
                         <div class="nav-mobile-auth">
-                            <a href="/auth/entrar.html?area=staff" class="botao botao--texto-branco nav-mobile-btn">Entrar</a>
-                            <a href="/auth/criar-conta.html?area=staff" class="botao botao--branco nav-mobile-btn">Criar conta</a>
+                            <a href="/auth/entrar.html?area=staff"
+                                class="botao botao--texto-branco nav-mobile-btn">Entrar</a>
+                            <a href="/auth/criar-conta.html?area=staff" class="botao botao--branco nav-mobile-btn">Criar
+                                conta</a>
                         </div>
                     </div>
 
                     <div class="nav-mobile-grupo">
                         <p class="nav-mobile-label">Atalhos</p>
                         <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
-                            rel="noopener noreferrer" class="botao botao--outline-branco nav-mobile-btn">Area do Cliente</a>
+                            rel="noopener noreferrer" class="botao botao--outline-branco nav-mobile-btn">Area do
+                            Cliente</a>
                         <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
                             rel="noopener noreferrer" class="botao botao--secundario nav-mobile-btn">Rastrear</a>
                     </div>
@@ -221,9 +224,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                             </div>
                         </div>
                         <div class="hero__imagem">
-                            <img src="/public/foto5.png" alt="Caminhão Rodogarcia em transporte nacional"
-                                class="img-hero-destaque" loading="eager" decoding="async" fetchpriority="high"
-                                width="2048" height="882">
+                            <picture class="hero__picture">
+                                <source media="(max-width: 768px)" srcset="/public/foto5.png">
+                                <source media="(min-width: 769px)" srcset="/public/foto5.png">
+                                <img src="/public/foto5.png" alt="Caminhão Rodogarcia em transporte nacional"
+                                    class="img-hero-destaque" loading="eager" decoding="async" fetchpriority="high"
+                                    width="2048" height="882">
+                            </picture>
                         </div>
                     </div>
                 </div>
@@ -244,8 +251,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                             </div>
                         </div>
                         <div class="hero__imagem">
-                            <img src="/public/foto4-semfundo.png" alt="Frota de caminhões Rodogarcia espalhada pelo Brasil"
-                                class="img-hero-destaque" loading="lazy" decoding="async" width="2048" height="2048">
+                            <picture class="hero__picture">
+                                <source media="(max-width: 768px)" srcset="/public/foto4-semfundo.png">
+                                <source media="(min-width: 769px)" srcset="/public/foto4-semfundo.png">
+                                <img src="/public/foto4-semfundo.png"
+                                    alt="Frota de caminhões Rodogarcia espalhada pelo Brasil" class="img-hero-destaque"
+                                    loading="lazy" decoding="async" width="2048" height="2048">
+                            </picture>
                         </div>
                     </div>
                 </div>
@@ -266,8 +278,12 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                             </div>
                         </div>
                         <div class="hero__imagem">
-                            <img src="/public/foto6-semfundo.png" alt="Logística Rodogarcia – cotação online"
-                                class="img-hero-destaque" loading="lazy" decoding="async" width="2048" height="882">
+                            <picture class="hero__picture">
+                                <source media="(max-width: 768px)" srcset="/public/foto6-semfundo.png">
+                                <source media="(min-width: 769px)" srcset="/public/foto6-semfundo.png">
+                                <img src="/public/foto6-semfundo.png" alt="Logística Rodogarcia – cotação online"
+                                    class="img-hero-destaque" loading="lazy" decoding="async" width="2048" height="882">
+                            </picture>
                         </div>
                     </div>
                 </div>
@@ -354,8 +370,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
         <!-- Seção DNA / Estatísticas (Fundo Azul) -->
         <section class="secao dna-bg-azul">
             <div class="container">
-                <div id="carrossel-dna" class="carrossel-dna is-hydrating" role="region" aria-roledescription="carrossel"
-                    aria-label="Destaques da Rodogarcia" tabindex="0">
+                <div id="carrossel-dna" class="carrossel-dna is-hydrating" role="region"
+                    aria-roledescription="carrossel" aria-label="Destaques da Rodogarcia" tabindex="0">
                     <div class="carrossel-dna__slides">
                         <article class="carrossel-dna__slide carrossel-dna__slide--ativo" data-dna-slide
                             aria-hidden="false">
@@ -388,9 +404,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                                     </ul>
                                 </div>
                                 <div class="dna-img">
-                                    <div>
-                                        <img src="/public/foto4.png" alt="Frota de caminhoes da Rodogarcia"
-                                            class="img-dna" loading="lazy" decoding="async" width="2048" height="2048">
+                                    <div class="dna-img__frame">
+                                        <picture class="dna-img__picture">
+                                            <source media="(max-width: 768px)" srcset="/public/foto4.png">
+                                            <source media="(min-width: 769px)" srcset="/public/foto4.png">
+                                            <img src="/public/foto4.png" alt="Frota de caminhoes da Rodogarcia"
+                                                class="img-dna" loading="lazy" decoding="async" width="2048" height="2048">
+                                        </picture>
                                     </div>
                                 </div>
                             </div>
@@ -426,9 +446,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                                     </ul>
                                 </div>
                                 <div class="dna-img">
-                                    <div>
-                                        <img src="/public/foto5.png" alt="Caminhão Rodogarcia em operação nacional"
-                                            class="img-dna" loading="lazy" decoding="async" width="2048" height="882">
+                                    <div class="dna-img__frame">
+                                        <picture class="dna-img__picture">
+                                            <source media="(max-width: 768px)" srcset="/public/foto5.png">
+                                            <source media="(min-width: 769px)" srcset="/public/foto5.png">
+                                            <img src="/public/foto5.png" alt="Caminhão Rodogarcia em operação nacional"
+                                                class="img-dna" loading="lazy" decoding="async" width="2048" height="882">
+                                        </picture>
                                     </div>
                                 </div>
                             </div>
@@ -464,9 +488,13 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                                     </ul>
                                 </div>
                                 <div class="dna-img">
-                                    <div>
-                                        <img src="/public/foto6.png" alt="Operação logística Rodogarcia com tecnologia"
-                                            class="img-dna" loading="lazy" decoding="async" width="2048" height="1152">
+                                    <div class="dna-img__frame">
+                                        <picture class="dna-img__picture">
+                                            <source media="(max-width: 768px)" srcset="/public/foto6.png">
+                                            <source media="(min-width: 769px)" srcset="/public/foto6.png">
+                                            <img src="/public/foto6.png" alt="Operação logística Rodogarcia com tecnologia"
+                                                class="img-dna" loading="lazy" decoding="async" width="2048" height="1152">
+                                        </picture>
                                     </div>
                                 </div>
                             </div>
@@ -627,7 +655,8 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
                     <div class="box-rastreio-inner">
                         <div class="texto">
                             <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-                            <h3 class="rastreio-titulo">Tenha controle total sobre sua logística rastreando suas entregas.</h3>
+                            <h3 class="rastreio-titulo">Tenha controle total sobre sua logística rastreando suas
+                                entregas.</h3>
                         </div>
                         <div class="rastreio-acao-row">
                             <a href="https://rodogarcia.eslcloud.com.br/recipient_tracking" target="_blank"
@@ -663,36 +692,213 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 
                 <div class="carousel-depoimentos-container">
                     <div class="carousel-depoimentos-track" data-feedback-track>
+
                         <div class="card-depoimento">
-                            <div class="depoimento-avaliacao">
-                                <i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i
-                                    class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i>
-                            </div>
                             <div class="depoimento-header">
-                                <div class="depoimento-avatar"><span>RC</span></div>
+                                <div class="depoimento-avatar">
+                                    <span>MS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Maria Silva</h4>
+                                    <p>Gerente de Operações - Indústria Química</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Transportamos produtos perigosos há <strong>4 anos</strong> com a Rodogarcia. <strong>100% de conformidade</strong> com todas as normas. Eles são os únicos que confiamos para nossas cargas mais sensíveis. Segurança em primeiro lugar!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-shield-check"></i>
+                                <span>100% de conformidade</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>JP</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>João Pereira</h4>
+                                    <p>CEO - E-commerce Brasil</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Nossa empresa <strong>cresceu 280%</strong> nos últimos 3 anos e a Rodogarcia acompanhou cada passo. A abrangência nacional foi decisiva - conseguimos atender clientes em <strong>todos os 27 estados</strong> com a mesma qualidade. O rastreamento em tempo real aumentou nossa taxa de satisfação do cliente em <strong>42%</strong>!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-up"></i>
+                                <span>280% de crescimento</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>AF</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Ana Ferreira</h4>
+                                    <p>Coordenadora de Supply Chain</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"A operação In Door da Rodogarcia <strong>reduziu nosso tempo de processamento em 60%</strong>. Antes levávamos 3 dias para processar um pedido, agora fazemos em <strong>menos de 1 dia</strong>. A eficiência deles é impressionante e isso impactou diretamente na satisfação dos nossos clientes!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-clock"></i>
+                                <span>60% mais rápido</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>RC</span>
+                                </div>
                                 <div class="depoimento-info">
                                     <h4>Roberto Campos</h4>
-                                    <p>Diretor de Logística - ABC Indústria</p>
+                                    <p>Diretor de Logística - TechCorp</p>
                                 </div>
                             </div>
-                            <p class="depoimento-texto">"Reduzimos nossos custos logísticos em 35% com previsibilidade e
-                                rastreio em tempo real."</p>
+                            <p class="depoimento-texto">"Reduzimos nossos custos logísticos em <strong>35%</strong> desde que começamos a trabalhar com a Rodogarcia. A confiabilidade deles é impressionante - <strong>zero atrasos</strong> em 7 anos. Isso mudou completamente nosso negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-down"></i>
+                                <span>35% de redução de custos</span>
+                            </div>
                         </div>
+
                         <div class="card-depoimento">
-                            <div class="depoimento-avaliacao">
-                                <i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i><i
-                                    class="ph ph-star-fill"></i><i class="ph ph-star-fill"></i>
-                            </div>
                             <div class="depoimento-header">
-                                <div class="depoimento-avatar"><span>AM</span></div>
+                                <div class="depoimento-avatar">
+                                    <span>CL</span>
+                                </div>
                                 <div class="depoimento-info">
-                                    <h4>Ana Martins</h4>
-                                    <p>Gerente de Operações - PharmaLog</p>
+                                    <h4>Carlos Lima</h4>
+                                    <p>Diretor Comercial - Importadora</p>
                                 </div>
                             </div>
-                            <p class="depoimento-texto">"Conseguimos operar com 100% de conformidade em cargas sensíveis
-                                e atendimento muito acima da média."</p>
+                            <p class="depoimento-texto">"Trabalhamos com importação e exportação há mais de 10 anos. A Rodogarcia é a <strong>única transportadora</strong> que conseguimos confiar 100%. Em 5 anos de parceria, <strong>zero problemas</strong> com documentação ou atrasos. Eles entendem a urgência do nosso negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-check-circle"></i>
+                                <span>Zero problemas em 5 anos</span>
+                            </div>
                         </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>PS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Patrícia Santos</h4>
+                                    <p>Gerente de Distribuição</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"A experiência de <strong>35 anos</strong> da Rodogarcia faz toda a diferença. Eles não apenas transportam, mas <strong>otimizam nossos processos</strong>. Reduzimos estoque em <strong>45%</strong> e aumentamos a rotatividade. Parceiros estratégicos que realmente entendem de logística!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-package"></i>
+                                <span>45% menos estoque</span>
+                            </div>
+                        </div>
+
+<!-- Duplicate for scroll -->
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>MS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Maria Silva</h4>
+                                    <p>Gerente de Operações - Indústria Química</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Transportamos produtos perigosos há <strong>4 anos</strong> com a Rodogarcia. <strong>100% de conformidade</strong> com todas as normas. Eles são os únicos que confiamos para nossas cargas mais sensíveis. Segurança em primeiro lugar!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-shield-check"></i>
+                                <span>100% de conformidade</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>JP</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>João Pereira</h4>
+                                    <p>CEO - E-commerce Brasil</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Nossa empresa <strong>cresceu 280%</strong> nos últimos 3 anos e a Rodogarcia acompanhou cada passo. A abrangência nacional foi decisiva - conseguimos atender clientes em <strong>todos os 27 estados</strong> com a mesma qualidade. O rastreamento em tempo real aumentou nossa taxa de satisfação do cliente em <strong>42%</strong>!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-up"></i>
+                                <span>280% de crescimento</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>AF</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Ana Ferreira</h4>
+                                    <p>Coordenadora de Supply Chain</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"A operação In Door da Rodogarcia <strong>reduziu nosso tempo de processamento em 60%</strong>. Antes levávamos 3 dias para processar um pedido, agora fazemos em <strong>menos de 1 dia</strong>. A eficiência deles é impressionante e isso impactou diretamente na satisfação dos nossos clientes!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-clock"></i>
+                                <span>60% mais rápido</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>RC</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Roberto Campos</h4>
+                                    <p>Diretor de Logística - TechCorp</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Reduzimos nossos custos logísticos em <strong>35%</strong> desde que começamos a trabalhar com a Rodogarcia. A confiabilidade deles é impressionante - <strong>zero atrasos</strong> em 7 anos. Isso mudou completamente nosso negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-trend-down"></i>
+                                <span>35% de redução de custos</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>CL</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Carlos Lima</h4>
+                                    <p>Diretor Comercial - Importadora</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"Trabalhamos com importação e exportação há mais de 10 anos. A Rodogarcia é a <strong>única transportadora</strong> que conseguimos confiar 100%. Em 5 anos de parceria, <strong>zero problemas</strong> com documentação ou atrasos. Eles entendem a urgência do nosso negócio!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-check-circle"></i>
+                                <span>Zero problemas em 5 anos</span>
+                            </div>
+                        </div>
+
+                        <div class="card-depoimento">
+                            <div class="depoimento-header">
+                                <div class="depoimento-avatar">
+                                    <span>PS</span>
+                                </div>
+                                <div class="depoimento-info">
+                                    <h4>Patrícia Santos</h4>
+                                    <p>Gerente de Distribuição</p>
+                                </div>
+                            </div>
+                            <p class="depoimento-texto">"A experiência de <strong>35 anos</strong> da Rodogarcia faz toda a diferença. Eles não apenas transportam, mas <strong>otimizam nossos processos</strong>. Reduzimos estoque em <strong>45%</strong> e aumentamos a rotatividade. Parceiros estratégicos que realmente entendem de logística!"</p>
+                            <div class="depoimento-resultado">
+                                <i class="ph ph-package"></i>
+                                <span>45% menos estoque</span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -773,6 +979,3 @@ Elementos tecnicos: arquivo declarativo, sem funcoes JS locais.
 </body>
 
 </html>
-
-
-
