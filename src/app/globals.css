@@ -1,0 +1,325 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — mapeados do base.css original
+   ═══════════════════════════════════════════════ */
+@theme {
+  /* Fonts */
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-body: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+
+  /* Transitions */
+  --transition-fast: 160ms ease;
+  --transition-base: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 420ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Focus */
+  --focus-ring: 0 0 0 3px rgba(29, 78, 216, 0.18);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 22px 50px rgba(15, 23, 42, 0.12);
+  --shadow-lg: 0 28px 80px rgba(10, 18, 38, 0.18);
+
+  /* Border radius — pill and custom */
+  --radius-pill: 999px;
+
+  /* Layout */
+  --container-width: 1200px;
+}
+
+/* ═══════════════════════════════════════════════
+   shadcn token bridge — mapeia shadcn → nosso design
+   ═══════════════════════════════════════════════ */
+@theme inline {
+  --font-heading: var(--font-display);
+  --font-sans: var(--font-body);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.85);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+/* ═══════════════════════════════════════════════
+   LIGHT THEME — design Rodogarcia
+   ═══════════════════════════════════════════════ */
+:root {
+  --background: #eef3f9;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #1d4ed8;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #334155;
+  --muted: #f4f7fc;
+  --muted-foreground: #5b6474;
+  --accent: #06b6d4;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --border: rgba(15, 23, 42, 0.08);
+  --input: rgba(15, 23, 42, 0.08);
+  --ring: #1d4ed8;
+  --radius: 14px;
+  --chart-1: #1d4ed8;
+  --chart-2: #06b6d4;
+  --chart-3: #059669;
+  --chart-4: #d97706;
+  --chart-5: #dc2626;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #1d4ed8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #334155;
+  --sidebar-border: rgba(15, 23, 42, 0.08);
+  --sidebar-ring: #1d4ed8;
+
+  /* ── Aliases diretos para uso em CSS customizado ── */
+  --color-surface: rgba(255, 255, 255, 0.86);
+  --color-surface-2: rgba(241, 245, 249, 0.88);
+  --color-surface-strong: #ffffff;
+  --color-surface-muted: rgba(244, 247, 252, 0.92);
+  --color-foreground-soft: #334155;
+  --color-muted-raw: #5b6474;
+  --color-border-strong: rgba(15, 23, 42, 0.16);
+  --color-primary-strong: #1e40af;
+  --color-primary-soft: rgba(29, 78, 216, 0.1);
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-overlay: rgba(5, 10, 28, 0.56);
+  --color-overlay-strong: rgba(5, 10, 28, 0.78);
+}
+
+/* ═══════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    background:
+      radial-gradient(circle at top left, rgba(6, 182, 212, 0.14), transparent 30%),
+      radial-gradient(circle at top right, rgba(29, 78, 216, 0.16), transparent 28%),
+      linear-gradient(180deg, #f6f9fd 0%, #eef3f9 56%, #f6f9fd 100%);
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body.page-home {
+    background:
+      radial-gradient(circle at 18% 10%, rgba(6, 182, 212, 0.1), transparent 22%),
+      radial-gradient(circle at 82% 9%, rgba(29, 78, 216, 0.1), transparent 20%),
+      linear-gradient(180deg, #f8fbff 0%, #eef4fb 26%, #eaf1f9 58%, #f8fbff 100%);
+  }
+
+  body.has-nav-open,
+  body.has-modal-open {
+    overflow: hidden;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+  }
+
+  img,
+  picture,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    border: 0;
+    background: none;
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    cursor: not-allowed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    font-family: var(--font-display);
+    letter-spacing: -0.04em;
+    line-height: 1.02;
+  }
+
+  h1 { font-size: clamp(2.8rem, 8vw, 5.6rem); }
+  h2 { font-size: clamp(2rem, 4vw, 3.5rem); }
+  h3 { font-size: clamp(1.3rem, 2.6vw, 1.75rem); }
+
+  p {
+    margin: 0;
+    color: var(--muted-foreground);
+    line-height: 1.68;
+  }
+
+  ul,
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  strong {
+    color: var(--foreground);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  ::selection {
+    background: rgba(29, 78, 216, 0.18);
+    color: var(--foreground);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  section[id] {
+    scroll-margin-top: 7rem;
+  }
+
+  @media (max-width: 767px) {
+    section[id] {
+      scroll-margin-top: 6rem;
+    }
+
+    body.page-home {
+      background:
+        radial-gradient(circle at 20% 8%, rgba(6, 182, 212, 0.08), transparent 24%),
+        radial-gradient(circle at 82% 10%, rgba(29, 78, 216, 0.08), transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, #eef4fb 26%, #eef4fb 100%);
+    }
+  }
+}
+
+/* ── Utilities ─────────────────────────────────────────────── */
+@keyframes certifications-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+[data-admin-shell="true"] [data-admin-scroll] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.42) transparent;
+}
+
+[data-admin-shell="true"] [data-admin-scroll]::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+[data-admin-shell="true"] [data-admin-scroll]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-admin-shell="true"] [data-admin-scroll]::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.36);
+  background-clip: padding-box;
+}
+
+[data-admin-shell="true"] [data-admin-scroll]::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 232, 240, 0.5);
+  background-clip: padding-box;
+}

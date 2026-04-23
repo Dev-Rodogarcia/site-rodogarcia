@@ -1,89 +1,37 @@
-const { spawn } = require('child_process');
-const http = require('http');
+const { spawn } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 
-const PORT = 5010;
-const HOST = '127.0.0.1';
-const SERVER_URL = `http://${HOST}:${PORT}`;
-const BLOCKED_PATHS = [
-  '/.env',
-  '/.env.example',
-  '/README.md',
-  '/docs/checklist-tecnico.md',
-  '/scripts/tests/test-basic.js',
-  '/.claude/settings.local.json',
-  '/data/analytics.json',
-  '/data/analytics-config.json',
-  '/src/index.html',
-  '/src/developer/index.html'
-];
-const PUBLIC_PATHS = [
-  '/',
-  '/index.html',
-  '/assets/js/public-content.js',
-  '/assets/js/api.js'
-];
-const AUTH_PATHS = [
-  '/api/admin/content',
-  '/api/developer/imagens',
-  '/api/popup-config/admin',
-  '/api/analytics/config/admin'
-];
-const SENSITIVE_LOG_PATTERNS = [
-  'admin_setup_code',
-  '.env',
-  'passwordhash',
-  'email',
-  'phone'
-];
-
-function request(pathname, options = {}) {
-  return new Promise((resolve, reject) => {
-    const req = http.request({
-      hostname: HOST,
-      port: PORT,
-      path: pathname,
-      method: options.method || 'GET',
-      headers: options.headers || {}
-    }, (res) => {
-      let body = '';
-      res.setEncoding('utf8');
-      res.on('data', (chunk) => {
-        body += chunk;
-      });
-      res.on('end', () => {
-        resolve({
-          status: res.statusCode,
-          headers: res.headers,
-          body
-        });
-      });
-    });
-
-    req.on('error', reject);
-
-    if (options.body) {
-      req.write(options.body);
-    }
-
-    req.end();
-  });
+const PORT = 5411;
+const HOST = "127.0.0.1";
+const BASE_URL = `http://${HOST}:${PORT}`;
+function readEnvValue(name) {
+  try {
+    const envFile = fs.readFileSync(path.join(process.cwd(), ".env"), "utf8");
+    const match = envFile.match(new RegExp(`^${name}=(.+)$`, "m"));
+    return match ? match[1].trim() : "";
+  } catch {
+    return "";
+  }
 }
 
-async function waitForServerReady() {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
-    try {
-      const response = await request('/');
-      if (response.status === 200) {
-        return;
-      }
-    } catch {
-      // Continua tentando.
-    }
+const SETUP_CODE = readEnvValue("ADMIN_SETUP_CODE") || "test-setup-code-2026-safe";
 
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
+const BLOCKED_PATHS = [
+  "/.env",
+  "/README.md",
+  "/docs/checklist-tecnico.md",
+  "/scripts/tests/test-basic.js",
+  "/src/app/page.tsx",
+  "/server/storage/content.json",
+];
 
-  throw new Error(`Servidor nao respondeu em ${SERVER_URL}.`);
+const PUBLIC_PATHS = ["/", "/auth/entrar", "/api/public/content", "/api/popup-config"];
+const AUTH_PATHS = ["/api/admin/content", "/api/analytics/config", "/api/leads"];
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function assert(condition, message) {
@@ -92,99 +40,203 @@ function assert(condition, message) {
   }
 }
 
-async function runChecks() {
+function getRunCommand(script, extraArgs = []) {
+  if (process.platform === "win32") {
+    return {
+      command: "cmd",
+      args: ["/c", "npm", "run", script, "--", ...extraArgs],
+    };
+  }
+
+  return {
+    command: "npm",
+    args: ["run", script, "--", ...extraArgs],
+  };
+}
+
+function copyFixture(relativePath, targetPath) {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.copyFileSync(path.join(process.cwd(), relativePath), targetPath);
+}
+
+async function waitForServer(timeoutMs = 90000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/session`, {
+        method: "GET",
+        redirect: "manual",
+      });
+
+      if (response.status === 200) {
+        return;
+      }
+    } catch {
+      // aguarda próxima tentativa
+    }
+
+    await sleep(500);
+  }
+
+  throw new Error("Servidor Next não ficou pronto dentro do tempo esperado.");
+}
+
+function startServer(storeDir) {
+  const contentStorePath = path.join(storeDir, "content.json");
+  const siteTextsStorePath = path.join(storeDir, "site-texts.json");
+
+  copyFixture("server/storage/content.json", contentStorePath);
+  copyFixture("server/storage/site-texts.json", siteTextsStorePath);
+
+  const { command, args } = getRunCommand("start", [
+    "--hostname",
+    HOST,
+    "--port",
+    String(PORT),
+  ]);
+
+  const env = {
+    ...process.env,
+    PORT: String(PORT),
+    NODE_ENV: "production",
+    ADMIN_SETUP_CODE: SETUP_CODE,
+    CONTENT_STORE_PATH: contentStorePath,
+    SITE_TEXTS_STORE_PATH: siteTextsStorePath,
+    USERS_STORE_PATH: path.join(storeDir, "users.json"),
+    SESSIONS_STORE_PATH: path.join(storeDir, "sessions.json"),
+    CONTACTS_STORE_PATH: path.join(storeDir, "contacts.json"),
+    QUOTES_STORE_PATH: path.join(storeDir, "quotes.json"),
+    POPUP_CONFIG_STORE_PATH: path.join(storeDir, "popup-config.json"),
+    POPUP_LEADS_STORE_PATH: path.join(storeDir, "popup-leads.json"),
+    POPUP_EVENTS_STORE_PATH: path.join(storeDir, "popup-events.json"),
+    ANALYTICS_STORE_PATH: path.join(storeDir, "analytics.json"),
+    ANALYTICS_CONFIG_PATH: path.join(storeDir, "analytics-config.json"),
+    RATE_LIMITS_STORE_PATH: path.join(storeDir, "rate-limits.json"),
+  };
+
+  const child = spawn(command, args, {
+    cwd: process.cwd(),
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  let logs = "";
+  child.stdout.on("data", (chunk) => {
+    logs += chunk.toString();
+  });
+  child.stderr.on("data", (chunk) => {
+    logs += chunk.toString();
+  });
+
+  return {
+    child,
+    getLogs: () => logs,
+  };
+}
+
+async function request(pathname, options = {}) {
+  const response = await fetch(`${BASE_URL}${pathname}`, {
+    method: options.method || "GET",
+    headers: options.headers || {},
+    body: options.body,
+    redirect: options.redirect || "manual",
+  });
+
+  const contentType = String(response.headers.get("content-type") || "");
+  const payload = contentType.includes("application/json")
+    ? await response.json().catch(() => null)
+    : null;
+
+  return { response, payload };
+}
+
+async function runChecks(logsAccessor) {
   const results = [];
 
   for (const pathname of BLOCKED_PATHS) {
-    const response = await request(pathname);
+    const { response } = await request(pathname);
     results.push({
       name: `BLOCK ${pathname}`,
       pass: response.status === 404,
-      detail: `status=${response.status}`
+      detail: `status=${response.status}`,
     });
   }
 
   for (const pathname of PUBLIC_PATHS) {
-    const response = await request(pathname);
+    const { response } = await request(pathname);
     results.push({
       name: `PUBLIC ${pathname}`,
       pass: response.status === 200,
-      detail: `status=${response.status}`
+      detail: `status=${response.status}`,
     });
   }
 
   for (const pathname of AUTH_PATHS) {
-    const response = await request(pathname);
+    const { response } = await request(pathname);
     results.push({
       name: `AUTH ${pathname}`,
       pass: response.status === 401,
-      detail: `status=${response.status}`
+      detail: `status=${response.status}`,
     });
   }
 
-  const corsRoot = await request('/', {
-    headers: { Origin: 'https://evil.example' }
+  const crossOriginLogin = await request("/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://evil.example",
+    },
+    body: JSON.stringify({ email: "a@a.com", password: "x" }),
   });
   results.push({
-    name: 'CORS /',
-    pass: !corsRoot.headers['access-control-allow-origin'],
-    detail: `acao=${corsRoot.headers['access-control-allow-origin'] || 'none'}`
+    name: "SAME-ORIGIN /api/auth/login",
+    pass: crossOriginLogin.response.status === 403,
+    detail: `status=${crossOriginLogin.response.status}`,
   });
 
-  const corsApi = await request('/api/public/content', {
-    headers: { Origin: 'https://evil.example' }
+  const wrongContentType = await request("/api/contact", {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+    },
+    body: "nome=teste",
   });
   results.push({
-    name: 'CORS /api/public/content',
-    pass: !corsApi.headers['access-control-allow-origin'],
-    detail: `acao=${corsApi.headers['access-control-allow-origin'] || 'none'}`
+    name: "CONTENT-TYPE /api/contact",
+    pass: wrongContentType.response.status === 415,
+    detail: `status=${wrongContentType.response.status}`,
+  });
+
+  const logs = logsAccessor().toLowerCase();
+  const leakedPatterns = [SETUP_CODE.toLowerCase(), "passwordhash"].filter((pattern) =>
+    logs.includes(pattern)
+  );
+  results.push({
+    name: "LOGS startup",
+    pass: leakedPatterns.length === 0,
+    detail: leakedPatterns.length === 0 ? "clean" : `found=${leakedPatterns.join(",")}`,
   });
 
   return results;
 }
 
 async function main() {
-  const stdout = [];
-  const stderr = [];
-  const child = spawn(process.execPath, ['server.js'], {
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      NODE_ENV: 'production',
-      PORT: String(PORT)
-    },
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
-
-  child.stdout.on('data', (chunk) => {
-    stdout.push(String(chunk));
-  });
-  child.stderr.on('data', (chunk) => {
-    stderr.push(String(chunk));
-  });
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "rodogarcia-security-test-"));
+  const { child, getLogs } = startServer(tmpDir);
 
   try {
-    await waitForServerReady();
-    const results = await runChecks();
-    const combinedLogs = `${stdout.join('')}\n${stderr.join('')}`.toLowerCase();
-    const logLeaks = SENSITIVE_LOG_PATTERNS.filter((pattern) => combinedLogs.includes(pattern));
-
-    results.push({
-      name: 'LOGS startup',
-      pass: logLeaks.length === 0,
-      detail: logLeaks.length === 0 ? 'clean' : `found=${logLeaks.join(',')}`
-    });
-
+    await waitForServer();
+    const results = await runChecks(getLogs);
     const failed = results.filter((item) => !item.pass);
+
     results.forEach((item) => {
-      const status = item.pass ? 'PASS' : 'FAIL';
-      console.log(`${status} ${item.name} ${item.detail}`);
+      console.log(`${item.pass ? "PASS" : "FAIL"} ${item.name} ${item.detail}`);
     });
 
-    assert(failed.length === 0, `Falhas detectadas: ${failed.map((item) => item.name).join(', ')}`);
-    console.log('ALL TESTS PASS');
+    assert(failed.length === 0, `Falhas detectadas: ${failed.map((item) => item.name).join(", ")}`);
+    console.log("ALL TESTS PASS");
   } finally {
-    child.kill('SIGTERM');
+    child.kill();
   }
 }
 

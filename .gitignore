@@ -1,11 +1,18 @@
 # Dependencies
 node_modules/
+.npm/
+.pnpm-store/
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
 # Environment variables
 .env
+.env.*
+!.env.example
+!.env.*.example
 .env.local
 .env.development.local
 .env.test.local
@@ -14,7 +21,8 @@ yarn-error.log*
 # IDE
 .vscode/
 .idea/
-.claude/
+.claude/*
+!.claude/settings.json
 *.swp
 *.swo
 *~
@@ -25,6 +33,8 @@ Thumbs.db
 
 # Logs
 *.log
+*.pid
+*.pid.lock
 
 # Sensitive local persistence
 server/storage/private/*
@@ -33,15 +43,24 @@ server/private/*
 server/storage/popup-config.json
 server/storage/popup-events.json
 server/storage/popup-leads.json
-
-# Runtime analytics persistence (local)
-data/*
-!data/.gitkeep
+server/storage/contacts.json
+server/storage/quotes.json
 
 # Runtime uploads
 public/uploads/
 
 # Build
+.next/
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+out/
+dist/
+coverage/
+.nyc_output/
+*.tsbuildinfo
 .vercel
 .vercelignore
 
@@ -54,3 +73,14 @@ backup/
 *.orig
 *.tmp
 *.temp
+
+# Local artifacts
+test-results/
+playwright-report/
+.playwright/
+cypress/screenshots/
+cypress/videos/
+.sass-cache/
+.tmp-*.html
+.tmp-*.png
+tmp-dna-*.png

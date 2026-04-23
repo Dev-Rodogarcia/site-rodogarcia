@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rodogarcia UI Sections"
+  short_description: "Guardrails premium para secoes Rodogarcia"
+  default_prompt: "Use $rodogarcia-ui-sections to design or refactor a public-facing Rodogarcia section with strong surface composition and without cardception."

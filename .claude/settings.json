@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./node_modules/**)",
+      "Read(./.next/**)",
+      "Read(./out/**)",
+      "Read(./*.tsbuildinfo)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./.vscode/**)",
+      "Read(./.idea/**)",
+      "Read(./.git/**)",
+      "Read(./*.log)",
+      "Read(./*.tmp)",
+      "Read(./*.temp)",
+      "Read(./backups/**)",
+      "Read(./backup/**)",
+      "Read(./test-results/**)",
+      "Read(./public/uploads/**)",
+      "Read(./server/storage/private/**)",
+      "Read(./server/storage/popup-config.json)",
+      "Read(./server/storage/popup-events.json)",
+      "Read(./server/storage/popup-leads.json)",
+      "Read(./server/storage/contacts.json)",
+      "Read(./server/storage/quotes.json)",
+      "Read(./.claude/settings.local.json)"
+    ]
+  }
+}

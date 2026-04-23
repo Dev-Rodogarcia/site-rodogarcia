@@ -1,0 +1,294 @@
+export type AppPath = `/${string}`;
+export type AppChromeKind = "public" | "auth" | "admin";
+
+export interface NavigationItem {
+  href: AppPath;
+  label: string;
+  key: string;
+  exact?: boolean;
+}
+
+export interface SitemapEntry {
+  path: AppPath;
+  changeFrequency:
+    | "always"
+    | "hourly"
+    | "daily"
+    | "weekly"
+    | "monthly"
+    | "yearly"
+    | "never";
+  priority: number;
+}
+
+export interface RedirectAlias {
+  source: AppPath;
+  destination: string;
+  permanent: boolean;
+}
+
+const BASE_URL = "https://rodogarcia.com.br";
+const SITE_NAME = "Rodogarcia Transportes";
+
+export const site = {
+  home: "/",
+  services: "/servicos",
+  about: "/sobre",
+  business: "/para-empresas",
+  quote: "/cotacao",
+  contact: "/fale-conosco",
+  help: "/central-ajuda",
+  press: "/imprensa",
+  careers: "/trabalhe-conosco",
+  terms: "/termos-de-uso",
+  privacy: "/privacidade",
+} as const satisfies Record<string, AppPath>;
+
+export const auth = {
+  login: "/auth/entrar",
+  register: "/auth/criar-conta",
+  prefix: "/auth/",
+} as const;
+
+export const admin = {
+  root: "/developer",
+  homeHero: "/developer/home-hero",
+  homeDna: "/developer/home-dna",
+  feedbacks: "/developer/servicos-feedbacks",
+  jobs: "/developer/vagas",
+  aboutHero: "/developer/sobre-hero",
+  popup: "/developer/popup-exit",
+  contactInfo: "/developer/contato-info",
+  images: "/developer/imagens",
+  analytics: "/developer/analytics",
+  prefix: "/developer/",
+} as const;
+
+export const api = {
+  auth: {
+    login: "/api/auth/login",
+    logout: "/api/auth/logout",
+    register: "/api/auth/register",
+    session: "/api/auth/session",
+  },
+  admin: {
+    content: "/api/admin/content",
+    siteTexts: "/api/admin/site-texts",
+    images: "/api/admin/images",
+    replaceImageReference: "/api/admin/images/replace-reference",
+    entity: (entity: string) => `/api/admin/${entity}`,
+    entityItem: (entity: string, id: string) => `/api/admin/${entity}/${id}`,
+    reorder: (entity: string) => `/api/admin/${entity}/reorder`,
+  },
+  analytics: {
+    config: "/api/analytics/config",
+    event: "/api/analytics/event",
+    stats: "/api/analytics/stats",
+  },
+  popup: {
+    config: "/api/popup-config",
+    events: "/api/popup-events",
+    leads: "/api/leads",
+  },
+  forms: {
+    contact: "/api/contact",
+    quote: "/api/quote",
+  },
+  public: {
+    content: "/api/public/content",
+  },
+} as const;
+
+export const external = {
+  tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+  whatsappCommercial: "https://wa.me/5514999999999",
+  whatsappQuoteFractional:
+    "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fracionada.",
+  whatsappQuoteFull:
+    "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fechada.",
+  commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
+  commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
+  careersEmailAddress: "rh@rodogarcia.com.br",
+  careersEmail: "mailto:rh@rodogarcia.com.br",
+  careersEmailWithSubject:
+    "mailto:rh@rodogarcia.com.br?subject=Candidatura%20-%20Trabalhe%20Conosco",
+  phoneDisplay: "0800 591 4557",
+  phoneHref: "tel:+551408005914557",
+  brazilFlag: "https://flagcdn.com/w20/br.png",
+} as const;
+
+export const seo = {
+  baseUrl: BASE_URL,
+  siteName: SITE_NAME,
+  defaultOgImage: "/foto5.png",
+  sitemapPath: "/sitemap.xml",
+  disallow: ["/developer/", "/auth/", "/api/"] as const,
+  absoluteUrl(path: string) {
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
+
+    return `${BASE_URL}${path}`;
+  },
+} as const;
+
+export const headerNavigation = [
+  { href: site.home, label: "Inicio", key: "home" },
+  { href: site.services, label: "Servicos", key: "services" },
+  { href: site.about, label: "Sobre", key: "about" },
+  { href: site.business, label: "Empresas", key: "business" },
+  { href: site.contact, label: "Contato", key: "contact" },
+] as const satisfies readonly NavigationItem[];
+
+export const drawerNavigation = [
+  ...headerNavigation,
+  { href: site.careers, label: "Carreiras", key: "careers" },
+  { href: site.quote, label: "Cotacao", key: "quote" },
+] as const satisfies readonly NavigationItem[];
+
+export const adminNavigationGroups = [
+  {
+    label: "Visao geral",
+    key: "overview",
+    items: [{ href: admin.root, label: "Dashboard", key: "dashboard", exact: true }],
+  },
+  {
+    label: "Home",
+    key: "home",
+    items: [
+      { href: admin.homeHero, label: "Hero", key: "home-hero" },
+      { href: admin.homeDna, label: "DNA", key: "home-dna" },
+    ],
+  },
+  {
+    label: "Conteudo",
+    key: "content",
+    items: [
+      { href: admin.feedbacks, label: "Feedbacks", key: "feedbacks" },
+      { href: admin.jobs, label: "Vagas", key: "jobs" },
+      { href: admin.aboutHero, label: "Sobre", key: "about-hero" },
+      { href: admin.contactInfo, label: "Contato", key: "contact-info" },
+    ],
+  },
+  {
+    label: "Midia e automacoes",
+    key: "automation",
+    items: [
+      { href: admin.images, label: "Imagens", key: "images" },
+      { href: admin.popup, label: "Popup de saida", key: "popup" },
+      { href: admin.analytics, label: "Analytics", key: "analytics" },
+    ],
+  },
+] as const satisfies readonly {
+  label: string;
+  key: string;
+  items: readonly NavigationItem[];
+}[];
+
+export const adminNavigation: readonly NavigationItem[] = adminNavigationGroups.reduce<
+  NavigationItem[]
+>((items, group) => items.concat(group.items as readonly NavigationItem[]), []);
+
+export const sitemapRoutes = [
+  { path: site.home, changeFrequency: "weekly", priority: 1.0 },
+  { path: site.services, changeFrequency: "monthly", priority: 0.9 },
+  { path: site.about, changeFrequency: "monthly", priority: 0.8 },
+  { path: site.business, changeFrequency: "monthly", priority: 0.8 },
+  { path: site.quote, changeFrequency: "monthly", priority: 0.9 },
+  { path: site.contact, changeFrequency: "monthly", priority: 0.7 },
+  { path: site.help, changeFrequency: "monthly", priority: 0.6 },
+  { path: site.press, changeFrequency: "monthly", priority: 0.5 },
+  { path: site.careers, changeFrequency: "weekly", priority: 0.7 },
+  { path: site.terms, changeFrequency: "yearly", priority: 0.3 },
+  { path: site.privacy, changeFrequency: "yearly", priority: 0.3 },
+] as const satisfies readonly SitemapEntry[];
+
+export const redirectAliases = [
+  { source: "/index.html", destination: site.home, permanent: true },
+  { source: "/inicio", destination: site.home, permanent: true },
+  { source: "/home", destination: site.home, permanent: true },
+  { source: "/sobre.html", destination: site.about, permanent: true },
+  { source: "/institucional", destination: site.about, permanent: true },
+  { source: "/empresa", destination: site.about, permanent: true },
+  { source: "/quem-somos", destination: site.about, permanent: true },
+  { source: "/servicos.html", destination: site.services, permanent: true },
+  { source: "/transportes", destination: site.services, permanent: true },
+  { source: "/nossos-servicos", destination: site.services, permanent: true },
+  { source: "/fale-conosco.html", destination: site.contact, permanent: true },
+  { source: "/contato", destination: site.contact, permanent: true },
+  { source: "/contact", destination: site.contact, permanent: true },
+  { source: "/cotacao.html", destination: site.quote, permanent: true },
+  { source: "/quote", destination: site.quote, permanent: true },
+  { source: "/orcamento", destination: site.quote, permanent: true },
+  { source: "/trabalhe-conosco.html", destination: site.careers, permanent: true },
+  { source: "/careers", destination: site.careers, permanent: true },
+  { source: "/vagas", destination: site.careers, permanent: true },
+  { source: "/central-ajuda.html", destination: site.help, permanent: true },
+  { source: "/ajuda", destination: site.help, permanent: true },
+  { source: "/help", destination: site.help, permanent: true },
+  { source: "/faq", destination: site.help, permanent: true },
+  { source: "/imprensa.html", destination: site.press, permanent: true },
+  { source: "/press", destination: site.press, permanent: true },
+  { source: "/midia", destination: site.press, permanent: true },
+  { source: "/para-empresas.html", destination: site.business, permanent: true },
+  { source: "/empresas", destination: site.business, permanent: true },
+  { source: "/b2b", destination: site.business, permanent: true },
+  { source: "/termos-de-uso.html", destination: site.terms, permanent: true },
+  { source: "/termos", destination: site.terms, permanent: true },
+  { source: "/politica-de-privacidade", destination: site.privacy, permanent: true },
+  { source: "/politica", destination: site.privacy, permanent: true },
+  { source: "/entrar.html", destination: auth.login, permanent: true },
+  { source: "/auth/entrar.html", destination: auth.login, permanent: true },
+  { source: "/criar-conta.html", destination: auth.register, permanent: true },
+  { source: "/auth/criar-conta.html", destination: auth.register, permanent: true },
+  { source: "/admin", destination: admin.root, permanent: true },
+  { source: "/developer/index.html", destination: admin.root, permanent: true },
+  {
+    source: "/rastrear-encomenda",
+    destination: external.tracking,
+    permanent: false,
+  },
+] as const satisfies readonly RedirectAlias[];
+
+export function isAuthRoute(pathname: string): boolean {
+  return pathname === auth.login || pathname === auth.register || pathname.startsWith(auth.prefix);
+}
+
+export function isAdminRoute(pathname: string): boolean {
+  return pathname === admin.root || pathname.startsWith(admin.prefix);
+}
+
+export function isBareLayoutRoute(pathname: string): boolean {
+  return isAuthRoute(pathname) || isAdminRoute(pathname);
+}
+
+export function getAppChrome(pathname: string): AppChromeKind {
+  if (isAuthRoute(pathname)) return "auth";
+  if (isAdminRoute(pathname)) return "admin";
+  return "public";
+}
+
+export function getAdminRouteContext(pathname: string) {
+  for (const group of adminNavigationGroups) {
+    for (const item of group.items) {
+      const isExact = "exact" in item && item.exact === true;
+      const matches = isExact ? pathname === item.href : pathname.startsWith(item.href);
+      if (matches) {
+        return {
+          groupLabel: group.label,
+          item,
+        };
+      }
+    }
+  }
+
+  return {
+    groupLabel: adminNavigationGroups[0]?.label ?? "Painel",
+    item: adminNavigationGroups[0]?.items[0] ?? {
+      href: admin.root,
+      label: "Dashboard",
+      key: "dashboard",
+      exact: true,
+    },
+  };
+}

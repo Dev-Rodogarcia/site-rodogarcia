@@ -1,57 +1,30 @@
-﻿# Checklist de Seguranca da Area Restrita (Node.js)
+# Checklist de segurança do CMS
 
-## O que esta implementado
+## O que já está implementado
 
-- Sessao em cookie `HttpOnly` (`SameSite=Strict`, `Secure` em producao).
-- Painel oficial em `/developer/*`, com redirecionamento legado de `/admin/*`.
-- Validacao de origem para metodos mutaveis (`POST`, `PUT`, `DELETE`, `PATCH`).
-- Protecao CSRF via token enviado no header `X-CSRF-Token`.
-- Hash de senha com `PBKDF2` (`sha512`, 120k iteracoes, salt aleatorio).
-- Sanitizacao de entrada e validacao no backend para Hero, DNA e Vagas.
-- Rate limit basico para tentativas de login.
-- Bloqueio de acesso HTTP a caminhos sensiveis (`/server/*`, `.git`, etc).
+- sessão em cookie `HttpOnly`
+- `SameSite=Strict`
+- `Secure` em produção
+- proteção CSRF por `X-CSRF-Token`
+- validação same-origin em rotas mutáveis
+- hash de senha com `PBKDF2`
+- rate limit local para login e endpoints de captura
+- rotas administrativas protegidas por sessão admin
 
-## Regras de servidor recomendadas
+## Rotas críticas
 
-## Apache (`.htaccess`)
+- `/api/auth/login`
+- `/api/auth/logout`
+- `/api/auth/register`
+- `/api/admin/**`
+- `/api/analytics/config`
+- `/api/analytics/stats`
+- `/api/leads`
 
-```apacheconf
-# Bloquear arquivos e pastas sensiveis
-RedirectMatch 403 ^/(server|backups|\.git|\.vscode)(/|$)
+## Recomendações para produção
 
-# Forcar HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Evitar cache do developer/auth
-<IfModule mod_headers.c>
-  <FilesMatch "^(index\.html|entrar\.html|criar-conta\.html)$">
-    Header set Cache-Control "no-store"
-  </FilesMatch>
-</IfModule>
-```
-
-## Nginx
-
-```nginx
-location ~ ^/(server|backups|\.git|\.vscode) {
-  deny all;
-}
-
-location /developer/ {
-  add_header Cache-Control "no-store";
-}
-
-location /auth/ {
-  add_header Cache-Control "no-store";
-}
-```
-
-## Hardening para producao
-
-- Definir `ADMIN_SETUP_CODE` forte e rotacionar apos a primeira conta.
-- Usar HTTPS com certificado valido.
-- Mover usuarios/sessoes para banco + store dedicado (Redis, por exemplo).
-- Implementar logs de auditoria para alteracoes de conteudo.
-- Configurar backup criptografado e politica de restauracao.
+- usar HTTPS
+- rotacionar `ADMIN_SETUP_CODE`
+- mover usuários, sessões e rate limit para storage dedicado
+- adicionar trilha de auditoria para alterações no CMS
+- manter `server/storage/private/**` fora de qualquer publicação estática

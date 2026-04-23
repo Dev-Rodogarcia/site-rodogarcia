@@ -1,11 +1,9 @@
-# Scripts do Projeto
+# Scripts do projeto
 
-Organizacao dos scripts utilitarios:
+## Testes
 
-- `scripts/maintenance/`: manutencao de artefatos e arquivos de infraestrutura.
-- `scripts/tests/`: validacoes automatizadas locais.
+- `node scripts/tests/test-security-hardening.js`
 
-Scripts atuais:
+## Observação
 
-- `npm run sitemap:generate` -> `scripts/maintenance/generate-sitemap.js`
-- `npm run test:basic` -> `scripts/tests/test-basic.js`
+O sitemap é gerado pelo App Router em `src/app/sitemap.ts`. Não há mais gerador manual em arquivo estático.

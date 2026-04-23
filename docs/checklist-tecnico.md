@@ -1,49 +1,35 @@
-# Checklist tecnico rapido
+# Checklist técnico rápido
 
-## 1) Estrutura
+## 1. Build
 
-- [ ] Nenhum HTML vazio em `src/`.
-- [ ] Nenhum arquivo legado de componentizacao runtime (`src/components/`, `load-components.js`).
-- [ ] Nenhum asset CSS/JS obsoleto sem uso nas paginas publicas.
+- [ ] `cmd /c npm run build` conclui sem erro.
 
-Comandos:
+## 2. Encoding
 
-```powershell
-Get-ChildItem src -Filter *.html | Where-Object { $_.Length -eq 0 }
-rg -n "load-components\\.js|components/header\\.html|components/footer\\.html|src/components|main\\.css" src README.md vercel.json
-```
-
-## 2) Encoding
-
-- [ ] Nenhum mojibake (texto quebrado em acentuacao).
-- [ ] Arquivos de texto salvos em UTF-8.
+- [ ] Nenhum mojibake em `src`, `server`, `docs` e `README.md`.
+- [ ] Textos visíveis em português com acentuação correta.
 
 Comando:
 
 ```powershell
-rg -nP "\\x{00C3}[^\\x00-\\x7F]|\\x{FFFD}" src package.json README.md
+rg -n 'Ã|Â|ï¿½|�|â€”|â€|â†' src server docs README.md -S
 ```
 
-## 3) SEO tecnico
+## 3. CMS
 
-- [ ] `sitemap.xml` contem todas as paginas publicas reais.
-- [ ] `robots.txt` aponta para o sitemap correto.
+- [ ] `/auth/entrar` abre normalmente.
+- [ ] `/auth/criar-conta` só serve para setup inicial.
+- [ ] `/developer` exige sessão.
+- [ ] `/api/admin/**` exige admin.
 
-Comandos:
+## 4. Dados locais
 
-```powershell
-npm run sitemap:generate
-Get-Content sitemap.xml
-```
+- [ ] `server/storage/private/**` não está sendo versionado.
+- [ ] `public/uploads/` não contém lixo de teste.
+- [ ] Não há duplicação de assets sem uso.
 
-## 4) Rotas e ambiente
+## 5. SEO técnico
 
-- [ ] Rotas locais em `server.js` alinhadas com `vercel.json`.
-- [ ] URL local principal documentada como `http://localhost:3000/`.
-
-Comandos:
-
-```powershell
-Get-Content server.js
-Get-Content vercel.json
-```
+- [ ] `/sitemap.xml` responde.
+- [ ] `/robots.txt` responde.
+- [ ] URLs canônicas apontam para rotas atuais.
