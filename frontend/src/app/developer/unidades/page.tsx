@@ -1,0 +1,522 @@
+"use client";
+
+import { useState } from "react";
+import {
+  CheckCircle,
+  MapPinLine,
+  PencilSimple,
+  Plus,
+  SortAscending,
+  Trash,
+  X,
+} from "@phosphor-icons/react";
+import { useAdminCollection } from "@/hooks/useAdminCollection";
+import { useCarouselPagination } from "@/hooks/useCarouselPagination";
+import { DeveloperConfirmButton } from "@/components/developer/DeveloperConfirmButton";
+import {
+  DeveloperCard,
+  DeveloperField,
+  DeveloperHero,
+  DeveloperCarouselPagination,
+  DeveloperMessage,
+  DeveloperPage,
+  DeveloperSectionHeading,
+  DeveloperStatusPill,
+  developerSplitLayoutClassName,
+  developerGhostButtonClassName,
+  developerInputClassName,
+  developerPrimaryButtonClassName,
+  developerSecondaryButtonClassName,
+} from "@/components/developer/ui";
+
+interface UnitFormState {
+  name: string;
+  type: string;
+  state: string;
+  city: string;
+  address: string;
+  phone: string;
+  email: string;
+  contactUrl: string;
+  description: string;
+  logisticsInfo: string;
+  isDefault: boolean;
+  active: boolean;
+}
+
+interface UnitItem extends UnitFormState {
+  id: string;
+  order?: number;
+}
+
+const EMPTY_FORM: UnitFormState = {
+  name: "",
+  type: "filial",
+  state: "",
+  city: "",
+  address: "",
+  phone: "",
+  email: "",
+  contactUrl: "/fale-conosco",
+  description: "",
+  logisticsInfo: "",
+  isDefault: false,
+  active: true,
+};
+
+const UNIT_TYPES = ["matriz", "filial", "ponto de apoio"] as const;
+
+function normalizeUnit(item: Record<string, unknown>): UnitItem {
+  return {
+    id: String(item.id ?? ""),
+    order: Number(item.order ?? 0),
+    name: String(item.name ?? item.nome ?? ""),
+    type: String(item.type ?? item.tipo ?? "filial"),
+    state: String(item.state ?? item.estado ?? "").toLowerCase(),
+    city: String(item.city ?? item.cidade ?? ""),
+    address: String(item.address ?? item.endereco ?? ""),
+    phone: String(item.phone ?? item.telefone ?? ""),
+    email: String(item.email ?? ""),
+    contactUrl: String(item.contactUrl ?? item.linkContato ?? "/fale-conosco"),
+    description: String(item.description ?? item.descricao ?? ""),
+    logisticsInfo: String(item.logisticsInfo ?? item.infoLogistica ?? ""),
+    isDefault: Boolean(item.isDefault ?? item.matriz),
+    active: Boolean(item.active ?? item.ativo ?? true),
+  };
+}
+
+export default function UnidadesPage() {
+  const { items, loading, error, createItem, updateItem, removeItem, moveItem } =
+    useAdminCollection<UnitItem>("units", { normalize: normalizeUnit });
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<UnitFormState>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("");
+  const { pages, currentPage, totalPages, nextPage, prevPage } =
+    useCarouselPagination(items, 3);
+
+  function resetForm() {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setStatus("");
+  }
+
+  function editItem(item: UnitItem) {
+    setEditingId(item.id);
+    setForm({
+      name: item.name,
+      type: item.type || "filial",
+      state: item.state,
+      city: item.city,
+      address: item.address,
+      phone: item.phone,
+      email: item.email,
+      contactUrl: item.contactUrl || "/fale-conosco",
+      description: item.description,
+      logisticsInfo: item.logisticsInfo,
+      isDefault: item.isDefault,
+      active: item.active,
+    });
+    setStatus("");
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const payload = {
+      ...form,
+      name: form.name.trim(),
+      type: form.type.trim(),
+      state: form.state.trim().toLowerCase(),
+      city: form.city.trim(),
+      address: form.address.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      contactUrl: form.contactUrl.trim(),
+      description: form.description.trim(),
+      logisticsInfo: form.logisticsInfo.trim(),
+    };
+
+    if (!payload.name || !payload.state || !payload.address) {
+      setStatus("Preencha nome, estado e endereco.");
+      return;
+    }
+
+    if (!payload.phone && !payload.email) {
+      setStatus("Informe ao menos telefone ou e-mail da unidade.");
+      return;
+    }
+
+    setSaving(true);
+    setStatus("");
+
+    const response = editingId
+      ? await updateItem(editingId, payload)
+      : await createItem(payload);
+
+    setSaving(false);
+
+    if (!response.success) {
+      setStatus(response.error ?? "Falha ao salvar a unidade.");
+      return;
+    }
+
+    resetForm();
+    setStatus("Unidade salva com sucesso.");
+  }
+
+  async function toggleItem(item: UnitItem) {
+    const response = await updateItem(item.id, { ...item, active: !item.active });
+    if (!response.success) {
+      setStatus(response.error ?? "Falha ao atualizar a unidade.");
+    }
+  }
+
+  async function deleteItem(id: string) {
+    const response = await removeItem(id);
+    if (!response.success) {
+      setStatus(response.error ?? "Falha ao excluir a unidade.");
+    }
+  }
+
+  async function move(id: string, direction: -1 | 1) {
+    const response = await moveItem(id, direction);
+    if (!response.success && response.error !== "Movimento invalido.") {
+      setStatus(response.error ?? "Falha ao reordenar a unidade.");
+    }
+  }
+
+  return (
+    <DeveloperPage>
+      <DeveloperHero
+        eyebrow="Conteudo - Unidades"
+        title="Editor de unidades, filiais e pontos de apoio."
+        description="Esses registros alimentam o mapa da home, o seletor de unidade ativa e os dados operacionais exibidos no site."
+        stats={[
+          { label: "Unidades", value: items.length },
+          { label: "Ativas", value: items.filter((item) => item.active).length },
+        ]}
+      />
+
+      <section className={developerSplitLayoutClassName}>
+        <DeveloperCard>
+          <DeveloperSectionHeading
+            eyebrow={editingId ? "Edicao" : "Nova unidade"}
+            title={editingId ? "Atualizar unidade" : "Cadastrar unidade"}
+            description="Use UF com duas letras para destacar automaticamente o estado no mapa."
+          />
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <DeveloperField label="Nome da unidade" required>
+                <input
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, name: event.target.value }))
+                  }
+                  maxLength={120}
+                  className={developerInputClassName}
+                />
+              </DeveloperField>
+
+              <DeveloperField label="Tipo" required>
+                <select
+                  value={form.type}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, type: event.target.value }))
+                  }
+                  className={developerInputClassName}
+                >
+                  {UNIT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </DeveloperField>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
+              <DeveloperField label="UF" required>
+                <input
+                  value={form.state}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, state: event.target.value }))
+                  }
+                  maxLength={2}
+                  className={developerInputClassName}
+                  placeholder="sp"
+                />
+              </DeveloperField>
+
+              <DeveloperField label="Cidade">
+                <input
+                  value={form.city}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, city: event.target.value }))
+                  }
+                  maxLength={80}
+                  className={developerInputClassName}
+                />
+              </DeveloperField>
+            </div>
+
+            <DeveloperField label="Endereco" required>
+              <input
+                value={form.address}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, address: event.target.value }))
+                }
+                maxLength={220}
+                className={developerInputClassName}
+              />
+            </DeveloperField>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <DeveloperField label="Telefone">
+                <input
+                  value={form.phone}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, phone: event.target.value }))
+                  }
+                  maxLength={60}
+                  className={developerInputClassName}
+                />
+              </DeveloperField>
+
+              <DeveloperField label="E-mail">
+                <input
+                  value={form.email}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, email: event.target.value }))
+                  }
+                  maxLength={160}
+                  className={developerInputClassName}
+                />
+              </DeveloperField>
+            </div>
+
+            <DeveloperField label="Link de contato">
+              <input
+                value={form.contactUrl}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, contactUrl: event.target.value }))
+                }
+                className={developerInputClassName}
+                placeholder="/fale-conosco"
+              />
+            </DeveloperField>
+
+            <DeveloperField label="Descricao">
+              <textarea
+                rows={3}
+                value={form.description}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, description: event.target.value }))
+                }
+                maxLength={220}
+                className={`${developerInputClassName} resize-none`}
+              />
+            </DeveloperField>
+
+            <DeveloperField label="Informacao logistica">
+              <textarea
+                rows={3}
+                value={form.logisticsInfo}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    logisticsInfo: event.target.value,
+                  }))
+                }
+                maxLength={260}
+                className={`${developerInputClassName} resize-none`}
+              />
+            </DeveloperField>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
+                <input
+                  type="checkbox"
+                  checked={form.isDefault}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      isDefault: event.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 accent-[var(--primary)]"
+                />
+                Unidade padrao do mapa
+              </label>
+
+              <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
+                <input
+                  type="checkbox"
+                  checked={form.active}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, active: event.target.checked }))
+                  }
+                  className="h-4 w-4 accent-[var(--primary)]"
+                />
+                Unidade ativa
+              </label>
+            </div>
+
+            {status ? (
+              <DeveloperMessage tone={status.includes("sucesso") ? "success" : "error"}>
+                {status}
+              </DeveloperMessage>
+            ) : null}
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button type="submit" disabled={saving} className={developerPrimaryButtonClassName}>
+                <CheckCircle size={18} weight="bold" />
+                {saving ? "Salvando..." : "Salvar configuracao"}
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className={developerSecondaryButtonClassName}
+              >
+                <X size={18} weight="bold" />
+                Limpar
+              </button>
+            </div>
+          </form>
+        </DeveloperCard>
+
+        <DeveloperCard>
+          <DeveloperSectionHeading
+            eyebrow="Unidades cadastradas"
+            title="Mapa operacional"
+            description="Ordene, ative e ajuste o que aparece no mapa da home."
+            action={
+              <button type="button" onClick={resetForm} className={developerSecondaryButtonClassName}>
+                <Plus size={16} weight="bold" />
+                Nova unidade
+              </button>
+            }
+          />
+
+          {loading ? <DeveloperMessage tone="info">Carregando unidades...</DeveloperMessage> : null}
+          {error ? <DeveloperMessage tone="error">{error}</DeveloperMessage> : null}
+
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
+              style={{ transform: `translateX(-${currentPage * 100}%)` }}
+            >
+              {pages.map((page, pageIndex) => (
+                <div key={pageIndex} className="w-full shrink-0 space-y-4">
+                  {page.map((item) => (
+                    <article
+                      key={item.id}
+                      className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
+                    >
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+                            Ordem {item.order ?? 0}
+                          </span>
+                          <DeveloperStatusPill active={item.active} />
+                          {item.isDefault ? (
+                            <span className="rounded-full bg-[var(--primary)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
+                              Padrao
+                            </span>
+                          ) : null}
+                          <span className="rounded-full bg-[var(--color-surface-2)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+                            {item.state.toUpperCase()}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h3 className="flex items-center gap-2 text-xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">
+                            <MapPinLine size={18} weight="duotone" />
+                            {item.name || "Unidade sem nome"}
+                          </h3>
+                          <p className="mt-2 text-sm leading-7 text-[var(--color-muted-raw)]">
+                            {item.address || "Endereco nao cadastrado."}
+                          </p>
+                          <p className="mt-2 text-xs leading-6 text-[var(--color-muted-raw)]">
+                            {item.phone || "-"} - {item.email || "-"}
+                          </p>
+                          {item.logisticsInfo ? (
+                            <p className="mt-2 text-sm leading-7 text-[var(--color-muted-raw)]">
+                              {item.logisticsInfo}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                          <button
+                            type="button"
+                            onClick={() => editItem(item)}
+                            className={developerSecondaryButtonClassName}
+                          >
+                            <PencilSimple size={16} weight="bold" />
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleItem(item)}
+                            className={developerGhostButtonClassName}
+                          >
+                            <CheckCircle size={16} weight="bold" />
+                            {item.active ? "Desativar" : "Ativar"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => move(item.id, -1)}
+                            className={developerGhostButtonClassName}
+                          >
+                            <SortAscending size={16} weight="bold" />
+                            Subir
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => move(item.id, 1)}
+                            className={developerGhostButtonClassName}
+                          >
+                            <SortAscending size={16} weight="bold" className="rotate-180" />
+                            Descer
+                          </button>
+                          <DeveloperConfirmButton
+                            message="Confirmar exclusao"
+                            onConfirm={() => deleteItem(item.id)}
+                          >
+                            <Trash size={16} weight="bold" />
+                            Excluir
+                          </DeveloperConfirmButton>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DeveloperCarouselPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onNext={nextPage}
+            onPrev={prevPage}
+          />
+
+          {!loading && items.length === 0 ? (
+            <div className="mt-4 rounded-[24px] border border-dashed border-[var(--border)] bg-white/60 px-4 py-8 text-center">
+              <MapPinLine size={28} weight="duotone" className="mx-auto text-[var(--primary)]" />
+              <p className="mt-3 text-sm font-medium text-[var(--foreground)]">
+                Nenhuma unidade cadastrada ainda.
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-muted-raw)]">
+                Cadastre a primeira unidade para alimentar o mapa da home.
+              </p>
+            </div>
+          ) : null}
+        </DeveloperCard>
+      </section>
+    </DeveloperPage>
+  );
+}

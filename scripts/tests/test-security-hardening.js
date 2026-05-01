@@ -1,30 +1,27 @@
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const PORT = 5411;
+const FRONTEND_PORT = 5411;
+const BACKEND_PORT = 4010;
 const HOST = "127.0.0.1";
-const BASE_URL = `http://${HOST}:${PORT}`;
-function readEnvValue(name) {
-  try {
-    const envFile = fs.readFileSync(path.join(process.cwd(), ".env"), "utf8");
-    const match = envFile.match(new RegExp(`^${name}=(.+)$`, "m"));
-    return match ? match[1].trim() : "";
-  } catch {
-    return "";
-  }
-}
+const FRONTEND_URL = `http://${HOST}:${FRONTEND_PORT}`;
+const BACKEND_URL = `http://${HOST}:${BACKEND_PORT}`;
+const ROOT_DIR = path.resolve(__dirname, "../..");
+const FRONTEND_DIR = path.join(ROOT_DIR, "frontend");
+const BACKEND_DIR = path.join(ROOT_DIR, "backend");
 
-const SETUP_CODE = readEnvValue("ADMIN_SETUP_CODE") || "test-setup-code-2026-safe";
+const SETUP_CODE = "test-setup-code-2026-safe";
 
 const BLOCKED_PATHS = [
   "/.env",
   "/README.md",
   "/docs/checklist-tecnico.md",
-  "/scripts/tests/test-basic.js",
-  "/src/app/page.tsx",
-  "/server/storage/content.json",
+  "/scripts/tests/test-security-hardening.js",
+  "/frontend/src/app/page.tsx",
+  "/backend/storage/content.json",
+  "/backend/.env",
 ];
 
 const PUBLIC_PATHS = ["/", "/auth/entrar", "/api/public/content", "/api/popup-config"];
@@ -35,70 +32,78 @@ function sleep(ms) {
 }
 
 function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message);
-  }
+  if (!condition) throw new Error(message);
 }
 
-function getRunCommand(script, extraArgs = []) {
+function npmCommand(script, extraArgs = []) {
   if (process.platform === "win32") {
-    return {
-      command: "cmd",
-      args: ["/c", "npm", "run", script, "--", ...extraArgs],
-    };
+    return { command: "cmd", args: ["/c", "npm", "run", script, "--", ...extraArgs] };
   }
-
-  return {
-    command: "npm",
-    args: ["run", script, "--", ...extraArgs],
-  };
+  return { command: "npm", args: ["run", script, "--", ...extraArgs] };
 }
 
 function copyFixture(relativePath, targetPath) {
   fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-  fs.copyFileSync(path.join(process.cwd(), relativePath), targetPath);
+  fs.copyFileSync(path.join(ROOT_DIR, relativePath), targetPath);
 }
 
-async function waitForServer(timeoutMs = 90000) {
+function startProcess({ cwd, script, args = [], env }) {
+  const command = npmCommand(script, args);
+  const child = spawn(command.command, command.args, {
+    cwd,
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  let logs = "";
+  child.stdout.on("data", (chunk) => {
+    logs += chunk.toString();
+  });
+  child.stderr.on("data", (chunk) => {
+    logs += chunk.toString();
+  });
+
+  return { child, getLogs: () => logs };
+}
+
+async function waitFor(url, timeoutMs = 90000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/session`, {
-        method: "GET",
-        redirect: "manual",
-      });
-
-      if (response.status === 200) {
-        return;
-      }
+      const response = await fetch(url, { redirect: "manual" });
+      if (response.status >= 200 && response.status < 500) return;
     } catch {
-      // aguarda próxima tentativa
+      // wait
     }
-
     await sleep(500);
   }
-
-  throw new Error("Servidor Next não ficou pronto dentro do tempo esperado.");
+  throw new Error(`Servidor nao ficou pronto: ${url}`);
 }
 
-function startServer(storeDir) {
+function killProcessTree(child) {
+  if (!child || child.killed) return;
+  if (process.platform === "win32") {
+    spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+      stdio: "ignore",
+    });
+    return;
+  }
+  child.kill();
+}
+
+function startServers(storeDir) {
   const contentStorePath = path.join(storeDir, "content.json");
   const siteTextsStorePath = path.join(storeDir, "site-texts.json");
 
-  copyFixture("server/storage/content.json", contentStorePath);
-  copyFixture("server/storage/site-texts.json", siteTextsStorePath);
+  copyFixture("backend/storage/content.json", contentStorePath);
+  copyFixture("backend/storage/site-texts.json", siteTextsStorePath);
 
-  const { command, args } = getRunCommand("start", [
-    "--hostname",
-    HOST,
-    "--port",
-    String(PORT),
-  ]);
-
-  const env = {
+  const backendEnv = {
     ...process.env,
-    PORT: String(PORT),
+    HOST,
+    PORT: String(BACKEND_PORT),
     NODE_ENV: "production",
+    FRONTEND_ORIGIN: FRONTEND_URL,
     ADMIN_SETUP_CODE: SETUP_CODE,
     CONTENT_STORE_PATH: contentStorePath,
     SITE_TEXTS_STORE_PATH: siteTextsStorePath,
@@ -112,30 +117,29 @@ function startServer(storeDir) {
     ANALYTICS_STORE_PATH: path.join(storeDir, "analytics.json"),
     ANALYTICS_CONFIG_PATH: path.join(storeDir, "analytics-config.json"),
     RATE_LIMITS_STORE_PATH: path.join(storeDir, "rate-limits.json"),
+    UPLOADS_DIR: path.join(storeDir, "uploads"),
   };
 
-  const child = spawn(command, args, {
-    cwd: process.cwd(),
-    env,
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-
-  let logs = "";
-  child.stdout.on("data", (chunk) => {
-    logs += chunk.toString();
-  });
-  child.stderr.on("data", (chunk) => {
-    logs += chunk.toString();
-  });
+  const frontendEnv = {
+    ...process.env,
+    NODE_ENV: "production",
+    BACKEND_INTERNAL_URL: BACKEND_URL,
+    NEXT_PUBLIC_BACKEND_URL: BACKEND_URL,
+  };
 
   return {
-    child,
-    getLogs: () => logs,
+    backend: startProcess({ cwd: BACKEND_DIR, script: "start", env: backendEnv }),
+    frontend: startProcess({
+      cwd: FRONTEND_DIR,
+      script: "start",
+      args: ["--hostname", HOST, "--port", String(FRONTEND_PORT)],
+      env: frontendEnv,
+    }),
   };
 }
 
 async function request(pathname, options = {}) {
-  const response = await fetch(`${BASE_URL}${pathname}`, {
+  const response = await fetch(`${FRONTEND_URL}${pathname}`, {
     method: options.method || "GET",
     headers: options.headers || {},
     body: options.body,
@@ -196,9 +200,7 @@ async function runChecks(logsAccessor) {
 
   const wrongContentType = await request("/api/contact", {
     method: "POST",
-    headers: {
-      "Content-Type": "text/plain",
-    },
+    headers: { "Content-Type": "text/plain" },
     body: "nome=teste",
   });
   results.push({
@@ -222,21 +224,33 @@ async function runChecks(logsAccessor) {
 
 async function main() {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "rodogarcia-security-test-"));
-  const { child, getLogs } = startServer(tmpDir);
+  const servers = startServers(tmpDir);
+  const children = [servers.backend.child, servers.frontend.child];
+  const logsAccessor = () => `${servers.backend.getLogs()}\n${servers.frontend.getLogs()}`;
 
   try {
-    await waitForServer();
-    const results = await runChecks(getLogs);
+    try {
+      await waitFor(`${BACKEND_URL}/health`);
+      await waitFor(`${FRONTEND_URL}/api/auth/session`);
+    } catch (error) {
+      console.error(logsAccessor());
+      throw error;
+    }
+
+    const results = await runChecks(logsAccessor);
     const failed = results.filter((item) => !item.pass);
 
     results.forEach((item) => {
       console.log(`${item.pass ? "PASS" : "FAIL"} ${item.name} ${item.detail}`);
     });
 
-    assert(failed.length === 0, `Falhas detectadas: ${failed.map((item) => item.name).join(", ")}`);
+    assert(
+      failed.length === 0,
+      `Falhas detectadas: ${failed.map((item) => item.name).join(", ")}`
+    );
     console.log("ALL TESTS PASS");
   } finally {
-    child.kill();
+    children.forEach(killProcessTree);
   }
 }
 

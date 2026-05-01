@@ -1,0 +1,527 @@
+{
+  "heroSlides": [
+    {
+      "id": "hero-2",
+      "title": "Cobertura em todo o Brasil.",
+      "description": "De Norte a Sul, a Rodogarcia leva sua carga com pontualidade e rastreamento em tempo real.",
+      "image": "/public/foto4-semfundo.png",
+      "active": true,
+      "order": 1,
+      "buttons": [
+        {
+          "label": "Conheça Nossa Rede",
+          "url": "/sobre",
+          "enabled": true
+        },
+        {
+          "label": "Nossos Serviços",
+          "url": "/servicos",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "hero-1",
+      "title": "Frete rápido sem interrupções.",
+      "description": "Segurança e eficiência em movimento para todo o Brasil desde 1989.",
+      "image": "/public/foto5.png",
+      "active": true,
+      "order": 2,
+      "buttons": [
+        {
+          "label": "Fazer Cotação",
+          "url": "/cotacao",
+          "enabled": true
+        },
+        {
+          "label": "Rastrear Carga",
+          "url": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "hero-3",
+      "title": "Cotação em minutos.",
+      "description": "Solicite seu frete de forma simples e receba a melhor proposta para sua carga.",
+      "image": "/public/foto6-semfundo.png",
+      "active": true,
+      "order": 3,
+      "buttons": [
+        {
+          "label": "Solicitar Cotação",
+          "url": "/cotacao",
+          "enabled": true
+        },
+        {
+          "label": "Fale Conosco",
+          "url": "/fale-conosco",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "hero_e38e37a6-f3eb-47ca-88f8-242661ecea6f",
+      "order": 4,
+      "createdAt": "2026-03-05T18:22:45.352Z",
+      "updatedAt": "2026-03-05T18:22:45.352Z",
+      "title": "",
+      "description": "",
+      "image": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
+      "active": true,
+      "layoutMode": "full-image",
+      "fullImageButtonsEnabled": false,
+      "fullImageBackgroundType": "wavy",
+      "buttons": [
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "#FFFFFF",
+          "variant": "solid"
+        },
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "id": "hero_c6cf046e-8b13-438a-8466-b1186e50319d",
+      "order": 5,
+      "createdAt": "2026-03-08T16:19:09.308Z",
+      "updatedAt": "2026-03-08T16:19:09.308Z",
+      "title": "Frete rápido e barato",
+      "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
+      "image": "/public/uploads/1-1772986684149.png",
+      "desktopImage": "",
+      "mobileImage": "",
+      "active": true,
+      "layoutMode": "text-image",
+      "fullImageButtonsEnabled": false,
+      "fullImageBackgroundType": "wavy",
+      "buttons": [
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "#FFFFFF",
+          "variant": "solid"
+        },
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "id": "hero_e360fd74-7a14-4287-8239-406440df9cdf",
+      "order": 6,
+      "createdAt": "2026-03-08T16:19:46.647Z",
+      "updatedAt": "2026-03-08T16:19:46.647Z",
+      "title": "Frete rápido e barato",
+      "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
+      "image": "/public/uploads/2-1772986687188.png",
+      "desktopImage": "",
+      "mobileImage": "",
+      "active": true,
+      "layoutMode": "text-image",
+      "fullImageButtonsEnabled": false,
+      "fullImageBackgroundType": "wavy",
+      "buttons": [
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "#FFFFFF",
+          "variant": "solid"
+        },
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "id": "hero_058618b3-9d7a-4df1-879b-0554d628618c",
+      "order": 7,
+      "createdAt": "2026-03-08T16:20:00.174Z",
+      "updatedAt": "2026-03-08T16:20:00.174Z",
+      "title": "Frete rápido e barato",
+      "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
+      "image": "/public/uploads/3-1772986690224.png",
+      "desktopImage": "",
+      "mobileImage": "",
+      "active": true,
+      "layoutMode": "text-image",
+      "fullImageButtonsEnabled": false,
+      "fullImageBackgroundType": "wavy",
+      "buttons": [
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "#FFFFFF",
+          "variant": "solid"
+        },
+        {
+          "label": "",
+          "url": "",
+          "enabled": false,
+          "color": "",
+          "variant": "outline"
+        }
+      ]
+    }
+  ],
+  "dnaSlides": [
+    {
+      "id": "dna-2",
+      "title": "Capilaridade para chegar mais longe",
+      "text": "Estrutura robusta para entregas em todo o Brasil com padrão de qualidade em cada etapa.",
+      "image": "/public/foto5.png",
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "dna_e4d1725a-7681-43e7-8b27-32305344c22d",
+      "order": 2,
+      "createdAt": "2026-03-05T18:30:03.639Z",
+      "updatedAt": "2026-03-05T18:30:03.639Z",
+      "title": "",
+      "text": "",
+      "image": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
+      "active": true,
+      "layoutMode": "full-image"
+    },
+    {
+      "id": "dna_9d4ef28357cf4da087768e36fba6553b",
+      "order": 3,
+      "createdAt": "2026-05-01T23:35:45.218Z",
+      "updatedAt": "2026-05-01T23:35:45.218Z",
+      "title": "Teste 2",
+      "text": "Teste 2 testando, testando, testando",
+      "image": "/caminhoneiro1.png",
+      "video": "",
+      "desktopImage": "",
+      "mobileImage": "",
+      "desktopVideo": "",
+      "mobileVideo": "",
+      "active": true,
+      "layoutMode": "text-image"
+    },
+    {
+      "id": "dna_d3686468c2354d4c8587f1b65209e46c",
+      "order": 4,
+      "createdAt": "2026-05-01T23:36:18.632Z",
+      "updatedAt": "2026-05-01T23:36:18.632Z",
+      "title": "Teste 3",
+      "text": "teste 3, teste 3",
+      "image": "/caminhoneiro1.png",
+      "video": "",
+      "desktopImage": "",
+      "mobileImage": "",
+      "desktopVideo": "",
+      "mobileVideo": "",
+      "active": true,
+      "layoutMode": "text-image"
+    }
+  ],
+  "vagas": [
+    {
+      "id": "vaga-1",
+      "title": "Motorista Categoria C/D/E",
+      "status": "Novo",
+      "location": "Agudos/SP",
+      "workType": "Presencial",
+      "contractType": "Integral",
+      "description": "Buscamos motorista experiente para transporte de cargas. Experiência mínima de 2 anos.",
+      "applyUrl": "/trabalhe-conosco#candidatura",
+      "featured": true,
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "vaga-2",
+      "title": "Analista de Logística",
+      "status": "Disponível",
+      "location": "Campinas/SP",
+      "workType": "Híbrido",
+      "contractType": "Integral",
+      "description": "Oportunidade para analista com experiência em gestão de rotas e otimização de processos.",
+      "applyUrl": "/trabalhe-conosco#candidatura",
+      "featured": true,
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "vaga-3",
+      "title": "Assistente Administrativo",
+      "status": "Disponível",
+      "location": "Osasco/SP",
+      "workType": "Presencial",
+      "contractType": "Integral",
+      "description": "Vaga para assistente com conhecimentos em gestão de documentos e atendimento ao cliente.",
+      "applyUrl": "/trabalhe-conosco#candidatura",
+      "featured": true,
+      "active": true,
+      "order": 3
+    }
+  ],
+  "feedbacks": [
+    {
+      "id": "feedback-1",
+      "name": "Mariana Araujo",
+      "role": "Gerente de Abastecimento",
+      "company": "Capricche",
+      "testimonial": "Nas jánelas de campanha, a Rodogarcia manteve previsibilidade de coleta e entrega entre CD e lojás, com menos ruptura e retorno rápido nas ocorrências.",
+      "photo": "/feedbacks/capricche.jpg",
+      "rating": 5,
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "feedback-2",
+      "name": "Leandro Martins",
+      "role": "Coordenador de Logística Industrial",
+      "company": "Corbion Brasil",
+      "testimonial": "Em uma operação industrial sensível, o que pesou foi a disciplina de agendamento e rastreabilidade. O SLA ficou mais estável e a leitura de ocorrências muito mais objetiva.",
+      "photo": "/feedbacks/corbion-brasil.png",
+      "rating": 5,
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "feedback-3",
+      "name": "Patricia Nunes",
+      "role": "Gerente de Supply Chain",
+      "company": "Danfoss",
+      "testimonial": "A Rodogarcia trouxe regularidade para embarques técnicos e maior confiança nas jánelas de entrega para clientes industriais. A redução de desvios operacionais foi perceptível.",
+      "photo": "/feedbacks/danfoss.png",
+      "rating": 5,
+      "active": true,
+      "order": 3
+    },
+    {
+      "id": "feedback-4",
+      "name": "Carlos Eduardo Prado",
+      "role": "Supervisor Nacional de Transportes",
+      "company": "Frigelar",
+      "testimonial": "Com capilaridade nacional e resposta rápida, conseguimos sustentar picos sazonais com mais previsibilidade de entrega e menos retrabalho no atendimento.",
+      "photo": "/feedbacks/frigelar.jpg",
+      "rating": 5,
+      "active": true,
+      "order": 4
+    },
+    {
+      "id": "feedback-5",
+      "name": "Aline Moreira",
+      "role": "Coordenadora de Customer Service Logístico",
+      "company": "H.B. Fuller",
+      "testimonial": "Precisavamos de controle fino de agendamento, compliance e rastreabilidade. A Rodogarcia entregou consistência operacional e menos ruído nas tratativas com planta e cliente.",
+      "photo": "/feedbacks/hbfuller.png",
+      "rating": 5,
+      "active": true,
+      "order": 5
+    },
+    {
+      "id": "feedback-6",
+      "name": "Diego Carvalho",
+      "role": "Gerente de Operações",
+      "company": "Hidrodomi",
+      "testimonial": "Nossa distribuição ganhou cadência. Hoje temos mais visibilidade por etapa, melhor ocupação das jánelas e menos impacto quando a operação exige replanejámento.",
+      "photo": "/feedbacks/hidrodomi.gif",
+      "rating": 4,
+      "active": true,
+      "order": 6
+    },
+    {
+      "id": "feedback-7",
+      "name": "Renata Campos",
+      "role": "Especialista de Supply Chain",
+      "company": "Kemira",
+      "testimonial": "Em uma malha sensível, a diferença esteve na previsibilidade de coleta, no acompanhamento das entregas e na qualidade do retorno para a nossa equipe.",
+      "photo": "/feedbacks/kemira.jpg",
+      "rating": 5,
+      "active": true,
+      "order": 7
+    },
+    {
+      "id": "feedback-8",
+      "name": "Bruno Tavares",
+      "role": "Gerente de Distribuição",
+      "company": "PPG",
+      "testimonial": "A combinação entre capilaridade e controle de entrega ajudou a reduzir avarias e melhorar o cumprimento das jánelas dos nossos clientes em todo o Brasil.",
+      "photo": "/feedbacks/PPG.jpg",
+      "rating": 5,
+      "active": true,
+      "order": 8
+    },
+    {
+      "id": "feedback-9",
+      "name": "Thiago Fernandes",
+      "role": "Coordenador de Logística",
+      "company": "Tigre",
+      "testimonial": "Para uma operação com alto volume e distribuição nacional, a Rodogarcia sustentou SLA, agendamento e rastreabilidade com padrão muito acima da média.",
+      "photo": "/feedbacks/tigre.jpg",
+      "rating": 5,
+      "active": true,
+      "order": 9
+    }
+  ],
+  "units": [
+    {
+      "id": "unit-matriz",
+      "order": 1,
+      "name": "Matriz - Agudos/SP",
+      "type": "matriz",
+      "state": "sp",
+      "city": "Agudos",
+      "address": "Rua Pedro Carmine Deo, 156, Agudos, SP - 17123-210",
+      "phone": "0800 591 4557",
+      "email": "gerente.financeiro@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Matriz operacional e administrativa.",
+      "logisticsInfo": "Base central para atendimento, alinhamento comercial e suporte operacional.",
+      "isDefault": true,
+      "active": true
+    },
+    {
+      "id": "unit-agudos",
+      "order": 2,
+      "name": "Agudos/SP",
+      "type": "filial",
+      "state": "sp",
+      "city": "Agudos",
+      "address": "Rua Pedro Carmine Deo, 156, Agudos, SP - 17123-210",
+      "phone": "0800 591 4557",
+      "email": "agudos@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade de apoio operacional.",
+      "logisticsInfo": "Atendimento para operacoes regionais e demandas de coleta.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-campinas",
+      "order": 3,
+      "name": "Campinas/SP",
+      "type": "filial",
+      "state": "sp",
+      "city": "Campinas",
+      "address": "Campinas, Sao Paulo",
+      "phone": "(19) 3XXX-XXXX",
+      "email": "campinas@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes no interior paulista.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-osasco",
+      "order": 4,
+      "name": "Osasco/SP",
+      "type": "filial",
+      "state": "sp",
+      "city": "Osasco",
+      "address": "Osasco, Sao Paulo",
+      "phone": "(11) 3XXX-XXXX",
+      "email": "osasco@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes na Grande Sao Paulo.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-castro",
+      "order": 5,
+      "name": "Castro/PR",
+      "type": "filial",
+      "state": "pr",
+      "city": "Castro",
+      "address": "Castro, Parana",
+      "phone": "(42) 3XXX-XXXX",
+      "email": "castro@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes no Parana.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-curitiba",
+      "order": 6,
+      "name": "Curitiba/PR",
+      "type": "filial",
+      "state": "pr",
+      "city": "Curitiba",
+      "address": "Curitiba, Parana",
+      "phone": "(41) 3XXX-XXXX",
+      "email": "curitiba@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes metropolitanas e conexoes no Sul.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-rio",
+      "order": 7,
+      "name": "Rio de Janeiro/RJ",
+      "type": "filial",
+      "state": "rj",
+      "city": "Rio de Janeiro",
+      "address": "Rio de Janeiro, RJ",
+      "phone": "(21) 3XXX-XXXX",
+      "email": "rj@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes no Rio de Janeiro.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-hamburgo",
+      "order": 8,
+      "name": "Novo Hamburgo/RS",
+      "type": "filial",
+      "state": "rs",
+      "city": "Novo Hamburgo",
+      "address": "Novo Hamburgo, Rio Grande do Sul",
+      "phone": "(51) 3XXX-XXXX",
+      "email": "hamburgo@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes no Rio Grande do Sul.",
+      "isDefault": false,
+      "active": true
+    },
+    {
+      "id": "unit-recife",
+      "order": 9,
+      "name": "Recife/PE",
+      "type": "filial",
+      "state": "pe",
+      "city": "Recife",
+      "address": "Recife, Pernambuco",
+      "phone": "(81) 3XXX-XXXX",
+      "email": "recife@rodogarcia.com.br",
+      "contactUrl": "/fale-conosco",
+      "description": "Unidade regional.",
+      "logisticsInfo": "Apoio para operacoes no Nordeste.",
+      "isDefault": false,
+      "active": true
+    }
+  ]
+}

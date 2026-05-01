@@ -1,0 +1,10 @@
+node_modules
+backups
+.env
+.env.*
+backend/storage/private
+backend/storage/uploads
+scripts
+*.log
+.DS_Store
+.git

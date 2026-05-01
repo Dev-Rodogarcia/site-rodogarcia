@@ -1,9 +1,9 @@
-# Scripts do projeto
+# Scripts globais do monorepo
 
 ## Testes
 
 - `node scripts/tests/test-security-hardening.js`
 
-## Observação
+## Observacao
 
-O sitemap é gerado pelo App Router em `src/app/sitemap.ts`. Não há mais gerador manual em arquivo estático.
+O teste de seguranca sobe `backend/` e `frontend/` como processos separados. Antes de executar, rode `npm run build` dentro de cada projeto.

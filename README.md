@@ -1,87 +1,82 @@
-<!-- PORTFOLIO-FEATURED
-title: Site Institucional Rodogarcia Transportes
-description: Aplicação Next.js com site público, CMS interno, autenticação administrativa e persistência local em JSON.
-technologies: Next.js, React, TypeScript, Tailwind CSS
-demo: https://site-rodogarcia.vercel.app/
-highlight: true
-image: public/imagem.png
--->
-
-<p align="center">
-  <img src="public/imagem.png" alt="Capa do projeto Rodogarcia" width="1200">
-</p>
-
 # Site Rodogarcia Transportes
 
-Aplicação Next.js da Rodogarcia com site público, CMS interno, autenticação administrativa e persistência local em JSON.
+Monorepo separado em dois projetos independentes:
 
-## Stack
+- `frontend/`: Next.js, React, TypeScript, UI publica e painel CMS.
+- `backend/`: Node.js, Express, TypeScript, APIs, autenticacao, regras de negocio, storage JSON e seguranca.
 
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS
+## Raiz do repositorio
 
-## Rotas principais
+A raiz fica reservada para arquivos globais:
 
-- `/`
-- `/servicos`
-- `/sobre`
-- `/cotacao`
-- `/fale-conosco`
-- `/trabalhe-conosco`
-- `/auth/entrar`
-- `/auth/criar-conta`
-- `/developer`
+- `.env` e `.env.example`: configuracao local do monorepo.
+- `docs/`: documentacao tecnica curta.
+- `scripts/`: testes e automacoes globais.
+- `frontend/` e `backend/`: projetos isolados.
 
-## Execução local
+Nao mantenha codigo de app, `node_modules`, builds, backups, guias de agente ou arquivos temporarios na raiz.
 
-No Windows com PowerShell restrito:
+## Desenvolvimento Local
+
+Instale as dependencias separadamente:
 
 ```powershell
+cd backend
+cmd /c npm install
+
+cd ..\frontend
+cmd /c npm install
+```
+
+Configure o ambiente:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Suba os dois servidores:
+
+```powershell
+cd backend
+cmd /c npm run dev
+
+cd ..\frontend
 cmd /c npm run dev
 ```
 
-Build e start:
+Tambem e possivel usar `iniciar.bat` a partir da raiz. Ele encerra processos antigos nas portas padrao e abre backend e frontend em janelas separadas.
+
+URLs padrao:
+
+- Frontend: `http://127.0.0.1:5010`
+- Backend: `http://127.0.0.1:4010`
+- CMS: `http://127.0.0.1:5010/auth/entrar`
+
+## Estrutura
+
+- `backend/src/controllers`: entrada HTTP.
+- `backend/src/services`: regras de negocio.
+- `backend/src/repositories`: persistencia JSON.
+- `backend/src/security`: sessao, CSRF, CORS, rate limit e auth.
+- `frontend/src/app/developer`: painel visual do CMS.
+- `frontend/src/app`: rotas publicas e auth.
+
+## Persistencia
+
+O storage inicial continua em JSON, agora dentro de `backend/storage`.
+Arquivos privados ficam em `backend/storage/private`.
+O backend carrega `.env` da raiz como fonte local padrao.
+
+## Verificacao
 
 ```powershell
+cd backend
+cmd /c npm run typecheck
 cmd /c npm run build
-cmd /c npm run start
+
+cd ..\frontend
+cmd /c npm run typecheck
+cmd /c npm run build
 ```
 
-## Setup admin
-
-- Se ainda não existir usuário em `server/storage/private/users.json`, acesse `/auth/criar-conta`.
-- O primeiro cadastro exige `ADMIN_SETUP_CODE`.
-- Depois do primeiro admin, o acesso passa a ser feito por `/auth/entrar`.
-
-## Persistência local
-
-- `server/storage/content.json`
-- `server/storage/site-texts.json`
-- `server/storage/popup-config.json`
-- `server/storage/popup-leads.json`
-- `server/storage/popup-events.json`
-- `server/storage/private/users.json`
-- `server/storage/private/sessions.json`
-- `server/storage/private/analytics.json`
-
-Todos os stores aceitam override por variável de ambiente.
-
-## Segurança
-
-- cookie `HttpOnly`
-- `SameSite=Strict`
-- CSRF em rotas mutáveis autenticadas
-- validação same-origin
-- rate limit local
-- rotas administrativas protegidas por admin
-
-## Observações
-
-- `/sitemap.xml` e `/robots.txt` são gerados pelo App Router.
-- Rotas legadas como `/admin` e `*.html` continuam redirecionando para os caminhos atuais.
-
-## Licença
-
-Uso interno da Rodogarcia.
+O teste de seguranca global fica em `scripts/tests/test-security-hardening.js`.
