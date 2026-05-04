@@ -3,6 +3,17 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface ComplianceContent {
+  image: {
+    src: string;
+    alt: string;
+  };
+  title: string;
+  description: string;
+  certificateText: string;
+  certificateUrl?: string;
+}
+
 const CERTIFICATIONS = [
   {
     title: "ISO 9001",
@@ -52,7 +63,60 @@ const getCertImageClass = (title: string) => {
   return `h-[36vh] sm:h-[40vh] md:h-[34vh] lg:h-[36vh] xl:h-[38vh] max-h-[560px] ${base}`;
 };
 
-export function ComplianceSection() {
+export function ComplianceSection({ content }: { content?: ComplianceContent }) {
+  if (content) {
+    const certificate = (
+      <span className="inline-flex rounded-full border border-sky-300/20 bg-sky-300/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-200">
+        {content.certificateText}
+      </span>
+    );
+
+    return (
+      <section className="relative overflow-hidden bg-[#020617] py-16 text-white sm:py-20 lg:py-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.15)_0%,rgba(2,6,23,1)_70%)]" />
+        <div className="relative mx-auto grid w-full max-w-[1440px] gap-10 px-5 sm:px-8 lg:grid-cols-[minmax(280px,0.86fr)_minmax(0,1fr)] lg:items-center">
+          <div className="mx-auto w-full max-w-[360px] overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl">
+            <img
+              src={content.image.src}
+              alt={content.image.alt}
+              className="mx-auto max-h-[320px] w-full object-contain"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-300">
+              Governança & Compliance
+            </span>
+            <h2 className="mt-4 max-w-[15ch] text-[clamp(2rem,4vw,3.6rem)] font-extrabold leading-[1.02] tracking-[-0.05em]">
+              {content.title}
+            </h2>
+            <p className="mt-5 max-w-[58ch] text-sm leading-7 text-white/68 sm:text-base">
+              {content.description}
+            </p>
+            <div className="mt-8">
+              {content.certificateUrl ? (
+                <a
+                  href={content.certificateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {certificate}
+                </a>
+              ) : (
+                certificate
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return <LegacyComplianceSection />;
+}
+
+function LegacyComplianceSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const totalSlides = CERTIFICATIONS.length;
   const [currentIdx, setCurrentIdx] = useState(0);

@@ -4,9 +4,7 @@ import {
   Briefcase,
   ChatCircleDots,
   CheckCircle,
-  Clock,
   EnvelopeSimple,
-  MapPinLine,
   ShieldCheck,
   Trophy,
   UsersThree,
@@ -14,15 +12,16 @@ import {
 import {
   ActionLink,
   PageContainer,
-  PageCtaBand,
   PageSection,
   PageShell,
   SectionHeader,
 } from "@/components/internal/PageContent";
+import { CareersJobsList } from "@/components/internal/CareersJobsList";
 import { fetchPublicContent } from "@/lib/api";
-import { buildCmsMetadata, fetchMediaSlots, mediaSlot } from "@/lib/cmsPublic";
+import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { external, seo, site } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import type { CareersPageContent } from "@/types/content";
 
 export const dynamic = "force-dynamic";
 
@@ -149,6 +148,41 @@ const STATIC_JOBS: JobCard[] = [
   },
 ];
 
+const FALLBACK_CAREERS_PAGE: CareersPageContent = {
+  hero: {
+    buttons: [
+      { label: "Ver vagas abertas", url: "#vagas" },
+      { label: "Enviar curriculo", url: "#candidatura" },
+    ],
+  },
+  cultureImage: {
+    src: "/caminhoneiro1.png",
+    alt: "Time Rodogarcia em operacao",
+  },
+  jobs: STATIC_JOBS.map((job, index) => ({
+    id: `career-job-${index + 1}`,
+    order: index + 1,
+    title: job.title,
+    location: job.location,
+    type: job.contractType,
+    description: job.description,
+    applyUrl: job.applyUrl || "#candidatura",
+    active: true,
+  })),
+  directApplication: {
+    buttons: [
+      { label: "Enviar curriculo por e-mail", url: external.careersEmailWithSubject, external: true },
+      { label: "Abrir contato", url: site.contact },
+    ],
+  },
+  finalCta: {
+    buttons: [
+      { label: "Enviar curriculo", url: external.careersEmailWithSubject, external: true },
+      { label: "Falar com contato", url: site.contact },
+    ],
+  },
+};
+
 function CareersHeroSurface({
   children,
   className,
@@ -170,33 +204,10 @@ function CareersHeroSurface({
   );
 }
 
-async function getJobCards(): Promise<JobCard[]> {
-  try {
-    const response = await fetchPublicContent();
-    const featuredJobs = response.data?.featuredJobs ?? [];
-    if (featuredJobs.length > 0) {
-      return featuredJobs.map((job, index) => ({
-        title: job.title,
-        badge: index === 0 ? "Novo" : "Disponível",
-        badgeVariant: index === 0 ? "new" : "default",
-        location: job.location || "A combinar",
-        workType: job.workType || "Consulte RH",
-        contractType: job.contractType || "Integral",
-        description: job.description,
-        applyUrl: job.applyUrl,
-      }));
-    }
-  } catch {
-    return STATIC_JOBS;
-  }
-
-  return STATIC_JOBS;
-}
-
 export default async function TrabalheConoscoPage() {
-  const jobs = await getJobCards();
-  const mediaSlots = await fetchMediaSlots();
-  const cultureImage = mediaSlot(mediaSlots, "careers.culture", "/caminhoneiro1.png");
+  const content = await fetchPublicContent();
+  const careersPage = content.data?.careersPage ?? FALLBACK_CAREERS_PAGE;
+  const cultureImage = careersPage.cultureImage;
 
   return (
     <PageShell>
@@ -228,12 +239,21 @@ export default async function TrabalheConoscoPage() {
 
               <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
                 <ActionLink
-                  action={{ label: "Ver vagas abertas", href: "#vagas" }}
+                  action={{
+                    label: careersPage.hero.buttons[0]?.label || "Ver vagas abertas",
+                    href: careersPage.hero.buttons[0]?.url || "#vagas",
+                    external: careersPage.hero.buttons[0]?.external,
+                  }}
                   tone="dark"
                   className="w-full min-w-0 sm:w-auto"
                 />
                 <ActionLink
-                  action={{ label: "Enviar currículo", href: "#candidatura", variant: "secondary" }}
+                  action={{
+                    label: careersPage.hero.buttons[1]?.label || "Enviar curriculo",
+                    href: careersPage.hero.buttons[1]?.url || "#candidatura",
+                    external: careersPage.hero.buttons[1]?.external,
+                    variant: "secondary",
+                  }}
                   tone="dark"
                   className="w-full min-w-0 sm:w-auto"
                 />
@@ -277,8 +297,8 @@ export default async function TrabalheConoscoPage() {
             <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-[#dce7f7] shadow-[0_24px_64px_rgba(15,23,42,0.12)]">
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(2,6,23,0.08)_100%)]" />
               <img
-                src={cultureImage}
-                alt="Time Rodogarcia em operação"
+                src={cultureImage.src}
+                alt={cultureImage.alt}
                 className="aspect-[4/3] w-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -324,58 +344,7 @@ export default async function TrabalheConoscoPage() {
               align="center"
             />
 
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {jobs.map((job) => (
-                <div
-                  key={job.title}
-                  className="group flex flex-col gap-4 border-b border-[var(--border)] pb-6 last:border-b-0 md:border-b-0 md:border-l md:pb-0 md:pl-6"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-lg font-semibold tracking-[-0.03em] text-[var(--foreground)]">
-                      {job.title}
-                    </h3>
-                    <span
-                      className={`shrink-0 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                        job.badgeVariant === "new"
-                          ? "bg-[var(--primary)]/10 text-[var(--primary)]"
-                          : "bg-[var(--foreground)]/6 text-[var(--color-muted-raw)]"
-                      }`}
-                    >
-                      {job.badge}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-raw)]">
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPinLine size={13} weight="duotone" className="text-[var(--primary)]" />
-                      {job.location}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Briefcase size={13} weight="duotone" className="text-[var(--primary)]" />
-                      {job.workType}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock size={13} weight="duotone" className="text-[var(--primary)]" />
-                      {job.contractType}
-                    </span>
-                  </div>
-
-                  <p className="text-sm leading-7 text-[var(--color-muted-raw)]">
-                    {job.description}
-                  </p>
-
-                  <ActionLink
-                    action={{
-                      label: job.applyUrl ? "Candidatar-se" : "Enviar perfil",
-                      href: job.applyUrl || "#candidatura",
-                      variant: "secondary",
-                      external: Boolean(job.applyUrl),
-                    }}
-                    className="mt-auto w-full"
-                  />
-                </div>
-              ))}
-            </div>
+            <CareersJobsList jobs={careersPage.jobs} />
           </div>
         </PageContainer>
       </PageSection>
@@ -404,16 +373,17 @@ export default async function TrabalheConoscoPage() {
               <div className="mt-12 grid w-full grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4">
                 <ActionLink
                   action={{
-                    label: "Enviar currículo por e-mail",
-                    href: external.careersEmailWithSubject,
-                    external: true,
+                    label: careersPage.directApplication.buttons[0]?.label || "Enviar curriculo por e-mail",
+                    href: careersPage.directApplication.buttons[0]?.url || external.careersEmailWithSubject,
+                    external: careersPage.directApplication.buttons[0]?.external,
                   }}
                   className="min-h-[60px] w-full min-w-0 flex-1 justify-center border-none bg-sky-500 text-[15px] text-white shadow-[0_12px_32px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:shadow-[0_20px_48px_rgba(14,165,233,0.35)] focus-visible:ring-sky-500/30 sm:w-auto"
                 />
                 <ActionLink
                   action={{
-                    label: "Abrir contato",
-                    href: site.contact,
+                    label: careersPage.directApplication.buttons[1]?.label || "Abrir contato",
+                    href: careersPage.directApplication.buttons[1]?.url || site.contact,
+                    external: careersPage.directApplication.buttons[1]?.external,
                     variant: "secondary",
                   }}
                   className="min-h-[60px] w-full min-w-0 flex-1 justify-center border border-slate-700 bg-transparent text-[15px] text-white hover:border-slate-500 hover:bg-slate-800 focus-visible:ring-slate-700/50 sm:w-auto"
@@ -528,16 +498,17 @@ export default async function TrabalheConoscoPage() {
             <div className="grid w-full shrink-0 grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4 lg:w-auto lg:flex-col">
               <ActionLink
                 action={{
-                  label: "Enviar currículo",
-                  href: external.careersEmailWithSubject,
-                  external: true,
+                  label: careersPage.finalCta.buttons[0]?.label || "Enviar curriculo",
+                  href: careersPage.finalCta.buttons[0]?.url || external.careersEmailWithSubject,
+                  external: careersPage.finalCta.buttons[0]?.external,
                 }}
                 className="min-h-[64px] w-full min-w-0 shadow-[0_12px_32px_rgba(29,78,216,0.22)] sm:min-w-[260px]"
               />
               <ActionLink
                 action={{
-                  label: "Falar com contato",
-                  href: site.contact,
+                  label: careersPage.finalCta.buttons[1]?.label || "Falar com contato",
+                  href: careersPage.finalCta.buttons[1]?.url || site.contact,
+                  external: careersPage.finalCta.buttons[1]?.external,
                   variant: "secondary",
                 }}
                 className="min-h-[64px] w-full min-w-0 border-transparent bg-slate-900 text-[15px] text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] hover:bg-slate-800 hover:text-white hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:ring-slate-900/30 sm:min-w-[260px]"

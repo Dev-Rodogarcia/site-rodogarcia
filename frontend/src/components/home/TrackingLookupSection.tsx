@@ -5,9 +5,20 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
 import { external, site } from "@/lib/routes";
 import { motion, useScroll, useTransform } from "framer-motion";
+import type { HomeHeroButton } from "@/types/content";
 
-export default function TrackingLookupSection() {
+export default function TrackingLookupSection({ buttons }: { buttons?: HomeHeroButton[] }) {
   const containerRef = useRef<HTMLElement>(null);
+  const primaryButton = buttons?.[0] ?? {
+    label: "Rastrear agora",
+    url: external.tracking,
+    enabled: true,
+  };
+  const secondaryButton = buttons?.[1] ?? {
+    label: "Como consultar",
+    url: site.help,
+    enabled: true,
+  };
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -60,28 +71,34 @@ export default function TrackingLookupSection() {
           </div>
 
           <div className="mt-10 flex w-full max-w-[620px] flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-            <a
-              href={external.tracking}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[linear-gradient(135deg,#1d4ed8_0%,#2563eb_54%,#38bdf8_100%)] px-5 pl-6 pr-5 text-sm font-semibold text-white shadow-[0_22px_52px_rgba(29,78,216,0.28)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_64px_rgba(29,78,216,0.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/18 sm:flex-1"
-              aria-label="Acessar rastreio oficial"
-            >
-              <span>Rastrear agora</span>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/16 ring-1 ring-white/18 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-                <ArrowUpRight size={16} weight="bold" />
-              </span>
-            </a>
+            {primaryButton.enabled !== false ? (
+              <a
+                href={primaryButton.url || external.tracking}
+                target={(primaryButton.url || "").startsWith("http") ? "_blank" : undefined}
+                rel={(primaryButton.url || "").startsWith("http") ? "noopener noreferrer" : undefined}
+                className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[linear-gradient(135deg,#1d4ed8_0%,#2563eb_54%,#38bdf8_100%)] px-5 pl-6 pr-5 text-sm font-semibold text-white shadow-[0_22px_52px_rgba(29,78,216,0.28)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_64px_rgba(29,78,216,0.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/18 sm:flex-1"
+                aria-label="Acessar rastreio oficial"
+              >
+                <span>{primaryButton.label || "Rastrear agora"}</span>
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/16 ring-1 ring-white/18 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                  <ArrowUpRight size={16} weight="bold" />
+                </span>
+              </a>
+            ) : null}
 
-            <Link
-              href={site.help}
-              className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/72 bg-white/76 px-5 pl-6 pr-5 text-sm font-semibold text-[var(--foreground)] shadow-[0_16px_34px_rgba(15,23,42,0.08)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/18 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/12 sm:flex-1"
-            >
-              <span>Como consultar</span>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)] transition-transform duration-300 group-hover:translate-x-0.5">
-                <ArrowRight size={16} weight="bold" />
-              </span>
-            </Link>
+            {secondaryButton.enabled !== false ? (
+              <Link
+                href={secondaryButton.url || site.help}
+                target={(secondaryButton.url || "").startsWith("http") ? "_blank" : undefined}
+                rel={(secondaryButton.url || "").startsWith("http") ? "noopener noreferrer" : undefined}
+                className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/72 bg-white/76 px-5 pl-6 pr-5 text-sm font-semibold text-[var(--foreground)] shadow-[0_16px_34px_rgba(15,23,42,0.08)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/18 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/12 sm:flex-1"
+              >
+                <span>{secondaryButton.label || "Como consultar"}</span>
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)] transition-transform duration-300 group-hover:translate-x-0.5">
+                  <ArrowRight size={16} weight="bold" />
+                </span>
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>

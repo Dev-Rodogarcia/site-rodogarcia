@@ -23,6 +23,11 @@ export interface ConsentSettings {
   saveLabel: string;
   desktop?: { position?: string; compact?: boolean };
   mobile?: { position?: string; compact?: boolean };
+  behavior?: {
+    requireExplicitChoice?: boolean;
+    blockAnalyticsUntilConsent?: boolean;
+    reopenOnVersionChange?: boolean;
+  };
   categories: ConsentCategory[];
 }
 
@@ -86,10 +91,13 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
 
   useEffect(() => {
     const stored = getStoredConsent();
-    setSelected(defaultCategories);
+    setSelected(stored?.categories ?? defaultCategories);
     if (!settings.enabled) return;
-    if (!stored || stored.version !== settings.version) setVisible(true);
-  }, [defaultCategories, settings.enabled, settings.version]);
+    const shouldReopenForVersion =
+      settings.behavior?.reopenOnVersionChange !== false &&
+      stored?.version !== settings.version;
+    if (!stored || shouldReopenForVersion) setVisible(true);
+  }, [defaultCategories, settings.behavior?.reopenOnVersionChange, settings.enabled, settings.version]);
 
   function decide(decision: StoredConsent["decision"], categories: Record<string, boolean>) {
     const normalized = {
@@ -110,11 +118,11 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     <div
       role="dialog"
       aria-label="Consentimento de cookies"
-      className="fixed inset-x-3 bottom-3 z-[9998] mx-auto max-w-[560px] rounded-lg border border-[var(--border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-lg)] sm:left-auto sm:right-5 sm:mx-0 sm:max-w-md"
+      className="fixed inset-x-3 bottom-3 z-[9998] mx-auto max-w-[620px] rounded-2xl border border-slate-200/90 bg-white/95 p-4 shadow-[0_24px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-all duration-300 sm:left-auto sm:right-5 sm:mx-0 sm:max-w-[460px]"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-[var(--foreground)]">{settings.title}</p>
+          <p className="text-sm font-bold tracking-[-0.01em] text-[var(--foreground)]">{settings.title}</p>
           <p className="mt-1 text-xs leading-5 text-[var(--color-muted-raw)]">
             {settings.description}
           </p>
@@ -122,11 +130,11 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       </div>
 
       {preferencesOpen ? (
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 grid gap-2">
           {settings.categories.map((category) => (
             <label
               key={category.key}
-              className="flex items-start gap-3 rounded-lg border border-[var(--border)] bg-white/70 px-3 py-2 text-sm"
+              className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/88 px-3 py-2 text-sm"
             >
               <input
                 type="checkbox"
@@ -160,14 +168,14 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
               Object.fromEntries(settings.categories.map((category) => [category.key, true]))
             )
           }
-          className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[var(--primary)] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[var(--color-primary-strong)]"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--primary)] px-4 py-2 text-xs font-bold text-white shadow-[0_10px_24px_rgba(29,78,216,0.18)] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)]"
         >
           {settings.acceptAllLabel}
         </button>
         <button
           type="button"
           onClick={() => decide("rejected", defaultCategories)}
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-bold text-[var(--foreground)] transition-colors hover:bg-black/5"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-[var(--foreground)] transition-colors hover:bg-slate-50"
         >
           {settings.rejectLabel}
         </button>
@@ -176,7 +184,7 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
           onClick={() =>
             preferencesOpen ? decide("custom", selected) : setPreferencesOpen(true)
           }
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-bold text-[var(--foreground)] transition-colors hover:bg-black/5"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-[var(--foreground)] transition-colors hover:bg-slate-50"
         >
           {preferencesOpen ? settings.saveLabel : settings.preferencesLabel}
         </button>

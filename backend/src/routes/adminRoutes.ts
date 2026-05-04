@@ -8,12 +8,28 @@ import {
   createEntityController,
   createUserController,
   deleteEntityController,
+  deleteUserController,
+  getCmsPageController,
   getContentController,
+  getHomeController,
+  getServicesPageController,
   getSiteTextsController,
   listEntityController,
   listUsersController,
   reorderEntityController,
   updateEntityController,
+  updateUserController,
+  updateHomeHeroController,
+  updateHomeSection1Controller,
+  updateHomeSection2Controller,
+  updateHomeSection3Controller,
+  updateHomeRegionalPresenceController,
+  updateHomeTrackingCtaController,
+  updateHomeSocialProofController,
+  updateCmsPageSectionController,
+  updateServicesFaqController,
+  updateServicesFinalCtaController,
+  updateServicesModulesController,
   updateSiteTextsController,
 } from "../controllers/cmsController.js";
 import { listUnifiedLeadsController } from "../controllers/leadsController.js";
@@ -40,12 +56,92 @@ import { requireJson } from "../validators/common.js";
 export const adminRouter = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024, files: 1 },
+  limits: { fileSize: 64 * 1024 * 1024, files: 1 },
 });
 
 adminRouter.use(requireAdmin);
 
 adminRouter.get("/content", getContentController);
+adminRouter.get("/home", getHomeController);
+adminRouter.put(
+  "/home/hero",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeHeroController
+);
+adminRouter.put(
+  "/home/section-1",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeSection1Controller
+);
+adminRouter.put(
+  "/home/section-2",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeSection2Controller
+);
+adminRouter.put(
+  "/home/section-3",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeSection3Controller
+);
+adminRouter.put(
+  "/home/regional-presence",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeRegionalPresenceController
+);
+adminRouter.put(
+  "/home/tracking-cta",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeTrackingCtaController
+);
+adminRouter.put(
+  "/home/social-proof",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeSocialProofController
+);
+adminRouter.get("/services-page", getServicesPageController);
+adminRouter.put(
+  "/services-page/modules",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateServicesModulesController
+);
+adminRouter.put(
+  "/services-page/final-cta",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateServicesFinalCtaController
+);
+adminRouter.put(
+  "/services-page/faq",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateServicesFaqController
+);
+adminRouter.get("/pages/:pageKey", getCmsPageController);
+adminRouter.put(
+  "/pages/:pageKey/:sectionKey",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateCmsPageSectionController
+);
 adminRouter.get("/site-texts", getSiteTextsController);
 adminRouter.post(
   "/site-texts",
@@ -60,7 +156,10 @@ adminRouter.post(
   "/images",
   requireAllowedOrigin,
   requireCsrf,
-  upload.single("image"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "media", maxCount: 1 },
+  ]),
   uploadImageController
 );
 adminRouter.post(
@@ -108,6 +207,19 @@ adminRouter.post(
   requireJson,
   requireCsrf,
   createUserController
+);
+adminRouter.put(
+  "/users/:id",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateUserController
+);
+adminRouter.delete(
+  "/users/:id",
+  requireAllowedOrigin,
+  requireCsrf,
+  deleteUserController
 );
 
 adminRouter.get("/:entity", listEntityController);

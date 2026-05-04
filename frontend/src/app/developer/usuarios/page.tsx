@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle,
   IdentificationBadge,
+  PencilSimple,
   ShieldCheck,
+  Trash,
   UserCirclePlus,
   UsersThree,
   X,
@@ -26,9 +28,10 @@ import {
   DeveloperSectionHeading,
   DeveloperStatusPill,
   developerInputClassName,
+  developerDangerButtonClassName,
+  developerGhostButtonClassName,
   developerPrimaryButtonClassName,
   developerSecondaryButtonClassName,
-  developerSplitLayoutClassName,
 } from "@/components/developer/ui";
 
 interface AdminUser {
@@ -38,9 +41,12 @@ interface AdminUser {
   role: "admin" | "user";
   createdAt: string;
   active: boolean;
+  protected?: boolean;
+  isSupreme?: boolean;
 }
 
 interface UsersResponse {
+  user?: AdminUser;
   users?: AdminUser[];
 }
 
@@ -86,7 +92,11 @@ export default function UsuariosPage() {
   const { apiRequest } = useApiRequest();
   const [form, setForm] = useState<UserFormState>(EMPTY_FORM);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
+  const [editingId, setEditingId] = useState("");
+  const [editing, setEditing] = useState<Partial<AdminUser>>({});
   const [saving, setSaving] = useState(false);
+  const [mutatingId, setMutatingId] = useState("");
   const [status, setStatus] = useState<"" | "success" | "error">("");
   const [statusMessage, setStatusMessage] = useState("");
   const { data, loading, error, refresh } = useAdminResource<AdminUser[]>({
@@ -113,12 +123,25 @@ export default function UsuariosPage() {
     setUsers(data);
   }, [data]);
 
+  async function loadUsers() {
+    const response = await apiRequest<UsersResponse>(api.admin.users);
+    if (response.success) {
+      setUsers(response.data?.users ?? []);
+      setCurrentUser(response.data?.user ?? null);
+    }
+  }
+
+  useEffect(() => {
+    void loadUsers();
+  }, []);
+
   const passwordChecks = useMemo(
     () => getPasswordChecks(form.password),
     [form.password]
   );
   const adminCount = users.filter((user) => user.role === "admin" && user.active).length;
   const activeCount = users.filter((user) => user.active).length;
+  const canManageUsers = Boolean(currentUser?.isSupreme || currentUser?.protected);
 
   function resetForm() {
     setForm(EMPTY_FORM);
@@ -128,6 +151,12 @@ export default function UsuariosPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+
+    if (!canManageUsers) {
+      setStatus("error");
+      setStatusMessage("Somente o usuário supremo pode criar ou alterar acessos.");
+      return;
+    }
 
     if (
       !form.name.trim() ||
@@ -176,11 +205,69 @@ export default function UsuariosPage() {
     }
 
     setUsers(response.data?.users ?? users);
+    setCurrentUser(response.data?.user ?? currentUser);
     invalidateAdminResource([adminResourceKeys.users, adminResourceKeys.dashboard]);
     setStatus("success");
     setStatusMessage("Usuário criado com sucesso.");
     setForm(EMPTY_FORM);
     await refresh();
+    await loadUsers();
+  }
+
+  function beginEdit(user: AdminUser) {
+    setEditingId(user.id);
+    setEditing({
+      name: user.name ?? "",
+      email: user.email,
+      role: user.role,
+      active: user.active,
+    });
+  }
+
+  async function saveUser(user: AdminUser) {
+    setMutatingId(user.id);
+    setStatus("");
+    setStatusMessage("");
+    const response = await apiRequest<UsersResponse>(`${api.admin.users}/${user.id}`, {
+      method: "PUT",
+      body: JSON.stringify(editing),
+    });
+    setMutatingId("");
+    if (!response.success) {
+      setStatus("error");
+      setStatusMessage(response.error ?? "Falha ao atualizar usuário.");
+      return;
+    }
+    setUsers(response.data?.users ?? users);
+    setEditingId("");
+    setEditing({});
+    setStatus("success");
+    setStatusMessage("Usuário atualizado com sucesso.");
+    invalidateAdminResource([adminResourceKeys.users, adminResourceKeys.dashboard]);
+    await refresh();
+    await loadUsers();
+  }
+
+  async function removeUser(user: AdminUser) {
+    if (!window.confirm(`Excluir o acesso de ${user.email}?`)) return;
+    setMutatingId(user.id);
+    setStatus("");
+    setStatusMessage("");
+    const response = await apiRequest<UsersResponse>(`${api.admin.users}/${user.id}`, {
+      method: "DELETE",
+    });
+    setMutatingId("");
+    if (!response.success) {
+      setStatus("error");
+      setStatusMessage(response.error ?? "Falha ao excluir usuário.");
+      return;
+    }
+    setUsers(response.data?.users ?? users);
+    setStatus("success");
+    setStatusMessage("Usuário removido com sucesso.");
+    invalidateAdminResource([adminResourceKeys.users, adminResourceKeys.dashboard]);
+    await refresh();
+    await loadUsers();
   }
 
   return (
@@ -208,7 +295,7 @@ export default function UsuariosPage() {
         </div>
       ) : null}
 
-      <section className={developerSplitLayoutClassName}>
+      <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(340px,480px)_minmax(0,1fr)]">
         <DeveloperCard>
           <DeveloperSectionHeading
             eyebrow="Novo acesso"
@@ -216,6 +303,14 @@ export default function UsuariosPage() {
             description="Use uma senha forte. O novo usuário poderá acessar o painel conforme o papel definido abaixo."
             tooltip="Usuário interno é uma conta criada para operar o CMS. Exemplo: admin@empresa.com.br."
           />
+
+          {!canManageUsers ? (
+            <div className="mb-5">
+              <DeveloperMessage tone="info">
+                Sua conta pode visualizar os acessos. Criação, edição e exclusão ficam restritas ao usuário supremo.
+              </DeveloperMessage>
+            </div>
+          ) : null}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <DeveloperField label="Nome" required>
@@ -350,7 +445,7 @@ export default function UsuariosPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !canManageUsers}
                 className={developerPrimaryButtonClassName}
               >
                 <UserCirclePlus size={18} weight="bold" />
@@ -377,9 +472,12 @@ export default function UsuariosPage() {
             tooltip="Lista de usuários internos autorizados no CMS, com status e função de acesso."
           />
 
-          <DeveloperListViewport className="space-y-4">
+          <DeveloperListViewport className="max-h-none space-y-4 overflow-visible pr-0">
             {users.length > 0 ? (
-              users.map((user) => (
+              users.map((user) => {
+                const editingThis = editingId === user.id;
+                const locked = Boolean(user.protected || !canManageUsers);
+                return (
                 <article
                   key={user.id}
                   className="rounded-2xl border border-[var(--border)] bg-white/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
@@ -407,6 +505,11 @@ export default function UsuariosPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2 sm:justify-end">
+                      {user.protected ? (
+                        <span className="rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">
+                          Supremo
+                        </span>
+                      ) : null}
                       <DeveloperStatusPill
                         active={user.active}
                         activeLabel="Ativo"
@@ -417,8 +520,100 @@ export default function UsuariosPage() {
                       </span>
                     </div>
                   </div>
+
+                  {editingThis ? (
+                    <div className="mt-4 grid gap-3 rounded-xl border border-slate-200 bg-white/82 p-3 lg:grid-cols-2">
+                      <DeveloperField label="Nome">
+                        <input
+                          value={String(editing.name ?? "")}
+                          onChange={(event) => setEditing((current) => ({ ...current, name: event.target.value }))}
+                          className={developerInputClassName}
+                        />
+                      </DeveloperField>
+                      <DeveloperField label="E-mail">
+                        <input
+                          type="email"
+                          value={String(editing.email ?? "")}
+                          onChange={(event) => setEditing((current) => ({ ...current, email: event.target.value }))}
+                          className={developerInputClassName}
+                        />
+                      </DeveloperField>
+                      <DeveloperField label="Perfil">
+                        <select
+                          value={(editing.role as AdminUser["role"]) ?? user.role}
+                          disabled={user.protected}
+                          onChange={(event) => setEditing((current) => ({ ...current, role: event.target.value as AdminUser["role"] }))}
+                          className={developerInputClassName}
+                        >
+                          <option value="admin">Administrador</option>
+                          <option value="user">Usuário</option>
+                        </select>
+                      </DeveloperField>
+                      <label className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(editing.active ?? user.active)}
+                          disabled={user.protected}
+                          onChange={(event) => setEditing((current) => ({ ...current, active: event.target.checked }))}
+                          className="h-4 w-4 accent-[var(--primary)]"
+                        />
+                        Usuário ativo
+                      </label>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {editingThis ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => void saveUser(user)}
+                          disabled={mutatingId === user.id}
+                          className={developerPrimaryButtonClassName}
+                        >
+                          <CheckCircle size={16} weight="bold" />
+                          {mutatingId === user.id ? "Salvando..." : "Salvar"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId("");
+                            setEditing({});
+                          }}
+                          className={developerSecondaryButtonClassName}
+                        >
+                          <X size={16} weight="bold" />
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => beginEdit(user)}
+                          disabled={locked}
+                          className={developerGhostButtonClassName}
+                          title={locked ? "Edição restrita ao usuário supremo." : "Editar usuário"}
+                        >
+                          <PencilSimple size={16} weight="bold" />
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void removeUser(user)}
+                          disabled={locked || mutatingId === user.id}
+                          className={developerDangerButtonClassName}
+                          title={user.protected ? "O usuário supremo não pode ser excluído." : "Excluir usuário"}
+                        >
+                          <Trash size={16} weight="bold" />
+                          Excluir
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </article>
-              ))
+                );
+              })
             ) : (
               <DeveloperMessage tone="info">
                 Nenhum usuário encontrado no storage atual.
@@ -438,9 +633,9 @@ export default function UsuariosPage() {
                   Política atual
                 </p>
                 <p className="mt-1 text-sm leading-7 text-[var(--color-muted-raw)]">
-                  Apenas usuários com perfil admin passam pela validação do layout
-                  `/developer`. Contas comuns ficam salvas, mas não acessam o painel
-                  administrativo nesta versão.
+                  O usuário supremo tem acesso total e é o único autorizado a criar,
+                  editar, excluir ou alterar perfis. Essa conta não pode ser excluída,
+                  desativada nem rebaixada.
                 </p>
               </div>
             </div>

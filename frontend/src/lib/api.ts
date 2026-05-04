@@ -1,6 +1,18 @@
 import type { ApiResponse } from "@/types/api";
 import { api } from "@/lib/routes";
-import type { DnaSlide, Feedback, HeroSlide, OperationalUnit } from "@/types/content";
+import type {
+  AboutPageContent,
+  BusinessPageContent,
+  CareersPageContent,
+  ContactPageContent,
+  DnaSlide,
+  Feedback,
+  HeroSlide,
+  HomePageContent,
+  OperationalUnit,
+  QuotePageContent,
+  ServicesPageContent,
+} from "@/types/content";
 
 const API_BASE_URL =
   process.env.BACKEND_INTERNAL_URL ??
@@ -8,6 +20,13 @@ const API_BASE_URL =
   "http://127.0.0.1:4010";
 
 export interface PublicContentResponse {
+  homePage: HomePageContent;
+  servicesPage: ServicesPageContent;
+  aboutPage: AboutPageContent;
+  businessPage: BusinessPageContent;
+  contactPage: ContactPageContent;
+  careersPage: CareersPageContent;
+  quotePage: QuotePageContent;
   heroSlides: HeroSlide[];
   dnaSlides: DnaSlide[];
   featuredJobs: Array<{

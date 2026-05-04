@@ -11,9 +11,9 @@ import { ValuesSection } from "@/components/internal/ValuesSection";
 import { ComplianceSection } from "@/components/internal/ComplianceSection";
 import { HistoryTimeline } from "@/components/internal/HistoryTimeline";
 import { fetchPublicContent } from "@/lib/api";
-import { buildCmsMetadata, fetchMediaSlots, mediaSlot } from "@/lib/cmsPublic";
+import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { seo, site } from "@/lib/routes";
-import { getAboutSiteTexts } from "@/lib/siteTexts";
+import type { AboutPageContent } from "@/types/content";
 
 export const dynamic = "force-dynamic";
 
@@ -73,24 +73,60 @@ const HIGHLIGHTS = [
   },
 ];
 
+const ABOUT_STATS = [
+  { value: "35+", label: "Anos de experiencia" },
+  { value: "1.500+", label: "Pontos de coleta" },
+  { value: "1M+", label: "Pacotes processados" },
+];
+
+const FALLBACK_ABOUT_PAGE: AboutPageContent = {
+  hero: {
+    title: "Mais de 35 anos conectando o Brasil",
+    description:
+      "Desde 1989, transformando a logistica com excelencia, tecnologia e compromisso com cada entrega.",
+    media: { src: "/caminhoneiro1.png", alt: "Operacao Rodogarcia em movimento" },
+    buttons: [
+      { label: "Solicitar cotacao", url: site.quote },
+      { label: "Conhecer servicos", url: site.services },
+    ],
+  },
+  compliance: {
+    image: { src: "/certificados/certificado-sassmaq.png", alt: "Certificado SASSMAQ" },
+    title: "Governanca e Compliance",
+    description:
+      "Certificacoes, licencas e controles sustentam operacoes com mais seguranca, rastreabilidade e previsibilidade.",
+    certificateText: "SASSMAQ, ISO 9001 e licencas operacionais ativas.",
+    certificateUrl: "",
+  },
+  finalCta: {
+    title: "Estruture sua operacao com a Rodogarcia.",
+    description: "Mais previsibilidade. Sem surpresas na sua malha logistica.",
+    buttons: [
+      { label: "Solicitar cotacao agora", url: site.quote },
+      { label: "Falar com atendimento", url: site.contact },
+    ],
+  },
+};
 
 export default async function SobrePage() {
   const content = await fetchPublicContent();
-  const mediaSlots = await fetchMediaSlots();
-
-  const aboutTexts = getAboutSiteTexts(content.data?.siteTexts);
+  const aboutPage = content.data?.aboutPage ?? FALLBACK_ABOUT_PAGE;
   
   return (
     <PageShell>
       <AboutHero
-        eyebrow={aboutTexts.tag}
-        title={aboutTexts.title}
-        description={aboutTexts.subtitle}
-        stats={aboutTexts.stats.map((item) => ({
-          value: item.number,
-          label: item.description,
+        eyebrow="Nossa historia"
+        title={aboutPage.hero.title}
+        description={aboutPage.hero.description}
+        stats={ABOUT_STATS}
+        image={aboutPage.hero.media.src}
+        imageAlt={aboutPage.hero.media.alt}
+        buttons={aboutPage.hero.buttons.map((button, index) => ({
+          label: button.label,
+          href: button.url,
+          external: button.external,
+          variant: index === 1 ? "secondary" : "primary",
         }))}
-        image={mediaSlot(mediaSlots, "about.hero", aboutTexts.image)}
       />
 
       <PageSection>
@@ -173,7 +209,7 @@ export default async function SobrePage() {
       </PageSection>
 
       {/* SEÇÃO COMPLIANCE WALL (Scroll Reveal Mobile + Desktop Cinematic Carousel) */}
-      <ComplianceSection />
+      <ComplianceSection content={aboutPage.compliance} />
 
       {/* SEÇÃO CTA FINAL SIMPLIFICADA */}
       <section className="py-20 sm:py-32">
@@ -184,20 +220,20 @@ export default async function SobrePage() {
             </span>
 
             <h2 className="text-[clamp(2.25rem,5vw,4rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)]">
-              Estruture sua operação com a Rodogarcia.
+              {aboutPage.finalCta.title}
             </h2>
 
             <p className="mt-6 text-lg leading-relaxed text-slate-600">
-              Mais previsibilidade. Sem surpresas na sua malha logística.
+              {aboutPage.finalCta.description}
             </p>
 
             <div className="mt-10 grid w-full grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-center sm:gap-5">
               <Link
-                href={site.quote}
+                href={aboutPage.finalCta.buttons[0]?.url || site.quote}
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-[15px] font-extrabold tracking-tight text-white shadow-[0_12px_32px_rgba(2,132,199,0.25)] transition-all duration-200 hover:-translate-y-1 hover:bg-[var(--primary)]/90 hover:shadow-[0_20px_48px_rgba(2,132,199,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 sm:w-auto sm:min-w-[320px] sm:px-10"
               >
                 <span className="flex min-w-0 items-center gap-3">
-                  <span className="min-w-0 truncate">Solicitar cotação agora</span>
+                  <span className="min-w-0 truncate">{aboutPage.finalCta.buttons[0]?.label || "Solicitar cotacao agora"}</span>
                   <svg
                     className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
                     fill="none"
@@ -211,10 +247,10 @@ export default async function SobrePage() {
               </Link>
 
               <Link
-                href={site.contact}
+                href={aboutPage.finalCta.buttons[1]?.url || site.contact}
                 className="inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-slate-900 px-4 text-[15px] font-bold tracking-tight text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] transition-all duration-200 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-900/30 sm:w-auto sm:min-w-[240px] sm:px-10"
               >
-                <span className="min-w-0 truncate">Falar com atendimento</span>
+                <span className="min-w-0 truncate">{aboutPage.finalCta.buttons[1]?.label || "Falar com atendimento"}</span>
               </Link>
             </div>
           </div>

@@ -17,7 +17,25 @@ export function publicUser(user: UserRecord) {
     email: user.email,
     name: user.name,
     role: user.role,
+    isSupreme: isSupremeUser(user),
   };
+}
+
+export function isSupremeUser(user: UserRecord | null | undefined) {
+  if (!user) return false;
+  const email = user.email.toLowerCase();
+  const name = sanitizeText(user.name, 80).toLowerCase();
+  return (
+    user.role === "admin" &&
+    user.active !== false &&
+    (env.supremeAdminEmails.has(email) || name.includes("desenvolvedor rodogarcia"))
+  );
+}
+
+function assertSupremeActor(actor: UserRecord | null | undefined) {
+  if (!isSupremeUser(actor)) {
+    throw new HttpError(403, "Somente o usuario supremo pode gerenciar acessos.");
+  }
 }
 
 export function listUsers() {
@@ -27,6 +45,7 @@ export function listUsers() {
       ...publicUser(user),
       createdAt: user.createdAt,
       active: user.active !== false,
+      protected: isSupremeUser(user),
     }))
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
 }
@@ -54,7 +73,11 @@ export function createUser(params: {
   password?: unknown;
   confirmPassword?: unknown;
   role?: unknown;
-}) {
+}, actor?: UserRecord) {
+  if (userRepository.hasAny()) {
+    assertSupremeActor(actor);
+  }
+
   const name = sanitizeText(params.name, 80);
   const email = sanitizeEmail(params.email);
   const password = typeof params.password === "string" ? params.password : "";
@@ -88,6 +111,78 @@ export function createUser(params: {
     createdAt: nowIso,
     passwordHash: hashPassword(password),
   });
+}
+
+export function updateUser(
+  id: unknown,
+  params: {
+    name?: unknown;
+    email?: unknown;
+    role?: unknown;
+    active?: unknown;
+    password?: unknown;
+    confirmPassword?: unknown;
+  },
+  actor: UserRecord
+) {
+  assertSupremeActor(actor);
+  const userId = sanitizeText(id, 120);
+  const target = userRepository.findById(userId);
+  if (!target) throw new HttpError(404, "Usuario nao encontrado.");
+  if (isSupremeUser(target)) {
+    const requestedRole = params.role === "user" ? "user" : "admin";
+    const requestedActive =
+      params.active === undefined ? target.active !== false : Boolean(params.active);
+    if (requestedRole !== "admin" || !requestedActive) {
+      throw new HttpError(403, "O usuario supremo nao pode perder perfil master ou ser desativado.");
+    }
+  }
+
+  const patch: Partial<UserRecord> = {};
+  const name = sanitizeText(params.name, 80);
+  const email = sanitizeEmail(params.email);
+  if (name) patch.name = name;
+  if (email && email !== target.email) {
+    const existing = userRepository.findByEmail(email);
+    if (existing && existing.id !== target.id) {
+      throw new HttpError(409, "Ja existe conta com este e-mail.");
+    }
+    patch.email = email;
+  }
+  patch.role = params.role === "user" ? "user" : "admin";
+  patch.active = params.active === undefined ? target.active !== false : Boolean(params.active);
+
+  const password = typeof params.password === "string" ? params.password : "";
+  if (password) {
+    const confirmPassword =
+      typeof params.confirmPassword === "string" ? params.confirmPassword : "";
+    if (password !== confirmPassword) {
+      throw new HttpError(422, "As senhas nao coincidem.");
+    }
+    const passwordErrors = validatePasswordStrength(password);
+    if (passwordErrors.length > 0) {
+      throw new HttpError(422, passwordErrors[0] ?? "Senha invalida.");
+    }
+    patch.passwordHash = hashPassword(password);
+  }
+
+  const updated = userRepository.update(target.id, patch);
+  if (!updated) throw new HttpError(404, "Usuario nao encontrado.");
+  return updated;
+}
+
+export function deleteUser(id: unknown, actor: UserRecord) {
+  assertSupremeActor(actor);
+  const userId = sanitizeText(id, 120);
+  const target = userRepository.findById(userId);
+  if (!target) throw new HttpError(404, "Usuario nao encontrado.");
+  if (isSupremeUser(target)) {
+    throw new HttpError(403, "O usuario supremo nao pode ser excluido.");
+  }
+  if (target.id === actor.id) {
+    throw new HttpError(403, "Voce nao pode excluir sua propria conta.");
+  }
+  userRepository.delete(target.id);
 }
 
 export function createInitialUser(params: {

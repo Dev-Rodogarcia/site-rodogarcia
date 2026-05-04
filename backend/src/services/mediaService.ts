@@ -18,7 +18,8 @@ import { HttpError } from "../utils/http.js";
 import { generateId } from "../utils/ids.js";
 import { recordAuditAction } from "./auditService.js";
 
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_UPLOAD_BYTES = 64 * 1024 * 1024;
 const IMAGE_EXTENSIONS = new Set([
   ".png",
   ".jpg",
@@ -28,17 +29,29 @@ const IMAGE_EXTENSIONS = new Set([
   ".svg",
   ".avif",
 ]);
-const UPLOAD_MIME_TYPES = new Set([
+const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".ogg"]);
+const MEDIA_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS]);
+const UPLOAD_IMAGE_MIME_TYPES = new Set([
   "image/png",
   "image/jpeg",
   "image/webp",
   "image/avif",
+]);
+const UPLOAD_VIDEO_MIME_TYPES = new Set([
+  "video/mp4",
+  "video/webm",
+  "video/ogg",
+  "application/ogg",
 ]);
 const MIME_TO_EXTENSION: Record<string, string> = {
   "image/png": ".png",
   "image/jpeg": ".jpg",
   "image/webp": ".webp",
   "image/avif": ".avif",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/ogg": ".ogg",
+  "application/ogg": ".ogg",
 };
 
 export interface AdminImageRecord {
@@ -49,6 +62,7 @@ export interface AdminImageRecord {
   usedInContent: boolean;
   size: number;
   references: number;
+  mediaType: "image" | "video";
   format?: string;
   width?: number;
   height?: number;
@@ -73,7 +87,7 @@ function walkFiles(rootDir: string, relativeDir = ""): string[] {
 function collectImageReferences(value: unknown, target: Map<string, number>) {
   if (typeof value === "string") {
     const sanitized = sanitizeUrl(value);
-    if (sanitized && IMAGE_EXTENSIONS.has(path.extname(sanitized).toLowerCase())) {
+    if (sanitized && MEDIA_EXTENSIONS.has(path.extname(sanitized).toLowerCase())) {
       target.set(sanitized, (target.get(sanitized) ?? 0) + 1);
     }
     return;
@@ -127,6 +141,29 @@ function isValidImageBuffer(mimeType: string, buffer: Buffer): boolean {
     );
   }
   return false;
+}
+
+function isValidVideoBuffer(mimeType: string, buffer: Buffer): boolean {
+  if (mimeType === "video/mp4") {
+    return buffer.length > 12 && buffer.subarray(4, 8).toString("ascii") === "ftyp";
+  }
+  if (mimeType === "video/webm") {
+    return (
+      buffer.length > 4 &&
+      buffer[0] === 0x1a &&
+      buffer[1] === 0x45 &&
+      buffer[2] === 0xdf &&
+      buffer[3] === 0xa3
+    );
+  }
+  if (mimeType === "video/ogg" || mimeType === "application/ogg") {
+    return buffer.length > 4 && buffer.subarray(0, 4).toString("ascii") === "OggS";
+  }
+  return false;
+}
+
+function mediaTypeFromUrl(url: string): "image" | "video" {
+  return VIDEO_EXTENSIONS.has(path.extname(url).toLowerCase()) ? "video" : "image";
 }
 
 function safeFileBaseName(fileName: string) {
@@ -186,6 +223,7 @@ export function listAdminImages(): AdminImageRecord[] {
       references: referenceCount,
       usedInContent: referenceCount > 0,
       source: "upload",
+      mediaType: String(item.mediaType ?? mediaTypeFromUrl(url)) === "video" ? "video" : "image",
       format: String(item.format ?? "webp"),
       width: Number(item.width ?? 0) || undefined,
       height: Number(item.height ?? 0) || undefined,
@@ -200,7 +238,7 @@ export function listAdminImages(): AdminImageRecord[] {
 
   const uploadFiles: AdminImageRecord[] = [];
   for (const relativePath of walkFiles(env.uploadsDir).filter((item) =>
-    IMAGE_EXTENSIONS.has(path.extname(item).toLowerCase())
+    MEDIA_EXTENSIONS.has(path.extname(item).toLowerCase())
   )) {
       const url = `/uploads/${relativePath.replace(/\\/g, "/")}`;
       const normalized = sanitizePath(url);
@@ -214,6 +252,7 @@ export function listAdminImages(): AdminImageRecord[] {
         references: referenceCount,
         usedInContent: referenceCount > 0,
         source: "upload",
+        mediaType: mediaTypeFromUrl(normalized),
         format: path.extname(relativePath).replace(".", ""),
         uploadedAt: stats.mtime.toISOString(),
       });
@@ -221,7 +260,7 @@ export function listAdminImages(): AdminImageRecord[] {
 
   const libraryFiles: AdminImageRecord[] = walkFiles(env.frontendPublicDir)
     .filter((relativePath) => !relativePath.replace(/\\/g, "/").startsWith("uploads/"))
-    .filter((relativePath) => IMAGE_EXTENSIONS.has(path.extname(relativePath).toLowerCase()))
+    .filter((relativePath) => MEDIA_EXTENSIONS.has(path.extname(relativePath).toLowerCase()))
     .map((relativePath) => {
       const url = `/${relativePath.replace(/\\/g, "/")}`;
       const normalized = sanitizePath(url);
@@ -234,6 +273,7 @@ export function listAdminImages(): AdminImageRecord[] {
         references: referenceCount,
         usedInContent: referenceCount > 0,
         source: referenceCount > 0 ? "content" : "library",
+        mediaType: mediaTypeFromUrl(normalized),
         format: path.extname(relativePath).replace(".", ""),
       } satisfies AdminImageRecord;
     });
@@ -256,10 +296,10 @@ export async function saveAdminImageFromBuffer({
   mimeType: string;
   buffer: Buffer;
 }) {
-  if (!UPLOAD_MIME_TYPES.has(mimeType) || !MIME_TO_EXTENSION[mimeType]) {
+  if (!UPLOAD_IMAGE_MIME_TYPES.has(mimeType) || !MIME_TO_EXTENSION[mimeType]) {
     throw new HttpError(422, "Tipo de imagem nao suportado. Use PNG, JPG, WebP ou AVIF.");
   }
-  if (buffer.length === 0 || buffer.length > MAX_UPLOAD_BYTES) {
+  if (buffer.length === 0 || buffer.length > MAX_IMAGE_UPLOAD_BYTES) {
     throw new HttpError(422, "Imagem fora do limite permitido.");
   }
   if (!isValidImageBuffer(mimeType, buffer)) {
@@ -294,6 +334,7 @@ export async function saveAdminImageFromBuffer({
     id: generateId("media"),
     name: path.basename(fileName),
     url: `/uploads/${optimizedName}`,
+    mediaType: "image",
     originalUrl: `/uploads/${originalName}`,
     optimizedUrl: `/uploads/${optimizedName}`,
     thumbnailUrl: `/uploads/${thumbnailName}`,
@@ -315,6 +356,65 @@ export async function saveAdminImageFromBuffer({
       fileName,
       originalSize: String(record.originalSize),
       optimizedSize: String(record.optimizedSize),
+    },
+  });
+  return record;
+}
+
+export async function saveAdminMediaFromBuffer({
+  req,
+  fileName,
+  mimeType,
+  buffer,
+}: {
+  req?: Request;
+  fileName: string;
+  mimeType: string;
+  buffer: Buffer;
+}) {
+  if (UPLOAD_IMAGE_MIME_TYPES.has(mimeType)) {
+    return saveAdminImageFromBuffer({ req, fileName, mimeType, buffer });
+  }
+
+  if (!UPLOAD_VIDEO_MIME_TYPES.has(mimeType) || !MIME_TO_EXTENSION[mimeType]) {
+    throw new HttpError(
+      422,
+      "Tipo de midia nao suportado. Use imagem PNG/JPG/WebP/AVIF ou video MP4/WebM/Ogg."
+    );
+  }
+  if (buffer.length === 0 || buffer.length > MAX_VIDEO_UPLOAD_BYTES) {
+    throw new HttpError(422, "Video fora do limite permitido.");
+  }
+  if (!isValidVideoBuffer(mimeType, buffer)) {
+    throw new HttpError(422, "O conteudo do video nao corresponde ao tipo informado.");
+  }
+
+  fs.mkdirSync(env.uploadsDir, { recursive: true });
+  const fileExtension = MIME_TO_EXTENSION[mimeType]!;
+  const storedName = `${safeFileBaseName(fileName)}-${Date.now()}${fileExtension}`;
+  const storedPath = path.join(env.uploadsDir, storedName);
+  fs.writeFileSync(storedPath, buffer);
+
+  const record = {
+    id: generateId("media"),
+    name: path.basename(fileName),
+    url: `/uploads/${storedName}`,
+    mediaType: "video",
+    format: fileExtension.replace(".", ""),
+    originalFormat: mimeType,
+    size: buffer.length,
+    originalSize: buffer.length,
+    uploadedAt: new Date().toISOString(),
+  };
+  writeMediaLibrary([record, ...readMediaLibrary()].slice(0, 5000));
+  recordAuditAction({
+    req,
+    action: "media.upload",
+    target: record.url,
+    metadata: {
+      fileName,
+      originalSize: String(record.originalSize),
+      mediaType: "video",
     },
   });
   return record;

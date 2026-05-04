@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ActionLink, PageContainer } from "./PageContent";
+import { ActionLink, PageContainer, type PageAction } from "./PageContent";
 import { site } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,8 @@ interface AboutHeroProps {
   description: string;
   stats: StatItem[];
   image: string;
+  imageAlt?: string;
+  buttons?: PageAction[];
 }
 
 export function AboutHero({
@@ -24,7 +26,16 @@ export function AboutHero({
   description,
   stats,
   image,
+  imageAlt,
+  buttons,
 }: AboutHeroProps) {
+  const heroButtons = buttons?.length
+    ? buttons
+    : [
+        { label: "Solicitar cotação", href: site.quote },
+        { label: "Conhecer serviços", href: site.services, variant: "secondary" as const },
+      ];
+
   return (
     <section className="relative overflow-hidden bg-[var(--foreground)] pb-16 pt-32 text-white sm:pb-20 sm:pt-40 lg:pb-24 lg:pt-48">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(29,78,216,0.12),transparent_50%),radial-gradient(circle_at_100%_100%,rgba(56,189,248,0.06),transparent_40%)]" />
@@ -89,20 +100,17 @@ export function AboutHero({
               transition={{ delay: 0.6, duration: 0.6 }}
               className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:flex-wrap"
             >
-              <ActionLink
-                action={{ label: "Solicitar cotação", href: site.quote }}
-                tone="dark"
-                className="w-full min-w-0 sm:w-auto"
-              />
-              <ActionLink
-                action={{
-                  label: "Conhecer serviços",
-                  href: site.services,
-                  variant: "secondary",
-                }}
-                tone="dark"
-                className="w-full min-w-0 sm:w-auto"
-              />
+              {heroButtons.slice(0, 2).map((button, index) => (
+                <ActionLink
+                  key={`${button.href}-${index}`}
+                  action={{
+                    ...button,
+                    variant: index === 1 ? "secondary" : button.variant,
+                  }}
+                  tone="dark"
+                  className="w-full min-w-0 sm:w-auto"
+                />
+              ))}
             </motion.div>
           </div>
 
@@ -121,7 +129,7 @@ export function AboutHero({
                 animate={{ scale: 1, filter: "blur(0px)" }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
                 src={image}
-                alt={title}
+                alt={imageAlt || title}
                 className="h-full w-full object-cover opacity-80 mix-blend-luminosity"
               />
               <div className="pointer-events-none absolute inset-0 z-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZUZpbHRlciI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2VGaWx0ZXIpIi8+PC9zdmc+')] opacity-[0.1] mix-blend-overlay" />

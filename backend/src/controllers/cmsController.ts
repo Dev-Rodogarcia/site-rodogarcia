@@ -2,22 +2,43 @@ import type { RequestHandler } from "express";
 import {
   createItem,
   deleteItem,
+  getCmsPage,
   getContent,
+  getHomePage,
+  getServicesPage,
   getItems,
   getSiteTexts,
   reorderItems,
   updateItem,
+  updateHomeSection,
+  updateCmsPageSection,
+  updateServicesPageSection,
   updateSiteTexts,
   VALID_ENTITIES,
   type Entity,
+  type HomeSectionKey,
+  type ServicesPageSectionKey,
 } from "../services/cmsService.js";
-import { listUsers, publicUser, createUser } from "../services/authService.js";
+import { parsePageKey, type PageSectionKey } from "../services/pageContent.js";
+import {
+  createUser,
+  deleteUser,
+  listUsers,
+  publicUser,
+  updateUser,
+} from "../services/authService.js";
 import { recordAuditAction } from "../services/auditService.js";
 import { asyncHandler, HttpError } from "../utils/http.js";
 
 function parseEntity(value: string | undefined): Entity {
   if (VALID_ENTITIES.includes(value as Entity)) return value as Entity;
   throw new HttpError(404, "Recurso administrativo nao encontrado.");
+}
+
+function parseCmsPage(value: string | undefined) {
+  const pageKey = parsePageKey(value);
+  if (pageKey) return pageKey;
+  throw new HttpError(404, "Pagina administrativa nao encontrada.");
 }
 
 function paramString(value: string | string[] | undefined): string | undefined {
@@ -30,6 +51,80 @@ export const getContentController: RequestHandler = asyncHandler((req, res) => {
     csrfToken: req.auth!.session.csrfToken,
     content: getContent(),
   });
+});
+
+export const getHomeController: RequestHandler = asyncHandler((req, res) => {
+  res.json({
+    user: publicUser(req.auth!.user),
+    csrfToken: req.auth!.session.csrfToken,
+    homePage: getHomePage(),
+  });
+});
+
+export const getServicesPageController: RequestHandler = asyncHandler((req, res) => {
+  res.json({
+    user: publicUser(req.auth!.user),
+    csrfToken: req.auth!.session.csrfToken,
+    servicesPage: getServicesPage(),
+  });
+});
+
+export const getCmsPageController: RequestHandler = asyncHandler((req, res) => {
+  const pageKey = parseCmsPage(paramString(req.params.pageKey));
+  res.json({
+    user: publicUser(req.auth!.user),
+    csrfToken: req.auth!.session.csrfToken,
+    pageKey,
+    page: getCmsPage(pageKey),
+  });
+});
+
+function updateHomeSectionController(section: HomeSectionKey): RequestHandler {
+  return asyncHandler((req, res) => {
+    const homePage = updateHomeSection(section, req.body ?? {});
+    recordAuditAction({
+      req,
+      action: "content.home_update",
+      target: `home:${section}`,
+    });
+    res.json({ message: "Home atualizada com sucesso.", homePage });
+  });
+}
+
+export const updateHomeHeroController = updateHomeSectionController("hero");
+export const updateHomeSection1Controller = updateHomeSectionController("section1");
+export const updateHomeSection2Controller = updateHomeSectionController("section2");
+export const updateHomeSection3Controller = updateHomeSectionController("section3");
+export const updateHomeRegionalPresenceController = updateHomeSectionController("regionalPresence");
+export const updateHomeTrackingCtaController = updateHomeSectionController("trackingCta");
+export const updateHomeSocialProofController = updateHomeSectionController("socialProof");
+
+function updateServicesPageSectionController(section: ServicesPageSectionKey): RequestHandler {
+  return asyncHandler((req, res) => {
+    const servicesPage = updateServicesPageSection(section, req.body ?? {});
+    recordAuditAction({
+      req,
+      action: "content.services_update",
+      target: `services:${section}`,
+    });
+    res.json({ message: "Página Serviços atualizada com sucesso.", servicesPage });
+  });
+}
+
+export const updateServicesModulesController = updateServicesPageSectionController("modules");
+export const updateServicesFinalCtaController = updateServicesPageSectionController("finalCta");
+export const updateServicesFaqController = updateServicesPageSectionController("faq");
+
+export const updateCmsPageSectionController: RequestHandler = asyncHandler((req, res) => {
+  const pageKey = parseCmsPage(paramString(req.params.pageKey));
+  const sectionKey = String(paramString(req.params.sectionKey) ?? "") as PageSectionKey;
+  const page = updateCmsPageSection(pageKey, sectionKey, req.body ?? {});
+  recordAuditAction({
+    req,
+    action: "content.page_update",
+    target: `${pageKey}:${sectionKey}`,
+  });
+  res.json({ message: "Pagina atualizada com sucesso.", pageKey, page });
 });
 
 export const getSiteTextsController: RequestHandler = asyncHandler((req, res) => {
@@ -101,7 +196,7 @@ export const listUsersController: RequestHandler = asyncHandler((req, res) => {
 });
 
 export const createUserController: RequestHandler = asyncHandler((req, res) => {
-  const created = createUser(req.body ?? {});
+  const created = createUser(req.body ?? {}, req.auth!.user);
   recordAuditAction({
     req,
     action: "user.create",
@@ -111,6 +206,35 @@ export const createUserController: RequestHandler = asyncHandler((req, res) => {
   res.status(201).json({
     message: "Usuario criado com sucesso.",
     createdUser: publicUser(created),
+    users: listUsers(),
+  });
+});
+
+export const updateUserController: RequestHandler = asyncHandler((req, res) => {
+  const updated = updateUser(paramString(req.params.id), req.body ?? {}, req.auth!.user);
+  recordAuditAction({
+    req,
+    action: "user.update",
+    target: updated.email,
+    metadata: { role: updated.role, active: String(updated.active !== false) },
+  });
+  res.json({
+    message: "Usuario atualizado com sucesso.",
+    updatedUser: publicUser(updated),
+    users: listUsers(),
+  });
+});
+
+export const deleteUserController: RequestHandler = asyncHandler((req, res) => {
+  const id = paramString(req.params.id);
+  deleteUser(id, req.auth!.user);
+  recordAuditAction({
+    req,
+    action: "user.delete",
+    target: String(id ?? ""),
+  });
+  res.json({
+    message: "Usuario removido com sucesso.",
     users: listUsers(),
   });
 });

@@ -36,6 +36,7 @@ interface AdminImageRecord {
   usedInContent: boolean;
   size: number;
   references: number;
+  mediaType?: "image" | "video";
   format?: string;
   uploadedAt?: string;
   originalSize?: number;
@@ -43,12 +44,16 @@ interface AdminImageRecord {
   thumbnailUrl?: string;
 }
 
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = [
+const MAX_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_UPLOAD_BYTES = 64 * 1024 * 1024;
+const ACCEPTED_MEDIA_TYPES = [
   "image/png",
   "image/jpeg",
   "image/webp",
   "image/avif",
+  "video/mp4",
+  "video/webm",
+  "video/ogg",
 ] as const;
 const MEDIA_SLOT_LABELS: Record<string, string> = {
   "home.hero.default": "Home - Hero padrão",
@@ -69,9 +74,6 @@ const MEDIA_SLOT_LABELS: Record<string, string> = {
   "home.cert.exercito": "Home - Exercito Brasileiro",
   "home.cert.ibama": "Home - IBAMA",
   "services.hero": "Serviços - Hero/OG",
-  "services.module.distribution": "Servicos - Distribuicao imagem",
-  "services.module.indoor": "Servicos - Indoor imagem",
-  "services.module.special": "Servicos - Cargas especiais imagem",
   "about.hero": "Sobre - Hero",
   "business.hero": "Empresas - Hero/OG",
   "careers.hero": "Carreiras - Hero/OG",
@@ -87,9 +89,14 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+function mediaTypeFromUrl(value: string): "image" | "video" {
+  return /\.(mp4|webm|ogg)$/i.test(value) ? "video" : "image";
+}
+
 export default function ImagensPage() {
   const { apiRequest } = useApiRequest();
   const [previewUrl, setPreviewUrl] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [fileName, setFileName] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [fromUrl, setFromUrl] = useState("");
@@ -132,11 +139,20 @@ export default function ImagensPage() {
   });
   const images = data?.images ?? [];
   const { pages, currentPage, totalPages, nextPage, prevPage } = useCarouselPagination(images, 6);
+  const slotEntries = useMemo(() => Object.entries(MEDIA_SLOT_LABELS), []);
+  const {
+    pages: slotPages,
+    currentPage: slotPage,
+    totalPages: slotTotalPages,
+    nextPage: nextSlotPage,
+    prevPage: prevSlotPage,
+  } = useCarouselPagination(slotEntries, 10);
 
   const summary = useMemo(
     () => ({
       total: images.length,
       uploads: images.filter((item) => item.source === "upload").length,
+      videos: images.filter((item) => (item.mediaType ?? mediaTypeFromUrl(item.url)) === "video").length,
       used: images.filter((item) => item.usedInContent).length,
     }),
     [images]
@@ -150,27 +166,37 @@ export default function ImagensPage() {
     const file = event.target.files?.[0];
     if (!file) {
       setPreviewUrl("");
+      setPreviewOpen(false);
       setUploadFile(null);
       setFileName("");
       return;
     }
 
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_IMAGE_TYPES)[number])) {
+    if (!ACCEPTED_MEDIA_TYPES.includes(file.type as (typeof ACCEPTED_MEDIA_TYPES)[number])) {
       setPreviewUrl("");
+      setPreviewOpen(false);
       setUploadFile(null);
       setFileName("");
       setStatus("error");
-      setMessage("Formato não suportado. Use PNG, JPG, WebP ou AVIF.");
+      setMessage("Formato nao suportado. Use PNG, JPG, WebP, AVIF, MP4, WebM ou Ogg.");
       event.target.value = "";
       return;
     }
 
-    if (file.size > MAX_UPLOAD_BYTES) {
+    const maxBytes = file.type.startsWith("video/")
+      ? MAX_VIDEO_UPLOAD_BYTES
+      : MAX_IMAGE_UPLOAD_BYTES;
+    if (file.size > maxBytes) {
       setPreviewUrl("");
+      setPreviewOpen(false);
       setUploadFile(null);
       setFileName("");
       setStatus("error");
-      setMessage("Imagem acima de 8 MB. Reduza o arquivo antes de enviar.");
+      setMessage(
+        file.type.startsWith("video/")
+          ? "Video acima de 64 MB. Reduza o arquivo antes de enviar."
+          : "Imagem acima de 8 MB. Reduza o arquivo antes de enviar."
+      );
       event.target.value = "";
       return;
     }
@@ -196,7 +222,7 @@ export default function ImagensPage() {
 
     setUploading(true);
     const formData = new FormData();
-    formData.append("image", uploadFile);
+    formData.append("media", uploadFile);
     const response = await apiRequest(api.admin.images, {
       method: "POST",
       body: formData,
@@ -210,6 +236,7 @@ export default function ImagensPage() {
     }
 
     setPreviewUrl("");
+    setPreviewOpen(false);
     setUploadFile(null);
     setFileName("");
     setStatus("success");
@@ -284,6 +311,7 @@ export default function ImagensPage() {
         stats={[
           { label: "Total", value: summary.total },
           { label: "Uploads", value: summary.uploads },
+          { label: "Videos", value: summary.videos },
           { label: "Em uso", value: summary.used },
         ]}
       />
@@ -323,7 +351,7 @@ export default function ImagensPage() {
             <DeveloperField label="Selecionar arquivo">
               <input
                 type="file"
-                accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                accept={ACCEPTED_MEDIA_TYPES.join(",")}
                 onChange={handleFileChange}
                 className={developerInputClassName}
               />
@@ -331,17 +359,85 @@ export default function ImagensPage() {
 
             <div className="rounded-[24px] border border-[var(--border)] bg-white/68 p-4">
               {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Preview da imagem selecionada"
-                  className="aspect-[4/3] w-full rounded-[20px] object-cover"
-                />
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen(true)}
+                  className="group block w-full max-w-[280px] overflow-hidden rounded-[18px] border border-[var(--border)] bg-white text-left focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                >
+                  <div className="relative h-32 overflow-hidden bg-slate-950">
+                    {uploadFile?.type.startsWith("video/") ? (
+                      <video
+                        src={previewUrl}
+                        muted
+                        preload="metadata"
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <img
+                        src={previewUrl}
+                        alt="Preview da imagem selecionada"
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                    <span className="absolute bottom-2 right-2 rounded-full bg-slate-950/78 px-2.5 py-1 text-[11px] font-semibold text-white">
+                      Ampliar
+                    </span>
+                  </div>
+                  <div className="border-t border-[var(--border)] px-3 py-2">
+                    <p className="text-xs font-semibold text-[var(--foreground)]">
+                      Preview compacto
+                    </p>
+                    <p className="mt-1 truncate text-[11px] text-[var(--color-muted-raw)]">
+                      {fileName}
+                    </p>
+                  </div>
+                </button>
               ) : (
-                <div className="flex aspect-[4/3] items-center justify-center rounded-[20px] border border-dashed border-[var(--border)] bg-white/72 text-sm text-[var(--color-muted-raw)]">
-                  Selecione uma imagem para visualizar o preview.
+                <div className="flex h-32 max-w-[280px] items-center justify-center rounded-[18px] border border-dashed border-[var(--border)] bg-white/72 px-4 text-center text-sm text-[var(--color-muted-raw)]">
+                  Selecione uma imagem ou video para visualizar o preview.
                 </div>
               )}
             </div>
+
+            {previewUrl && previewOpen ? (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/76 p-4">
+                <button
+                  type="button"
+                  aria-label="Fechar preview"
+                  className="absolute inset-0 cursor-default"
+                  onClick={() => setPreviewOpen(false)}
+                />
+                <div className="relative z-10 max-w-[92vw] rounded-[22px] border border-white/16 bg-white p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
+                      Preview do upload
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewOpen(false)}
+                      className={`${developerSecondaryButtonClassName} min-h-9 rounded-xl px-3 py-2 text-xs`}
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                  {uploadFile?.type.startsWith("video/") ? (
+                    <video
+                      src={previewUrl}
+                      controls
+                      autoPlay
+                      muted
+                      className="max-h-[78vh] max-w-[86vw] rounded-[16px] bg-slate-950 object-contain"
+                    />
+                  ) : (
+                    <img
+                      src={previewUrl}
+                      alt="Preview da imagem selecionada"
+                      className="max-h-[78vh] max-w-[86vw] rounded-[16px] object-contain"
+                    />
+                  )}
+                </div>
+              </div>
+            ) : null}
 
             <button type="button" onClick={handleUpload} disabled={uploading} className={developerPrimaryButtonClassName}>
               <UploadSimple size={18} weight="bold" />
@@ -403,20 +499,44 @@ export default function ImagensPage() {
               tooltip="Slots conectam uma imagem da biblioteca a uma área do site. Exemplo: Popup - Mobile usa a imagem no popup de celular."
             />
 
-            <div className="space-y-3">
-              {Object.entries(MEDIA_SLOT_LABELS).map(([slotKey, label]) => (
-                <DeveloperField key={slotKey} label={label}>
-                  <input
-                    list="image-url-options"
-                    value={slots[slotKey] ?? ""}
-                    onChange={(event) =>
-                      setSlots((current) => ({ ...current, [slotKey]: event.target.value }))
-                    }
-                    className={developerInputClassName}
-                    placeholder="/uploads/imagem.webp"
-                  />
-                </DeveloperField>
-              ))}
+            <div className="rounded-[18px] border border-[var(--border)] bg-slate-50/70 p-3">
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
+                  style={{ transform: `translateX(-${slotPage * 100}%)` }}
+                >
+                  {slotPages.map((page, pageIndex) => (
+                    <div key={pageIndex} className="w-full shrink-0 space-y-2">
+                      {page.map(([slotKey, label]) => (
+                        <div
+                          key={slotKey}
+                          className="grid gap-2 rounded-xl border border-slate-200/80 bg-white/82 p-2.5 lg:grid-cols-[minmax(160px,220px)_minmax(0,1fr)] lg:items-center"
+                        >
+                          <span className="truncate text-xs font-semibold text-[var(--foreground)]" title={label}>
+                            {label}
+                          </span>
+                          <input
+                            list="image-url-options"
+                            value={slots[slotKey] ?? ""}
+                            onChange={(event) =>
+                              setSlots((current) => ({ ...current, [slotKey]: event.target.value }))
+                            }
+                            className={`${developerInputClassName} min-h-9 py-2 text-xs`}
+                            placeholder="/uploads/imagem.webp"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <DeveloperCarouselPagination
+                currentPage={slotPage}
+                totalPages={slotTotalPages}
+                onNext={nextSlotPage}
+                onPrev={prevSlotPage}
+              />
 
               <button
                 type="button"
@@ -445,22 +565,34 @@ export default function ImagensPage() {
             >
               {pages.map((page, index) => (
                 <div key={index} className="w-full shrink-0 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-                  {page.map((image) => (
+                  {page.map((image) => {
+                    const itemType = image.mediaType ?? mediaTypeFromUrl(image.url);
+                    return (
                     <article
                       key={image.url}
                       className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
                     >
-                      <img
-                        src={image.url}
-                        alt={image.name}
-                        className="aspect-[5/4] w-full object-cover"
-                        loading="lazy"
-                      />
+                      {itemType === "video" ? (
+                        <video
+                          src={image.url}
+                          className="h-32 w-full bg-slate-950 object-contain"
+                          controls
+                          muted
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={image.thumbnailUrl || image.url}
+                          alt={image.name}
+                          className="h-32 w-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
 
                       <div className="p-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="rounded-full bg-[var(--primary)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-                            {image.source}
+                            {image.source} - {itemType}
                           </span>
                           {image.usedInContent ? (
                             <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600">
@@ -508,7 +640,8 @@ export default function ImagensPage() {
                         </div>
                       </div>
                     </article>
-                  ))}
+                    );
+                  })}
                 </div>
               ))}
             </div>

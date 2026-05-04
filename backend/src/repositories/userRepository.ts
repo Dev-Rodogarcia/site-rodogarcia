@@ -35,6 +35,22 @@ export const userRepository = {
     writeUsersFile(data);
     return user;
   },
+  update(id: string, patch: Partial<UserRecord>): UserRecord | null {
+    const data = readUsersFile();
+    const index = data.users.findIndex((user) => user.id === id);
+    if (index < 0) return null;
+    const next = { ...data.users[index]!, ...patch };
+    data.users[index] = next;
+    writeUsersFile(data);
+    return next;
+  },
+  delete(id: string): boolean {
+    const data = readUsersFile();
+    const nextUsers = data.users.filter((user) => user.id !== id);
+    if (nextUsers.length === data.users.length) return false;
+    writeUsersFile({ users: nextUsers });
+    return true;
+  },
   hasAny(): boolean {
     return readUsersFile().users.length > 0;
   },

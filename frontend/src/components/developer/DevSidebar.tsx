@@ -42,9 +42,16 @@ type SidebarIcon = ComponentType<{
 
 const iconMap: Record<string, SidebarIcon> = {
   dashboard: House,
+  home: Sparkle,
   "home-hero": Sparkle,
   "home-dna": Stack,
   feedbacks: CursorClick,
+  services: Stack,
+  "about-page": Buildings,
+  "business-page": Buildings,
+  "contact-page": Phone,
+  "careers-page": Briefcase,
+  "quote-page": EnvelopeSimple,
   jobs: Briefcase,
   "about-hero": Buildings,
   "contact-info": Phone,
@@ -93,7 +100,7 @@ function SidebarItem({
       </span>
       <span
         className={cn(
-          "overflow-hidden whitespace-nowrap text-[13px] tracking-[0.01em] transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
+          "min-w-0 overflow-hidden truncate whitespace-nowrap text-[13px] tracking-[0.01em] transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
           expanded ? "max-w-[180px] ml-2.5 opacity-100 translate-x-0" : "max-w-0 ml-0 opacity-0 -translate-x-2",
           active ? "font-semibold text-white" : destructive ? "font-medium text-rose-300/80 group-hover:text-rose-200" : "font-medium text-slate-300 group-hover:text-white"
         )}
@@ -109,7 +116,7 @@ function SidebarItem({
   );
 
   const className = cn(
-    "group relative flex items-center outline-none transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-sky-500",
+    "group relative flex min-w-0 items-center outline-none transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-sky-500",
     "h-9 mx-2.5 rounded-lg border",
     active
       ? "border-sky-500/20 bg-sky-500/10 shadow-[0_2px_10px_rgba(14,165,233,0.08)]"
@@ -234,6 +241,11 @@ export default function DevSidebar({
                   navigationExpanded ? "gap-0.5" : "gap-1.5"
                 )}
               >
+                {navigationExpanded ? (
+                  <p className="mx-5 mb-1 mt-1 truncate text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    {group.label}
+                  </p>
+                ) : null}
                 {group.items.map((item) => {
                   const Icon = iconMap[item.key] ?? Stack;
                   return (

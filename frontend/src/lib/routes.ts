@@ -52,6 +52,13 @@ export const auth = {
 
 export const admin = {
   root: "/developer",
+  home: "/developer/home",
+  services: "/developer/servicos",
+  aboutPage: "/developer/sobre",
+  businessPage: "/developer/para-empresas",
+  contactPage: "/developer/fale-conosco",
+  careersPage: "/developer/trabalhe-conosco",
+  quotePage: "/developer/cotacao",
   homeHero: "/developer/home-hero",
   homeDna: "/developer/home-dna",
   feedbacks: "/developer/servicos-feedbacks",
@@ -81,6 +88,21 @@ export const api = {
     content: "/api/admin/content",
     siteTexts: "/api/admin/site-texts",
     images: "/api/admin/images",
+    home: "/api/admin/home",
+    homeHero: "/api/admin/home/hero",
+    homeSection1: "/api/admin/home/section-1",
+    homeSection2: "/api/admin/home/section-2",
+    homeSection3: "/api/admin/home/section-3",
+    homeRegionalPresence: "/api/admin/home/regional-presence",
+    homeTrackingCta: "/api/admin/home/tracking-cta",
+    homeSocialProof: "/api/admin/home/social-proof",
+    servicesPage: "/api/admin/services-page",
+    servicesModules: "/api/admin/services-page/modules",
+    servicesFinalCta: "/api/admin/services-page/final-cta",
+    servicesFaq: "/api/admin/services-page/faq",
+    page: (pageKey: string) => `/api/admin/pages/${pageKey}`,
+    pageSection: (pageKey: string, sectionKey: string) =>
+      `/api/admin/pages/${pageKey}/${sectionKey}`,
     users: "/api/admin/users",
     replaceImageReference: "/api/admin/images/replace-reference",
     mediaSlots: "/api/admin/media-slots",
@@ -169,27 +191,21 @@ export const drawerNavigation = [
 
 export const adminNavigationGroups = [
   {
-    label: "Visão geral",
+    label: "Dashboard",
     key: "overview",
     items: [{ href: admin.root, label: "Dashboard", key: "dashboard", exact: true }],
   },
   {
-    label: "Home",
-    key: "home",
+    label: "Páginas",
+    key: "pages",
     items: [
-      { href: admin.homeHero, label: "Hero", key: "home-hero" },
-      { href: admin.homeDna, label: "DNA", key: "home-dna" },
-    ],
-  },
-  {
-    label: "Conteúdo",
-    key: "content",
-    items: [
-      { href: admin.feedbacks, label: "Feedbacks", key: "feedbacks" },
-      { href: admin.jobs, label: "Vagas", key: "jobs" },
-      { href: admin.units, label: "Unidades", key: "units" },
-      { href: admin.aboutHero, label: "Sobre", key: "about-hero" },
-      { href: admin.contactInfo, label: "Contato", key: "contact-info" },
+      { href: admin.home, label: "Página Inicial", key: "home" },
+      { href: admin.services, label: "Página Serviços", key: "services" },
+      { href: admin.aboutPage, label: "Página Sobre", key: "about-page" },
+      { href: admin.businessPage, label: "Página Empresas", key: "business-page" },
+      { href: admin.contactPage, label: "Página Contato", key: "contact-page" },
+      { href: admin.careersPage, label: "Trabalho Con.", key: "careers-page" },
+      { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
     ],
   },
   {

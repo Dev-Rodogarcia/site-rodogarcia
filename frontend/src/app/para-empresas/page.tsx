@@ -158,6 +158,7 @@ const FALLBACK_PARTNERS: PartnerLogo[] = [
   { name: "Capricche", category: "Industria Alimenticia", image: "/feedbacks/capricche.jpg" },
   { name: "Frigelar", category: "Refrigeracao / Varejo", image: "/feedbacks/frigelar.jpg" },
   { name: "HB Fuller", category: "Adesivos / Quimica", image: "/feedbacks/hbfuller.png" },
+  { name: "Hidrodomi", category: "Operacoes", image: "/feedbacks/hidrodomi.gif" },
   { name: "Kemira", category: "Industria Quimica", image: "/feedbacks/kemira.jpg" },
 ];
 
@@ -177,6 +178,12 @@ function normalizePartners(feedbacks: Feedback[]): PartnerLogo[] {
 export default async function ParaEmpresasPage() {
   const content = await fetchPublicContent();
   const partners = normalizePartners(content.data?.feedbacks ?? []);
+  const businessPage = content.data?.businessPage;
+  const scaleButtons = businessPage?.scaleCta.buttons ?? [
+    { label: "Solicitar cotação", url: site.quote },
+    { label: "Falar com especialista", url: site.contact },
+  ];
+  const faqItems = businessPage?.faq.items ?? FAQ;
 
   return (
     <PageShell>
@@ -242,12 +249,12 @@ export default async function ParaEmpresasPage() {
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 sm:gap-6">
+          <div className="mx-auto mt-16 grid max-w-[1380px] grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
             {partners.map((partner, index) => (
               <div
                 key={index}
                 tabIndex={0}
-                className="group relative flex flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-white/40 p-6 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:bg-white/60 hover:shadow-[0_12px_40px_-12px_rgba(29,78,216,0.15)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+                className="group relative flex min-h-[138px] flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-white/40 p-6 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:bg-white/60 hover:shadow-[0_12px_40px_-12px_rgba(29,78,216,0.15)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
               >
                 <div className="absolute inset-0 -z-10 rounded-2xl bg-[var(--primary)]/0 opacity-0 blur-xl transition-all duration-300 group-hover:bg-[var(--primary)]/5 group-hover:opacity-100" />
                 
@@ -310,11 +317,20 @@ export default async function ParaEmpresasPage() {
 
               <div className="mt-12 grid w-full grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4">
                 <ActionLink
-                  action={{ label: "Solicitar cotação", href: site.quote }}
+                  action={{
+                    label: scaleButtons[0]?.label || "Solicitar cotacao",
+                    href: scaleButtons[0]?.url || site.quote,
+                    external: scaleButtons[0]?.external,
+                  }}
                   className="min-h-[60px] w-full min-w-0 flex-1 justify-center border-none bg-sky-500 text-[15px] text-white shadow-[0_12px_32px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:shadow-[0_20px_48px_rgba(14,165,233,0.35)] focus-visible:ring-sky-500/30 sm:w-auto"
                 />
                 <ActionLink
-                  action={{ label: "Falar com especialista", href: site.contact, variant: "secondary" }}
+                  action={{
+                    label: scaleButtons[1]?.label || "Falar com especialista",
+                    href: scaleButtons[1]?.url || site.contact,
+                    external: scaleButtons[1]?.external,
+                    variant: "secondary",
+                  }}
                   className="min-h-[60px] w-full min-w-0 flex-1 justify-center border border-slate-700 bg-transparent text-[15px] text-white hover:border-slate-500 hover:bg-slate-800 focus-visible:ring-slate-700/50 sm:w-auto"
                 />
               </div>
@@ -418,7 +434,7 @@ export default async function ParaEmpresasPage() {
           </div>
           
           <Accordion className="mt-8 flex w-full flex-col">
-            {FAQ.map((faq, idx) => (
+            {faqItems.map((faq, idx) => (
               <AccordionItem
                 key={idx}
                 value={`faq-${idx}`}

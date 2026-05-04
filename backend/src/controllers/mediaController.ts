@@ -4,7 +4,7 @@ import {
   readMediaSlots,
   replaceAdminImageReferences,
   saveAdminImage,
-  saveAdminImageFromBuffer,
+  saveAdminMediaFromBuffer,
   updateMediaSlots,
 } from "../services/mediaService.js";
 import { asyncHandler } from "../utils/http.js";
@@ -15,9 +15,12 @@ export const listImagesController: RequestHandler = asyncHandler((_req, res) => 
 
 export const uploadImageController: RequestHandler = asyncHandler((req, res) => {
   const body = req.body ?? {};
-  const file = req.file;
+  const files = req.files as
+    | Partial<Record<"image" | "media", Express.Multer.File[]>>
+    | undefined;
+  const file = req.file ?? files?.media?.[0] ?? files?.image?.[0];
   const upload = file
-    ? saveAdminImageFromBuffer({
+    ? saveAdminMediaFromBuffer({
         req,
         fileName: file.originalname,
         mimeType: file.mimetype,
@@ -27,7 +30,7 @@ export const uploadImageController: RequestHandler = asyncHandler((req, res) => 
 
   return Promise.resolve(upload).then((image) => {
     res.status(201).json({
-      message: "Imagem enviada e otimizada com sucesso.",
+      message: "Midia enviada com sucesso.",
       image,
       images: listAdminImages(),
     });

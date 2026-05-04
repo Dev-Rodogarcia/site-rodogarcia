@@ -7,10 +7,10 @@ import {
   useState,
   type ComponentPropsWithoutRef,
 } from "react";
-import type { DnaSlide } from "@/types/content";
+import type { HomeOperationItem, HomeSection2 } from "@/types/content";
 
 interface DnaCarouselProps {
-  slides: DnaSlide[];
+  section: HomeSection2;
 }
 
 interface SpotlightSlide {
@@ -43,21 +43,19 @@ function isVideoAsset(src: string): boolean {
   return /\.(mp4|webm|ogg)$/i.test(src);
 }
 
-function buildSpotlightSlides(slides: DnaSlide[]): SpotlightSlide[] {
+function buildSpotlightSlides(slides: HomeOperationItem[]): SpotlightSlide[] {
   return slides
     .filter((slide) => slide.active !== false)
     .map((slide, index) => {
       const title = normalizeText(slide.title);
-      const text = normalizeText(slide.text);
+      const text = normalizeText(slide.description);
       const desktopAsset = resolveAssetPath(
-        slide.desktopVideo || slide.video || slide.desktopImage || slide.image
+        slide.media.desktopSrc || slide.media.src
       );
       const mobileAsset = resolveAssetPath(
-        slide.mobileVideo ||
-          slide.video ||
-          slide.mobileImage ||
-          slide.desktopImage ||
-          slide.image
+        slide.media.mobileSrc ||
+          slide.media.desktopSrc ||
+          slide.media.src
       );
 
       if (!title && !text && !desktopAsset && !mobileAsset) return null;
@@ -135,8 +133,8 @@ function SpotlightMedia({
   return <img {...imageProps} />;
 }
 
-export default function DnaCarousel({ slides }: DnaCarouselProps) {
-  const spotlightSlides = buildSpotlightSlides(slides);
+export default function DnaCarousel({ section }: DnaCarouselProps) {
+  const spotlightSlides = buildSpotlightSlides(section.items);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -248,7 +246,7 @@ export default function DnaCarousel({ slides }: DnaCarouselProps) {
     };
   }, [isDesktop, spotlightSlides.length]);
 
-  if (spotlightSlides.length === 0) return null;
+  if (!section.title || spotlightSlides.length === 0) return null;
 
   function goTo(index: number) {
     setCurrent(
@@ -273,7 +271,7 @@ export default function DnaCarousel({ slides }: DnaCarouselProps) {
       <div className="relative mx-auto max-w-[1440px] px-6">
         <div className="max-w-full text-center">
           <h2 className="text-[clamp(1.45rem,2.8vw,2.5rem)] font-bold leading-tight tracking-[-0.04em] text-white sm:whitespace-nowrap">
-            Todas as frentes da operacao se encontram aqui.
+            {section.title}
           </h2>
         </div>
 

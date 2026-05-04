@@ -16,17 +16,17 @@ import {
   SVG_PATH,
 } from "@/data/brazilMap";
 import { site } from "@/lib/routes";
-import type { OperationalUnit } from "@/types/content";
+import type { HomeRegionalUnit } from "@/types/content";
 
 interface BrazilMapProps {
-  units: OperationalUnit[];
+  units: HomeRegionalUnit[];
 }
 
 function normalizeState(value: string | undefined) {
   return value?.trim().toLowerCase() ?? "";
 }
 
-function normalizeUnits(units: OperationalUnit[]) {
+function normalizeUnits(units: HomeRegionalUnit[]) {
   return [...units]
     .filter((unit) => unit.active !== false)
     .map((unit) => ({ ...unit, state: normalizeState(unit.state) }))
@@ -43,7 +43,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
 
   const activeUnits = useMemo(() => normalizeUnits(units), [units]);
   const defaultUnit = useMemo(
-    () => activeUnits.find((unit) => unit.isDefault) ?? activeUnits[0] ?? null,
+    () => activeUnits[0] ?? null,
     [activeUnits]
   );
   const selectedUnit = useMemo(
@@ -126,7 +126,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
   );
 
   const selectEstado = useCallback(
-    (svg: SVGSVGElement, estadoId: string, selected?: OperationalUnit) => {
+    (svg: SVGSVGElement, estadoId: string, selected?: HomeRegionalUnit) => {
       const stateUnits = getUnitsByState(estadoId);
       const nextUnit = selected ?? stateUnits[0];
       if (!nextUnit) return;
@@ -249,8 +249,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
   };
 
   const contactHref = selectedUnit.contactUrl || site.contact;
-  const unitDescription =
-    selectedUnit.logisticsInfo || selectedUnit.description || "";
+  const unitDescription = selectedUnit.description || "";
 
   return (
     <div className="w-full" ref={containerRef}>
@@ -368,7 +367,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
           href={contactHref}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-strong)]"
         >
-          Falar com esta unidade
+          {selectedUnit.buttonLabel || "Falar com esta unidade"}
           <ArrowRight size={14} weight="bold" />
         </Link>
       </div>

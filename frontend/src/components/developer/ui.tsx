@@ -18,10 +18,10 @@ export const developerPrimaryButtonClassName =
   "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-bold text-white shadow-[0_6px_16px_rgba(29,78,216,0.22),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(29,78,216,0.3)] hover:bg-[var(--color-primary-strong)] active:scale-95 active:shadow-none disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:active:scale-100";
 
 export const developerSecondaryButtonClassName =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(15,23,42,0.08)] hover:border-slate-300 hover:text-slate-900 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:active:scale-100";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white/88 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_8px_18px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:text-slate-950 hover:shadow-[0_12px_26px_rgba(15,23,42,0.075)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:active:scale-100";
 
 export const developerGhostButtonClassName =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-100/60 px-4 py-2 text-sm font-bold text-slate-600 transition-all duration-300 hover:bg-slate-200/80 hover:text-slate-900 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:active:scale-100";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-transparent bg-slate-100/70 px-4 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 hover:bg-slate-200/80 hover:text-slate-950 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:active:scale-100";
 
 export const developerDangerButtonClassName =
   "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-500/20 bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(239,68,68,0.15)] hover:bg-red-100 hover:border-red-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:active:scale-100";
@@ -98,11 +98,11 @@ export function DeveloperHero({
 export function DeveloperCard({
   children,
   className,
-}: {
+  ...props
+}: HTMLAttributes<HTMLElement> & {
   children: ReactNode;
-  className?: string;
 }) {
-  return <section className={cn(developerCardClassName, className)}>{children}</section>;
+  return <section className={cn(developerCardClassName, className)} {...props}>{children}</section>;
 }
 
 export function DeveloperListViewport({
@@ -137,21 +137,21 @@ export function DeveloperSectionHeading({
   tooltip?: string;
 }) {
   return (
-    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
             {eyebrow}
           </p>
         ) : null}
         <div className="mt-1 flex items-center gap-2">
-          <h2 className="text-lg font-semibold tracking-[-0.02em] text-[var(--foreground)]">
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-[var(--foreground)] sm:text-lg">
             {title}
           </h2>
           {tooltip ? <DeveloperTooltip content={tooltip} /> : null}
         </div>
         {description ? (
-          <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">{description}</p>
+          <p className="mt-1 max-w-[78ch] text-sm leading-6 text-[var(--color-muted-raw)]">{description}</p>
         ) : null}
       </div>
       {action}
@@ -176,7 +176,7 @@ export function DeveloperField({
 }) {
   return (
     <label className={cn("block", className)}>
-      <span className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[var(--foreground)]">
+      <span className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--foreground)]">
         <span>
           {label}
           {required ? <span className="ml-1 text-[var(--primary)]">*</span> : null}
@@ -186,6 +186,44 @@ export function DeveloperField({
       {children}
       {hint ? <span className="mt-2 block text-xs leading-6 text-[var(--color-muted-raw)]">{hint}</span> : null}
     </label>
+  );
+}
+
+export function DeveloperColorField({
+  label,
+  value,
+  onChange,
+  required,
+  hint,
+  className,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  hint?: string;
+  className?: string;
+}) {
+  const color = value || "#1d4ed8";
+
+  return (
+    <DeveloperField label={label} required={required} hint={hint} className={className}>
+      <div className="grid gap-3 sm:grid-cols-[92px_minmax(0,1fr)] sm:items-center">
+        <input
+          type="color"
+          value={color}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-10 w-full cursor-pointer rounded-xl border border-[var(--border)] bg-white p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition-all focus:border-[var(--primary)]/35 focus:ring-4 focus:ring-[var(--primary)]/10"
+        />
+        <div className="flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)]/80 bg-slate-50/80 px-3 text-xs font-semibold text-[var(--color-muted-raw)]">
+          <span
+            className="h-4 w-4 shrink-0 rounded-full border border-slate-950/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]"
+            style={{ backgroundColor: color }}
+          />
+          <span className="font-mono uppercase tracking-[0.08em]">{color}</span>
+        </div>
+      </div>
+    </DeveloperField>
   );
 }
 

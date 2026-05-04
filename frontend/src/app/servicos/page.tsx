@@ -8,8 +8,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { fetchPublicContent } from "@/lib/api";
 import { external, seo, site } from "@/lib/routes";
-import { buildCmsMetadata, fetchMediaSlots, mediaSlot } from "@/lib/cmsPublic";
+import { buildCmsMetadata } from "@/lib/cmsPublic";
+import type { ServicesModule, ServicesPageContent } from "@/types/content";
 
 const fallbackMetadata: Metadata = {
   title: "Serviços",
@@ -22,7 +24,7 @@ const fallbackMetadata: Metadata = {
     siteName: seo.siteName,
     title: "Serviços | Rodogarcia Transportes",
     description:
-      "Conheca a estrutura de serviços da Rodogarcia com foco em distribuição, operação indoor e cargas especiais.",
+      "Conheça a estrutura de serviços da Rodogarcia com foco em distribuição, operação indoor e cargas especiais.",
     url: seo.absoluteUrl(site.services),
     images: [{ url: seo.absoluteUrl("/Gemini_Generated_Image_h09yu8h09yu8h09y.png") }],
   },
@@ -46,133 +48,84 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildCmsMetadata(site.services, fallbackMetadata);
 }
 
-type ServiceModule = {
-  eyebrow: string;
-  title: string;
-  description: string;
-  details: string[];
-  image: {
-    src: string;
-    alt: string;
-    position?: string;
-  };
-  cta: {
-    href: string;
-    label: string;
-    external?: boolean;
-  };
-};
-
-const SERVICE_MODULES: ServiceModule[] = [
-  {
-    eyebrow: "Distribuição nacional",
-    title: "Malha pronta para escalar entregas sem perder leitura de prazo.",
-    description:
-      "Coleta, transferencia e entrega final entram em um desenho operacional ajustado ao SLA, ao volume e a jánela de cada embarque.",
-    details: [
-      "Capilaridade nacional com cadência previsivel",
-      "Transferencia e entrega final no mesmo fluxo",
-      "Resposta comercial rápida para operação recorrente",
-    ],
-    image: {
-      src: "/foto3.png",
-      alt: "Frota Rodogarcia em operação noturna de distribuição.",
-    },
-    cta: {
-      href: site.quote,
-      label: "Solicitar cotação",
-    },
-  },
-  {
-    eyebrow: "Operação indoor",
-    title: "Apoio interno para fluxos de alto giro e abastecimento continuo.",
-    description:
-      "Cross docking, armazenagem e movimentação interna funcionam como extensão da operação, com mais disciplina entre etapas e menos atrito no abastecimento.",
-    details: [
-      "Cross docking e paletização com leitura técnica",
-      "Abastecimento, replenishment e viradas de volume",
-      "Mais controle sobre picos, janelas e reorganização de fluxo",
-    ],
-    image: {
-      src: "/Gemini_Generated_Image_h09yu8h09yu8h09y.png",
-      alt: "Operação indoor com conferência de volumes no centro logístico.",
-      position: "object-[50%_45%]",
-    },
-    cta: {
-      href: site.business,
-      label: "Ver operação B2B",
-    },
-  },
-  {
-    eyebrow: "Cargas especiais",
-    title: "Carga sensível com controle de risco, documentação e monitoramento ativo.",
-    description:
-      "Quando a operação exige mais governança, a Rodogarcia combina conferência, contexto técnico e rastreabilidade para reduzir ruído em momentos críticos.",
-    details: [
-      "Documentação e compliance desde a largada",
-      "Rastreio oficial conectado ao acompanhamento operacional",
-      "Escalonamento rápido para embarques mais sensíveis",
-    ],
-    image: {
-      src: "/Gemini_Generated_Image_sjd9flsjd9flsjd9.png",
-      alt: "Equipe Rodogarcia acompanhando documentos e rastreamento da operação.",
-    },
-    cta: {
-      href: site.contact,
-      label: "Falar com especialista",
-    },
-  },
-];
-
-const FAQ_ITEMS = [
-  {
-    question: "Quais operações a Rodogarcia atende com mais recorrencia?",
-    answer:
-      "A atuação costuma se concentrar em distribuição nacional, apoio indoor e cargas que pedem mais controle documental, rastreio e resposta operacional.",
-  },
-  {
-    question: "Quando faz sentido solicitar uma cotação técnica?",
-    answer:
-      "Quando a operação envolve jánela crítica, volume recorrente, necessidade de capilaridade ou alguma exigencia extra de governança e monitoramento.",
-  },
-  {
-    question: "O rastreio oficial funciona separado da cotação?",
-    answer:
-      "Sim. O rastreio segue no portal oficial da operação, enquanto a cotação abre um fluxo comercial para avaliar rota, prazo, frequencia e contexto logístico.",
-  },
-  {
-    question: "A operação indoor pode complementar a distribuição?",
-    answer:
-      "Pode. Em muitos cenários, armazenagem, cross docking e abastecimento interno entram como extensão da malha para reduzir atrito entre etapas.",
-  },
-  {
-    question: "Como falar com o time sobre uma carga mais sensível?",
-    answer:
-      "O melhor caminho e abrir a solicitação comercial ou falar direto com o time para detalhar criticidade, documentação e necessidade de acompanhamento.",
-  },
-] as const;
-
 const MODULE_CTA_CLASS_NAME =
   "mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_22px_46px_rgba(29,78,216,0.24)] sm:w-auto";
 
+const EMPTY_SERVICES_PAGE: ServicesPageContent = {
+  modules: [],
+  finalCta: { quoteUrl: "", trackingUrl: "" },
+  faq: { title: "", items: [] },
+};
+
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href);
+}
+
+function ModuleCta({ module }: { module: ServicesModule }) {
+  const content = (
+    <>
+      {module.ctaLabel}
+      <ArrowUpRight size={16} weight="bold" />
+    </>
+  );
+
+  if (isExternalHref(module.ctaUrl)) {
+    return (
+      <a
+        href={module.ctaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={MODULE_CTA_CLASS_NAME}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={module.ctaUrl} className={MODULE_CTA_CLASS_NAME}>
+      {content}
+    </Link>
+  );
+}
+
+function FinalQuoteCta({ href }: { href: string }) {
+  const content = (
+    <>
+      <span className="min-w-0 truncate">Solicitar cotação</span>
+      <ArrowUpRight size={16} weight="bold" className="shrink-0" />
+    </>
+  );
+  const className =
+    "inline-flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-[0_22px_54px_rgba(2,6,23,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 sm:px-7";
+
+  if (isExternalHref(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {content}
+    </Link>
+  );
+}
+
 export default async function ServicosPage() {
-  const mediaSlots = await fetchMediaSlots();
-  const serviceModuleSlots = [
-    "services.module.distribution",
-    "services.module.indoor",
-    "services.module.special",
-  ] as const;
-  const serviceModules = SERVICE_MODULES.map((module, index) => ({
-    ...module,
-    image: {
-      ...module.image,
-      src: mediaSlot(
-        mediaSlots,
-        serviceModuleSlots[index] ?? "services.hero",
-        module.image.src
-      ),
-    },
-  }));
+  let servicesPage = EMPTY_SERVICES_PAGE;
+  const contentResponse = await fetchPublicContent();
+  if (contentResponse.success) {
+    servicesPage = contentResponse.data?.servicesPage ?? EMPTY_SERVICES_PAGE;
+  }
+
+  const serviceModules = servicesPage.modules.length === 3 ? servicesPage.modules : [];
+  const quoteUrl = servicesPage.finalCta.quoteUrl || site.quote;
+  const trackingUrl = servicesPage.finalCta.trackingUrl || external.tracking;
+  const faqItems = servicesPage.faq.items;
+  const hasFaq = Boolean(servicesPage.faq.title && faqItems.length > 0);
 
   return (
     <div className="relative overflow-x-clip pb-16 sm:pb-20 lg:pb-24">
@@ -198,7 +151,7 @@ export default async function ServicosPage() {
               </h1>
 
               <p className="mx-auto mt-5 max-w-[42rem] text-sm leading-7 text-white/68 sm:text-base">
-                Ha mais de 35 anos, a Rodogarcia estrutura distribuição, indoor
+                Há mais de 35 anos, a Rodogarcia estrutura distribuição, indoor
                 e cargas especiais com leitura técnica, resposta rápida e
                 rastreabilidade oficial.
               </p>
@@ -217,89 +170,73 @@ export default async function ServicosPage() {
         </section>
       </div>
 
-      <section
-        className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fbff_0%,#f2f6fb_100%)] py-14 sm:py-16 lg:py-20"
-        aria-label="Módulos de serviço"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(29,78,216,0.08),transparent_22%),radial-gradient(circle_at_82%_16%,rgba(6,182,212,0.08),transparent_20%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/60 to-transparent" />
+      {serviceModules.length === 3 ? (
+        <section
+          className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fbff_0%,#f2f6fb_100%)] py-14 sm:py-16 lg:py-20"
+          aria-label="Módulos de serviço"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(29,78,216,0.08),transparent_22%),radial-gradient(circle_at_82%_16%,rgba(6,182,212,0.08),transparent_20%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/60 to-transparent" />
 
-        <div className="relative mx-auto max-w-[1440px] px-5 sm:px-8">
-          <div className="pt-2 sm:pt-4">
-            <div className="space-y-14 sm:space-y-16 lg:space-y-18">
-            {serviceModules.map((module, index) => {
-              const isInverted = index % 2 === 1;
+          <div className="relative mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="pt-2 sm:pt-4">
+              <div className="space-y-14 sm:space-y-16 lg:space-y-18">
+                {serviceModules.map((module, index) => {
+                  const isInverted = index % 2 === 1;
 
-              return (
-                <article
-                  key={module.title}
-                  className="grid gap-6 border-t border-[var(--border)] pt-10 first:border-t-0 first:pt-0 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:items-center lg:gap-12"
-                >
-                  <div
-                    className={`order-1 relative min-h-[280px] overflow-hidden rounded-[30px] bg-[#dbe7f3] shadow-[0_24px_64px_rgba(15,23,42,0.12)] sm:min-h-[360px] lg:min-h-[430px] ${
-                      isInverted ? "lg:order-2" : "lg:order-1"
-                    }`}
-                  >
-                    <Image
-                      src={module.image.src}
-                      alt={module.image.alt}
-                      fill
-                      sizes="(min-width: 1024px) 54vw, 100vw"
-                      className={`object-cover ${module.image.position ?? ""}`}
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0.18)_100%)]" />
-                  </div>
-
-                  <div className={`order-2 ${isInverted ? "lg:order-1" : "lg:order-2"}`}>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
-                      {module.eyebrow}
-                    </p>
-                    <h3 className="mt-3 max-w-[13ch] text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[0.95] tracking-[-0.05em] text-[var(--foreground)]">
-                      {module.title}
-                    </h3>
-                    <p className="mt-4 max-w-[54ch] text-sm leading-7 text-[var(--color-muted-raw)] sm:text-base">
-                      {module.description}
-                    </p>
-
-                    <ul className="mt-6 space-y-3">
-                      {module.details.map((detail) => (
-                        <li
-                          key={detail}
-                          className="flex items-start gap-3 text-sm leading-6 text-[var(--color-foreground-soft)]"
-                        >
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
-                          <span>{detail}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {module.cta.external ? (
-                      <a
-                        href={module.cta.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={MODULE_CTA_CLASS_NAME}
+                  return (
+                    <article
+                      key={module.id}
+                      className="grid gap-6 border-t border-[var(--border)] pt-10 first:border-t-0 first:pt-0 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:items-center lg:gap-12"
+                    >
+                      <div
+                        className={`order-1 relative min-h-[280px] overflow-hidden rounded-[30px] bg-[#dbe7f3] shadow-[0_24px_64px_rgba(15,23,42,0.12)] sm:min-h-[360px] lg:min-h-[430px] ${
+                          isInverted ? "lg:order-2" : "lg:order-1"
+                        }`}
                       >
-                        {module.cta.label}
-                        <ArrowUpRight size={16} weight="bold" />
-                      </a>
-                    ) : (
-                      <Link
-                        href={module.cta.href}
-                        className={MODULE_CTA_CLASS_NAME}
-                      >
-                        {module.cta.label}
-                        <ArrowUpRight size={16} weight="bold" />
-                      </Link>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+                        <Image
+                          src={module.image.src}
+                          alt={module.image.alt}
+                          fill
+                          sizes="(min-width: 1024px) 54vw, 100vw"
+                          className={`object-cover ${module.image.position ?? ""}`}
+                        />
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0.18)_100%)]" />
+                      </div>
+
+                      <div className={`order-2 ${isInverted ? "lg:order-1" : "lg:order-2"}`}>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
+                          {module.eyebrow}
+                        </p>
+                        <h3 className="mt-3 max-w-[13ch] text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[0.95] tracking-[-0.05em] text-[var(--foreground)]">
+                          {module.title}
+                        </h3>
+                        <p className="mt-4 max-w-[54ch] text-sm leading-7 text-[var(--color-muted-raw)] sm:text-base">
+                          {module.description}
+                        </p>
+
+                        <ul className="mt-6 space-y-3">
+                          {module.details.map((detail) => (
+                            <li
+                              key={detail}
+                              className="flex items-start gap-3 text-sm leading-6 text-[var(--color-foreground-soft)]"
+                            >
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
+                              <span>{detail}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <ModuleCta module={module} />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className="relative overflow-hidden bg-[linear-gradient(180deg,#07111f_0%,#050b16_100%)] py-16 sm:py-20 lg:py-24">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(56,189,248,0.1),transparent_22%)]" />
@@ -316,16 +253,10 @@ export default async function ServicosPage() {
           </p>
 
           <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:justify-center">
-            <Link
-              href={site.quote}
-              className="inline-flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-[0_22px_54px_rgba(2,6,23,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 sm:px-7"
-            >
-              <span className="min-w-0 truncate">Solicitar cotação</span>
-              <ArrowUpRight size={16} weight="bold" className="shrink-0" />
-            </Link>
+            <FinalQuoteCta href={quoteUrl} />
 
             <a
-              href={external.tracking}
+              href={trackingUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/12 sm:px-7"
@@ -337,40 +268,42 @@ export default async function ServicosPage() {
         </div>
       </section>
 
-      <section
-        className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fbff_0%,#f2f6fb_100%)] py-14 sm:py-16 lg:py-20"
-        aria-labelledby="faq-title"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(29,78,216,0.07),transparent_20%),radial-gradient(circle_at_82%_18%,rgba(6,182,212,0.06),transparent_18%)]" />
+      {hasFaq ? (
+        <section
+          className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fbff_0%,#f2f6fb_100%)] py-14 sm:py-16 lg:py-20"
+          aria-labelledby="faq-title"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(29,78,216,0.07),transparent_20%),radial-gradient(circle_at_82%_18%,rgba(6,182,212,0.06),transparent_18%)]" />
 
-        <div className="relative mx-auto max-w-[980px] px-5 sm:px-8">
-          <div className="max-w-[680px]">
-            <h2
-              id="faq-title"
-              className="text-[clamp(2.1rem,4vw,3.8rem)] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--foreground)]"
-            >
-              Perguntas frequentes
-            </h2>
-          </div>
-
-          <Accordion className="mt-8">
-            {FAQ_ITEMS.map((item, index) => (
-              <AccordionItem
-                key={item.question}
-                value={`faq-${index}`}
-                className="border-b border-[var(--border)]"
+          <div className="relative mx-auto max-w-[980px] px-5 sm:px-8">
+            <div className="max-w-[680px]">
+              <h2
+                id="faq-title"
+                className="text-[clamp(2.1rem,4vw,3.8rem)] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--foreground)]"
               >
-                <AccordionTrigger className="py-6 text-left text-base font-semibold tracking-[-0.02em] text-[var(--foreground)] hover:no-underline">
-                  {item.question}
-                </AccordionTrigger>
-                <AccordionContent className="max-w-[62ch] pb-6 pr-8 text-sm leading-7 text-[var(--color-muted-raw)]">
-                  {item.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </section>
+                {servicesPage.faq.title}
+              </h2>
+            </div>
+
+            <Accordion className="mt-8">
+              {faqItems.map((item, index) => (
+                <AccordionItem
+                  key={item.id || item.question}
+                  value={`faq-${index}`}
+                  className="border-b border-[var(--border)]"
+                >
+                  <AccordionTrigger className="py-6 text-left text-base font-semibold tracking-[-0.02em] text-[var(--foreground)] hover:no-underline">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="max-w-[62ch] pb-6 pr-8 text-sm leading-7 text-[var(--color-muted-raw)]">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

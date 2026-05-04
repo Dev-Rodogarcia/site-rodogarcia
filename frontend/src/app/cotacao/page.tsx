@@ -14,8 +14,11 @@ import {
   PageShell,
   SectionHeader,
 } from "@/components/internal/PageContent";
+import { QuoteOtherChannelsSection } from "@/components/internal/QuoteOtherChannelsSection";
+import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { external, seo, site } from "@/lib/routes";
+import type { QuotePageContent } from "@/types/content";
 
 const fallbackMetadata: Metadata = {
   title: "Cotação",
@@ -121,7 +124,78 @@ const FINAL_CTA_POINTS = [
   "Central de ajuda disponível para dúvidas operacionais.",
 ];
 
-export default function CotacaoPage() {
+const FALLBACK_QUOTE_PAGE: QuotePageContent = {
+  hero: {
+    buttons: [
+      { label: "Falar no WhatsApp", url: external.whatsappCommercial, external: true },
+      { label: "Ver contato completo", url: site.contact },
+    ],
+  },
+  directChannels: WHATSAPP_CHANNELS.map((item, index) => ({
+    id: index === 0 ? "fractional" : "full-load",
+    order: index + 1,
+    title: item.title,
+    description: item.description,
+    button: { label: item.label, url: item.href, external: true },
+  })),
+  otherChannels: [
+    {
+      id: "quote-channel-whatsapp",
+      order: 1,
+      icon: "WhatsappLogo",
+      iconColor: "#22c55e",
+      title: "WhatsApp comercial",
+      description: "Canal mais rapido para abrir conversa e pedir cotacao.",
+      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
+      buttonColor: "#22c55e",
+      active: true,
+    },
+    {
+      id: "quote-channel-phone",
+      order: 2,
+      icon: "PhoneCall",
+      iconColor: "#0ea5e9",
+      title: "Telefone",
+      description: `Ligue para ${external.phoneDisplay} e fale direto com o atendimento.`,
+      button: { label: "Ligar agora", url: external.phoneHref, external: true },
+      buttonColor: "#0f172a",
+      active: true,
+    },
+    {
+      id: "quote-channel-email",
+      order: 3,
+      icon: "EnvelopeSimple",
+      iconColor: "#1d4ed8",
+      title: "E-mail comercial",
+      description: "Ideal para mensagens formais, briefings e envio de documentos.",
+      button: { label: "Enviar e-mail", url: external.commercialEmail, external: true },
+      buttonColor: "#0f172a",
+      active: true,
+    },
+    {
+      id: "quote-channel-form",
+      order: 4,
+      icon: "ClipboardText",
+      iconColor: "#64748b",
+      title: "Formulario completo",
+      description: "Prefere detalhar a carga por escrito? Use o fluxo estruturado.",
+      button: { label: "Abrir formulario", url: site.contact },
+      buttonColor: "#0f172a",
+      active: true,
+    },
+  ],
+  finalCta: {
+    buttons: [
+      { label: "Abrir contato", url: site.contact },
+      { label: "Central de ajuda", url: site.help },
+    ],
+  },
+};
+
+export default async function CotacaoPage() {
+  const content = await fetchPublicContent();
+  const quotePage = content.data?.quotePage ?? FALLBACK_QUOTE_PAGE;
+
   return (
     <PageShell>
       {/* HERO — azul escuro, padrão /servicos */}
@@ -153,17 +227,18 @@ export default function CotacaoPage() {
               <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
                 <ActionLink
                   action={{
-                    label: "Falar no WhatsApp",
-                    href: external.whatsappCommercial,
-                    external: true,
+                    label: quotePage.hero.buttons[0]?.label || "Falar no WhatsApp",
+                    href: quotePage.hero.buttons[0]?.url || external.whatsappCommercial,
+                    external: quotePage.hero.buttons[0]?.external,
                   }}
                   tone="dark"
                   className="w-full min-w-0 sm:w-auto"
                 />
                 <ActionLink
                   action={{
-                    label: "Ver contato completo",
-                    href: site.contact,
+                    label: quotePage.hero.buttons[1]?.label || "Ver contato completo",
+                    href: quotePage.hero.buttons[1]?.url || site.contact,
+                    external: quotePage.hero.buttons[1]?.external,
                     variant: "secondary",
                   }}
                   tone="dark"
@@ -186,13 +261,13 @@ export default function CotacaoPage() {
           />
 
           <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {WHATSAPP_CHANNELS.map((item) => (
+            {quotePage.directChannels.map((item, index) => (
               <div
                 key={item.title}
                 className="flex flex-col gap-4 border-b border-[var(--border)] pb-8 last:border-b-0 md:border-b-0 md:border-l md:pb-0 md:pl-8"
               >
                 <span className="inline-flex w-fit items-center rounded-full bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">
-                  {item.tag}
+                  {index === 0 ? "Carga fracionada" : "Carga fechada"}
                 </span>
                 <h3 className="text-xl font-semibold tracking-[-0.03em] text-[var(--foreground)]">
                   {item.title}
@@ -201,13 +276,13 @@ export default function CotacaoPage() {
                   {item.description}
                 </p>
                 <a
-                  href={item.href}
+                  href={item.button.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-auto inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(34,197,94,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_22px_48px_rgba(34,197,94,0.32)]"
                 >
                   <WhatsappLogo size={18} weight="fill" />
-                  {item.label}
+                  {item.button.label}
                 </a>
               </div>
             ))}
@@ -230,38 +305,7 @@ export default function CotacaoPage() {
               align="center"
             />
 
-            <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-              {CONTACT_OPTIONS.map((item) => (
-                <div key={item.title} className="flex flex-col gap-4">
-                  <span
-                    className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${item.accentBg} ${item.accent}`}
-                  >
-                    <item.icon size={22} weight="duotone" />
-                  </span>
-                  <div className="flex-1">
-                    <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
-                      {item.title}
-                    </h3>
-                    <p className="mt-1.5 text-sm leading-7 text-white/58">{item.description}</p>
-                  </div>
-                  {item.action.external ? (
-                    <a
-                      href={item.action.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={item.btnClass}
-                    >
-                      {item.action.label}
-                    </a>
-                  ) : (
-                    <Link href={item.action.href} className={item.btnClass}>
-                      {item.action.label}
-                      <ArrowRight size={16} weight="bold" />
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </div>
+            <QuoteOtherChannelsSection channels={quotePage.otherChannels} />
           </div>
         </PageContainer>
       </section>
@@ -314,21 +358,21 @@ export default function CotacaoPage() {
               </p>
 
               <Link
-                href={site.contact}
+                href={quotePage.finalCta.buttons[0]?.url || site.contact}
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-[15px] font-extrabold tracking-tight text-white shadow-[0_12px_32px_rgba(2,132,199,0.25)] transition-all duration-200 hover:-translate-y-1 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_20px_48px_rgba(2,132,199,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 sm:px-8"
               >
                 <span className="flex min-w-0 items-center gap-3">
-                  <span className="min-w-0 truncate">Abrir contato</span>
+                  <span className="min-w-0 truncate">{quotePage.finalCta.buttons[0]?.label || "Abrir contato"}</span>
                   <ArrowRight size={18} weight="bold" className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                 </span>
               </Link>
 
               <Link
-                href={site.help}
+                href={quotePage.finalCta.buttons[1]?.url || site.help}
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-slate-900 px-4 text-[15px] font-bold tracking-tight text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] transition-all duration-200 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-900/30 sm:px-8"
               >
                 <span className="flex min-w-0 items-center gap-3">
-                  <span className="min-w-0 truncate">Central de ajuda</span>
+                  <span className="min-w-0 truncate">{quotePage.finalCta.buttons[1]?.label || "Central de ajuda"}</span>
                   <ArrowRight size={18} weight="bold" className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                 </span>
               </Link>

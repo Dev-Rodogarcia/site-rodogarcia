@@ -54,5 +54,11 @@ export const env = {
     process.env.SESSION_SECRET ??
     "dev-only-change-this-rodogarcia-secret",
   adminSetupCode: process.env.ADMIN_SETUP_CODE ?? "",
+  supremeAdminEmails: new Set([
+    "dev@rodogarcia.com.br",
+    ...parseOrigins(process.env.SUPREME_ADMIN_EMAILS).map((email) =>
+      email.toLowerCase()
+    ),
+  ]),
   isProduction: process.env.NODE_ENV === "production",
 } as const;
