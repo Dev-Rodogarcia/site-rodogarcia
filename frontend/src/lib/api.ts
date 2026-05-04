@@ -17,8 +17,8 @@ import type {
 const normalizeBackendUrl = (url: string) => url.replace(/\/+$/, "");
 
 const API_BASE_URL = normalizeBackendUrl(
-  process.env.NEXT_PUBLIC_BACKEND_PROXY_URL ??
-    process.env.BACKEND_PROXY_URL ??
+  process.env.BACKEND_PROXY_URL ??
+    process.env.NEXT_PUBLIC_BACKEND_PROXY_URL ??
     process.env.BACKEND_INTERNAL_URL ??
     process.env.NEXT_PUBLIC_BACKEND_URL ??
     "http://127.0.0.1:4010"
