@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowSquareOut,
   Briefcase,
   Buildings,
+  CaretDown,
   CaretLeft,
+  CaretUp,
   ChartBar,
   Cookie,
   CursorClick,
@@ -65,6 +67,79 @@ const iconMap: Record<string, SidebarIcon> = {
   users: UsersThree,
 };
 
+function SidebarScrollArea({
+  children,
+  expanded,
+}: {
+  children: ReactNode;
+  expanded: boolean;
+}) {
+  const scrollRef = useRef<HTMLElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+
+    const updateIndicators = () => {
+      const maxScrollTop = scrollElement.scrollHeight - scrollElement.clientHeight;
+      setCanScrollUp(scrollElement.scrollTop > 2);
+      setCanScrollDown(scrollElement.scrollTop < maxScrollTop - 2);
+    };
+
+    updateIndicators();
+    const frameId = window.requestAnimationFrame(updateIndicators);
+    scrollElement.addEventListener("scroll", updateIndicators, { passive: true });
+    window.addEventListener("resize", updateIndicators);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(updateIndicators);
+      resizeObserver.observe(scrollElement);
+      if (scrollElement.firstElementChild) {
+        resizeObserver.observe(scrollElement.firstElementChild);
+      }
+    }
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      scrollElement.removeEventListener("scroll", updateIndicators);
+      window.removeEventListener("resize", updateIndicators);
+      resizeObserver?.disconnect();
+    };
+  }, [expanded]);
+
+  return (
+    <div className="relative min-h-0 flex-1">
+      <nav
+        ref={scrollRef}
+        aria-label="Navegação do painel"
+        data-admin-sidebar-scroll
+        className="h-full min-h-0 overflow-x-hidden overflow-y-auto py-3"
+      >
+        {children}
+      </nav>
+
+      {canScrollUp ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-start justify-center bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-transparent pt-2 backdrop-blur-[2px]">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)]">
+            <CaretUp size={expanded ? 14 : 12} weight="bold" />
+          </span>
+        </div>
+      ) : null}
+
+      {canScrollDown ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-14 items-end justify-center bg-gradient-to-t from-slate-950/95 via-slate-950/80 to-transparent pb-2 backdrop-blur-[2px]">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)]">
+            <CaretDown size={expanded ? 14 : 12} weight="bold" />
+          </span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function SidebarItem({
   href,
   label,
@@ -101,7 +176,7 @@ function SidebarItem({
       <span
         className={cn(
           "min-w-0 overflow-hidden truncate whitespace-nowrap text-[13px] tracking-[0.01em] transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
-          expanded ? "max-w-[180px] ml-2.5 opacity-100 translate-x-0" : "max-w-0 ml-0 opacity-0 -translate-x-2",
+          expanded ? "ml-2.5 max-w-[180px] translate-x-0 opacity-100" : "ml-0 max-w-0 -translate-x-2 opacity-0",
           active ? "font-semibold text-white" : destructive ? "font-medium text-rose-300/80 group-hover:text-rose-200" : "font-medium text-slate-300 group-hover:text-white"
         )}
       >
@@ -117,7 +192,8 @@ function SidebarItem({
 
   const className = cn(
     "group relative flex min-w-0 items-center outline-none transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-sky-500",
-    "h-9 mx-2.5 rounded-lg border",
+    "mx-2.5 h-9 rounded-lg border",
+    expanded ? "justify-start" : "justify-center",
     active
       ? "border-sky-500/20 bg-sky-500/10 shadow-[0_2px_10px_rgba(14,165,233,0.08)]"
       : destructive
@@ -176,10 +252,8 @@ export default function DevSidebar({
 
   function renderNavigation({
     navigationExpanded,
-    mobile,
   }: {
     navigationExpanded: boolean;
-    mobile: boolean;
   }) {
     return (
       <div className="relative flex h-full w-full flex-col overflow-hidden">
@@ -194,7 +268,7 @@ export default function DevSidebar({
               <span
                 className={cn(
                   "flex flex-col justify-center overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
-                  navigationExpanded ? "max-w-[180px] opacity-100 translate-x-0" : "max-w-0 opacity-0 -translate-x-4"
+                  navigationExpanded ? "max-w-[180px] translate-x-0 opacity-100" : "max-w-0 -translate-x-4 opacity-0"
                 )}
               >
                 <span className="block text-[15px] font-bold tracking-tight text-white transition-colors duration-200 group-hover:text-white/80">
@@ -215,24 +289,20 @@ export default function DevSidebar({
                 navigationExpanded ? "bg-transparent" : "bg-white/[0.04] text-white hover:bg-white/[0.08]"
               )}
             >
-              <CaretLeft 
-                size={18} 
-                weight="bold" 
+              <CaretLeft
+                size={18}
+                weight="bold"
                 className={cn(
                   "transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
                   navigationExpanded ? "rotate-0" : "rotate-180"
-                )} 
+                )}
               />
             </button>
           </div>
         </div>
 
-        <nav
-          aria-label="Navegação do painel"
-          data-admin-scroll
-          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto py-3"
-        >
-            <div className={cn("flex flex-col transition-[gap] duration-500 ease-[cubic-bezier(0.2,0,0,1)]", navigationExpanded ? "gap-3" : "gap-2")}>
+        <SidebarScrollArea expanded={navigationExpanded}>
+          <div className={cn("flex flex-col transition-[gap] duration-500 ease-[cubic-bezier(0.2,0,0,1)]", navigationExpanded ? "gap-3" : "gap-2")}>
             {adminNavigationGroups.map((group, groupIndex) => (
               <div
                 key={group.key}
@@ -264,7 +334,7 @@ export default function DevSidebar({
                 {groupIndex < adminNavigationGroups.length - 1 ? (
                   <div
                     className={cn(
-                      "rounded-full bg-white/10 transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] shrink-0",
+                      "shrink-0 rounded-full bg-white/10 transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
                       navigationExpanded ? "mx-5 mt-3 h-px" : "mx-auto my-1 h-1 w-1"
                     )}
                   />
@@ -272,7 +342,7 @@ export default function DevSidebar({
               </div>
             ))}
           </div>
-        </nav>
+        </SidebarScrollArea>
 
         <div className="w-full shrink-0 border-t border-white/5 py-3">
           <div className={cn("flex w-full flex-col transition-[gap] duration-500 ease-[cubic-bezier(0.2,0,0,1)]", navigationExpanded ? "gap-1" : "gap-2")}>
@@ -302,7 +372,7 @@ export default function DevSidebar({
     <>
       <aside
         className={cn(
-          "relative hidden h-dvh shrink-0 border-r border-white/5 text-white transition-[width] duration-500 ease-[cubic-bezier(0.2,0,0,1)] lg:flex z-20 overflow-hidden",
+          "relative z-20 hidden h-dvh shrink-0 overflow-hidden border-r border-white/5 text-white transition-[width] duration-500 ease-[cubic-bezier(0.2,0,0,1)] lg:flex",
           expanded ? "w-[230px]" : "w-[64px]"
         )}
       >
@@ -310,7 +380,7 @@ export default function DevSidebar({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
         <div className="relative flex h-full w-full flex-col">
-          {renderNavigation({ navigationExpanded: expanded, mobile: false })}
+          {renderNavigation({ navigationExpanded: expanded })}
         </div>
       </aside>
 
@@ -332,13 +402,13 @@ export default function DevSidebar({
               type="button"
               onClick={onCloseMobile}
               aria-label="Fechar menu"
-              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white shadow-sm backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white shadow-sm backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 active:scale-95"
             >
               <X size={18} weight="bold" />
             </button>
 
             <div className="relative flex h-full flex-col">
-              {renderNavigation({ navigationExpanded: true, mobile: true })}
+              {renderNavigation({ navigationExpanded: true })}
             </div>
           </aside>
         </div>
