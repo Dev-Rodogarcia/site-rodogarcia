@@ -1,10 +1,15 @@
 import express from "express";
+import type { RequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import helmet from "helmet";
+import helmet, { type HelmetOptions } from "helmet";
 import { env } from "./config/env.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./utils/http.js";
+
+const helmetMiddleware = helmet as unknown as (
+  options?: Readonly<HelmetOptions>
+) => RequestHandler;
 
 export function createApp() {
   const app = express();
@@ -13,7 +18,7 @@ export function createApp() {
   app.disable("x-powered-by");
 
   app.use(
-    helmet({
+    helmetMiddleware({
       crossOriginResourcePolicy: { policy: "cross-origin" },
     })
   );
