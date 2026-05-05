@@ -16,26 +16,26 @@ export const dynamic = "force-dynamic";
 
 const fallbackMetadata: Metadata = {
   title: {
-    absolute: "Rodogarcia Transportes | Logistica com previsibilidade nacional",
+    absolute: "Rodogarcia Transportes | Logística com previsibilidade nacional",
   },
   description:
-    "Rodogarcia Transportes: logistica nacional com seguranca, previsibilidade operacional e rastreabilidade em toda a jornada.",
+    "Rodogarcia Transportes: logística nacional com segurança, previsibilidade operacional e rastreabilidade em toda a jornada.",
   alternates: { canonical: seo.absoluteUrl(site.home) },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: seo.siteName,
-    title: "Rodogarcia Transportes | Logistica com previsibilidade nacional",
+    title: "Rodogarcia Transportes | Logística com previsibilidade nacional",
     description:
-      "Frete, distribuicao, operacoes dedicadas e rastreabilidade para empresas que precisam de consistencia em escala.",
+      "Frete, distribuição, operações dedicadas e rastreabilidade para empresas que precisam de consistência em escala.",
     url: seo.absoluteUrl(site.home),
     images: [{ url: seo.absoluteUrl(seo.defaultOgImage) }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rodogarcia Transportes | Logistica com previsibilidade nacional",
+    title: "Rodogarcia Transportes | Logística com previsibilidade nacional",
     description:
-      "Operacao nacional com seguranca, eficiencia e uma experiencia digital moderna para cotacao e rastreio.",
+      "Operação nacional com segurança, eficiência e uma experiência digital moderna para cotação e rastreio.",
     images: [seo.absoluteUrl(seo.defaultOgImage)],
   },
   robots: {
@@ -128,7 +128,7 @@ export default async function HomePage() {
       homePage = response.data.homePage ?? EMPTY_HOME_PAGE;
     }
   } catch {
-    // Se o CMS estiver indisponivel, os blocos editaveis da Home ficam ocultos.
+    // Se o CMS estiver indisponível, os blocos editáveis da Home ficam ocultos.
   }
 
   const certs = CERTS.map((cert) => ({
@@ -148,7 +148,7 @@ export default async function HomePage() {
             Compliance e qualidade
           </span>
           <h2 className="hidden">
-            Reconhecimento operacional que reforca seguranca e padrao.
+            Reconhecimento operacional que reforça segurança e padrão.
           </h2>
           <h2 className="mt-5 text-[clamp(1.4rem,2.2vw,2rem)] font-extrabold leading-tight tracking-[-0.03em] text-[var(--foreground)]">
             Credenciais operacionais.
@@ -163,7 +163,7 @@ export default async function HomePage() {
             <div
               className="flex w-max items-center gap-6 group-hover:[animation-play-state:paused] sm:gap-8"
               style={{ animation: "certifications-marquee 35s linear infinite" }}
-              aria-label="Certificacoes e licencas operacionais"
+              aria-label="Certificações e licenças operacionais"
             >
               {[...certs, ...certs].map((cert, index) => (
                 <div

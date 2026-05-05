@@ -69,7 +69,7 @@ const FALLBACK_CONTACT_PAGE: ContactPageContent = {
       id: "phone",
       order: 1,
       title: "Telefone",
-      description: "Canal direto para orientacao inicial e alinhamento rapido.",
+      description: "Canal direto para orientação inicial e alinhamento rápido.",
       button: { label: "Ligar agora", url: external.phoneHref, external: true },
     },
     {
@@ -83,7 +83,7 @@ const FALLBACK_CONTACT_PAGE: ContactPageContent = {
       id: "whatsapp",
       order: 3,
       title: "WhatsApp comercial",
-      description: "Canal mais rapido para abrir conversa e pedir direcionamento.",
+      description: "Canal mais rápido para abrir conversa e pedir direcionamento.",
       button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
     },
   ],
@@ -92,7 +92,7 @@ const FALLBACK_CONTACT_PAGE: ContactPageContent = {
       { id: "phone", order: 1, label: "Telefone", title: external.phoneDisplay, description: "segunda a sexta, das 8h as 18h" },
       { id: "email", order: 2, label: "E-mail", title: external.commercialEmailAddress, description: "conforme ordem de atendimento" },
       { id: "whatsapp", order: 3, label: "WhatsApp", title: "atendimento Rodogarcia", description: external.whatsappCommercial },
-      { id: "address", order: 4, label: "Endereco", title: "Rua Pedro Carmine Deo, 156, Agudos - SP", description: "CEP 17123-210 - Brasil" },
+      { id: "address", order: 4, label: "Endereço", title: "Rua Pedro Carmine Deo, 156, Agudos - SP", description: "CEP 17123-210 - Brasil" },
     ],
     companyTitle: "Rodogarcia Transportes",
     address: "Rua Pedro Carmine Deo, 156, Agudos - SP, CEP 17123-210",
@@ -100,15 +100,15 @@ const FALLBACK_CONTACT_PAGE: ContactPageContent = {
     channelGuideTitle: "Qual canal usar?",
     channelGuideDescription: "Use WhatsApp para cotações e e-mail para briefings com anexos.",
     documentsDescription: "O e-mail continua sendo o melhor canal para briefing, documentos e materiais.",
-    quickSupportDescription: "Telefone para orientacao inicial e direcionamento do atendimento.",
+    quickSupportDescription: "Telefone para orientação inicial e direcionamento do atendimento.",
     indicators: [
-      { id: "commercial-return", order: 1, value: "< 2h", description: "retorno comercial em dias uteis" },
+      { id: "commercial-return", order: 1, value: "< 2h", description: "retorno comercial em dias úteis" },
       { id: "whatsapp-return", order: 2, value: "Imediato", description: "WhatsApp para primeiro contato" },
     ],
   },
   finalCta: {
     buttons: [
-      { label: "Solicitar cotacao", url: site.quote },
+      { label: "Solicitar cotação", url: site.quote },
       { label: "Central de ajuda", url: site.help },
     ],
   },
@@ -134,7 +134,7 @@ export default async function FaleConoscoPage() {
       <PageHero
         eyebrow="Contato e atendimento"
         title="Fale com a Rodogarcia"
-        description="Estamos prontos para apoiar cotacoes, suporte operacional e orientacoes gerais."
+        description="Estamos prontos para apoiar cotações, suporte operacional e orientações gerais."
         primaryAction={{
           label: contactPage.heroWhatsappButton.label,
           href: contactPage.heroWhatsappButton.url,
@@ -147,8 +147,8 @@ export default async function FaleConoscoPage() {
       <SurfaceSection contentClassName="space-y-8">
         <SectionHeader
           eyebrow="Canais principais"
-          title="Escolha o canal mais adequado para cada situacao."
-          description="A pagina publica agora consome os mesmos dados editados no CMS interno."
+          title="Escolha o canal mais adequado para cada situação."
+          description="A página pública agora consome os mesmos dados editados no CMS interno."
           align="center"
         />
 
@@ -193,13 +193,13 @@ export default async function FaleConoscoPage() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1.02fr)_minmax(320px,0.98fr)] lg:gap-14">
             <div>
               <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/52">
-                Informacoes oficiais
+                Informações oficiais
               </span>
               <h2
                 id="contato-info-title"
                 className="mt-3 text-[clamp(1.9rem,3.2vw,3rem)] font-semibold leading-[1] tracking-[-0.05em] text-white"
               >
-                Canais, horario e dados da matriz.
+                Canais, horário e dados da matriz.
               </h2>
               <p className="mt-4 max-w-[58ch] text-sm leading-7 text-white/62 sm:text-base">
                 Tudo o que aparece aqui vem do painel administrativo, sem depender do HTML legado.
@@ -262,7 +262,7 @@ export default async function FaleConoscoPage() {
                       description: contactPage.info.documentsDescription,
                     },
                     {
-                      title: "Apoio rapido",
+                      title: "Apoio rápido",
                       description: contactPage.info.quickSupportDescription,
                     },
                   ].map((item) => (
@@ -326,7 +326,7 @@ export default async function FaleConoscoPage() {
             <div className="grid w-full shrink-0 grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4 lg:w-auto lg:flex-col">
               <ActionLink
                 action={{
-                  label: contactPage.finalCta.buttons[0]?.label || "Solicitar cotacao",
+                  label: contactPage.finalCta.buttons[0]?.label || "Solicitar cotação",
                   href: contactPage.finalCta.buttons[0]?.url || site.quote,
                   external: contactPage.finalCta.buttons[0]?.external,
                 }}

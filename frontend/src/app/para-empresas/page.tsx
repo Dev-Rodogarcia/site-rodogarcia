@@ -318,7 +318,7 @@ export default async function ParaEmpresasPage() {
               <div className="mt-12 grid w-full grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4">
                 <ActionLink
                   action={{
-                    label: scaleButtons[0]?.label || "Solicitar cotacao",
+                    label: scaleButtons[0]?.label || "Solicitar cotação",
                     href: scaleButtons[0]?.url || site.quote,
                     external: scaleButtons[0]?.external,
                   }}

@@ -80,3 +80,5 @@ cmd /c npm run build
 ```
 
 O teste de seguranca global fica em `scripts/tests/test-security-hardening.js`.
+
+

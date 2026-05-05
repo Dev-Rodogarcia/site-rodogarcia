@@ -145,7 +145,7 @@ const FALLBACK_QUOTE_PAGE: QuotePageContent = {
       icon: "WhatsappLogo",
       iconColor: "#22c55e",
       title: "WhatsApp comercial",
-      description: "Canal mais rapido para abrir conversa e pedir cotacao.",
+      description: "Canal mais rápido para abrir conversa e pedir cotação.",
       button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
       buttonColor: "#22c55e",
       active: true,

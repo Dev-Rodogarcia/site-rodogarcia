@@ -67,13 +67,13 @@ const HOME_STEPS = [
     key: "hero",
     step: "Etapa 1",
     title: "Hero principal",
-    description: "Carrossel inicial, midias e botoes de entrada da Home.",
+    description: "Carrossel inicial, mídias e botões de entrada da Home.",
   },
   {
     key: "section1",
     step: "Etapa 2",
     title: "Previsibilidade",
-    description: "Titulo, 3 abas clicaveis e CTA da primeira sessao.",
+    description: "Título, 3 abas clicáveis e CTA da primeira seção.",
   },
   {
     key: "section2",
@@ -85,7 +85,7 @@ const HOME_STEPS = [
     key: "section3",
     step: "Etapa 4",
     title: "Linhas de servico",
-    description: "Badge, texto principal e 3 cards de solucoes.",
+    description: "Badge, texto principal e cards paginados de soluções.",
   },
   {
     key: "regionalPresence",
@@ -97,7 +97,7 @@ const HOME_STEPS = [
     key: "trackingCta",
     step: "Etapa 6",
     title: "Rastreie sua carga",
-    description: "Somente textos e links dos dois botoes da area de rastreio.",
+    description: "Somente textos e links dos dois botões da área de rastreio.",
   },
   {
     key: "socialProof",
@@ -242,7 +242,7 @@ function emptySection2Item(): HomeOperationItem {
 
 function emptyServiceCard(index: number): HomeServiceCard {
   return {
-    id: `section3-card-${index + 1}`,
+    id: index < 3 ? `section3-card-${index + 1}` : createId("section3-card"),
     order: index + 1,
     media: emptyMedia(),
     badge: "",
@@ -313,10 +313,10 @@ function normalizeHomePage(data?: HomePageContent): HomePageContent {
     section3: {
       ...fallback.section3,
       ...data.section3,
-      cards: Array.from({ length: 3 }, (_, index) => {
-        const card = data.section3?.cards?.[index];
-        return card ? { ...emptyServiceCard(index), ...card } : emptyServiceCard(index);
-      }),
+      cards:
+        Array.isArray(data.section3?.cards) && data.section3.cards.length > 0
+          ? data.section3.cards.map((card, index) => ({ ...emptyServiceCard(index), ...card }))
+          : fallback.section3.cards,
     },
     regionalPresence: {
       units: Array.isArray(data.regionalPresence?.units)
@@ -522,7 +522,7 @@ function HomeMediaEditor({
         <div>
           <h4 className="text-sm font-semibold text-[var(--foreground)]">{label}</h4>
           <p className="mt-1 max-w-[72ch] text-xs leading-5 text-[var(--color-muted-raw)]">
-            Escolha imagem ou video. Videos ficam sem conversao; imagens enviadas pela biblioteca viram WebP.
+            Escolha imagem ou vídeo. Vídeos ficam sem conversão; imagens enviadas pela biblioteca viram WebP.
           </p>
         </div>
       </div>
@@ -547,7 +547,7 @@ function HomeMediaEditor({
                 className={developerInputClassName}
               >
                 <option value="image">Imagem</option>
-                <option value="video">Video</option>
+                <option value="video">Vídeo</option>
               </select>
             </DeveloperField>
             <DeveloperMediaField
@@ -756,6 +756,37 @@ export default function DeveloperHomePage() {
     }));
   }
 
+  function addSection3Card() {
+    setHome((current) => {
+      const cards = [...current.section3.cards, emptyServiceCard(current.section3.cards.length)];
+      setOpenSection3Card(cards.length - 1);
+      return {
+        ...current,
+        section3: {
+          ...current.section3,
+          cards,
+        },
+      };
+    });
+  }
+
+  function removeSection3Card(index: number) {
+    setHome((current) => {
+      const cards = current.section3.cards.filter((_, cardIndex) => cardIndex !== index);
+      setOpenSection3Card((open) => {
+        if (open === null) return null;
+        return Math.max(0, Math.min(open, cards.length - 1));
+      });
+      return {
+        ...current,
+        section3: {
+          ...current.section3,
+          cards,
+        },
+      };
+    });
+  }
+
   function updateRegionalUnit(index: number, patch: Partial<HomeRegionalUnit>) {
     setHome((current) => ({
       ...current,
@@ -835,10 +866,10 @@ export default function DeveloperHomePage() {
       <DeveloperHero
         eyebrow="Home - Pagina Inicial"
         title="Editor completo da Home."
-        description="Edite os cinco blocos principais da pagina inicial em um unico lugar, com limites claros e dados padronizados."
+        description="Edite os cinco blocos principais da página inicial em um único lugar, com limites claros e dados padronizados."
         stats={[
           { label: "Hero", value: summary.hero },
-          { label: "Sessao 2", value: summary.section2 },
+          { label: "Seção 2", value: summary.section2 },
           { label: "Unidades", value: summary.units },
           { label: "Feedbacks", value: summary.feedbacks },
         ]}
@@ -944,7 +975,7 @@ export default function DeveloperHomePage() {
           <DeveloperSectionHeading
             eyebrow="Etapa 1 - topo da Home"
             title="Hero principal"
-            description="Controla o carrossel inicial. Use 'somente midia completa' para banners sem texto nem botoes."
+            description="Controla o carrossel inicial. Use 'somente mídia completa' para banners sem texto nem botões."
             action={
               <button
                 type="button"
@@ -976,7 +1007,7 @@ export default function DeveloperHomePage() {
                 key={slide.id}
                 label={`Slide ${index + 1}`}
                 title={slide.title || "Slide sem titulo"}
-                description="Midia, textos e botoes exibidos no carrossel principal da Home."
+                description="Mídia, textos e botões exibidos no carrossel principal da Home."
                 active={slide.active !== false}
                 open={openHeroSlide === index}
                 onToggle={() => setOpenHeroSlide(openHeroSlide === index ? null : index)}
@@ -1000,12 +1031,12 @@ export default function DeveloperHomePage() {
                 <div className={cn(homeNestedPanelClassName, "grid gap-5 lg:grid-cols-3")}>
                   <DeveloperField label="Modo de exibicao" required>
                     <select value={slide.mode} onChange={(event) => updateHeroSlide(index, { mode: event.target.value as HomeHeroMode })} className={developerInputClassName}>
-                      <option value="text-media-buttons">Texto + midia + botoes</option>
-                      <option value="text-media">Texto + midia sem botoes</option>
-                      <option value="media-only">Somente midia completa</option>
+                      <option value="text-media-buttons">Texto + mídia + botões</option>
+                      <option value="text-media">Texto + mídia sem botões</option>
+                      <option value="media-only">Somente mídia completa</option>
                     </select>
                   </DeveloperField>
-                  <DeveloperField label="Titulo" required={slide.mode !== "media-only"} hint="Onde aparece: chamada principal do hero. Maximo esperado: 2 linhas.">
+                  <DeveloperField label="Título" required={slide.mode !== "media-only"} hint="Onde aparece: chamada principal do hero. Máximo esperado: 2 linhas.">
                     <input value={slide.title} onChange={(event) => updateHeroSlide(index, { title: event.target.value })} maxLength={120} className={developerInputClassName} />
                     <CountHint value={slide.title} maxLength={120} />
                   </DeveloperField>
@@ -1016,14 +1047,14 @@ export default function DeveloperHomePage() {
                 </div>
                 {slide.mode !== "media-only" ? (
                   <div className={cn(homeNestedPanelClassName, "mt-4")}>
-                    <DeveloperField label="Descricao" required hint="Onde aparece: paragrafo abaixo do titulo. Maximo esperado: 3 linhas.">
+                    <DeveloperField label="Descrição" required hint="Onde aparece: parágrafo abaixo do título. Máximo esperado: 3 linhas.">
                       <textarea value={slide.description} onChange={(event) => updateHeroSlide(index, { description: event.target.value })} maxLength={420} rows={3} className={`${developerInputClassName} resize-none`} />
                       <CountHint value={slide.description} maxLength={420} />
                     </DeveloperField>
                   </div>
                 ) : null}
                 <div className="mt-4">
-                  <HomeMediaEditor label="Midia do hero" media={slide.media} required onChange={(media) => updateHeroSlide(index, { media })} />
+                  <HomeMediaEditor label="Mídia do hero" media={slide.media} required onChange={(media) => updateHeroSlide(index, { media })} />
                 </div>
                 {slide.mode === "text-media-buttons" ? (
                   <div className="mt-5 grid gap-5 md:grid-cols-2">
@@ -1071,20 +1102,20 @@ export default function DeveloperHomePage() {
         {activeStep === "section1" ? (
         <DeveloperCard id="section-1" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 2 - primeira sessao apos o hero"
+            eyebrow="Etapa 2 - primeira seção após o hero"
             title="Previsibilidade para crescer"
-            description="Exatamente 3 itens clicaveis. A descricao e truncada visualmente em 2 linhas no site."
+            description="Exatamente 3 itens clicáveis. A descrição é truncada visualmente em 2 linhas no site."
           />
           <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("section1", api.admin.homeSection1, home.section1); }}>
             <div className={cn(homeFormGroupClassName, "grid gap-5 md:grid-cols-3")}>
-              <DeveloperField label="Titulo principal" required hint="Onde aparece: topo da Sessao 1. Maximo esperado: 2 linhas.">
+              <DeveloperField label="Título principal" required hint="Onde aparece: topo da Seção 1. Máximo esperado: 2 linhas.">
                 <input value={home.section1.title} onChange={(event) => setHome((current) => ({ ...current, section1: { ...current.section1, title: event.target.value } }))} maxLength={140} className={developerInputClassName} />
                 <CountHint value={home.section1.title} maxLength={140} />
               </DeveloperField>
-              <DeveloperField label="Texto do botao final" required>
+              <DeveloperField label="Texto do botão final" required>
                 <input value={home.section1.ctaLabel} onChange={(event) => setHome((current) => ({ ...current, section1: { ...current.section1, ctaLabel: event.target.value } }))} maxLength={40} className={developerInputClassName} />
               </DeveloperField>
-              <DeveloperField label="Link do botao final" required>
+              <DeveloperField label="Link do botão final" required>
                 <input value={home.section1.ctaUrl} onChange={(event) => setHome((current) => ({ ...current, section1: { ...current.section1, ctaUrl: event.target.value } }))} className={developerInputClassName} />
               </DeveloperField>
             </div>
@@ -1093,26 +1124,26 @@ export default function DeveloperHomePage() {
                 key={item.id}
                 label={`Item ${index + 1}`}
                 title={item.title || "Item clicavel sem titulo"}
-                description="Ao clicar, troca a midia exibida no lado esquerdo da secao."
+                description="Ao clicar, troca a mídia exibida no lado esquerdo da seção."
                 open={openSection1Item === index}
                 onToggle={() => setOpenSection1Item(openSection1Item === index ? null : index)}
               >
                 <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-2")}>
-                  <DeveloperField label="Titulo curto" required hint="Limite forte: maximo 3 a 5 palavras.">
+                  <DeveloperField label="Título curto" required hint="Limite forte: máximo 3 a 5 palavras.">
                     <input value={item.title} onChange={(event) => updateSection1Item(index, { title: event.target.value })} maxLength={60} className={developerInputClassName} />
                     <CountHint value={item.title} maxWords={5} maxLength={60} />
                   </DeveloperField>
-                  <DeveloperField label="Descricao curta" required hint="No site sera cortada com reticencias se passar de 2 linhas.">
+                  <DeveloperField label="Descrição curta" required hint="No site será cortada com reticências se passar de 2 linhas.">
                     <textarea value={item.description} onChange={(event) => updateSection1Item(index, { description: event.target.value })} maxLength={180} rows={3} className={`${developerInputClassName} resize-none`} />
                     <CountHint value={item.description} maxLength={180} />
                   </DeveloperField>
                 </div>
                 <div className="mt-4">
-                  <HomeMediaEditor label={`Midia do item ${index + 1}`} media={item.media} required onChange={(media) => updateSection1Item(index, { media })} />
+                  <HomeMediaEditor label={`Mídia do item ${index + 1}`} media={item.media} required onChange={(media) => updateSection1Item(index, { media })} />
                 </div>
               </HomeAccordionCard>
             ))}
-            <SaveButton saving={saving === "section1"}>Salvar Sessao 1</SaveButton>
+            <SaveButton saving={saving === "section1"}>Salvar Seção 1</SaveButton>
           </form>
         </DeveloperCard>
         ) : null}
@@ -1120,9 +1151,9 @@ export default function DeveloperHomePage() {
         {activeStep === "section2" ? (
         <DeveloperCard id="section-2" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 3 - area de operacao"
-            title="Todas as frentes da operacao se encontram aqui"
-            description="Maximo de 5 itens. A ordem aqui define a ordem desktop e mobile."
+            eyebrow="Etapa 3 - área de operação"
+            title="Todas as frentes da operação se encontram aqui"
+            description="Máximo de 5 itens. A ordem aqui define a ordem desktop e mobile."
             action={
               <button
                 type="button"
@@ -1137,7 +1168,7 @@ export default function DeveloperHomePage() {
           />
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("section2", api.admin.homeSection2, home.section2); }}>
             <div className={homeFormGroupClassName}>
-              <DeveloperField label="Titulo principal" required hint="Onde aparece: titulo da faixa escura da Sessao 2.">
+              <DeveloperField label="Título principal" required hint="Onde aparece: título da faixa escura da Seção 2.">
                 <input value={home.section2.title} onChange={(event) => setHome((current) => ({ ...current, section2: { ...current.section2, title: event.target.value } }))} maxLength={160} className={developerInputClassName} />
                 <CountHint value={home.section2.title} maxLength={160} />
               </DeveloperField>
@@ -1147,7 +1178,7 @@ export default function DeveloperHomePage() {
                 key={item.id}
                 label={`Item ${index + 1}`}
                 title={item.title || "Item sem titulo"}
-                description="Titulo e descricao aparecem sobre a midia no card ativo."
+                description="Título e descrição aparecem sobre a mídia no card ativo."
                 active={item.active !== false}
                 open={openSection2Item === index}
                 onToggle={() => setOpenSection2Item(openSection2Item === index ? null : index)}
@@ -1160,11 +1191,11 @@ export default function DeveloperHomePage() {
                 }
               >
                 <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-2")}>
-                  <DeveloperField label="Titulo" required hint="Maximo esperado: 3 linhas.">
+                  <DeveloperField label="Título" required hint="Máximo esperado: 3 linhas.">
                     <input value={item.title} onChange={(event) => updateSection2Item(index, { title: event.target.value })} maxLength={120} className={developerInputClassName} />
                     <CountHint value={item.title} maxLength={120} />
                   </DeveloperField>
-                  <DeveloperField label="Descricao" required hint="Maximo esperado: 3 linhas.">
+                  <DeveloperField label="Descrição" required hint="Máximo esperado: 3 linhas.">
                     <textarea value={item.description} onChange={(event) => updateSection2Item(index, { description: event.target.value })} maxLength={260} rows={3} className={`${developerInputClassName} resize-none`} />
                     <CountHint value={item.description} maxLength={260} />
                   </DeveloperField>
@@ -1173,10 +1204,10 @@ export default function DeveloperHomePage() {
                   <input type="checkbox" checked={item.active !== false} onChange={(event) => updateSection2Item(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
                   Item ativo
                 </label>
-                <HomeMediaEditor label={`Midia do item ${index + 1}`} media={item.media} required onChange={(media) => updateSection2Item(index, { media })} />
+                <HomeMediaEditor label={`Mídia do item ${index + 1}`} media={item.media} required onChange={(media) => updateSection2Item(index, { media })} />
               </HomeAccordionCard>
             ))}
-            <SaveButton saving={saving === "section2"}>Salvar Sessao 2</SaveButton>
+            <SaveButton saving={saving === "section2"}>Salvar Seção 2</SaveButton>
           </form>
         </DeveloperCard>
         ) : null}
@@ -1185,8 +1216,14 @@ export default function DeveloperHomePage() {
         <DeveloperCard id="section-3" className="p-5 sm:p-6">
           <DeveloperSectionHeading
             eyebrow="Etapa 4 - linhas de servico"
-            title="Solucoes para a complexidade da sua operacao"
-            description="Exatamente 3 cards. O botao principal e compartilhado entre desktop e mobile."
+            title="Soluções para a complexidade da sua operação"
+            description="O site mostra 3 cards por página, com paginação visual e rotação automática."
+            action={
+              <button type="button" onClick={addSection3Card} className={developerSecondaryButtonClassName}>
+                <Plus size={16} weight="bold" />
+                Novo card
+              </button>
+            }
           />
           <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("section3", api.admin.homeSection3, home.section3); }}>
             <div className={cn(homeFormGroupClassName, "space-y-5")}>
@@ -1194,18 +1231,18 @@ export default function DeveloperHomePage() {
                 <DeveloperField label="Badge" required>
                   <input value={home.section3.badge} onChange={(event) => setHome((current) => ({ ...current, section3: { ...current.section3, badge: event.target.value } }))} maxLength={60} className={developerInputClassName} />
                 </DeveloperField>
-                <DeveloperField label="Titulo principal" required hint="Maximo esperado: 3 linhas.">
+                <DeveloperField label="Título principal" required hint="Máximo esperado: 3 linhas.">
                   <input value={home.section3.title} onChange={(event) => setHome((current) => ({ ...current, section3: { ...current.section3, title: event.target.value } }))} maxLength={180} className={developerInputClassName} />
                   <CountHint value={home.section3.title} maxLength={180} />
                 </DeveloperField>
-                <DeveloperField label="Texto do botao" required>
+                <DeveloperField label="Texto do botão" required>
                   <input value={home.section3.ctaLabel} onChange={(event) => setHome((current) => ({ ...current, section3: { ...current.section3, ctaLabel: event.target.value } }))} maxLength={40} className={developerInputClassName} />
                 </DeveloperField>
-                <DeveloperField label="Link do botao" required>
+                <DeveloperField label="Link do botão" required>
                   <input value={home.section3.ctaUrl} onChange={(event) => setHome((current) => ({ ...current, section3: { ...current.section3, ctaUrl: event.target.value } }))} className={developerInputClassName} />
                 </DeveloperField>
               </div>
-              <DeveloperField label="Descricao principal" required hint="Maximo esperado: 4 linhas.">
+              <DeveloperField label="Descrição principal" required hint="Máximo esperado: 4 linhas.">
                 <textarea value={home.section3.description} onChange={(event) => setHome((current) => ({ ...current, section3: { ...current.section3, description: event.target.value } }))} maxLength={420} rows={4} className={`${developerInputClassName} resize-none`} />
                 <CountHint value={home.section3.description} maxLength={420} />
               </DeveloperField>
@@ -1215,37 +1252,44 @@ export default function DeveloperHomePage() {
                 key={card.id}
                 label={`Card ${index + 1}`}
                 title={card.title || "Card fixo sem titulo"}
-                description="Card fixo da Sessao 3. O titulo tem limite forte de 2 palavras."
+                description="Card da Seção 3. O título tem limite forte de 2 palavras."
                 open={openSection3Card === index}
                 onToggle={() => setOpenSection3Card(openSection3Card === index ? null : index)}
+                actions={
+                  <>
+                    <button type="button" onClick={() => setHome((current) => ({ ...current, section3: { ...current.section3, cards: moveItem(current.section3.cards, index, -1) } }))} className={developerGhostButtonClassName}><ArrowUp size={16} weight="bold" />Subir</button>
+                    <button type="button" onClick={() => setHome((current) => ({ ...current, section3: { ...current.section3, cards: moveItem(current.section3.cards, index, 1) } }))} className={developerGhostButtonClassName}><ArrowDown size={16} weight="bold" />Descer</button>
+                    <button type="button" onClick={() => removeSection3Card(index)} className={developerDangerButtonClassName}><Trash size={16} weight="bold" />Remover</button>
+                  </>
+                }
               >
                 <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-3")}>
                   <DeveloperField label="Badge pequeno" required>
                     <input value={card.badge} onChange={(event) => updateSection3Card(index, { badge: event.target.value })} maxLength={60} className={developerInputClassName} />
                   </DeveloperField>
-                  <DeveloperField label="Titulo do card" required>
+                  <DeveloperField label="Título do card" required>
                     <input value={card.title} onChange={(event) => updateSection3Card(index, { title: event.target.value })} maxLength={80} className={developerInputClassName} />
                     <CountHint value={card.title} maxWords={2} maxLength={80} />
                   </DeveloperField>
-                  <DeveloperField label="Texto do botao interno" required>
+                  <DeveloperField label="Texto do botão interno" required>
                     <input value={card.ctaLabel} onChange={(event) => updateSection3Card(index, { ctaLabel: event.target.value })} maxLength={40} className={developerInputClassName} />
                   </DeveloperField>
                 </div>
                 <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-2")}>
-                  <DeveloperField label="Descricao do card" required hint="Maximo esperado: 5 linhas.">
+                  <DeveloperField label="Descrição do card" required hint="Máximo esperado: 5 linhas.">
                     <textarea value={card.description} onChange={(event) => updateSection3Card(index, { description: event.target.value })} maxLength={320} rows={4} className={`${developerInputClassName} resize-none`} />
                     <CountHint value={card.description} maxLength={320} />
                   </DeveloperField>
-                  <DeveloperField label="Link do botao interno" required>
+                  <DeveloperField label="Link do botão interno" required>
                     <input value={card.ctaUrl} onChange={(event) => updateSection3Card(index, { ctaUrl: event.target.value })} className={developerInputClassName} />
                   </DeveloperField>
                 </div>
                 <div className="mt-4">
-                  <HomeMediaEditor label={`Midia do card ${index + 1}`} media={card.media} required onChange={(media) => updateSection3Card(index, { media })} />
+                  <HomeMediaEditor label={`Mídia do card ${index + 1}`} media={card.media} required onChange={(media) => updateSection3Card(index, { media })} />
                 </div>
               </HomeAccordionCard>
             ))}
-            <SaveButton saving={saving === "section3"}>Salvar Sessao 3</SaveButton>
+            <SaveButton saving={saving === "section3"}>Salvar Seção 3</SaveButton>
           </form>
         </DeveloperCard>
         ) : null}
@@ -1520,7 +1564,7 @@ export default function DeveloperHomePage() {
           />
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("socialProof", api.admin.homeSocialProof, home.socialProof); }}>
             <div className={homeFormGroupClassName}>
-              <DeveloperField label="Titulo principal" required hint="Onde aparece: topo da Prova Social. Maximo esperado: 2 linhas.">
+              <DeveloperField label="Título principal" required hint="Onde aparece: topo da Prova Social. Máximo esperado: 2 linhas.">
                 <input value={home.socialProof.title} onChange={(event) => setHome((current) => ({ ...current, socialProof: { ...current.socialProof, title: event.target.value } }))} maxLength={160} className={developerInputClassName} />
                 <CountHint value={home.socialProof.title} maxLength={160} />
               </DeveloperField>
@@ -1546,7 +1590,7 @@ export default function DeveloperHomePage() {
                   <DeveloperField label="Nome" required hint="Normalmente, nome da empresa.">
                     <input value={feedback.name} onChange={(event) => updateFeedback(index, { name: event.target.value })} maxLength={80} className={developerInputClassName} />
                   </DeveloperField>
-                  <DeveloperField label="Cargo/descricao" required>
+                  <DeveloperField label="Cargo/descrição" required>
                     <input value={feedback.role} onChange={(event) => updateFeedback(index, { role: event.target.value })} maxLength={80} className={developerInputClassName} />
                   </DeveloperField>
                   <DeveloperField label="Empresa" required>

@@ -8,7 +8,7 @@ const DEFAULT_CONSENT = {
   version: 1,
   title: "Usamos cookies para melhorar sua experiencia",
   description:
-    "Utilizamos cookies necessarios e, com sua permissao, cookies de analytics e marketing para melhorar o site.",
+    "Utilizamos cookies necessários e, com sua permissão, cookies de analytics e marketing para melhorar o site.",
   acceptAllLabel: "Aceitar todos",
   rejectLabel: "Recusar opcionais",
   preferencesLabel: "Preferencias",
@@ -31,14 +31,14 @@ const DEFAULT_CONSENT = {
     {
       key: "necessary",
       label: "Necessarios",
-      description: "Essenciais para seguranca, login e funcionamento do site.",
+      description: "Essenciais para segurança, login e funcionamento do site.",
       required: true,
       enabledByDefault: true,
     },
     {
       key: "analytics",
       label: "Analytics",
-      description: "Ajudam a entender visitas, paginas acessadas e desempenho.",
+      description: "Ajudam a entender visitas, páginas acessadas e desempenho.",
       required: false,
       enabledByDefault: false,
     },

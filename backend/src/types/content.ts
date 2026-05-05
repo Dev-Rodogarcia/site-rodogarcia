@@ -194,6 +194,138 @@ export interface PageFaqItem {
   answer: string;
 }
 
+export interface FooterLinkItem extends PageButton {
+  id: string;
+  order?: number;
+}
+
+export interface FooterLinkColumn {
+  id: string;
+  order?: number;
+  title: string;
+  links: FooterLinkItem[];
+}
+
+export interface FooterSocialLink extends FooterLinkItem {
+  icon: string;
+}
+
+export interface FooterGlobalContent {
+  description: string;
+  proposalButton: PageButton;
+  supportButton: PageButton;
+  columns: FooterLinkColumn[];
+  serviceHoursTitle: string;
+  serviceHours: string[];
+  socialTitle: string;
+  socialLinks: FooterSocialLink[];
+  bottomLinks: FooterLinkItem[];
+  copyrightText: string;
+  locationText: string;
+  creditText: string;
+  creditUrl: string;
+}
+
+export interface FooterTextBlock {
+  id: string;
+  order?: number;
+  title: string;
+  description: string;
+}
+
+export interface FooterActionCard extends FooterTextBlock {
+  icon: string;
+  button: PageButton;
+}
+
+export interface FooterLinksTermsContent {
+  hero: {
+    eyebrow: string;
+    titleHighlight: string;
+    titleRest: string;
+    description: string;
+  };
+  summary: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    body: string;
+    button: PageButton;
+  };
+  reading: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    blocks: FooterTextBlock[];
+  };
+  finalCta: {
+    title: string;
+    description: string;
+    buttons: PageButton[];
+  };
+}
+
+export interface FooterLinksHelpContent {
+  hero: {
+    eyebrow: string;
+    titleHighlight: string;
+    titleRest: string;
+    description: string;
+    buttons: PageButton[];
+  };
+  quickAccess: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    actions: FooterActionCard[];
+  };
+  contactCard: {
+    phone: string;
+    hours: string;
+    channelDescriptions: string[];
+  };
+  faq: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    items: PageFaqItem[];
+  };
+  finalSupport: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    button: PageButton;
+  };
+}
+
+export interface FooterLinksPrivacyContent {
+  hero: {
+    eyebrow: string;
+    titleHighlight: string;
+    titleRest: string;
+    description: string;
+    button: PageButton;
+  };
+  dataSection: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    blocks: FooterTextBlock[];
+  };
+  finalCta: {
+    title: string;
+    description: string;
+    buttons: PageButton[];
+  };
+}
+
+export interface FooterLinksContent {
+  footer: FooterGlobalContent;
+  terms: FooterLinksTermsContent;
+  help: FooterLinksHelpContent;
+  privacy: FooterLinksPrivacyContent;
+}
+
 export interface AboutPageContent {
   hero: {
     title: string;
@@ -442,6 +574,7 @@ export interface ContentData {
   contactPage?: ContactPageContent;
   careersPage?: CareersPageContent;
   quotePage?: QuotePageContent;
+  footerLinks?: FooterLinksContent;
   heroSlides: HeroSlide[];
   dnaSlides: DnaSlide[];
   feedbacks: Feedback[];

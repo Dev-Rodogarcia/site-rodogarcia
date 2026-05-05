@@ -23,13 +23,13 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
 
   const session = getSession(sid);
   if (!session) {
-    res.status(401).json({ error: "Sessao expirada." });
+    res.status(401).json({ error: "Sessão expirada." });
     return;
   }
 
   const user = userRepository.findById(session.userId);
   if (!user || user.active === false || user.role !== "admin") {
-    res.status(403).json({ error: "Acesso administrativo obrigatorio." });
+    res.status(403).json({ error: "Acesso administrativo obrigatório." });
     return;
   }
 

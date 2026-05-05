@@ -8,5 +8,5 @@ export const requireAllowedOrigin: RequestHandler = (req, res, next) => {
     return;
   }
 
-  res.status(403).json({ error: "Origem nao autorizada." });
+  res.status(403).json({ error: "Origem não autorizada." });
 };

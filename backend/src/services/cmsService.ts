@@ -1,5 +1,11 @@
 import { readContentData, readSiteTextsData, writeContentData, writeSiteTextsData } from "./contentService.js";
 import {
+  FOOTER_LINK_SECTION_KEYS,
+  getFooterLinksContent,
+  updateFooterLinksSection,
+  type FooterLinkSectionKey,
+} from "./footerLinksContent.js";
+import {
   getPageContent,
   pageContentKey,
   updatePageSection,
@@ -512,9 +518,9 @@ function sanitizeHomePage(payload: unknown): HomePageContent {
 }
 
 function validateRequiredMedia(media: HomeMedia, label: string) {
-  if (!media.src) return `${label}: midia obrigatoria.`;
+  if (!media.src) return `${label}: mídia obrigatória.`;
   if (media.type === "video" && media.src && !/\.(mp4|webm|ogg)$/i.test(media.src)) {
-    return `${label}: video deve usar MP4, WebM ou Ogg.`;
+    return `${label}: vídeo deve usar MP4, WebM ou Ogg.`;
   }
   return null;
 }
@@ -525,14 +531,14 @@ function validateHomeHero(payload: HomePageContent["hero"]) {
     const mediaError = validateRequiredMedia(slide.media, prefix);
     if (mediaError) return mediaError;
     if (slide.mode !== "media-only" && (!slide.title || !slide.description)) {
-      return `${prefix}: titulo e descricao sao obrigatorios neste modo.`;
+      return `${prefix}: título e descrição são obrigatórios neste modo.`;
     }
     if (slide.mode === "text-media-buttons") {
       const enabledButtons = slide.buttons.filter(
         (button) => button.enabled && button.label && button.url
       );
       if (enabledButtons.length === 0) {
-        return `${prefix}: informe ao menos um botao ativo com texto e link.`;
+        return `${prefix}: informe ao menos um botão ativo com texto e link.`;
       }
     }
   }
@@ -541,30 +547,30 @@ function validateHomeHero(payload: HomePageContent["hero"]) {
 
 function validateHomeSection1(section: HomeSection1) {
   if (!section.title || !section.ctaLabel || !section.ctaUrl) {
-    return "Sessao 1: titulo, texto do botao e link sao obrigatorios.";
+    return "Seção 1: título, texto do botão e link são obrigatórios.";
   }
-  if (section.items.length !== 3) return "Sessao 1 deve ter exatamente 3 itens.";
+  if (section.items.length !== 3) return "Seção 1 deve ter exatamente 3 itens.";
   for (const item of section.items) {
     if (!item.title || !item.description) {
-      return "Sessao 1: titulo e descricao dos 3 itens sao obrigatorios.";
+      return "Seção 1: título e descrição dos 3 itens são obrigatórios.";
     }
     if (wordCount(item.title) > 5) {
-      return "Sessao 1: cada titulo deve ter no maximo 5 palavras.";
+      return "Seção 1: cada título deve ter no máximo 5 palavras.";
     }
-    const mediaError = validateRequiredMedia(item.media, `Sessao 1 item ${item.order}`);
+    const mediaError = validateRequiredMedia(item.media, `Seção 1 item ${item.order}`);
     if (mediaError) return mediaError;
   }
   return null;
 }
 
 function validateHomeSection2(section: HomeSection2) {
-  if (!section.title) return "Sessao 2: titulo principal obrigatorio.";
-  if (section.items.length > 5) return "Sessao 2 permite no maximo 5 itens.";
+  if (!section.title) return "Seção 2: título principal obrigatório.";
+  if (section.items.length > 5) return "Seção 2 permite no máximo 5 itens.";
   for (const item of section.items) {
     if (!item.title || !item.description) {
-      return "Sessao 2: titulo e descricao de cada item sao obrigatorios.";
+      return "Seção 2: título e descrição de cada item são obrigatórios.";
     }
-    const mediaError = validateRequiredMedia(item.media, `Sessao 2 item ${item.order}`);
+    const mediaError = validateRequiredMedia(item.media, `Seção 2 item ${item.order}`);
     if (mediaError) return mediaError;
   }
   return null;
@@ -572,17 +578,17 @@ function validateHomeSection2(section: HomeSection2) {
 
 function validateHomeSection3(section: HomeSection3) {
   if (!section.badge || !section.title || !section.description || !section.ctaLabel || !section.ctaUrl) {
-    return "Sessao 3: badge, titulo, descricao, botao e link sao obrigatorios.";
+    return "Seção 3: badge, título, descrição, botão e link são obrigatórios.";
   }
-  if (section.cards.length !== 3) return "Sessao 3 deve ter exatamente 3 cards.";
+  if (section.cards.length < 3) return "Seção 3 deve ter pelo menos 3 cards.";
   for (const card of section.cards) {
     if (!card.badge || !card.title || !card.description || !card.ctaLabel || !card.ctaUrl) {
-      return "Sessao 3: todos os campos dos cards sao obrigatorios.";
+      return "Seção 3: todos os campos dos cards são obrigatórios.";
     }
     if (wordCount(card.title) > 2) {
-      return "Sessao 3: titulo de cada card deve ter no maximo 2 palavras.";
+      return "Seção 3: título de cada card deve ter no máximo 2 palavras.";
     }
-    const mediaError = validateRequiredMedia(card.media, `Sessao 3 card ${card.order}`);
+    const mediaError = validateRequiredMedia(card.media, `Seção 3 card ${card.order}`);
     if (mediaError) return mediaError;
   }
   return null;
@@ -592,10 +598,10 @@ function validateHomeRegionalPresence(section: HomeRegionalPresence) {
   for (const unit of section.units) {
     if (unit.active === false) continue;
     if (!unit.name || !unit.state || !unit.description || !unit.address || !unit.contactUrl) {
-      return "Presenca Regional: nome, UF, descricao, endereco e link do botao sao obrigatorios em unidades ativas.";
+      return "Presença Regional: nome, UF, descrição, endereço e link do botão são obrigatórios em unidades ativas.";
     }
     if (!BRAZIL_UF.has(unit.state)) {
-      return "Presenca Regional: selecione uma UF valida.";
+      return "Presença Regional: selecione uma UF válida.";
     }
   }
   return null;
@@ -603,20 +609,20 @@ function validateHomeRegionalPresence(section: HomeRegionalPresence) {
 
 function validateHomeTrackingCta(section: HomePageContent["trackingCta"]) {
   const buttons = section.buttons.slice(0, 2);
-  if (buttons.length !== 2) return "Rastreio: informe os dois botoes.";
+  if (buttons.length !== 2) return "Rastreio: informe os dois botões.";
   for (const button of buttons) {
     if (button.enabled !== false && (!button.label || !button.url)) {
-      return "Rastreio: texto e link dos botoes ativos sao obrigatorios.";
+      return "Rastreio: texto e link dos botões ativos são obrigatórios.";
     }
   }
   return null;
 }
 
 function validateHomeSocialProof(section: HomeSocialProof) {
-  if (!section.title) return "Prova Social: titulo principal obrigatorio.";
+  if (!section.title) return "Prova Social: título principal obrigatório.";
   for (const feedback of section.feedbacks) {
     if (!feedback.name || !feedback.role || !feedback.company || !feedback.testimonial || !feedback.photo) {
-      return "Prova Social: foto/logo, nome, cargo, empresa e depoimento sao obrigatorios.";
+      return "Prova Social: foto/logo, nome, cargo, empresa e depoimento são obrigatórios.";
     }
   }
   return null;
@@ -715,17 +721,17 @@ function sanitizeServicesPage(payload: unknown): ServicesPageContent {
 }
 
 function validateServicesModules(modules: ServicesModule[]) {
-  if (modules.length !== 3) return "Servicos: a sessao de modulos deve ter exatamente 3 cards.";
+  if (modules.length !== 3) return "Serviços: a seção de módulos deve ter exatamente 3 cards.";
   for (const module of modules) {
     const prefix = `Modulo ${module.order ?? ""}`.trim();
     if (!module.image.src || !module.image.alt) {
-      return `${prefix}: imagem e texto alternativo sao obrigatorios.`;
+      return `${prefix}: imagem e texto alternativo são obrigatórios.`;
     }
     if (!module.eyebrow || !module.title || !module.description || !module.ctaLabel || !module.ctaUrl) {
-      return `${prefix}: tag, titulo, descricao, texto do botao e link sao obrigatorios.`;
+      return `${prefix}: tag, título, descrição, texto do botão e link são obrigatórios.`;
     }
     if (module.details.length !== 3 || module.details.some((detail) => !detail)) {
-      return `${prefix}: informe exatamente 3 topicos.`;
+      return `${prefix}: informe exatamente 3 tópicos.`;
     }
   }
   return null;
@@ -733,17 +739,17 @@ function validateServicesModules(modules: ServicesModule[]) {
 
 function validateServicesFinalCta(finalCta: ServicesFinalCta) {
   if (!finalCta.quoteUrl || !finalCta.trackingUrl) {
-    return "CTA final: os links de cotacao e rastreio sao obrigatorios.";
+    return "CTA final: os links de cotação e rastreio são obrigatórios.";
   }
   return null;
 }
 
 function validateServicesFaq(faq: ServicesFaq) {
-  if (!faq.title) return "FAQ: titulo principal obrigatorio.";
+  if (!faq.title) return "FAQ: título principal obrigatório.";
   if (faq.items.length !== 5) return "FAQ: a lista deve manter exatamente 5 perguntas.";
   for (const item of faq.items) {
     if (!item.question || !item.answer) {
-      return "FAQ: pergunta e resposta sao obrigatorias em todos os itens.";
+      return "FAQ: pergunta e resposta são obrigatórias em todos os itens.";
     }
   }
   return null;
@@ -767,36 +773,36 @@ function normalizeServicesForAdmin(content: ContentData): ServicesPageContent {
 function validateEntityPayload(entity: Entity, payload: Record<string, unknown>) {
   if (entity === "hero") {
     const layoutMode = payload.layoutMode === "full-image" ? "full-image" : "text-image";
-    if (!payload.title || !payload.image) return "Titulo e imagem sao obrigatorios.";
+    if (!payload.title || !payload.image) return "Título e imagem são obrigatórios.";
     if (layoutMode === "text-image" && !payload.description) {
-      return "Descricao obrigatoria para hero com texto.";
+      return "Descrição obrigatória para hero com texto.";
     }
   }
   if (entity === "dna") {
     const layoutMode = payload.layoutMode === "full-image" ? "full-image" : "text-image";
     if (!payload.title && !payload.image && !payload.video) {
-      return "Informe ao menos titulo, imagem ou video.";
+      return "Informe ao menos título, imagem ou vídeo.";
     }
     if (payload.title && !payload.image && !payload.video) {
-      return "Imagem ou video sao obrigatorios quando houver titulo.";
+      return "Imagem ou vídeo são obrigatórios quando houver título.";
     }
     if (layoutMode === "text-image" && !payload.text) {
-      return "Texto obrigatorio para slide DNA com texto.";
+      return "Texto obrigatório para slide DNA com texto.";
     }
   }
   if (entity === "vagas") {
     if (!payload.titulo || !payload.local || !payload.tipo || !payload.descricao || !payload.applyUrl) {
-      return "Titulo, localizacao, contrato, descricao e link sao obrigatorios.";
+      return "Título, localização, contrato, descrição e link são obrigatórios.";
     }
   }
   if (entity === "feedbacks") {
     if (!payload.nome || !payload.empresa || !payload.texto || !payload.role) {
-      return "Nome, cargo, empresa e depoimento sao obrigatorios.";
+      return "Nome, cargo, empresa e depoimento são obrigatórios.";
     }
   }
   if (entity === "units") {
     if (!payload.name || !payload.state || !payload.address) {
-      return "Nome, estado e endereco sao obrigatorios.";
+      return "Nome, estado e endereço são obrigatórios.";
     }
     if (!payload.phone && !payload.email) {
       return "Informe ao menos telefone ou e-mail da unidade.";
@@ -919,6 +925,25 @@ export function getCmsPage(pageKey: CmsPageKey) {
   return getPageContent(readContentData(), pageKey);
 }
 
+export function parseFooterLinkSection(value: string | undefined): FooterLinkSectionKey | null {
+  return FOOTER_LINK_SECTION_KEYS.includes(value as FooterLinkSectionKey)
+    ? (value as FooterLinkSectionKey)
+    : null;
+}
+
+export function getFooterLinks() {
+  return getFooterLinksContent(readContentData());
+}
+
+export function updateFooterLinks(sectionKey: FooterLinkSectionKey, body: Record<string, unknown>) {
+  const content = readContentData();
+  const current = getFooterLinksContent(content);
+  const next = updateFooterLinksSection(current, sectionKey, isRecord(body) ? body : {});
+  content.footerLinks = next;
+  writeContentData(content);
+  return next;
+}
+
 export function updateHomeSection(section: HomeSectionKey, body: Record<string, unknown>) {
   const content = readContentData();
   const home = normalizeHomeForAdmin(content);
@@ -994,7 +1019,7 @@ export function updateCmsPageSection(
   const nextPage = updatePageSection(current, pageKey, sectionKey, isRecord(body) ? body : {});
 
   if (!nextPage) {
-    throw new HttpError(404, "Secao administrativa nao encontrada.");
+    throw new HttpError(404, "Seção administrativa não encontrada.");
   }
 
   (content as unknown as Record<string, unknown>)[pageContentKey(pageKey)] = nextPage;
@@ -1036,7 +1061,7 @@ export function updateItem(entity: Entity, id: string, body: Record<string, unkn
   const content = readContentData();
   const collection = getCollection(content, entity);
   const index = collection.findIndex((item) => item.id === id);
-  if (index === -1) throw new HttpError(404, "Item nao encontrado.");
+  if (index === -1) throw new HttpError(404, "Item não encontrado.");
 
   const payload = sanitizeEntityPayload(entity, body);
   const validationError = validateEntityPayload(entity, payload);
@@ -1065,7 +1090,7 @@ export function deleteItem(entity: Entity, id: string) {
   const collection = getCollection(content, entity);
   const nextItems = collection.filter((item) => item.id !== id);
   if (nextItems.length === collection.length) {
-    throw new HttpError(404, "Item nao encontrado.");
+    throw new HttpError(404, "Item não encontrado.");
   }
   const normalized = normalizeOrders(nextItems);
   setCollection(content, entity, normalized);

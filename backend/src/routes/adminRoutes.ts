@@ -11,6 +11,7 @@ import {
   deleteUserController,
   getCmsPageController,
   getContentController,
+  getFooterLinksController,
   getHomeController,
   getServicesPageController,
   getSiteTextsController,
@@ -18,6 +19,7 @@ import {
   listUsersController,
   reorderEntityController,
   updateEntityController,
+  updateFooterLinksSectionController,
   updateUserController,
   updateHomeHeroController,
   updateHomeSection1Controller,
@@ -141,6 +143,14 @@ adminRouter.put(
   requireJson,
   requireCsrf,
   updateCmsPageSectionController
+);
+adminRouter.get("/footer-links", getFooterLinksController);
+adminRouter.put(
+  "/footer-links/:sectionKey",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateFooterLinksSectionController
 );
 adminRouter.get("/site-texts", getSiteTextsController);
 adminRouter.post(

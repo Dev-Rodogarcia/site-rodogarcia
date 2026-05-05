@@ -130,26 +130,26 @@ const DEFAULT_ABOUT_PAGE: AboutPageContent = {
   hero: {
     title: "Mais de 35 anos conectando o Brasil",
     description:
-      "Desde 1989, transformando a logistica com excelencia, tecnologia e compromisso com cada entrega.",
-    media: { src: "/caminhoneiro1.png", alt: "Operacao Rodogarcia em movimento" },
+      "Desde 1989, transformando a logística com excelência, tecnologia e compromisso com cada entrega.",
+    media: { src: "/caminhoneiro1.png", alt: "Operação Rodogarcia em movimento" },
     buttons: [
-      { label: "Solicitar cotacao", url: site.quote },
-      { label: "Conhecer servicos", url: site.services },
+      { label: "Solicitar cotação", url: site.quote },
+      { label: "Conhecer serviços", url: site.services },
     ],
   },
   compliance: {
     image: { src: "/certificados/certificado-sassmaq.png", alt: "Certificado SASSMAQ" },
     title: "Governanca e Compliance",
     description:
-      "Certificacoes, licencas e controles sustentam operacoes com mais seguranca, rastreabilidade e previsibilidade.",
-    certificateText: "SASSMAQ, ISO 9001 e licencas operacionais ativas.",
+      "Certificações, licenças e controles sustentam operações com mais segurança, rastreabilidade e previsibilidade.",
+    certificateText: "SASSMAQ, ISO 9001 e licenças operacionais ativas.",
     certificateUrl: "",
   },
   finalCta: {
-    title: "Estruture sua operacao com a Rodogarcia.",
-    description: "Mais previsibilidade. Sem surpresas na sua malha logistica.",
+    title: "Estruture sua operação com a Rodogarcia.",
+    description: "Mais previsibilidade. Sem surpresas na sua malha logística.",
     buttons: [
-      { label: "Solicitar cotacao agora", url: site.quote },
+      { label: "Solicitar cotação agora", url: site.quote },
       { label: "Falar com atendimento", url: site.contact },
     ],
   },
@@ -158,7 +158,7 @@ const DEFAULT_ABOUT_PAGE: AboutPageContent = {
 const DEFAULT_BUSINESS_PAGE: BusinessPageContent = {
   scaleCta: {
     buttons: [
-      { label: "Solicitar cotacao", url: site.quote },
+      { label: "Solicitar cotação", url: site.quote },
       { label: "Falar com especialista", url: site.contact },
     ],
   },
@@ -170,28 +170,28 @@ const DEFAULT_BUSINESS_PAGE: BusinessPageContent = {
         order: 1,
         question: "Quais tipos de carga a Rodogarcia transporta?",
         answer:
-          "Trabalhamos com operacoes B2B de escala, carga fracionada corporativa, lotacao e projetos especiais com alta exigencia de SLA e compliance.",
+          "Trabalhamos com operações B2B de escala, carga fracionada corporativa, lotação e projetos especiais com alta exigência de SLA e compliance.",
       },
       {
         id: "business-faq-2",
         order: 2,
-        question: "Como funciona a visibilidade da operacao?",
+        question: "Como funciona a visibilidade da operação?",
         answer:
-          "O acompanhamento combina indicadores, SLA e rastreabilidade para dar mais controle ao time responsavel pela operacao.",
+          "O acompanhamento combina indicadores, SLA e rastreabilidade para dar mais controle ao time responsável pela operação.",
       },
       {
         id: "business-faq-3",
         order: 3,
         question: "A Rodogarcia atende todo o Brasil?",
         answer:
-          "Sim. A malha logistica e os parceiros homologados ampliam cobertura, prazo e capilaridade em diferentes regioes.",
+          "Sim. A malha logística e os parceiros homologados ampliam cobertura, prazo e capilaridade em diferentes regiões.",
       },
       {
         id: "business-faq-4",
         order: 4,
-        question: "Como funciona a fase de implantacao?",
+        question: "Como funciona a fase de implantação?",
         answer:
-          "O escopo e acompanhado de perto nos primeiros envios, com ajustes em ciclos curtos para evitar gargalos.",
+          "O escopo é acompanhado de perto nos primeiros envios, com ajustes em ciclos curtos para evitar gargalos.",
       },
     ],
   },
@@ -208,7 +208,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
       id: "phone",
       order: 1,
       title: "Telefone",
-      description: "Canal direto para orientacao inicial e alinhamento rapido.",
+      description: "Canal direto para orientação inicial e alinhamento rápido.",
       button: { label: "Ligar agora", url: external.phoneHref, external: true },
     },
     {
@@ -222,7 +222,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
       id: "whatsapp",
       order: 3,
       title: "WhatsApp comercial",
-      description: "Canal mais rapido para abrir conversa e pedir direcionamento.",
+      description: "Canal mais rápido para abrir conversa e pedir direcionamento.",
       button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
     },
   ],
@@ -252,7 +252,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
       {
         id: "address",
         order: 4,
-        label: "Endereco",
+        label: "Endereço",
         title: "Rua Pedro Carmine Deo, 156, Agudos - SP",
         description: "CEP 17123-210 - Brasil",
       },
@@ -263,13 +263,13 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
     channelGuideTitle: "Qual canal usar?",
     channelGuideDescription: "Use WhatsApp para cotações e e-mail para briefings com anexos.",
     documentsDescription: "O e-mail continua sendo o melhor canal para briefing, documentos e materiais.",
-    quickSupportDescription: "Telefone para orientacao inicial e direcionamento do atendimento.",
+    quickSupportDescription: "Telefone para orientação inicial e direcionamento do atendimento.",
     indicators: [
       {
         id: "commercial-return",
         order: 1,
         value: "< 2h",
-        description: "retorno comercial em dias uteis",
+        description: "retorno comercial em dias úteis",
       },
       {
         id: "whatsapp-return",
@@ -281,7 +281,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
   },
   finalCta: {
     buttons: [
-      { label: "Solicitar cotacao", url: site.quote },
+      { label: "Solicitar cotação", url: site.quote },
       { label: "Central de ajuda", url: site.help },
     ],
   },
@@ -295,17 +295,17 @@ const DEFAULT_CAREERS_JOBS: CareersPageJob[] = [
     location: "Agudos/SP",
     type: "Integral",
     description:
-      "Experiencia minima de 2 anos em transporte de cargas e foco em seguranca operacional.",
+      "Experiência mínima de 2 anos em transporte de cargas e foco em segurança operacional.",
     applyUrl: `${site.careers}#candidatura`,
     active: true,
   },
   {
     id: "career-job-2",
     order: 2,
-    title: "Analista de Logistica",
+    title: "Analista de Logística",
     location: "Campinas/SP",
     type: "Integral",
-    description: "Gestao de rotas, leitura de indicadores e melhoria de processo logistico.",
+    description: "Gestão de rotas, leitura de indicadores e melhoria de processo logístico.",
     applyUrl: `${site.careers}#candidatura`,
     active: true,
   },
@@ -315,7 +315,7 @@ const DEFAULT_CAREERS_JOBS: CareersPageJob[] = [
     title: "Assistente Administrativo",
     location: "Osasco/SP",
     type: "Integral",
-    description: "Apoio a rotinas administrativas, documentacao e interface com a operacao.",
+    description: "Apoio a rotinas administrativas, documentação e interface com a operação.",
     applyUrl: `${site.careers}#candidatura`,
     active: true,
   },
@@ -325,18 +325,18 @@ const DEFAULT_CAREERS_PAGE: CareersPageContent = {
   hero: {
     buttons: [
       { label: "Ver vagas abertas", url: "#vagas" },
-      { label: "Enviar curriculo", url: "#candidatura" },
+      { label: "Enviar currículo", url: "#candidatura" },
     ],
   },
   cultureImage: {
     src: "/caminhoneiro1.png",
-    alt: "Time Rodogarcia em operacao",
+    alt: "Time Rodogarcia em operação",
   },
   jobs: DEFAULT_CAREERS_JOBS,
   directApplication: {
     buttons: [
       {
-        label: "Enviar curriculo por e-mail",
+        label: "Enviar currículo por e-mail",
         url: external.careersEmailWithSubject,
         external: true,
       },
@@ -346,7 +346,7 @@ const DEFAULT_CAREERS_PAGE: CareersPageContent = {
   finalCta: {
     buttons: [
       {
-        label: "Enviar curriculo",
+        label: "Enviar currículo",
         url: external.careersEmailWithSubject,
         external: true,
       },
@@ -366,9 +366,9 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
     {
       id: "fractional",
       order: 1,
-      title: "Distribuicao e volumes menores",
+      title: "Distribuição e volumes menores",
       description:
-        "Canal ideal para distribuicao e volumes com maior frequencia de embarque.",
+        "Canal ideal para distribuição e volumes com maior frequência de embarque.",
       button: {
         label: "Abrir WhatsApp - Fracionado",
         url: external.whatsappQuoteFractional,
@@ -378,11 +378,11 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
     {
       id: "full-load",
       order: 2,
-      title: "Lotacao e operacoes especiais",
+      title: "Lotação e operações especiais",
       description:
-        "Melhor opcao para lotacao, projetos de maior volume e requisitos tecnicos especificos.",
+        "Melhor opção para lotação, projetos de maior volume e requisitos técnicos específicos.",
       button: {
-        label: "Abrir WhatsApp - Lotacao",
+        label: "Abrir WhatsApp - Lotação",
         url: external.whatsappQuoteFull,
         external: true,
       },
@@ -395,7 +395,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       icon: "WhatsappLogo",
       iconColor: "#22c55e",
       title: "WhatsApp comercial",
-      description: "Canal mais rapido para abrir conversa e pedir cotacao.",
+      description: "Canal mais rápido para abrir conversa e pedir cotação.",
       button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
       buttonColor: "#22c55e",
       active: true,

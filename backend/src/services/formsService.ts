@@ -32,7 +32,7 @@ export function createContact(req: Request) {
   };
 
   if (!entry.name || !entry.email || !entry.message) {
-    throw new HttpError(422, "Nome, e-mail e mensagem sao obrigatorios.");
+    throw new HttpError(422, "Nome, e-mail e mensagem são obrigatórios.");
   }
 
   const contacts = contactRepository.read();
@@ -83,7 +83,7 @@ export function createQuote(req: Request) {
   };
 
   if (!entry.name || !entry.email || !entry.origin || !entry.destination) {
-    throw new HttpError(422, "Nome, e-mail, origem e destino sao obrigatorios.");
+    throw new HttpError(422, "Nome, e-mail, origem e destino são obrigatórios.");
   }
 
   const quotes = quoteRepository.read();

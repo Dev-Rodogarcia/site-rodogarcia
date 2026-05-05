@@ -34,7 +34,7 @@ export const ABOUT_SITE_TEXT_DEFAULTS = {
   tag: "Nossa historia",
   title: "Mais de 35 anos conectando o Brasil",
   subtitle:
-    "Desde 1989, transformando a logistica com consistencia, tecnologia e compromisso com cada entrega.",
+    "Desde 1989, transformando a logística com consistência, tecnologia e compromisso com cada entrega.",
   image: "/caminhoneiro1.png",
   stats: [
     { number: "35+", description: "anos de experiencia" },
@@ -56,7 +56,7 @@ export const CONTACT_SITE_TEXT_DEFAULTS = {
   addressLine: "Rua Pedro Carmine Deo, 156, Agudos - SP",
   addressZip: "17123-210",
   addressCountry: "Brasil",
-  ctaLabel: "Solicitar cotacao",
+  ctaLabel: "Solicitar cotação",
   ctaUrl: site.quote,
 } satisfies ContactSiteTexts;
 

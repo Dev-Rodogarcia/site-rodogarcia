@@ -44,6 +44,8 @@ const nextConfig = {
       { source: "/termos", destination: "/termos-de-uso", permanent: true },
       { source: "/politica-de-privacidade", destination: "/privacidade", permanent: true },
       { source: "/politica", destination: "/privacidade", permanent: true },
+      { source: "/sua-voz.html", destination: "/sua-voz", permanent: true },
+      { source: "/canal-de-denuncias", destination: "/sua-voz", permanent: true },
       { source: "/entrar.html", destination: "/auth/entrar", permanent: true },
       { source: "/auth/entrar.html", destination: "/auth/entrar", permanent: true },
       { source: "/criar-conta.html", destination: "/auth/criar-conta", permanent: true },

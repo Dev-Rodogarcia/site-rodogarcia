@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { List, X, User, Calculator } from "@phosphor-icons/react";
+import {
+  Briefcase,
+  Buildings,
+  Calculator,
+  ChatCircleDots,
+  GearSix,
+  HouseLine,
+  Info,
+  List,
+  ShieldCheck,
+  User,
+  X,
+} from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { auth, drawerNavigation, site } from "@/lib/routes";
@@ -20,7 +32,26 @@ const DARK_HERO_ROUTES = [
   site.press,
   site.terms,
   site.privacy,
+  site.voice,
 ] as const;
+
+type MenuIcon = ComponentType<{
+  size?: number;
+  weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+  className?: string;
+  "aria-hidden"?: boolean;
+}>;
+
+const MENU_ICONS: Record<string, MenuIcon> = {
+  home: HouseLine,
+  services: GearSix,
+  about: Info,
+  business: Buildings,
+  contact: ChatCircleDots,
+  careers: Briefcase,
+  quote: Calculator,
+  voice: ShieldCheck,
+};
 
 function matchesRoute(pathname: string, href: string) {
   if (href === site.home) return pathname === site.home;
@@ -144,8 +175,8 @@ export function SiteHeader() {
             <Link
               href={site.quote}
               className={quoteButtonClassName}
-              aria-label="Solicitar cotacao"
-              title="Solicitar cotacao"
+              aria-label="Solicitar cotação"
+              title="Solicitar cotação"
             >
               <Calculator size={20} weight="bold" />
             </Link>
@@ -185,21 +216,37 @@ export function SiteHeader() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-4">
-          {drawerNavigation.map(({ href, label }) => (
+          {drawerNavigation.map(({ href, label, key }) => {
+            const Icon = MENU_ICONS[key] ?? Info;
+            const active = isActive(href);
+
+            return (
             <Link
               key={href}
               href={href}
               onClick={() => setDrawerOpen(false)}
               className={[
-                "rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-150",
-                isActive(href)
+                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-150",
+                active
                   ? "bg-[var(--color-primary-soft)] text-[var(--primary)]"
                   : "text-[var(--foreground)] hover:bg-black/5",
               ].join(" ")}
             >
-              {label}
+              <span
+                className={[
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                  active
+                    ? "border-[var(--primary)]/15 bg-white/70 text-[var(--primary)]"
+                    : "border-slate-200/70 bg-slate-50 text-slate-500",
+                ].join(" ")}
+                aria-hidden="true"
+              >
+                <Icon size={17} weight={active ? "fill" : "duotone"} />
+              </span>
+              <span className="min-w-0 leading-none">{label}</span>
             </Link>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-black/8 p-4">
@@ -215,7 +262,7 @@ export function SiteHeader() {
             onClick={() => setDrawerOpen(false)}
             className="w-full rounded-xl bg-[var(--primary)] px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-strong)]"
           >
-            Solicitar cotacao
+            Solicitar cotação
           </Link>
         </div>
       </aside>

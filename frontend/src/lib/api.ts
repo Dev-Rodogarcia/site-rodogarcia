@@ -7,6 +7,7 @@ import type {
   ContactPageContent,
   DnaSlide,
   Feedback,
+  FooterLinksContent,
   HeroSlide,
   HomePageContent,
   OperationalUnit,
@@ -32,6 +33,7 @@ export interface PublicContentResponse {
   contactPage: ContactPageContent;
   careersPage: CareersPageContent;
   quotePage: QuotePageContent;
+  footerLinks: FooterLinksContent;
   heroSlides: HeroSlide[];
   dnaSlides: DnaSlide[];
   featuredJobs: Array<{

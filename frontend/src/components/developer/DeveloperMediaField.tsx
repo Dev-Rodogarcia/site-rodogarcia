@@ -70,7 +70,7 @@ export function DeveloperMediaField({
       if (!response.success) {
         return {
           success: false,
-          error: response.error ?? "Falha ao carregar midias.",
+          error: response.error ?? "Falha ao carregar mídias.",
         };
       }
 
@@ -252,7 +252,7 @@ export function DeveloperMediaPreview({
                 ) : (
                   <img
                     src={trimmedValue}
-                    alt={previewAlt ?? "Preview da midia selecionada"}
+                    alt={previewAlt ?? "Preview da mídia selecionada"}
                     className="h-full w-full object-cover"
                     loading="lazy"
                     decoding="async"
@@ -265,7 +265,7 @@ export function DeveloperMediaPreview({
               </div>
               <div className="border-t border-[var(--border)] px-3 py-2.5">
                 <p className="text-xs font-semibold text-[var(--foreground)]">
-                  Preview da midia
+                  Preview da mídia
                 </p>
                 <p className="mt-1 truncate text-[11px] text-[var(--color-muted-raw)]">
                   {trimmedValue}
@@ -278,7 +278,7 @@ export function DeveloperMediaPreview({
                 <ImagesSquare size={21} weight="bold" />
               </span>
               <p className="text-xs font-semibold text-[var(--foreground)]">
-                Nenhuma midia selecionada
+                Nenhuma mídia selecionada
               </p>
               <p className="max-w-[22ch] text-[11px] leading-5 text-[var(--color-muted-raw)]">
                 Escolha um arquivo da biblioteca ou informe uma URL valida.
@@ -299,7 +299,7 @@ export function DeveloperMediaPreview({
           <div className="relative z-10 max-w-[92vw] rounded-[22px] border border-white/16 bg-white p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-[var(--foreground)]">
-                Preview da midia
+                Preview da mídia
               </p>
               <button
                 type="button"
@@ -323,7 +323,7 @@ export function DeveloperMediaPreview({
             ) : (
               <img
                 src={trimmedValue}
-                alt={previewAlt ?? "Preview da midia selecionada"}
+                alt={previewAlt ?? "Preview da mídia selecionada"}
                 className="max-h-[78vh] max-w-[86vw] rounded-[16px] object-contain"
               />
             )}

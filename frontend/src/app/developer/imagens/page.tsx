@@ -57,11 +57,11 @@ const ACCEPTED_MEDIA_TYPES = [
 ] as const;
 const MEDIA_SLOT_LABELS: Record<string, string> = {
   "home.hero.default": "Home - Hero padrão",
-  "home.showcase.quote": "Home - Showcase cotacao",
+  "home.showcase.quote": "Home - Showcase cotação",
   "home.showcase.tracking": "Home - Showcase rastreio",
   "home.showcase.coverage": "Home - Showcase cobertura",
-  "home.services.distribution.video": "Home - Servicos distribuicao video",
-  "home.services.distribution.poster": "Home - Servicos distribuicao poster",
+  "home.services.distribution.video": "Home - Serviços distribuição vídeo",
+  "home.services.distribution.poster": "Home - Serviços distribuição poster",
   "home.services.indoor.video": "Home - Servicos indoor video",
   "home.services.indoor.poster": "Home - Servicos indoor poster",
   "home.services.special.video": "Home - Servicos cargas especiais video",
@@ -178,7 +178,7 @@ export default function ImagensPage() {
       setUploadFile(null);
       setFileName("");
       setStatus("error");
-      setMessage("Formato nao suportado. Use PNG, JPG, WebP, AVIF, MP4, WebM ou Ogg.");
+      setMessage("Formato não suportado. Use PNG, JPG, WebP, AVIF, MP4, WebM ou Ogg.");
       event.target.value = "";
       return;
     }

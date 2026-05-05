@@ -205,7 +205,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         {activeSlides.length > 1 ? (
           <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-20 hidden items-center justify-between px-3 md:flex lg:px-5 xl:px-6">
             <SliderArrowButton direction="left" onClick={() => goTo(current - 1)} label="Ver slide anterior" />
-            <SliderArrowButton direction="right" onClick={() => goTo(current + 1)} label="Ver proximo slide" />
+            <SliderArrowButton direction="right" onClick={() => goTo(current + 1)} label="Ver próximo slide" />
           </div>
         ) : null}
 

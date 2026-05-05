@@ -15,11 +15,11 @@ import { recordTrackingEvent } from "./trackingService.js";
 const DEFAULT_CONFIG = {
   enabled: true,
   title: "Antes de sair...",
-  description: "Quer receber nosso conteudo gratuito antes de ir?",
+  description: "Quer receber nosso conteúdo gratuito antes de ir?",
   enableName: true,
   enableEmail: true,
   enablePhone: true,
-  buttonText: "Receber conteudo",
+  buttonText: "Receber conteúdo",
   closeText: "Fechar",
   successMessage: "Recebemos seus dados. Em breve entraremos em contato.",
   badgeText: "Oferta especial",
@@ -31,7 +31,7 @@ const DEFAULT_CONFIG = {
   mobileBackButtonTrigger: true,
   desktop: {
     title: "Antes de sair...",
-    description: "Receba uma proposta personalizada para sua operacao logistica.",
+    description: "Receba uma proposta personalizada para sua operação logística.",
     image: "",
   },
   mobile: {

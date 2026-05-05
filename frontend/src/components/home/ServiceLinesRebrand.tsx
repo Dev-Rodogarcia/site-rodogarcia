@@ -1,27 +1,62 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { HomeSection3 } from "@/types/content";
+import { cn } from "@/lib/utils";
+
+const CARDS_PER_PAGE = 3;
+const AUTO_ADVANCE_MS = 8500;
 
 export default function ServiceLinesRebrand({
   section,
 }: {
   section: HomeSection3;
 }) {
-  const cards = section.cards.filter(
-    (card) =>
-      card.media?.src &&
-      card.badge &&
-      card.title &&
-      card.description &&
-      card.ctaLabel &&
-      card.ctaUrl
+  const cards = useMemo(
+    () =>
+      section.cards.filter(
+        (card) =>
+          card.media?.src &&
+          card.badge &&
+          card.title &&
+          card.description &&
+          card.ctaLabel &&
+          card.ctaUrl
+      ),
+    [section.cards]
   );
+  const pages = useMemo(() => {
+    const chunks: typeof cards[] = [];
+    for (let index = 0; index < cards.length; index += CARDS_PER_PAGE) {
+      chunks.push(cards.slice(index, index + CARDS_PER_PAGE));
+    }
+    return chunks;
+  }, [cards]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const totalPages = pages.length;
+
+  useEffect(() => {
+    if (currentPage < totalPages) return;
+    setCurrentPage(0);
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (totalPages <= 1 || paused) return;
+    const timeout = window.setTimeout(() => {
+      setCurrentPage((page) => (page + 1) % totalPages);
+    }, AUTO_ADVANCE_MS);
+    return () => window.clearTimeout(timeout);
+  }, [currentPage, paused, totalPages]);
+
   if (
     !section.badge ||
     !section.title ||
     !section.description ||
     !section.ctaLabel ||
     !section.ctaUrl ||
-    cards.length !== 3
+    cards.length < 3
   ) {
     return null;
   }
@@ -56,66 +91,47 @@ export default function ServiceLinesRebrand({
             </Link>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {cards.map((card) => {
-              const mediaSrc = card.media.desktopSrc || card.media.src;
-              return (
-                <article
-                  key={card.id}
-                  className="group flex min-w-0 flex-1 flex-col overflow-hidden rounded-[32px] border border-white bg-white/60 shadow-[0_8px_30px_rgba(15,23,42,0.04)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-sky-100 hover:bg-white hover:shadow-[0_24px_50px_rgba(29,78,216,0.08)]"
+          <div
+            className="overflow-hidden"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onFocusCapture={() => setPaused(true)}
+            onBlurCapture={() => setPaused(false)}
+          >
+            <div
+              className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              style={{ transform: `translate3d(-${currentPage * 100}%,0,0)` }}
+            >
+              {pages.map((page, pageIndex) => (
+                <div
+                  key={`service-page-${pageIndex}`}
+                  className="grid w-full shrink-0 gap-5 sm:grid-cols-2 xl:grid-cols-3"
                 >
-                  <div className="relative aspect-video overflow-hidden p-2 pb-0">
-                    <div className="relative h-full w-full overflow-hidden rounded-[24px] bg-slate-100">
-                      {card.media.type === "video" || /\.(mp4|webm|ogg)$/i.test(mediaSrc) ? (
-                        <video
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                          preload="metadata"
-                          poster={card.media.poster}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-                        >
-                          <source src={mediaSrc} />
-                        </video>
-                      ) : (
-                        <img
-                          src={mediaSrc}
-                          alt={card.media.alt || card.title}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/30 via-transparent to-transparent opacity-80" />
-                      <div className="absolute left-4 top-4">
-                        <span className="inline-flex rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-sm backdrop-blur-md">
-                          {card.badge}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  {page.map((card) => (
+                    <ServiceCard key={card.id} card={card} />
+                  ))}
+                </div>
+              ))}
+            </div>
 
-                  <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
-                    <h3 className="text-lg font-bold tracking-[-0.03em] text-[var(--foreground)] transition-colors duration-300 group-hover:text-[var(--primary)]">
-                      {card.title}
-                    </h3>
-                    <p className="mt-2.5 flex-1 text-[13px] leading-[1.6] text-[var(--color-muted-raw)]">
-                      {card.description}
-                    </p>
-                    <div className="mt-5 border-t border-slate-100/80 pt-4">
-                      <Link
-                        href={card.ctaUrl}
-                        className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--primary)] transition-all duration-300 hover:gap-3 hover:text-[var(--color-primary-strong)]"
-                      >
-                        {card.ctaLabel}
-                        <ArrowRightIcon />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+            {totalPages > 1 ? (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                {pages.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`Ver grupo ${index + 1} de soluções`}
+                    onClick={() => setCurrentPage(index)}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-500",
+                      currentPage === index
+                        ? "w-8 bg-[var(--primary)]"
+                        : "w-2 bg-slate-300 hover:bg-slate-400"
+                    )}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -130,6 +146,68 @@ export default function ServiceLinesRebrand({
         </div>
       </div>
     </section>
+  );
+}
+
+function ServiceCard({
+  card,
+}: {
+  card: HomeSection3["cards"][number];
+}) {
+  const mediaSrc = card.media.desktopSrc || card.media.src;
+
+  return (
+    <article className="group flex min-w-0 flex-1 flex-col overflow-hidden rounded-[32px] border border-white bg-white/60 shadow-[0_8px_30px_rgba(15,23,42,0.04)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-sky-100 hover:bg-white hover:shadow-[0_24px_50px_rgba(29,78,216,0.08)]">
+      <div className="relative aspect-video overflow-hidden p-2 pb-0">
+        <div className="relative h-full w-full overflow-hidden rounded-[24px] bg-slate-100">
+          {card.media.type === "video" || /\.(mp4|webm|ogg)$/i.test(mediaSrc) ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={card.media.poster}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+            >
+              <source src={mediaSrc} />
+            </video>
+          ) : (
+            <img
+              src={mediaSrc}
+              alt={card.media.alt || card.title}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/30 via-transparent to-transparent opacity-80" />
+          <div className="absolute left-4 top-4">
+            <span className="inline-flex rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-sm backdrop-blur-md">
+              {card.badge}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
+        <h3 className="text-lg font-bold tracking-[-0.03em] text-[var(--foreground)] transition-colors duration-300 group-hover:text-[var(--primary)]">
+          {card.title}
+        </h3>
+        <p className="mt-2.5 flex-1 text-[13px] leading-[1.6] text-[var(--color-muted-raw)]">
+          {card.description}
+        </p>
+        <div className="mt-5 border-t border-slate-100/80 pt-4">
+          <Link
+            href={card.ctaUrl}
+            className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--primary)] transition-all duration-300 hover:gap-3 hover:text-[var(--color-primary-strong)]"
+          >
+            {card.ctaLabel}
+            <ArrowRightIcon />
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 }
 

@@ -58,9 +58,9 @@ const DEFAULT_CONFIG: PopupConfig = {
   },
   mobile: {
     title: "Fale com a Rodogarcia",
-    description: "Deixe seu contato para retorno rapido pelo celular.",
+    description: "Deixe seu contato para retorno rápido pelo celular.",
     image: "",
-    sheetTitle: "Atendimento rapido",
+    sheetTitle: "Atendimento rápido",
   },
 };
 

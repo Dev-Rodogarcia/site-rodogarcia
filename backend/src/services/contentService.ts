@@ -8,12 +8,14 @@ import type {
   HomeOperationItem,
   HomePageContent,
   HomeRegionalUnit,
+  FooterLinksContent,
   ServicesFaq,
   ServicesFinalCta,
   ServicesModule,
   ServicesPageContent,
 } from "../types/content.js";
 import { contentRepository, siteTextsRepository } from "../repositories/contentRepository.js";
+import { getFooterLinksContent } from "./footerLinksContent.js";
 import { getAllPageContent } from "./pageContent.js";
 import { sanitizeHexColor, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 
@@ -240,7 +242,6 @@ function normalizeHomePage(content: ContentData): HomePageContent {
 
   const rawSection3 = isRecord(source.section3) ? source.section3 : {};
   const section3Cards = sortByOrder(arrayValue(rawSection3.cards))
-    .slice(0, 3)
     .map((item, index) => ({
       id: String(item.id ?? `home-section3-${index + 1}`),
       order: Number(item.order ?? index + 1),
@@ -272,7 +273,7 @@ function normalizeHomePage(content: ContentData): HomePageContent {
     section3Description &&
     section3CtaLabel &&
     section3CtaUrl &&
-    section3Cards.length === 3
+    section3Cards.length >= 3
   ) {
     homePage.section3 = {
       badge: section3Badge,
@@ -551,6 +552,7 @@ export function preparePublicContent(content: ContentData) {
     homePage: normalizeHomePage(content),
     servicesPage: normalizeServicesPage(content),
     ...getAllPageContent(content),
+    footerLinks: getFooterLinksContent(content) satisfies FooterLinksContent,
     heroSlides,
     dnaSlides,
     featuredJobs,

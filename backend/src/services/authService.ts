@@ -34,7 +34,7 @@ export function isSupremeUser(user: UserRecord | null | undefined) {
 
 function assertSupremeActor(actor: UserRecord | null | undefined) {
   if (!isSupremeUser(actor)) {
-    throw new HttpError(403, "Somente o usuario supremo pode gerenciar acessos.");
+    throw new HttpError(403, "Somente o usuário supremo pode gerenciar acessos.");
   }
 }
 
@@ -55,7 +55,7 @@ export function login(emailRaw: unknown, passwordRaw: unknown) {
   const password = typeof passwordRaw === "string" ? passwordRaw : "";
 
   if (!email || !password) {
-    throw new HttpError(400, "E-mail e senha sao obrigatorios.");
+    throw new HttpError(400, "E-mail e senha são obrigatórios.");
   }
 
   const user = userRepository.findByEmail(email);
@@ -89,7 +89,7 @@ export function createUser(params: {
     throw new HttpError(422, "Preencha nome, e-mail e senha corretamente.");
   }
   if (password !== confirmPassword) {
-    throw new HttpError(422, "As senhas nao coincidem.");
+    throw new HttpError(422, "As senhas não coincidem.");
   }
 
   const passwordErrors = validatePasswordStrength(password);
@@ -128,13 +128,13 @@ export function updateUser(
   assertSupremeActor(actor);
   const userId = sanitizeText(id, 120);
   const target = userRepository.findById(userId);
-  if (!target) throw new HttpError(404, "Usuario nao encontrado.");
+  if (!target) throw new HttpError(404, "Usuário não encontrado.");
   if (isSupremeUser(target)) {
     const requestedRole = params.role === "user" ? "user" : "admin";
     const requestedActive =
       params.active === undefined ? target.active !== false : Boolean(params.active);
     if (requestedRole !== "admin" || !requestedActive) {
-      throw new HttpError(403, "O usuario supremo nao pode perder perfil master ou ser desativado.");
+      throw new HttpError(403, "O usuário supremo não pode perder perfil master ou ser desativado.");
     }
   }
 
@@ -157,7 +157,7 @@ export function updateUser(
     const confirmPassword =
       typeof params.confirmPassword === "string" ? params.confirmPassword : "";
     if (password !== confirmPassword) {
-      throw new HttpError(422, "As senhas nao coincidem.");
+      throw new HttpError(422, "As senhas não coincidem.");
     }
     const passwordErrors = validatePasswordStrength(password);
     if (passwordErrors.length > 0) {
@@ -167,7 +167,7 @@ export function updateUser(
   }
 
   const updated = userRepository.update(target.id, patch);
-  if (!updated) throw new HttpError(404, "Usuario nao encontrado.");
+  if (!updated) throw new HttpError(404, "Usuário não encontrado.");
   return updated;
 }
 
@@ -175,12 +175,12 @@ export function deleteUser(id: unknown, actor: UserRecord) {
   assertSupremeActor(actor);
   const userId = sanitizeText(id, 120);
   const target = userRepository.findById(userId);
-  if (!target) throw new HttpError(404, "Usuario nao encontrado.");
+  if (!target) throw new HttpError(404, "Usuário não encontrado.");
   if (isSupremeUser(target)) {
-    throw new HttpError(403, "O usuario supremo nao pode ser excluido.");
+    throw new HttpError(403, "O usuário supremo não pode ser excluído.");
   }
   if (target.id === actor.id) {
-    throw new HttpError(403, "Voce nao pode excluir sua propria conta.");
+    throw new HttpError(403, "Você não pode excluir sua própria conta.");
   }
   userRepository.delete(target.id);
 }

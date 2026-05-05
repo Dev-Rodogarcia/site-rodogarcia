@@ -10,7 +10,10 @@
           "media": {
             "type": "image",
             "src": "/public/foto4-semfundo.png",
-            "alt": "Caminhao Rodogarcia em operacao"
+            "alt": "Caminhão Rodogarcia em operação",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "text-media-buttons",
@@ -34,12 +37,15 @@
         {
           "id": "home-hero-1",
           "order": 2,
-          "title": "Frete rapido sem interrupcoes.",
+          "title": "Frete rápido sem interrupções.",
           "description": "Seguranca e eficiencia em movimento para todo o Brasil desde 1989.",
           "media": {
             "type": "image",
             "src": "/public/foto5.png",
-            "alt": "Operacao Rodogarcia"
+            "alt": "Operacao Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "text-media-buttons",
@@ -68,7 +74,10 @@
           "media": {
             "type": "image",
             "src": "/public/foto6-semfundo.png",
-            "alt": "Atendimento Rodogarcia"
+            "alt": "Atendimento Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "text-media-buttons",
@@ -97,7 +106,10 @@
           "media": {
             "type": "image",
             "src": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
-            "alt": "Banner visual Rodogarcia"
+            "alt": "Banner visual Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "media-only",
@@ -106,12 +118,15 @@
         {
           "id": "home-hero-4",
           "order": 5,
-          "title": "Frete rapido e barato",
-          "description": "Frete rapido e barato Frete rapido e barato Frete rapido e barato",
+          "title": "Frete rápido e barato",
+          "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
           "media": {
             "type": "image",
             "src": "/public/uploads/1-1772986684149.png",
-            "alt": "Banner Rodogarcia"
+            "alt": "Banner Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "text-media",
@@ -120,12 +135,15 @@
         {
           "id": "home-hero-5",
           "order": 6,
-          "title": "Frete rapido e barato",
-          "description": "Frete rapido e barato Frete rapido e barato Frete rapido e barato",
+          "title": "Frete rápido e barato",
+          "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
           "media": {
             "type": "image",
             "src": "/public/uploads/2-1772986687188.png",
-            "alt": "Banner Rodogarcia"
+            "alt": "Banner Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "text-media",
@@ -134,12 +152,15 @@
         {
           "id": "home-hero-6",
           "order": 7,
-          "title": "Frete rapido e barato",
-          "description": "Frete rapido e barato Frete rapido e barato Frete rapido e barato",
+          "title": "Frete rápido e barato",
+          "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
           "media": {
             "type": "image",
             "src": "/public/uploads/3-1772986690224.png",
-            "alt": "Banner Rodogarcia"
+            "alt": "Banner Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true,
           "mode": "text-media",
@@ -149,18 +170,21 @@
     },
     "section1": {
       "title": "Previsibilidade para crescer.",
-      "ctaLabel": "Conhecer solucoes",
+      "ctaLabel": "Conhecer soluções",
       "ctaUrl": "/servicos",
       "items": [
         {
           "id": "section1-quote",
           "order": 1,
           "title": "Cotacao sem friccao",
-          "description": "Fluxo comercial mais direto, com resposta clara para operacoes que precisam avancar sem ruido.",
+          "description": "Fluxo comercial mais direto, com resposta clara para operações que precisam avançar sem ruído.",
           "media": {
             "type": "video",
             "src": "/Animação_de_Conversa_Sem_Manipulação_de_Objetos.mp4",
-            "alt": "Operacao logistica Rodogarcia"
+            "alt": "Operação logística Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           }
         },
         {
@@ -171,34 +195,43 @@
           "media": {
             "type": "video",
             "src": "/Vídeo_de_Operação_Gerado.mp4",
-            "alt": "Acompanhamento operacional de carga Rodogarcia"
+            "alt": "Acompanhamento operacional de carga Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           }
         },
         {
           "id": "section1-coverage",
           "order": 3,
           "title": "Cobertura sustenta escala",
-          "description": "Capilaridade nacional e consistencia de execucao para operacoes que crescem em volume e complexidade.",
+          "description": "Capilaridade nacional e consistência de execução para operações que crescem em volume e complexidade.",
           "media": {
             "type": "video",
             "src": "/caminhoneiro.mp4",
-            "alt": "Motorista Rodogarcia em operacao"
+            "alt": "Motorista Rodogarcia em operação",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           }
         }
       ]
     },
     "section2": {
-      "title": "Todas as frentes da operacao se encontram aqui.",
+      "title": "Todas as frentes da operação se encontram aqui.",
       "items": [
         {
           "id": "section2-dna-1",
           "order": 1,
           "title": "Capilaridade para chegar mais longe",
-          "description": "Estrutura robusta para entregas em todo o Brasil com padrao de qualidade em cada etapa.",
+          "description": "Estrutura robusta para entregas em todo o Brasil com padrão de qualidade em cada etapa.",
           "media": {
             "type": "image",
             "src": "/public/foto5.png",
-            "alt": "Capilaridade operacional Rodogarcia"
+            "alt": "Capilaridade operacional Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true
         },
@@ -210,7 +243,10 @@
           "media": {
             "type": "image",
             "src": "/caminhoneiro1.png",
-            "alt": "Equipe Rodogarcia"
+            "alt": "Equipe Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true
         },
@@ -222,7 +258,10 @@
           "media": {
             "type": "image",
             "src": "/caminhoneiro1.png",
-            "alt": "Operacao Rodogarcia"
+            "alt": "Operacao Rodogarcia",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "active": true
         }
@@ -230,9 +269,9 @@
     },
     "section3": {
       "badge": "Linhas de servico",
-      "title": "Solucoes para a complexidade da sua operacao.",
-      "description": "Da distribuicao nacional as cargas especiais, cada frente combina execucao rigorosa, rastreabilidade e inteligencia operacional para sustentar o ritmo da sua entrega em qualquer cenario.",
-      "ctaLabel": "Conhecer solucoes",
+      "title": "Soluções para a complexidade da sua operação.",
+      "description": "Da distribuição nacional às cargas especiais, cada frente combina execução rigorosa, rastreabilidade e inteligência operacional para sustentar o ritmo da sua entrega em qualquer cenário.",
+      "ctaLabel": "Conhecer soluções",
       "ctaUrl": "/servicos",
       "cards": [
         {
@@ -241,13 +280,15 @@
           "media": {
             "type": "video",
             "src": "/caminhoes1.mp4",
+            "alt": "Distribuicao nacional Rodogarcia",
             "poster": "/foto2.png",
-            "alt": "Distribuicao nacional Rodogarcia"
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "badge": "Malha ativa",
           "title": "Distribuicao nacional",
           "description": "Coleta, transferencia e entrega final com rastreabilidade e governanca de rota.",
-          "ctaLabel": "Explorar servicos",
+          "ctaLabel": "Explorar serviços",
           "ctaUrl": "/servicos"
         },
         {
@@ -256,13 +297,15 @@
           "media": {
             "type": "video",
             "src": "/Vídeo_de_Operação_Gerado.mp4",
+            "alt": "Operacao indoor Rodogarcia",
             "poster": "/foto4.png",
-            "alt": "Operacao indoor Rodogarcia"
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "badge": "Fluxo interno",
           "title": "Operacao indoor",
-          "description": "Fluxos de armazenagem, cross docking e apoio a operacoes de alto giro.",
-          "ctaLabel": "Ver operacoes B2B",
+          "description": "Fluxos de armazenagem, cross docking e apoio a operações de alto giro.",
+          "ctaLabel": "Ver operações B2B",
           "ctaUrl": "/para-empresas"
         },
         {
@@ -271,14 +314,33 @@
           "media": {
             "type": "video",
             "src": "/caminhoneiro.mp4",
+            "alt": "Cargas especiais Rodogarcia",
             "poster": "/caminhoneiro1.png",
-            "alt": "Cargas especiais Rodogarcia"
+            "desktopSrc": "",
+            "mobileSrc": ""
           },
           "badge": "Execucao critica",
           "title": "Cargas especiais",
-          "description": "Compliance e seguranca para industrias com demanda sensivel e exigente.",
+          "description": "Compliance e segurança para indústrias com demanda sensível e exigente.",
           "ctaLabel": "Fale conosco",
           "ctaUrl": "/fale-conosco"
+        },
+        {
+          "id": "section3-card-1777998290534-e9139ae789922",
+          "order": 4,
+          "media": {
+            "type": "video",
+            "src": "/Animação_de_Conversa_Sem_Manipulação_de_Objetos.mp4",
+            "alt": "Teste",
+            "poster": "",
+            "desktopSrc": "",
+            "mobileSrc": ""
+          },
+          "badge": "Teste 2",
+          "title": "Teste 2",
+          "description": "Da distribuição nacional às cargas especiais, cada frente combina execução rigorosa, rastreabilidade e inteligência operacional para sustentar o ritmo da sua entrega em qualquer cenário.",
+          "ctaLabel": "/servicos",
+          "ctaUrl": "/servicos"
         }
       ]
     },
@@ -319,7 +381,7 @@
           "state": "SP",
           "description": "Unidade regional.",
           "linkedUnitId": "unit-campinas",
-          "address": "Campinas, Sao Paulo",
+          "address": "Campinas, São Paulo",
           "phone": "(19) 3XXX-XXXX",
           "email": "campinas@rodogarcia.com.br",
           "buttonLabel": "Falar com esta unidade",
@@ -333,7 +395,7 @@
           "state": "SP",
           "description": "Unidade regional.",
           "linkedUnitId": "unit-osasco",
-          "address": "Osasco, Sao Paulo",
+          "address": "Osasco, São Paulo",
           "phone": "(11) 3XXX-XXXX",
           "email": "osasco@rodogarcia.com.br",
           "buttonLabel": "Falar com esta unidade",
@@ -347,7 +409,7 @@
           "state": "PR",
           "description": "Unidade regional.",
           "linkedUnitId": "unit-castro",
-          "address": "Castro, Parana",
+          "address": "Castro, Paraná",
           "phone": "(42) 3XXX-XXXX",
           "email": "castro@rodogarcia.com.br",
           "buttonLabel": "Falar com esta unidade",
@@ -361,7 +423,7 @@
           "state": "PR",
           "description": "Unidade regional.",
           "linkedUnitId": "unit-curitiba",
-          "address": "Curitiba, Parana",
+          "address": "Curitiba, Paraná",
           "phone": "(41) 3XXX-XXXX",
           "email": "curitiba@rodogarcia.com.br",
           "buttonLabel": "Falar com esta unidade",
@@ -431,7 +493,7 @@
       ]
     },
     "socialProof": {
-      "title": "Marcas gigantes confiam a operacao na Rodogarcia.",
+      "title": "Marcas gigantes confiam a operação na Rodogarcia.",
       "feedbacks": [
         {
           "id": "home-feedback-1",
@@ -439,7 +501,7 @@
           "name": "Mariana Araujo",
           "role": "Gerente de Abastecimento",
           "company": "Capricche",
-          "testimonial": "Nas janelas de campanha, a Rodogarcia manteve previsibilidade de coleta e entrega entre CD e lojas, com menos ruptura e retorno rapido nas ocorrencias.",
+          "testimonial": "Nas janelas de campanha, a Rodogarcia manteve previsibilidade de coleta e entrega entre CD e lojas, com menos ruptura e retorno rápido nas ocorrências.",
           "photo": "/feedbacks/capricche.jpg",
           "rating": 5,
           "active": true
@@ -450,7 +512,7 @@
           "name": "Leandro Martins",
           "role": "Coordenador de Logistica Industrial",
           "company": "Corbion Brasil",
-          "testimonial": "Em uma operacao industrial sensivel, o que pesou foi a disciplina de agendamento e rastreabilidade. O SLA ficou mais estavel e a leitura de ocorrencias muito mais objetiva.",
+          "testimonial": "Em uma operação industrial sensível, o que pesou foi a disciplina de agendamento e rastreabilidade. O SLA ficou mais estável e a leitura de ocorrências muito mais objetiva.",
           "photo": "/feedbacks/corbion-brasil.png",
           "rating": 5,
           "active": true
@@ -483,7 +545,7 @@
           "name": "Aline Moreira",
           "role": "Coordenadora de Customer Service Logistico",
           "company": "H.B. Fuller",
-          "testimonial": "Precisavamos de controle fino de agendamento, compliance e rastreabilidade. A Rodogarcia entregou consistencia operacional e menos ruido nas tratativas com planta e cliente.",
+          "testimonial": "Precisávamos de controle fino de agendamento, compliance e rastreabilidade. A Rodogarcia entregou consistência operacional e menos ruído nas tratativas com planta e cliente.",
           "photo": "/feedbacks/hbfuller.png",
           "rating": 5,
           "active": true
@@ -494,7 +556,7 @@
           "name": "Diego Carvalho",
           "role": "Gerente de Operacoes",
           "company": "Hidrodomi",
-          "testimonial": "Nossa distribuicao ganhou cadencia. Hoje temos mais visibilidade por etapa, melhor ocupacao das janelas e menos impacto quando a operacao exige replanejamento.",
+          "testimonial": "Nossa distribuição ganhou cadência. Hoje temos mais visibilidade por etapa, melhor ocupação das janelas e menos impacto quando a operação exige replanejamento.",
           "photo": "/feedbacks/hidrodomi.gif",
           "rating": 4,
           "active": true
@@ -505,7 +567,7 @@
           "name": "Renata Campos",
           "role": "Especialista de Supply Chain",
           "company": "Kemira",
-          "testimonial": "Em uma malha sensivel, a diferenca esteve na previsibilidade de coleta, no acompanhamento das entregas e na qualidade do retorno para a nossa equipe.",
+          "testimonial": "Em uma malha sensível, a diferença esteve na previsibilidade de coleta, no acompanhamento das entregas e na qualidade do retorno para a nossa equipe.",
           "photo": "/feedbacks/kemira.jpg",
           "rating": 5,
           "active": true
@@ -527,7 +589,7 @@
           "name": "Thiago Fernandes",
           "role": "Coordenador de Logistica",
           "company": "Tigre",
-          "testimonial": "Para uma operacao com alto volume e distribuicao nacional, a Rodogarcia sustentou SLA, agendamento e rastreabilidade com padrao muito acima da media.",
+          "testimonial": "Para uma operação com alto volume e distribuição nacional, a Rodogarcia sustentou SLA, agendamento e rastreabilidade com padrão muito acima da média.",
           "photo": "/feedbacks/tigre.jpg",
           "rating": 5,
           "active": true
@@ -645,12 +707,12 @@
       },
       "buttons": [
         {
-          "label": "Solicitar cotacao",
+          "label": "Solicitar cotação",
           "url": "/cotacao",
           "external": false
         },
         {
-          "label": "Conhecer servicos",
+          "label": "Conhecer serviços",
           "url": "/servicos",
           "external": false
         }
@@ -662,16 +724,16 @@
         "alt": "Certificado SASSMAQ"
       },
       "title": "Governanca e Compliance",
-      "description": "Certificacoes, licencas e controles sustentam operacoes com mais seguranca, rastreabilidade e previsibilidade.",
-      "certificateText": "SASSMAQ, ISO 9001 e licencas operacionais ativas.",
+      "description": "Certificações, licenças e controles sustentam operações com mais segurança, rastreabilidade e previsibilidade.",
+      "certificateText": "SASSMAQ, ISO 9001 e licenças operacionais ativas.",
       "certificateUrl": ""
     },
     "finalCta": {
-      "title": "Estruture sua operacao com a Rodogarcia.",
-      "description": "Mais previsibilidade. Sem surpresas na sua malha logistica.",
+      "title": "Estruture sua operação com a Rodogarcia.",
+      "description": "Mais previsibilidade. Sem surpresas na sua malha logística.",
       "buttons": [
         {
-          "label": "Solicitar cotacao agora",
+          "label": "Solicitar cotação agora",
           "url": "/cotacao",
           "external": false
         },
@@ -687,7 +749,7 @@
     "scaleCta": {
       "buttons": [
         {
-          "label": "Solicitar cotacao",
+          "label": "Solicitar cotação",
           "url": "/cotacao",
           "external": false
         },
@@ -705,19 +767,19 @@
           "id": "business-faq-1",
           "order": 1,
           "question": "Quais tipos de carga a Rodogarcia transporta?",
-          "answer": "Trabalhamos com operacoes B2B de escala, carga fracionada corporativa, lotacao e projetos especiais com alta exigencia de SLA e compliance."
+          "answer": "Trabalhamos com operações B2B de escala, carga fracionada corporativa, lotação e projetos especiais com alta exigência de SLA e compliance."
         },
         {
           "id": "business-faq-2",
           "order": 2,
-          "question": "Como funciona a visibilidade da operacao?",
-          "answer": "O acompanhamento combina indicadores, SLA e rastreabilidade para dar mais controle ao time responsavel pela operacao."
+          "question": "Como funciona a visibilidade da operação?",
+          "answer": "O acompanhamento combina indicadores, SLA e rastreabilidade para dar mais controle ao time responsável pela operação."
         },
         {
           "id": "business-faq-3",
           "order": 3,
           "question": "A Rodogarcia atende todo o Brasil?",
-          "answer": "Sim. A malha logistica e os parceiros homologados ampliam cobertura, prazo e capilaridade em diferentes regioes."
+          "answer": "Sim. A malha logística e os parceiros homologados ampliam cobertura, prazo e capilaridade em diferentes regiões."
         },
         {
           "id": "business-faq-4",
@@ -739,7 +801,7 @@
         "id": "phone",
         "order": 1,
         "title": "Telefone",
-        "description": "Canal direto para orientacao inicial e alinhamento rapido.",
+        "description": "Canal direto para orientação inicial e alinhamento rápido.",
         "button": {
           "label": "Ligar agora",
           "url": "tel:+5508005914557",
@@ -761,7 +823,7 @@
         "id": "whatsapp",
         "order": 3,
         "title": "WhatsApp comercial",
-        "description": "Canal mais rapido para abrir conversa e pedir direcionamento.",
+        "description": "Canal mais rápido para abrir conversa e pedir direcionamento.",
         "button": {
           "label": "Abrir WhatsApp",
           "url": "https://wa.me/5514999999999",
@@ -795,7 +857,7 @@
         {
           "id": "address",
           "order": 4,
-          "label": "Endereco",
+          "label": "Endereço",
           "title": "Rua Pedro Carmine Deo, 156, Agudos - SP",
           "description": "CEP 17123-210 - Brasil"
         }
@@ -806,7 +868,7 @@
       "channelGuideTitle": "Qual canal usar?",
       "channelGuideDescription": "Use WhatsApp para cotações e e-mail para briefings com anexos.",
       "documentsDescription": "O e-mail continua sendo o melhor canal para briefing, documentos e materiais.",
-      "quickSupportDescription": "Telefone para orientacao inicial e direcionamento do atendimento.",
+      "quickSupportDescription": "Telefone para orientação inicial e direcionamento do atendimento.",
       "indicators": [
         {
           "id": "commercial-return",
@@ -854,7 +916,7 @@
     },
     "cultureImage": {
       "src": "/caminhoneiro1.png",
-      "alt": "Time Rodogarcia em operacao"
+      "alt": "Time Rodogarcia em operação"
     },
     "jobs": [
       {
@@ -863,7 +925,7 @@
         "title": "Motorista Categoria C/D/E",
         "location": "Agudos/SP",
         "type": "Integral",
-        "description": "Experiencia minima de 2 anos em transporte de cargas e foco em seguranca operacional.",
+        "description": "Experiência mínima de 2 anos em transporte de cargas e foco em segurança operacional.",
         "applyUrl": "/trabalhe-conosco#candidatura",
         "active": true,
         "createdAt": "",
@@ -887,7 +949,7 @@
         "title": "Assistente Administrativo",
         "location": "Osasco/SP",
         "type": "Integral",
-        "description": "Apoio a rotinas administrativas, documentacao e interface com a operacao.",
+        "description": "Apoio a rotinas administrativas, documentação e interface com a operação.",
         "applyUrl": "/trabalhe-conosco#candidatura",
         "active": true,
         "createdAt": "",
@@ -943,7 +1005,7 @@
         "id": "fractional",
         "order": 1,
         "title": "Distribuicao e volumes menores",
-        "description": "Canal ideal para distribuicao e volumes com maior frequencia de embarque.",
+        "description": "Canal ideal para distribuição e volumes com maior frequência de embarque.",
         "button": {
           "label": "Abrir WhatsApp - Fracionado",
           "url": "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fracionada.",
@@ -953,8 +1015,8 @@
       {
         "id": "full-load",
         "order": 2,
-        "title": "Lotacao e operacoes especiais",
-        "description": "Melhor opcao para lotacao, projetos de maior volume e requisitos tecnicos especificos.",
+        "title": "Lotação e operações especiais",
+        "description": "Melhor opção para lotação, projetos de maior volume e requisitos técnicos específicos.",
         "button": {
           "label": "Abrir WhatsApp - Lotacao",
           "url": "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fechada.",
@@ -969,7 +1031,7 @@
         "icon": "WhatsappLogo",
         "iconColor": "#22c55e",
         "title": "WhatsApp comercial",
-        "description": "Canal mais rapido para abrir conversa e pedir cotacao.",
+        "description": "Canal mais rápido para abrir conversa e pedir cotação.",
         "button": {
           "label": "Abrir WhatsApp",
           "url": "https://wa.me/5514999999999",
@@ -1045,6 +1107,480 @@
           "external": false
         }
       ]
+    }
+  },
+  "footerLinks": {
+    "footer": {
+      "description": "Estruturamos operações de transporte, distribuição e rastreabilidade com consistência e cobertura nacional.",
+      "proposalButton": {
+        "label": "Receber proposta",
+        "url": "/cotacao",
+        "external": false
+      },
+      "supportButton": {
+        "label": "Falar com atendimento",
+        "url": "/fale-conosco",
+        "external": false
+      },
+      "columns": [
+        {
+          "id": "services",
+          "order": 1,
+          "title": "Serviços",
+          "links": [
+            {
+              "id": "services-road",
+              "order": 1,
+              "label": "Transporte rodoviário",
+              "url": "/servicos",
+              "external": false
+            },
+            {
+              "id": "services-quote",
+              "order": 2,
+              "label": "Solicitar cotação",
+              "url": "/cotacao",
+              "external": false
+            },
+            {
+              "id": "services-tracking",
+              "order": 3,
+              "label": "Rastrear encomenda",
+              "url": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+              "external": true
+            },
+            {
+              "id": "services-business",
+              "order": 4,
+              "label": "Para empresas",
+              "url": "/para-empresas",
+              "external": false
+            }
+          ]
+        },
+        {
+          "id": "company",
+          "order": 2,
+          "title": "Empresa",
+          "links": [
+            {
+              "id": "company-home",
+              "order": 1,
+              "label": "Início",
+              "url": "/",
+              "external": false
+            },
+            {
+              "id": "company-about",
+              "order": 2,
+              "label": "Sobre a Rodogarcia",
+              "url": "/sobre",
+              "external": false
+            },
+            {
+              "id": "company-careers",
+              "order": 3,
+              "label": "Carreiras",
+              "url": "/trabalhe-conosco",
+              "external": false
+            },
+            {
+              "id": "company-press",
+              "order": 4,
+              "label": "Imprensa",
+              "url": "/imprensa",
+              "external": false
+            },
+            {
+              "id": "company-voice",
+              "order": 5,
+              "label": "Sua Voz",
+              "url": "/sua-voz",
+              "external": false
+            },
+            {
+              "id": "company-terms",
+              "order": 6,
+              "label": "Termos de uso",
+              "url": "/termos-de-uso",
+              "external": false
+            }
+          ]
+        },
+        {
+          "id": "resources",
+          "order": 3,
+          "title": "Recursos",
+          "links": [
+            {
+              "id": "resources-help",
+              "order": 1,
+              "label": "Central de ajuda",
+              "url": "/central-ajuda",
+              "external": false
+            },
+            {
+              "id": "resources-privacy",
+              "order": 2,
+              "label": "Privacidade de dados",
+              "url": "/privacidade",
+              "external": false
+            },
+            {
+              "id": "resources-contact",
+              "order": 3,
+              "label": "Atendimento comercial",
+              "url": "/fale-conosco",
+              "external": false
+            },
+            {
+              "id": "resources-email",
+              "order": 4,
+              "label": "E-mail comercial",
+              "url": "mailto:gerente.financeiro@rodogarcia.com.br",
+              "external": true
+            },
+            {
+              "id": "resources-phone",
+              "order": 5,
+              "label": "0800 591 4557",
+              "url": "tel:+551408005914557",
+              "external": true
+            }
+          ]
+        }
+      ],
+      "serviceHoursTitle": "Horário de atendimento",
+      "serviceHours": [
+        "Segunda a sexta: 08:00 às 18:00",
+        "Sábado: 08:00 às 12:00",
+        "Domingo e feriados: fechado"
+      ],
+      "socialTitle": "Redes sociais",
+      "socialLinks": [
+        {
+          "id": "social-instagram",
+          "order": 1,
+          "label": "Instagram",
+          "url": "#",
+          "external": false,
+          "icon": "InstagramLogo"
+        },
+        {
+          "id": "social-linkedin",
+          "order": 2,
+          "label": "LinkedIn",
+          "url": "#",
+          "external": false,
+          "icon": "LinkedinLogo"
+        },
+        {
+          "id": "social-facebook",
+          "order": 3,
+          "label": "Facebook",
+          "url": "#",
+          "external": false,
+          "icon": "FacebookLogo"
+        },
+        {
+          "id": "social-whatsapp",
+          "order": 4,
+          "label": "WhatsApp",
+          "url": "#",
+          "external": false,
+          "icon": "WhatsappLogo"
+        }
+      ],
+      "bottomLinks": [
+        {
+          "id": "bottom-terms",
+          "order": 1,
+          "label": "Termos de uso",
+          "url": "/termos-de-uso",
+          "external": false
+        },
+        {
+          "id": "bottom-privacy",
+          "order": 2,
+          "label": "Privacidade",
+          "url": "/privacidade",
+          "external": false
+        },
+        {
+          "id": "bottom-voice",
+          "order": 3,
+          "label": "Sua Voz",
+          "url": "/sua-voz",
+          "external": false
+        }
+      ],
+      "copyrightText": "Rodogarcia Transportes. Todos os direitos reservados.",
+      "locationText": "Agudos, SP - Cobertura nacional",
+      "creditText": "Feito por Lucas Andrade @valentelucass",
+      "creditUrl": "https://www.linkedin.com/in/dev-lucasandrade/"
+    },
+    "terms": {
+      "hero": {
+        "eyebrow": "Condições de uso",
+        "titleHighlight": "Transparência",
+        "titleRest": "e clareza.",
+        "description": "Termos claros para o uso do site, formulários e canais oficiais da Rodogarcia. Todas as informações em um só lugar."
+      },
+      "summary": {
+        "eyebrow": "Resumo rápido",
+        "title": "O site é um canal institucional e comercial.",
+        "description": "Informações, cotações e contatos publicados aqui fazem parte da jornada oficial da marca.",
+        "body": "Este documento cobre o uso do site institucional, o envio de dados por formulários oficiais e as responsabilidades sobre conteúdo e marcas.",
+        "button": {
+          "label": "Ler política",
+          "url": "/privacidade",
+          "external": false
+        }
+      },
+      "reading": {
+        "eyebrow": "Leitura completa",
+        "title": "Termos detalhados",
+        "description": "Entenda os limites e as diretrizes para utilizar nosso portal e serviços associados.",
+        "blocks": [
+          {
+            "id": "terms-use",
+            "order": 1,
+            "title": "1. Uso do site",
+            "description": "O site da Rodogarcia é destinado a fins informativos e comerciais relacionados aos serviços de transporte, distribuição, cotação e atendimento institucional."
+          },
+          {
+            "id": "terms-content",
+            "order": 2,
+            "title": "2. Conteúdo e propriedade intelectual",
+            "description": "Textos, imagens, marcas, elementos gráficos e demais materiais publicados pertencem à Rodogarcia ou são utilizados com autorização."
+          },
+          {
+            "id": "terms-forms",
+            "order": 3,
+            "title": "3. Formulários e canais digitais",
+            "description": "Os formulários de contato, cotação e carreiras servem para iniciar atendimento institucional sem representar contratação automática."
+          },
+          {
+            "id": "terms-responsibility",
+            "order": 4,
+            "title": "4. Limitação de responsabilidade",
+            "description": "A Rodogarcia busca manter o site atualizado e funcional, mas indisponibilidades temporárias podem ocorrer."
+          },
+          {
+            "id": "terms-updates",
+            "order": 5,
+            "title": "5. Atualizações",
+            "description": "Os termos podem ser revisados para refletir ajustes operacionais, legais ou de experiência digital."
+          }
+        ]
+      },
+      "finalCta": {
+        "title": "Ficou alguma dúvida?",
+        "description": "Em caso de dúvida sobre este documento ou sobre o uso dos canais institucionais, fale com a equipe pelo canal oficial.",
+        "buttons": [
+          {
+            "label": "Enviar e-mail",
+            "url": "mailto:gerente.financeiro@rodogarcia.com.br",
+            "external": true
+          },
+          {
+            "label": "Abrir contato",
+            "url": "/fale-conosco",
+            "external": false
+          }
+        ]
+      }
+    },
+    "help": {
+      "hero": {
+        "eyebrow": "Central de ajuda",
+        "titleHighlight": "Respostas diretas,",
+        "titleRest": "sem ruído.",
+        "description": "FAQ, canais de suporte e atalhos operacionais organizados em um só lugar para tornar o atendimento mais ágil.",
+        "buttons": [
+          {
+            "label": "Rastrear carga",
+            "url": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+            "external": true
+          },
+          {
+            "label": "Falar com atendimento",
+            "url": "/fale-conosco",
+            "external": false
+          }
+        ]
+      },
+      "quickAccess": {
+        "eyebrow": "Acesso rápido",
+        "title": "Os três caminhos mais usados pelo nosso time de atendimento.",
+        "description": "Rastreio, contato e privacidade concentrados para que você chegue ao canal certo sem esforço.",
+        "actions": [
+          {
+            "id": "help-tracking",
+            "order": 1,
+            "title": "Rastrear carga",
+            "description": "Acesso direto ao portal operacional para consulta do status da remessa em tempo real.",
+            "icon": "Package",
+            "button": {
+              "label": "Abrir rastreio",
+              "url": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+              "external": true
+            }
+          },
+          {
+            "id": "help-commercial",
+            "order": 2,
+            "title": "Atendimento comercial",
+            "description": "Fale com o time para cotação, orientação inicial ou suporte institucional.",
+            "icon": "ChatCircleDots",
+            "button": {
+              "label": "Abrir contato",
+              "url": "/fale-conosco",
+              "external": false
+            }
+          },
+          {
+            "id": "help-privacy",
+            "order": 3,
+            "title": "Política de privacidade",
+            "description": "Entenda como tratamos dados e como os formulários entram no fluxo institucional.",
+            "icon": "ShieldCheck",
+            "button": {
+              "label": "Ler política",
+              "url": "/privacidade",
+              "external": false
+            }
+          }
+        ]
+      },
+      "contactCard": {
+        "phone": "0800 591 4557",
+        "hours": "Segunda a sexta, das 8h às 18h. Sábado das 8h às 12h.",
+        "channelDescriptions": [
+          "Para cotação: WhatsApp ou página de cotação.",
+          "Para rastreio: portal oficial com código da remessa.",
+          "Para política de dados: rodapé e página de privacidade."
+        ]
+      },
+      "faq": {
+        "eyebrow": "Perguntas frequentes",
+        "title": "As dúvidas mais comuns respondidas de forma objetiva.",
+        "description": "Se sua pergunta não está aqui, o canal de atendimento está disponível para orientação direta.",
+        "items": [
+          {
+            "id": "help-faq-1",
+            "order": 1,
+            "question": "Como rastrear minha encomenda?",
+            "answer": "Use o portal oficial de rastreio com o código recebido no envio."
+          },
+          {
+            "id": "help-faq-2",
+            "order": 2,
+            "question": "Como solicitar uma cotação?",
+            "answer": "Acesse a página de cotação ou fale diretamente com a equipe comercial."
+          },
+          {
+            "id": "help-faq-3",
+            "order": 3,
+            "question": "Quais regiões a Rodogarcia atende?",
+            "answer": "A operação tem cobertura nacional para distribuição e projetos corporativos."
+          },
+          {
+            "id": "help-faq-4",
+            "order": 4,
+            "question": "Qual o prazo de entrega?",
+            "answer": "O prazo depende de origem, destino, janela e tipo de serviço contratado."
+          },
+          {
+            "id": "help-faq-5",
+            "order": 5,
+            "question": "A Rodogarcia atende cargas especiais?",
+            "answer": "Operações com maior exigência podem ser avaliadas pelo time especializado."
+          },
+          {
+            "id": "help-faq-6",
+            "order": 6,
+            "question": "Como falar com o suporte?",
+            "answer": "Use o telefone, o e-mail comercial ou a página de contato."
+          }
+        ]
+      },
+      "finalSupport": {
+        "eyebrow": "Ainda precisa de apoio?",
+        "title": "Abra uma solicitação e fale com o canal certo.",
+        "description": "Envie sua demanda pelo contato oficial para que a equipe identifique o melhor fluxo.",
+        "button": {
+          "label": "Abrir suporte",
+          "url": "/fale-conosco",
+          "external": false
+        }
+      }
+    },
+    "privacy": {
+      "hero": {
+        "eyebrow": "Política de privacidade",
+        "titleHighlight": "Dados tratados",
+        "titleRest": "com clareza.",
+        "description": "Entenda como os dados enviados pelos formulários e canais digitais são utilizados dentro dos fluxos institucionais da Rodogarcia.",
+        "button": {
+          "label": "Ver termos de uso",
+          "url": "/termos-de-uso",
+          "external": false
+        }
+      },
+      "dataSection": {
+        "eyebrow": "Política de privacidade",
+        "title": "Leia os principais pontos sobre coleta, finalidade, segurança e direitos do titular.",
+        "description": "As informações abaixo explicam como os dados podem ser recebidos e tratados nos canais oficiais.",
+        "blocks": [
+          {
+            "id": "privacy-data",
+            "order": 1,
+            "title": "Quais dados podem ser coletados?",
+            "description": "Formulários podem receber nome, e-mail, telefone, empresa, origem, destino e mensagens enviadas voluntariamente."
+          },
+          {
+            "id": "privacy-purpose",
+            "order": 2,
+            "title": "Para que os dados são usados?",
+            "description": "Os dados são usados para responder contatos, elaborar cotações e conduzir comunicações institucionais."
+          },
+          {
+            "id": "privacy-access",
+            "order": 3,
+            "title": "Quem pode acessar?",
+            "description": "Equipes responsáveis por atendimento, contato, recrutamento ou operação podem acessar conforme a demanda."
+          },
+          {
+            "id": "privacy-security",
+            "order": 4,
+            "title": "Como protegemos as informações?",
+            "description": "A Rodogarcia adota medidas técnicas e organizacionais para proteger as informações recebidas."
+          },
+          {
+            "id": "privacy-rights",
+            "order": 5,
+            "title": "Quais são os direitos do titular?",
+            "description": "O titular pode solicitar esclarecimentos, atualização ou revisão pelos canais institucionais da empresa."
+          }
+        ]
+      },
+      "finalCta": {
+        "title": "Precisa falar sobre seus dados?",
+        "description": "Para dúvidas sobre privacidade, atualização de informações ou direitos do titular, use o canal institucional oficial.",
+        "buttons": [
+          {
+            "label": "Enviar e-mail",
+            "url": "mailto:gerente.financeiro@rodogarcia.com.br",
+            "external": true
+          },
+          {
+            "label": "Abrir contato",
+            "url": "/fale-conosco",
+            "external": false
+          }
+        ]
+      }
     }
   },
   "heroSlides": [
@@ -1455,7 +1991,7 @@
       "email": "agudos@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade de apoio operacional.",
-      "logisticsInfo": "Atendimento para operacoes regionais e demandas de coleta.",
+      "logisticsInfo": "Atendimento para operações regionais e demandas de coleta.",
       "isDefault": false,
       "active": true
     },
@@ -1466,12 +2002,12 @@
       "type": "filial",
       "state": "sp",
       "city": "Campinas",
-      "address": "Campinas, Sao Paulo",
+      "address": "Campinas, São Paulo",
       "phone": "(19) 3XXX-XXXX",
       "email": "campinas@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes no interior paulista.",
+      "logisticsInfo": "Apoio para operações no interior paulista.",
       "isDefault": false,
       "active": true
     },
@@ -1482,12 +2018,12 @@
       "type": "filial",
       "state": "sp",
       "city": "Osasco",
-      "address": "Osasco, Sao Paulo",
+      "address": "Osasco, São Paulo",
       "phone": "(11) 3XXX-XXXX",
       "email": "osasco@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes na Grande Sao Paulo.",
+      "logisticsInfo": "Apoio para operações na Grande São Paulo.",
       "isDefault": false,
       "active": true
     },
@@ -1498,12 +2034,12 @@
       "type": "filial",
       "state": "pr",
       "city": "Castro",
-      "address": "Castro, Parana",
+      "address": "Castro, Paraná",
       "phone": "(42) 3XXX-XXXX",
       "email": "castro@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes no Parana.",
+      "logisticsInfo": "Apoio para operações no Paraná.",
       "isDefault": false,
       "active": true
     },
@@ -1514,12 +2050,12 @@
       "type": "filial",
       "state": "pr",
       "city": "Curitiba",
-      "address": "Curitiba, Parana",
+      "address": "Curitiba, Paraná",
       "phone": "(41) 3XXX-XXXX",
       "email": "curitiba@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes metropolitanas e conexoes no Sul.",
+      "logisticsInfo": "Apoio para operações metropolitanas e conexões no Sul.",
       "isDefault": false,
       "active": true
     },
@@ -1535,7 +2071,7 @@
       "email": "rj@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes no Rio de Janeiro.",
+      "logisticsInfo": "Apoio para operações no Rio de Janeiro.",
       "isDefault": false,
       "active": true
     },
@@ -1551,7 +2087,7 @@
       "email": "hamburgo@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes no Rio Grande do Sul.",
+      "logisticsInfo": "Apoio para operações no Rio Grande do Sul.",
       "isDefault": false,
       "active": true
     },
@@ -1567,7 +2103,7 @@
       "email": "recife@rodogarcia.com.br",
       "contactUrl": "/fale-conosco",
       "description": "Unidade regional.",
-      "logisticsInfo": "Apoio para operacoes no Nordeste.",
+      "logisticsInfo": "Apoio para operações no Nordeste.",
       "isDefault": false,
       "active": true
     }

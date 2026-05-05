@@ -16,7 +16,7 @@ export function asyncHandler(handler: RequestHandler): RequestHandler {
 }
 
 export const notFoundHandler: RequestHandler = (_req, res) => {
-  res.status(404).json({ error: "Recurso nao encontrado." });
+  res.status(404).json({ error: "Recurso não encontrado." });
 };
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {

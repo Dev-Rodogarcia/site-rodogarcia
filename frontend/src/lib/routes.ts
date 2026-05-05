@@ -42,6 +42,7 @@ export const site = {
   careers: "/trabalhe-conosco",
   terms: "/termos-de-uso",
   privacy: "/privacidade",
+  voice: "/sua-voz",
 } as const satisfies Record<string, AppPath>;
 
 export const auth = {
@@ -58,7 +59,8 @@ export const admin = {
   businessPage: "/developer/para-empresas",
   contactPage: "/developer/fale-conosco",
   careersPage: "/developer/trabalhe-conosco",
-  quotePage: "/developer/cotacao",
+    quotePage: "/developer/cotacao",
+    footerLinks: "/developer/footer-links",
   homeHero: "/developer/home-hero",
   homeDna: "/developer/home-dna",
   feedbacks: "/developer/servicos-feedbacks",
@@ -93,6 +95,9 @@ export const api = {
     homeSection1: "/api/admin/home/section-1",
     homeSection2: "/api/admin/home/section-2",
     homeSection3: "/api/admin/home/section-3",
+    footerLinks: "/api/admin/footer-links",
+    footerLinksSection: (sectionKey: string) =>
+      `/api/admin/footer-links/${sectionKey}`,
     homeRegionalPresence: "/api/admin/home/regional-presence",
     homeTrackingCta: "/api/admin/home/tracking-cta",
     homeSocialProof: "/api/admin/home/social-proof",
@@ -181,6 +186,7 @@ export const headerNavigation = [
   { href: site.about, label: "Sobre", key: "about" },
   { href: site.business, label: "Empresas", key: "business" },
   { href: site.contact, label: "Contato", key: "contact" },
+  { href: site.voice, label: "Sua Voz", key: "voice" },
 ] as const satisfies readonly NavigationItem[];
 
 export const drawerNavigation = [
@@ -206,6 +212,7 @@ export const adminNavigationGroups = [
       { href: admin.contactPage, label: "Página Contato", key: "contact-page" },
       { href: admin.careersPage, label: "Trabalho Con.", key: "careers-page" },
       { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
+      { href: admin.footerLinks, label: "FOOTER LINKS", key: "footer-links" },
     ],
   },
   {
@@ -248,6 +255,7 @@ export const sitemapRoutes = [
   { path: site.careers, changeFrequency: "weekly", priority: 0.7 },
   { path: site.terms, changeFrequency: "yearly", priority: 0.3 },
   { path: site.privacy, changeFrequency: "yearly", priority: 0.3 },
+  { path: site.voice, changeFrequency: "yearly", priority: 0.4 },
 ] as const satisfies readonly SitemapEntry[];
 
 export const redirectAliases = [
@@ -284,6 +292,8 @@ export const redirectAliases = [
   { source: "/termos", destination: site.terms, permanent: true },
   { source: "/politica-de-privacidade", destination: site.privacy, permanent: true },
   { source: "/politica", destination: site.privacy, permanent: true },
+  { source: "/sua-voz.html", destination: site.voice, permanent: true },
+  { source: "/canal-de-denuncias", destination: site.voice, permanent: true },
   { source: "/entrar.html", destination: auth.login, permanent: true },
   { source: "/auth/entrar.html", destination: auth.login, permanent: true },
   { source: "/criar-conta.html", destination: auth.register, permanent: true },

@@ -157,7 +157,7 @@ const FALLBACK_CAREERS_PAGE: CareersPageContent = {
   },
   cultureImage: {
     src: "/caminhoneiro1.png",
-    alt: "Time Rodogarcia em operacao",
+    alt: "Time Rodogarcia em operação",
   },
   jobs: STATIC_JOBS.map((job, index) => ({
     id: `career-job-${index + 1}`,

@@ -37,7 +37,7 @@ const PAGE_META: Record<PageKey, { title: string; eyebrow: string; publicHref: s
     eyebrow: "Página Para Empresas",
     title: "Página Para Empresas.",
     publicHref: site.business,
-    description: "Apenas botoes do CTA de escala e FAQ da rota /para-empresas.",
+    description: "Apenas botões do CTA de escala e FAQ da rota /para-empresas.",
   },
   contact: {
     eyebrow: "Página Fale Conosco",
@@ -49,13 +49,13 @@ const PAGE_META: Record<PageKey, { title: string; eyebrow: string; publicHref: s
     eyebrow: "Página Trabalhe Conosco",
     title: "Página Trabalhe Conosco.",
     publicHref: site.careers,
-    description: "Botoes, imagem de cultura, vagas e CTAs da rota /trabalhe-conosco.",
+    description: "Botões, imagem de cultura, vagas e CTAs da rota /trabalhe-conosco.",
   },
   quote: {
     eyebrow: "Página Cotação",
     title: "Página Cotação.",
     publicHref: site.quote,
-    description: "Botoes, canais diretos, outros canais e CTA final da rota /cotacao.",
+    description: "Botões, canais diretos, outros canais e CTA final da rota /cotacao.",
   },
 };
 
@@ -114,7 +114,7 @@ function ButtonFields({
       {buttons.slice(0, max).map((button, index) => (
         <div key={index} className="space-y-4">
           <DeveloperSectionHeading title={labels[index] ?? `Botao ${index + 1}`} />
-          <DeveloperField label="Texto" required tooltip="Texto exibido no botao. Exemplo: Solicitar cotacao.">
+          <DeveloperField label="Texto" required tooltip="Texto exibido no botão. Exemplo: Solicitar cotação.">
             <input
               value={button.label ?? ""}
               onChange={(event) => {
@@ -201,7 +201,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         setPage(response.data?.page ?? null);
         setStatus(null);
       } else {
-        setStatus({ tone: "error", text: response.error ?? "Falha ao carregar pagina." });
+        setStatus({ tone: "error", text: response.error ?? "Falha ao carregar página." });
       }
       setLoading(false);
     }
@@ -287,7 +287,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         actions={
           <Link href={meta.publicHref} className={developerSecondaryButtonClassName}>
             <ArrowSquareOut size={16} weight="bold" />
-            Ver pagina
+            Ver página
           </Link>
         }
       />
@@ -299,11 +299,11 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         {pageKey === "about" ? (
           <>
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Hero" title="Hero da Pagina Sobre" description="Titulo, descricao, dois botoes e midia principal." />
+              <DeveloperSectionHeading eyebrow="Hero" title="Hero da Página Sobre" description="Título, descrição, dois botões e mídia principal." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("hero", page.hero); }}>
                 <div className={panelClassName}>
                   <DeveloperMediaField
-                    label="Imagem ou midia"
+                    label="Imagem ou mídia"
                     mediaType="all"
                     value={page.hero.media.src}
                     onChange={(src) => update((draft) => { draft.hero.media.src = src; })}
@@ -314,21 +314,21 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   </div>
                 </div>
                 <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
-                  <TextInput label="Titulo" value={page.hero.title} maxLength={320} onChange={(value) => update((draft) => { draft.hero.title = value; })} tooltip="Maximo visual esperado: 3 linhas." />
-                  <TextInput label="Descricao" value={page.hero.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.hero.description = value; })} tooltip="Maximo visual esperado: 2 linhas." />
+                  <TextInput label="Título" value={page.hero.title} maxLength={320} onChange={(value) => update((draft) => { draft.hero.title = value; })} tooltip="Máximo visual esperado: 3 linhas." />
+                  <TextInput label="Descrição" value={page.hero.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.hero.description = value; })} tooltip="Máximo visual esperado: 2 linhas." />
                 </div>
                 <ButtonFields buttons={page.hero.buttons} onChange={(buttons) => update((draft) => { draft.hero.buttons = buttons; })} />
                 <SaveButton saving={saving === "hero"}>Salvar hero</SaveButton>
               </form>
             </DeveloperCard>
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Governanca" title="Governanca e Compliance" description="Imagem, texto alternativo, titulo, descricao e certificado." />
+              <DeveloperSectionHeading eyebrow="Governança" title="Governança e Compliance" description="Imagem, texto alternativo, título, descrição e certificado." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("compliance", page.compliance); }}>
                 <DeveloperMediaField label="Imagem principal" mediaType="image" value={page.compliance.image.src} onChange={(src) => update((draft) => { draft.compliance.image.src = src; })} previewAlt={page.compliance.image.alt} />
                 <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
                   <TextInput label="Texto alternativo" value={page.compliance.image.alt} maxLength={160} onChange={(value) => update((draft) => { draft.compliance.image.alt = value; })} />
-                  <TextInput label="Titulo" value={page.compliance.title} maxLength={220} onChange={(value) => update((draft) => { draft.compliance.title = value; })} />
-                  <TextInput label="Descricao" value={page.compliance.description} maxLength={320} textarea onChange={(value) => update((draft) => { draft.compliance.description = value; })} />
+                  <TextInput label="Título" value={page.compliance.title} maxLength={220} onChange={(value) => update((draft) => { draft.compliance.title = value; })} />
+                  <TextInput label="Descrição" value={page.compliance.description} maxLength={320} textarea onChange={(value) => update((draft) => { draft.compliance.description = value; })} />
                   <TextInput label="Texto do certificado" value={page.compliance.certificateText} maxLength={180} onChange={(value) => update((draft) => { draft.compliance.certificateText = value; })} />
                   <DeveloperField label="Link externo do certificado">
                     <input value={page.compliance.certificateUrl ?? ""} onChange={(event) => update((draft) => { draft.compliance.certificateUrl = event.target.value; })} className={developerInputClassName} />
@@ -344,10 +344,10 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         {pageKey === "business" ? (
           <>
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Pronto para escalar" title="Botoes editaveis" description="Somente os dois botoes desta secao sao editaveis." />
+              <DeveloperSectionHeading eyebrow="Pronto para escalar" title="Botões editáveis" description="Somente os dois botões desta seção são editáveis." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("scaleCta", page.scaleCta); }}>
                 <ButtonFields buttons={page.scaleCta.buttons} onChange={(buttons) => update((draft) => { draft.scaleCta.buttons = buttons; })} />
-                <SaveButton saving={saving === "scaleCta"}>Salvar botoes</SaveButton>
+                <SaveButton saving={saving === "scaleCta"}>Salvar botões</SaveButton>
               </form>
             </DeveloperCard>
             {renderFaq(page.faq, "faq", 4)}
@@ -357,14 +357,14 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         {pageKey === "contact" ? (
           <>
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Hero" title="Botao WhatsApp" description="Hero fixo; somente este botao e editavel." />
+              <DeveloperSectionHeading eyebrow="Hero" title="Botão WhatsApp" description="Hero fixo; somente este botão é editável." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("hero", { heroWhatsappButton: page.heroWhatsappButton }); }}>
                 <ButtonFields buttons={[page.heroWhatsappButton]} labels={["Botao WhatsApp"]} max={1} onChange={(buttons) => update((draft) => { draft.heroWhatsappButton = buttons[0]; })} />
                 <SaveButton saving={saving === "hero"}>Salvar hero</SaveButton>
               </form>
             </DeveloperCard>
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Canais principais" title="Cards fixos" description="Titulos fixos; edite descricao e botao." />
+              <DeveloperSectionHeading eyebrow="Canais principais" title="Cards fixos" description="Títulos fixos; edite descrição e botão." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("mainChannels", { mainChannels: page.mainChannels }); }}>
                 <DeveloperCmsAccordion
                   items={page.mainChannels}
@@ -374,7 +374,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   getTitle={(item) => item.title}
                   renderItem={(item, index) => (
                     <div className="space-y-5">
-                      <TextInput label="Descricao curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.mainChannels[index].description = value; })} />
+                      <TextInput label="Descrição curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.mainChannels[index].description = value; })} />
                       <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} onChange={(buttons) => update((draft) => { draft.mainChannels[index].button = buttons[0]; })} />
                     </div>
                   )}
@@ -389,9 +389,9 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
 
         {pageKey === "careers" ? (
           <>
-            {renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; somente os botoes sao editaveis.")}
+            {renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; somente os botões são editáveis.")}
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Cultura e beneficios" title="Foto da secao" description="Somente imagem e texto alternativo." />
+              <DeveloperSectionHeading eyebrow="Cultura e benefícios" title="Foto da seção" description="Somente imagem e texto alternativo." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("cultureImage", page.cultureImage); }}>
                 <DeveloperMediaField label="Imagem" mediaType="image" value={page.cultureImage.src} onChange={(src) => update((draft) => { draft.cultureImage.src = src; })} previewAlt={page.cultureImage.alt} />
                 <TextInput label="Texto alternativo" value={page.cultureImage.alt} maxLength={160} onChange={(value) => update((draft) => { draft.cultureImage.alt = value; })} />
@@ -399,16 +399,16 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               </form>
             </DeveloperCard>
             {renderJobs()}
-            {renderButtonsOnly("directApplication", page.directApplication, "Candidatura direta", "Somente os dois botoes sao editaveis.")}
-            {renderButtonsOnly("finalCta", page.finalCta, "CTA final", "Somente os dois botoes sao editaveis.")}
+            {renderButtonsOnly("directApplication", page.directApplication, "Candidatura direta", "Somente os dois botões são editáveis.")}
+            {renderButtonsOnly("finalCta", page.finalCta, "CTA final", "Somente os dois botões são editáveis.")}
           </>
         ) : null}
 
         {pageKey === "quote" ? (
           <>
-            {renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; somente os botoes sao editaveis.")}
+            {renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; somente os botões são editáveis.")}
             <DeveloperCard className="p-5 sm:p-6">
-              <DeveloperSectionHeading eyebrow="Canais diretos" title="Dois cards fixos" description="Titulo, descricao e botao dos dois cards." />
+              <DeveloperSectionHeading eyebrow="Canais diretos" title="Dois cards fixos" description="Título, descrição e botão dos dois cards." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("directChannels", { directChannels: page.directChannels }); }}>
                 <DeveloperCmsAccordion
                   items={page.directChannels}
@@ -419,8 +419,8 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   renderItem={(item, index) => (
                     <div className="space-y-5">
                       <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
-                        <TextInput label="Titulo" value={item.title} maxLength={220} onChange={(value) => update((draft) => { draft.directChannels[index].title = value; })} />
-                        <TextInput label="Descricao" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.directChannels[index].description = value; })} />
+                        <TextInput label="Título" value={item.title} maxLength={220} onChange={(value) => update((draft) => { draft.directChannels[index].title = value; })} />
+                        <TextInput label="Descrição" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.directChannels[index].description = value; })} />
                       </div>
                       <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} onChange={(buttons) => update((draft) => { draft.directChannels[index].button = buttons[0]; })} />
                     </div>
@@ -430,7 +430,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               </form>
             </DeveloperCard>
             {renderOtherChannels()}
-            {renderButtonsOnly("finalCta", page.finalCta, "CTA final", "Somente os dois botoes sao editaveis.")}
+            {renderButtonsOnly("finalCta", page.finalCta, "CTA final", "Somente os dois botões são editáveis.")}
           </>
         ) : null}
       </div>
@@ -443,7 +443,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         <DeveloperSectionHeading title={title} description={description} />
         <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection(sectionKey, section); }}>
           <ButtonFields buttons={section.buttons} onChange={(buttons) => update((draft) => { draft[sectionKey].buttons = buttons; })} />
-          <SaveButton saving={saving === sectionKey}>Salvar botoes</SaveButton>
+          <SaveButton saving={saving === sectionKey}>Salvar botões</SaveButton>
         </form>
       </DeveloperCard>
     );
@@ -452,12 +452,12 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
   function renderFinalCta(finalCta: AnyRecord, sectionKey: string, buttonsOnly = false) {
     return (
       <DeveloperCard className="p-5 sm:p-6">
-        <DeveloperSectionHeading eyebrow="CTA final" title="CTA final" description={buttonsOnly ? "Texto fixo; somente botoes editaveis." : "Titulo, descricao e botoes."} />
+        <DeveloperSectionHeading eyebrow="CTA final" title="CTA final" description={buttonsOnly ? "Texto fixo; somente botões editáveis." : "Título, descrição e botões."} />
         <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection(sectionKey, finalCta); }}>
           {!buttonsOnly ? (
             <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
-              <TextInput label="Titulo" value={finalCta.title} maxLength={320} onChange={(value) => update((draft) => { draft.finalCta.title = value; })} />
-              <TextInput label="Descricao" value={finalCta.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.finalCta.description = value; })} />
+              <TextInput label="Título" value={finalCta.title} maxLength={320} onChange={(value) => update((draft) => { draft.finalCta.title = value; })} />
+              <TextInput label="Descrição" value={finalCta.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.finalCta.description = value; })} />
             </div>
           ) : null}
           <ButtonFields buttons={finalCta.buttons} onChange={(buttons) => update((draft) => { draft.finalCta.buttons = buttons; })} />
@@ -472,7 +472,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
       <DeveloperCard className="p-5 sm:p-6">
         <DeveloperSectionHeading eyebrow="FAQ" title="Perguntas frequentes" description="Perguntas fixas em accordion; salvar tudo no final." />
         <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection(sectionKey, faq); }}>
-          <TextInput label="Titulo principal" value={faq.title} maxLength={120} onChange={(value) => update((draft) => { draft.faq.title = value; })} />
+          <TextInput label="Título principal" value={faq.title} maxLength={120} onChange={(value) => update((draft) => { draft.faq.title = value; })} />
           <DeveloperCmsAccordion
             items={faq.items.slice(0, count)}
             openIndex={openIndex}
@@ -497,7 +497,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
     const current = page;
     return (
       <DeveloperCard className="p-5 sm:p-6">
-        <DeveloperSectionHeading eyebrow="Informacoes oficiais" title="Canais, horarios e estrutura" description="Blocos exibidos na secao escura de contato." />
+        <DeveloperSectionHeading eyebrow="Informações oficiais" title="Canais, horários e estrutura" description="Blocos exibidos na seção escura de contato." />
         <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("info", current.info); }}>
           <DeveloperCmsAccordion
             items={current.info.items}
@@ -507,19 +507,19 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
             getTitle={(item) => item.label}
             renderItem={(item, index) => (
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="Titulo" value={item.title} maxLength={90} onChange={(value) => update((draft) => { draft.info.items[index].title = value; })} />
-                <TextInput label="Descricao curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.items[index].description = value; })} />
+                <TextInput label="Título" value={item.title} maxLength={90} onChange={(value) => update((draft) => { draft.info.items[index].title = value; })} />
+                <TextInput label="Descrição curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.items[index].description = value; })} />
               </div>
             )}
           />
           <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
-            <TextInput label="Titulo principal do bloco" value={current.info.companyTitle} maxLength={90} onChange={(value) => update((draft) => { draft.info.companyTitle = value; })} />
+            <TextInput label="Título principal do bloco" value={current.info.companyTitle} maxLength={90} onChange={(value) => update((draft) => { draft.info.companyTitle = value; })} />
             <TextInput label="Endereco" value={current.info.address} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.address = value; })} />
             <TextInput label="Horario de atendimento" value={current.info.hours} maxLength={160} onChange={(value) => update((draft) => { draft.info.hours = value; })} />
-            <TextInput label="Titulo Qual canal usar" value={current.info.channelGuideTitle} maxLength={90} onChange={(value) => update((draft) => { draft.info.channelGuideTitle = value; })} />
-            <TextInput label="Descricao Qual canal usar" value={current.info.channelGuideDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.channelGuideDescription = value; })} />
+            <TextInput label="Título Qual canal usar" value={current.info.channelGuideTitle} maxLength={90} onChange={(value) => update((draft) => { draft.info.channelGuideTitle = value; })} />
+            <TextInput label="Descrição Qual canal usar" value={current.info.channelGuideDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.channelGuideDescription = value; })} />
             <TextInput label="Documentos e anexos" value={current.info.documentsDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.documentsDescription = value; })} />
-            <TextInput label="Apoio rapido" value={current.info.quickSupportDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.quickSupportDescription = value; })} />
+            <TextInput label="Apoio rápido" value={current.info.quickSupportDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.quickSupportDescription = value; })} />
           </div>
           <DeveloperCmsAccordion
             items={current.info.indicators}
@@ -530,7 +530,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
             renderItem={(item, index) => (
               <div className="grid gap-5 md:grid-cols-2">
                 <TextInput label="Valor" value={item.value} maxLength={40} onChange={(value) => update((draft) => { draft.info.indicators[index].value = value; })} />
-                <TextInput label="Descricao" value={item.description} maxLength={140} onChange={(value) => update((draft) => { draft.info.indicators[index].description = value; })} />
+                <TextInput label="Descrição" value={item.description} maxLength={140} onChange={(value) => update((draft) => { draft.info.indicators[index].description = value; })} />
               </div>
             )}
           />
@@ -548,7 +548,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         <DeveloperSectionHeading
           eyebrow="Oportunidades abertas"
           title="Vagas"
-          description="Crie, remova e ordene as vagas publicadas. O site mostra 3 por pagina."
+          description="Crie, remova e ordene as vagas publicadas. O site mostra 3 por página."
           action={
             <button
               type="button"
@@ -585,7 +585,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   <TextInput label="Localidade" value={item.location} maxLength={90} onChange={(value) => update((draft) => { draft.jobs[index].location = value; })} />
                   <TextInput label="Tipo" value={item.type} maxLength={40} onChange={(value) => update((draft) => { draft.jobs[index].type = value; })} />
                   <TextInput label="Link candidatura" value={item.applyUrl} maxLength={600} onChange={(value) => update((draft) => { draft.jobs[index].applyUrl = value; })} />
-                  <TextInput label="Descricao curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.jobs[index].description = value; })} />
+                  <TextInput label="Descrição curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.jobs[index].description = value; })} />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" className={developerGhostButtonClassName} onClick={() => moveArrayItem("jobs", index, -1)}><SortAscending size={16} weight="bold" />Subir</button>
@@ -609,7 +609,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         <DeveloperSectionHeading
           eyebrow="Outros canais"
           title="Cards dinamicos"
-          description="Crie, remova e ordene canais. O site mostra 4 por pagina."
+          description="Crie, remova e ordene canais. O site mostra 4 por página."
           action={
             <button
               type="button"
@@ -649,9 +649,9 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                     </select>
                   </DeveloperField>
                   <DeveloperColorField label="Cor do icone" value={item.iconColor} onChange={(value) => update((draft) => { draft.otherChannels[index].iconColor = value; })} />
-                  <TextInput label="Titulo" value={item.title} maxLength={90} onChange={(value) => update((draft) => { draft.otherChannels[index].title = value; })} />
-                  <TextInput label="Descricao" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.otherChannels[index].description = value; })} />
-                  <DeveloperColorField label="Cor do botao" value={item.buttonColor} onChange={(value) => update((draft) => { draft.otherChannels[index].buttonColor = value; })} />
+                  <TextInput label="Título" value={item.title} maxLength={90} onChange={(value) => update((draft) => { draft.otherChannels[index].title = value; })} />
+                  <TextInput label="Descrição" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.otherChannels[index].description = value; })} />
+                  <DeveloperColorField label="Cor do botão" value={item.buttonColor} onChange={(value) => update((draft) => { draft.otherChannels[index].buttonColor = value; })} />
                 </div>
                 <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} onChange={(buttons) => update((draft) => { draft.otherChannels[index].button = buttons[0]; })} />
                 <div className="flex flex-wrap gap-2">

@@ -4,12 +4,15 @@ import {
   deleteItem,
   getCmsPage,
   getContent,
+  getFooterLinks,
   getHomePage,
   getServicesPage,
   getItems,
   getSiteTexts,
+  parseFooterLinkSection,
   reorderItems,
   updateItem,
+  updateFooterLinks,
   updateHomeSection,
   updateCmsPageSection,
   updateServicesPageSection,
@@ -32,13 +35,13 @@ import { asyncHandler, HttpError } from "../utils/http.js";
 
 function parseEntity(value: string | undefined): Entity {
   if (VALID_ENTITIES.includes(value as Entity)) return value as Entity;
-  throw new HttpError(404, "Recurso administrativo nao encontrado.");
+  throw new HttpError(404, "Recurso administrativo não encontrado.");
 }
 
 function parseCmsPage(value: string | undefined) {
   const pageKey = parsePageKey(value);
   if (pageKey) return pageKey;
-  throw new HttpError(404, "Pagina administrativa nao encontrada.");
+  throw new HttpError(404, "Página administrativa não encontrada.");
 }
 
 function paramString(value: string | string[] | undefined): string | undefined {
@@ -76,6 +79,14 @@ export const getCmsPageController: RequestHandler = asyncHandler((req, res) => {
     csrfToken: req.auth!.session.csrfToken,
     pageKey,
     page: getCmsPage(pageKey),
+  });
+});
+
+export const getFooterLinksController: RequestHandler = asyncHandler((req, res) => {
+  res.json({
+    user: publicUser(req.auth!.user),
+    csrfToken: req.auth!.session.csrfToken,
+    footerLinks: getFooterLinks(),
   });
 });
 
@@ -125,6 +136,20 @@ export const updateCmsPageSectionController: RequestHandler = asyncHandler((req,
     target: `${pageKey}:${sectionKey}`,
   });
   res.json({ message: "Pagina atualizada com sucesso.", pageKey, page });
+});
+
+export const updateFooterLinksSectionController: RequestHandler = asyncHandler((req, res) => {
+  const sectionKey = parseFooterLinkSection(paramString(req.params.sectionKey));
+  if (!sectionKey) {
+    throw new HttpError(404, "Seção FOOTER LINKS não encontrada.");
+  }
+  const footerLinks = updateFooterLinks(sectionKey, req.body ?? {});
+  recordAuditAction({
+    req,
+    action: "content.footer_links_update",
+    target: `footer-links:${sectionKey}`,
+  });
+  res.json({ message: "FOOTER LINKS atualizado com sucesso.", footerLinks });
 });
 
 export const getSiteTextsController: RequestHandler = asyncHandler((req, res) => {
@@ -204,7 +229,7 @@ export const createUserController: RequestHandler = asyncHandler((req, res) => {
     metadata: { role: created.role },
   });
   res.status(201).json({
-    message: "Usuario criado com sucesso.",
+    message: "Usuário criado com sucesso.",
     createdUser: publicUser(created),
     users: listUsers(),
   });
@@ -219,7 +244,7 @@ export const updateUserController: RequestHandler = asyncHandler((req, res) => {
     metadata: { role: updated.role, active: String(updated.active !== false) },
   });
   res.json({
-    message: "Usuario atualizado com sucesso.",
+    message: "Usuário atualizado com sucesso.",
     updatedUser: publicUser(updated),
     users: listUsers(),
   });
@@ -234,7 +259,7 @@ export const deleteUserController: RequestHandler = asyncHandler((req, res) => {
     target: String(id ?? ""),
   });
   res.json({
-    message: "Usuario removido com sucesso.",
+    message: "Usuário removido com sucesso.",
     users: listUsers(),
   });
 });

@@ -307,7 +307,7 @@ export default function UnidadesPage() {
               />
             </DeveloperField>
 
-            <DeveloperField label="Descricao">
+            <DeveloperField label="Descrição">
               <textarea
                 rows={3}
                 value={form.description}
@@ -319,7 +319,7 @@ export default function UnidadesPage() {
               />
             </DeveloperField>
 
-            <DeveloperField label="Informacao logistica">
+            <DeveloperField label="Informação logística">
               <textarea
                 rows={3}
                 value={form.logisticsInfo}
@@ -347,7 +347,7 @@ export default function UnidadesPage() {
                   }
                   className="h-4 w-4 accent-[var(--primary)]"
                 />
-                Unidade padrao do mapa
+                Unidade padrão do mapa
               </label>
 
               <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
@@ -436,7 +436,7 @@ export default function UnidadesPage() {
                             {item.name || "Unidade sem nome"}
                           </h3>
                           <p className="mt-2 text-sm leading-7 text-[var(--color-muted-raw)]">
-                            {item.address || "Endereco nao cadastrado."}
+                            {item.address || "Endereço não cadastrado."}
                           </p>
                           <p className="mt-2 text-xs leading-6 text-[var(--color-muted-raw)]">
                             {item.phone || "-"} - {item.email || "-"}
@@ -482,7 +482,7 @@ export default function UnidadesPage() {
                             Descer
                           </button>
                           <DeveloperConfirmButton
-                            message="Confirmar exclusao"
+                            message="Confirmar exclusão"
                             onConfirm={() => deleteItem(item.id)}
                           >
                             <Trash size={16} weight="bold" />

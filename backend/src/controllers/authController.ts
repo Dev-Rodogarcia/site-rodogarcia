@@ -23,7 +23,7 @@ export const logoutController: RequestHandler = asyncHandler((req, res) => {
   const sid = req.cookies?.[SESSION_COOKIE];
   if (sid && typeof sid === "string") destroySession(sid);
   clearSessionCookie(res);
-  res.json({ message: "Sessao encerrada." });
+  res.json({ message: "Sessão encerrada." });
 });
 
 export const sessionController: RequestHandler = asyncHandler((req, res) => {
@@ -49,7 +49,7 @@ export const meController: RequestHandler = asyncHandler((req, res) => {
 export const registerController: RequestHandler = asyncHandler((req, res) => {
   const created = createInitialUser(req.body ?? {});
   res.status(201).json({
-    message: "Usuario cadastrado com sucesso.",
+    message: "Usuário cadastrado com sucesso.",
     user: publicUser(created),
   });
 });

@@ -18,7 +18,7 @@ export const listContactsController: RequestHandler = asyncHandler((_req, res) =
 
 export const createQuoteController: RequestHandler = asyncHandler((req, res) => {
   const quote = createQuote(req);
-  res.status(201).json({ message: "Solicitacao de cotacao recebida.", id: quote.id });
+  res.status(201).json({ message: "Solicitação de cotação recebida.", id: quote.id });
 });
 
 export const listQuotesController: RequestHandler = asyncHandler((_req, res) => {

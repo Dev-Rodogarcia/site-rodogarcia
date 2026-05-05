@@ -16,7 +16,7 @@ const VALUES = [
   {
     icon: ShieldCheck,
     title: "Seguranca",
-    description: "Protecao de carga, equipe e reputacao como base da operacao.",
+    description: "Proteção de carga, equipe e reputação como base da operação.",
   },
   {
     icon: Clock,
@@ -26,7 +26,7 @@ const VALUES = [
   {
     icon: Target,
     title: "Comprometimento",
-    description: "Leitura real de contexto, sem resposta padrao para cenarios diferentes.",
+    description: "Leitura real de contexto, sem resposta padrão para cenários diferentes.",
   },
   {
     icon: LightbulbFilament,
@@ -41,7 +41,7 @@ const VALUES = [
   {
     icon: Star,
     title: "Excelencia",
-    description: "Acabamento, comunicacao e execucao guiados pelo mesmo padrao.",
+    description: "Acabamento, comunicação e execução guiados pelo mesmo padrão.",
   },
 ];
 

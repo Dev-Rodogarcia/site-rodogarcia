@@ -297,13 +297,13 @@ export async function saveAdminImageFromBuffer({
   buffer: Buffer;
 }) {
   if (!UPLOAD_IMAGE_MIME_TYPES.has(mimeType) || !MIME_TO_EXTENSION[mimeType]) {
-    throw new HttpError(422, "Tipo de imagem nao suportado. Use PNG, JPG, WebP ou AVIF.");
+    throw new HttpError(422, "Tipo de imagem não suportado. Use PNG, JPG, WebP ou AVIF.");
   }
   if (buffer.length === 0 || buffer.length > MAX_IMAGE_UPLOAD_BYTES) {
     throw new HttpError(422, "Imagem fora do limite permitido.");
   }
   if (!isValidImageBuffer(mimeType, buffer)) {
-    throw new HttpError(422, "O conteudo do arquivo nao corresponde ao tipo informado.");
+    throw new HttpError(422, "O conteúdo do arquivo não corresponde ao tipo informado.");
   }
 
   fs.mkdirSync(env.uploadsDir, { recursive: true });
@@ -379,14 +379,14 @@ export async function saveAdminMediaFromBuffer({
   if (!UPLOAD_VIDEO_MIME_TYPES.has(mimeType) || !MIME_TO_EXTENSION[mimeType]) {
     throw new HttpError(
       422,
-      "Tipo de midia nao suportado. Use imagem PNG/JPG/WebP/AVIF ou video MP4/WebM/Ogg."
+      "Tipo de mídia não suportado. Use imagem PNG/JPG/WebP/AVIF ou vídeo MP4/WebM/Ogg."
     );
   }
   if (buffer.length === 0 || buffer.length > MAX_VIDEO_UPLOAD_BYTES) {
     throw new HttpError(422, "Video fora do limite permitido.");
   }
   if (!isValidVideoBuffer(mimeType, buffer)) {
-    throw new HttpError(422, "O conteudo do video nao corresponde ao tipo informado.");
+    throw new HttpError(422, "O conteúdo do vídeo não corresponde ao tipo informado.");
   }
 
   fs.mkdirSync(env.uploadsDir, { recursive: true });

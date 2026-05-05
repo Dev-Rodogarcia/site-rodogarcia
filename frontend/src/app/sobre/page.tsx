@@ -20,23 +20,23 @@ export const dynamic = "force-dynamic";
 const fallbackMetadata: Metadata = {
   title: "Sobre a Rodogarcia",
   description:
-    "Conheca a trajetoria, os valores e a estrutura que sustentam a Rodogarcia como operacao nacional de logistica.",
+    "Conheça a trajetória, os valores e a estrutura que sustentam a Rodogarcia como operação nacional de logística.",
   alternates: { canonical: seo.absoluteUrl(site.about) },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: seo.siteName,
-    title: "Sobre a Rodogarcia | Logistica com visao de longo prazo",
+    title: "Sobre a Rodogarcia | Logística com visão de longo prazo",
     description:
-      "Historia, cultura, cobertura e disciplina operacional para crescer com consistencia.",
+      "História, cultura, cobertura e disciplina operacional para crescer com consistência.",
     url: seo.absoluteUrl(site.about),
     images: [{ url: seo.absoluteUrl("/caminhoneiro1.png") }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sobre a Rodogarcia | Logistica com visao de longo prazo",
+    title: "Sobre a Rodogarcia | Logística com visão de longo prazo",
     description:
-      "Veja como a Rodogarcia combina experiencia operacional, capilaridade e consistencia.",
+      "Veja como a Rodogarcia combina experiência operacional, capilaridade e consistência.",
     images: [seo.absoluteUrl("/caminhoneiro1.png")],
   },
   robots: {
@@ -57,24 +57,24 @@ const HIGHLIGHTS = [
     icon: Trophy,
     title: "Disciplina operacional",
     description:
-      "Prazo, previsibilidade e consistencia tratados como parte central da entrega.",
+      "Prazo, previsibilidade e consistência tratados como parte central da entrega.",
   },
   {
     icon: MapPinLine,
-    title: "Cobertura estrategica",
+    title: "Cobertura estratégica",
     description:
-      "Capilaridade para atender diferentes rotas sem desmontar o padrao de resposta.",
+      "Capilaridade para atender diferentes rotas sem desmontar o padrão de resposta.",
   },
   {
     icon: LightbulbFilament,
-    title: "Evolucao continua",
+    title: "Evolução contínua",
     description:
-      "Processo, tecnologia e experiencia digital melhorados sem criar ruido desnecessario.",
+      "Processo, tecnologia e experiência digital melhorados sem criar ruído desnecessário.",
   },
 ];
 
 const ABOUT_STATS = [
-  { value: "35+", label: "Anos de experiencia" },
+  { value: "35+", label: "Anos de experiência" },
   { value: "1.500+", label: "Pontos de coleta" },
   { value: "1M+", label: "Pacotes processados" },
 ];
@@ -83,26 +83,26 @@ const FALLBACK_ABOUT_PAGE: AboutPageContent = {
   hero: {
     title: "Mais de 35 anos conectando o Brasil",
     description:
-      "Desde 1989, transformando a logistica com excelencia, tecnologia e compromisso com cada entrega.",
-    media: { src: "/caminhoneiro1.png", alt: "Operacao Rodogarcia em movimento" },
+      "Desde 1989, transformando a logística com excelência, tecnologia e compromisso com cada entrega.",
+    media: { src: "/caminhoneiro1.png", alt: "Operação Rodogarcia em movimento" },
     buttons: [
-      { label: "Solicitar cotacao", url: site.quote },
-      { label: "Conhecer servicos", url: site.services },
+      { label: "Solicitar cotação", url: site.quote },
+      { label: "Conhecer serviços", url: site.services },
     ],
   },
   compliance: {
     image: { src: "/certificados/certificado-sassmaq.png", alt: "Certificado SASSMAQ" },
     title: "Governanca e Compliance",
     description:
-      "Certificacoes, licencas e controles sustentam operacoes com mais seguranca, rastreabilidade e previsibilidade.",
-    certificateText: "SASSMAQ, ISO 9001 e licencas operacionais ativas.",
+      "Certificações, licenças e controles sustentam operações com mais segurança, rastreabilidade e previsibilidade.",
+    certificateText: "SASSMAQ, ISO 9001 e licenças operacionais ativas.",
     certificateUrl: "",
   },
   finalCta: {
-    title: "Estruture sua operacao com a Rodogarcia.",
-    description: "Mais previsibilidade. Sem surpresas na sua malha logistica.",
+    title: "Estruture sua operação com a Rodogarcia.",
+    description: "Mais previsibilidade. Sem surpresas na sua malha logística.",
     buttons: [
-      { label: "Solicitar cotacao agora", url: site.quote },
+      { label: "Solicitar cotação agora", url: site.quote },
       { label: "Falar com atendimento", url: site.contact },
     ],
   },
@@ -115,7 +115,7 @@ export default async function SobrePage() {
   return (
     <PageShell>
       <AboutHero
-        eyebrow="Nossa historia"
+        eyebrow="Nossa história"
         title={aboutPage.hero.title}
         description={aboutPage.hero.description}
         stats={ABOUT_STATS}
@@ -133,8 +133,8 @@ export default async function SobrePage() {
         <PageContainer>
           <SectionHeader
             eyebrow="Base da marca"
-            title="Tres pilares sustentam a percepcao de confianca."
-            description="A diferenca aparece na combinacao entre disciplina operacional, presenca estrategica e evolucao consistente."
+            title="Três pilares sustentam a percepção de confiança."
+            description="A diferença aparece na combinação entre disciplina operacional, presença estratégica e evolução consistente."
             align="center"
           />
 
@@ -172,9 +172,9 @@ export default async function SobrePage() {
         <PageContainer>
           <div className="relative space-y-8">
             <SectionHeader
-              eyebrow="Historia"
-              title="Crescimento com metodo, nao com improviso."
-              description="Uma leitura direta da evolucao da Rodogarcia ao longo do tempo."
+              eyebrow="História"
+              title="Crescimento com método, não com improviso."
+              description="Uma leitura direta da evolução da Rodogarcia ao longo do tempo."
               theme="dark"
               align="center"
             />
@@ -190,8 +190,8 @@ export default async function SobrePage() {
             <div className="max-w-2xl">
               <SectionHeader
                 eyebrow="Valores"
-                title="Valores que sustentam a operacao."
-                description="Mesmo com crescimento, a leitura interna continua simples: seguranca, pontualidade, respeito e excelencia."
+                title="Valores que sustentam a operação."
+                description="Mesmo com crescimento, a leitura interna continua simples: segurança, pontualidade, respeito e excelência."
                 align="left"
               />
             </div>
@@ -233,7 +233,7 @@ export default async function SobrePage() {
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-[15px] font-extrabold tracking-tight text-white shadow-[0_12px_32px_rgba(2,132,199,0.25)] transition-all duration-200 hover:-translate-y-1 hover:bg-[var(--primary)]/90 hover:shadow-[0_20px_48px_rgba(2,132,199,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 sm:w-auto sm:min-w-[320px] sm:px-10"
               >
                 <span className="flex min-w-0 items-center gap-3">
-                  <span className="min-w-0 truncate">{aboutPage.finalCta.buttons[0]?.label || "Solicitar cotacao agora"}</span>
+                  <span className="min-w-0 truncate">{aboutPage.finalCta.buttons[0]?.label || "Solicitar cotação agora"}</span>
                   <svg
                     className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
                     fill="none"

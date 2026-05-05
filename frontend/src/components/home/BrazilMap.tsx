@@ -261,7 +261,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
           Filiais e pontos de apoio para acelerar decisoes operacionais.
         </h2>
         <p className="mt-4 text-base leading-7 text-white/[0.68]">
-          Consulte rapidamente a unidade mais proxima da sua operacao e alterne a
+          Consulte rapidamente a unidade mais próxima da sua operação e alterne a
           visualizacao com o seletor ou pelo mapa.
         </p>
       </div>

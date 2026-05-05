@@ -57,5 +57,5 @@ export const getMediaSlotsController: RequestHandler = asyncHandler((_req, res) 
 
 export const updateMediaSlotsController: RequestHandler = asyncHandler((req, res) => {
   const slots = updateMediaSlots(req, req.body ?? {});
-  res.json({ message: "Slots de midia atualizados.", slots });
+  res.json({ message: "Slots de mídia atualizados.", slots });
 });

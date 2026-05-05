@@ -5,21 +5,22 @@ import { recordAuditAction } from "./auditService.js";
 import type { Request } from "express";
 
 const DEFAULT_ROUTES = [
-  { path: "/", label: "Home", title: "Rodogarcia Transportes | Logistica com previsibilidade nacional" },
-  { path: "/servicos", label: "Servicos", title: "Servicos | Rodogarcia Transportes" },
+  { path: "/", label: "Home", title: "Rodogarcia Transportes | Logística com previsibilidade nacional" },
+  { path: "/servicos", label: "Serviços", title: "Serviços | Rodogarcia Transportes" },
   { path: "/sobre", label: "Sobre", title: "Sobre a Rodogarcia" },
   { path: "/para-empresas", label: "Para Empresas", title: "Para Empresas | Rodogarcia Transportes" },
-  { path: "/cotacao", label: "Cotacao", title: "Cotacao | Rodogarcia Transportes" },
+  { path: "/cotacao", label: "Cotação", title: "Cotação | Rodogarcia Transportes" },
   { path: "/fale-conosco", label: "Contato", title: "Contato | Rodogarcia Transportes" },
   { path: "/central-ajuda", label: "Central de ajuda", title: "Central de ajuda | Rodogarcia Transportes" },
   { path: "/imprensa", label: "Imprensa", title: "Imprensa | Rodogarcia Transportes" },
   { path: "/trabalhe-conosco", label: "Carreiras", title: "Carreiras | Rodogarcia Transportes" },
   { path: "/termos-de-uso", label: "Termos", title: "Termos de uso | Rodogarcia Transportes" },
   { path: "/privacidade", label: "Privacidade", title: "Privacidade | Rodogarcia Transportes" },
+  { path: "/sua-voz", label: "Sua Voz", title: "Sua Voz | Rodogarcia Transportes" },
 ];
 
 const DEFAULT_DESCRIPTION =
-  "Rodogarcia Transportes: solucoes logisticas nacionais com seguranca, previsibilidade e rastreabilidade.";
+  "Rodogarcia Transportes: soluções logísticas nacionais com segurança, previsibilidade e rastreabilidade.";
 
 export interface SeoPageSettings {
   path: string;
@@ -102,8 +103,8 @@ export function updateSeoPage(req: Request | undefined, body: Record<string, unk
   const settings = readSeoSettings();
   const current = settings.pages.find((page) => page.path === path);
   const nextPage = normalizePage({ ...current, ...body, updatedAt: new Date().toISOString() }, current);
-  if (nextPage.title.length < 8) throw new HttpError(422, "Titulo SEO muito curto.");
-  if (nextPage.description.length < 40) throw new HttpError(422, "Descricao SEO muito curta.");
+  if (nextPage.title.length < 8) throw new HttpError(422, "Título SEO muito curto.");
+  if (nextPage.description.length < 40) throw new HttpError(422, "Descrição SEO muito curta.");
 
   const pages = settings.pages.some((page) => page.path === path)
     ? settings.pages.map((page) => (page.path === path ? nextPage : page))

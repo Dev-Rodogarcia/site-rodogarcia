@@ -1,18 +1,65 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  FacebookLogo,
+  InstagramLogo,
+  LinkedinLogo,
+  WhatsappLogo,
+} from "@phosphor-icons/react";
+import type { FooterGlobalContent, FooterLinksContent } from "@/types/content";
+import { DEFAULT_FOOTER_LINKS } from "@/lib/footerLinksDefaults";
+import { cn } from "@/lib/utils";
+import { site } from "@/lib/routes";
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+const SOCIAL_ICONS: Record<
+  string,
+  ComponentType<{ size?: number; weight?: "fill" | "duotone" | "regular" | "bold" }>
+> = {
   InstagramLogo,
   LinkedinLogo,
   FacebookLogo,
   WhatsappLogo,
-} from "@phosphor-icons/react/dist/ssr";
-import { cn } from "@/lib/utils";
-import { external, site } from "@/lib/routes";
+};
 
-const CURRENT_YEAR = new Date().getFullYear();
+function ordered<T extends { order?: number }>(items: T[] = []) {
+  return [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
 
 export function SiteFooter() {
+  const [footer, setFooter] = useState<FooterGlobalContent>(DEFAULT_FOOTER_LINKS.footer);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadFooterLinks() {
+      try {
+        const response = await fetch("/api/public/content", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as { footerLinks?: FooterLinksContent };
+        if (alive && data.footerLinks?.footer) {
+          setFooter(data.footerLinks.footer);
+        }
+      } catch {
+        // Keep the static fallback visible if the public API is unavailable.
+      }
+    }
+
+    void loadFooterLinks();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const columns = useMemo(() => ordered(footer.columns), [footer.columns]);
+  const socialLinks = useMemo(() => ordered(footer.socialLinks), [footer.socialLinks]);
+  const bottomLinks = useMemo(() => ordered(footer.bottomLinks), [footer.bottomLinks]);
+
   return (
     <footer
       className="relative overflow-hidden bg-slate-950 pt-16 pb-8 text-[var(--color-surface)]"
@@ -33,129 +80,75 @@ export function SiteFooter() {
               />
             </Link>
             <p className="max-w-[34ch] text-sm leading-7 text-white/60">
-              Estruturamos operações de transporte, distribuição e
-              rastreabilidade com consistência e cobertura nacional.
+              {footer.description}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link
-                href={site.quote}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_16px_36px_rgba(29,78,216,0.22)] sm:w-auto"
-              >
-                Receber proposta
-              </Link>
-              <Link
-                href={site.contact}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-5 py-3 text-sm font-medium text-white shadow-[0_18px_44px_rgba(34,197,94,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_22px_52px_rgba(22,163,74,0.38)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/24 sm:w-auto"
-              >
-                Falar com atendimento
-              </Link>
+              <FooterButton href={footer.proposalButton.url} className="bg-[var(--primary)] font-semibold hover:bg-[var(--color-primary-strong)] hover:shadow-[0_16px_36px_rgba(29,78,216,0.22)]">
+                {footer.proposalButton.label}
+              </FooterButton>
+              <FooterButton href={footer.supportButton.url} className="bg-emerald-500 font-medium shadow-[0_18px_44px_rgba(34,197,94,0.35)] hover:bg-emerald-600 hover:shadow-[0_22px_52px_rgba(22,163,74,0.38)] focus-visible:ring-emerald-500/24">
+                {footer.supportButton.label}
+              </FooterButton>
             </div>
           </div>
 
-          <FooterColumn title="Serviços">
-            <FooterLink href={site.services}>Transporte rodoviario</FooterLink>
-            <FooterLink href={site.quote}>Solicitar cotação</FooterLink>
-            <FooterLink href={external.tracking} external>
-              Rastrear encomenda
-            </FooterLink>
-            <FooterLink href={site.business}>Para empresas</FooterLink>
-          </FooterColumn>
+          {columns.map((column) => (
+            <FooterColumn key={column.id} title={column.title}>
+              {ordered(column.links).map((link) => (
+                <FooterLink key={link.id} href={link.url} external={link.external}>
+                  {link.label}
+                </FooterLink>
+              ))}
+            </FooterColumn>
+          ))}
 
-          <FooterColumn title="Empresa">
-            <FooterLink href={site.home}>Início</FooterLink>
-            <FooterLink href={site.about}>Sobre a Rodogarcia</FooterLink>
-            <FooterLink href={site.careers}>Carreiras</FooterLink>
-            <FooterLink href={site.press}>Imprensa</FooterLink>
-            <FooterLink href={site.terms}>Termos de uso</FooterLink>
-          </FooterColumn>
-
-          <FooterColumn title="Recursos">
-            <FooterLink href={site.help}>Central de ajuda</FooterLink>
-            <FooterLink href={site.contact}>Atendimento comercial</FooterLink>
-            <FooterLink href={external.commercialEmail}>E-mail comercial</FooterLink>
-            <FooterLink href={external.phoneHref}>{external.phoneDisplay}</FooterLink>
-          </FooterColumn>
-
-          <FooterColumn title="Horario de atendimento">
-            <li className="text-sm leading-7 text-white/60">
-              <span className="font-medium text-white/80">Segunda a Sexta:</span>{" "}
-              08:00 as 18:00
-            </li>
-            <li className="text-sm leading-7 text-white/60">
-              <span className="font-medium text-white/80">Sábado:</span> 08:00 as
-              12:00
-            </li>
-            <li className="text-sm leading-7 text-white/60">
-              <span className="font-medium text-white/80">
-                Domingo e Feriados:
-              </span>{" "}
-              Fechado
-            </li>
+          <FooterColumn title={footer.serviceHoursTitle}>
+            {footer.serviceHours.map((hour) => (
+              <li key={hour} className="text-sm leading-7 text-white/60">
+                {hour}
+              </li>
+            ))}
           </FooterColumn>
 
           <FooterColumn
-            title="Redes Sociais"
+            title={footer.socialTitle}
             listClassName="grid grid-cols-2 gap-3 lg:grid-cols-1 lg:gap-2.5"
           >
-            <FooterSocialLink
-              href="#"
-              icon={<InstagramLogo size={16} weight="fill" />}
-              label="Instagram"
-            >
-              Instagram
-            </FooterSocialLink>
-            <FooterSocialLink
-              href="#"
-              icon={<LinkedinLogo size={16} weight="fill" />}
-              label="LinkedIn"
-            >
-              LinkedIn
-            </FooterSocialLink>
-            <FooterSocialLink
-              href="#"
-              icon={<FacebookLogo size={16} weight="fill" />}
-              label="Facebook"
-            >
-              Facebook
-            </FooterSocialLink>
-            <FooterSocialLink
-              href="#"
-              icon={<WhatsappLogo size={16} weight="fill" />}
-              label="WhatsApp"
-            >
-              WhatsApp
-            </FooterSocialLink>
+            {socialLinks.map((link) => {
+              const Icon = SOCIAL_ICONS[link.icon] ?? InstagramLogo;
+              return (
+                <FooterSocialLink
+                  key={link.id}
+                  href={link.url}
+                  icon={<Icon size={16} weight="fill" />}
+                  label={link.label}
+                >
+                  {link.label}
+                </FooterSocialLink>
+              );
+            })}
           </FooterColumn>
         </div>
 
         <div className="flex flex-col gap-3 pt-8 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
           <span>
-            &copy; {CURRENT_YEAR} Rodogarcia Transportes. Todos os direitos
-            reservados.
+            &copy; {CURRENT_YEAR} {footer.copyrightText}
           </span>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-            <Link
-              href={site.terms}
-              className="transition-colors hover:text-white/70"
-            >
-              Termos de uso
-            </Link>
-            <Link
-              href={site.privacy}
-              className="transition-colors hover:text-white/70"
-            >
-              Privacidade
-            </Link>
-            <span>Agudos, SP • Cobertura nacional</span>
+            {bottomLinks.map((link) => (
+              <FooterInlineLink key={link.id} href={link.url} external={link.external}>
+                {link.label}
+              </FooterInlineLink>
+            ))}
+            <span>{footer.locationText}</span>
             <span>
-              Feito por Lucas Andrade{" "}
               <a
-                href="https://www.linkedin.com/in/dev-lucasandrade/"
+                href={footer.creditUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-white/56 transition-colors hover:text-white/80"
               >
-                @valentelucass
+                {footer.creditText}
               </a>
             </span>
           </div>
@@ -191,6 +184,44 @@ function FooterColumn({
   );
 }
 
+function isExternalHref(href: string, external?: boolean) {
+  return (
+    external ||
+    href.startsWith("http") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  );
+}
+
+function FooterButton({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const buttonClassName = cn(
+    "inline-flex min-h-12 w-full items-center justify-center rounded-full px-5 py-3 text-sm text-white transition-all duration-200 hover:-translate-y-0.5 sm:w-auto",
+    className
+  );
+
+  if (isExternalHref(href)) {
+    return (
+      <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined} className={buttonClassName}>
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={buttonClassName}>
+      {children}
+    </Link>
+  );
+}
+
 function FooterLink({
   href,
   children,
@@ -200,18 +231,13 @@ function FooterLink({
   children: ReactNode;
   external?: boolean;
 }) {
-  if (
-    external ||
-    href.startsWith("http") ||
-    href.startsWith("mailto:") ||
-    href.startsWith("tel:")
-  ) {
+  if (isExternalHref(href, external)) {
     return (
       <li>
         <a
           href={href}
-          target={external ? "_blank" : undefined}
-          rel={external ? "noopener noreferrer" : undefined}
+          target={href.startsWith("http") ? "_blank" : undefined}
+          rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
           className="block py-0.5 text-sm leading-7 text-white/60 transition-colors hover:text-white"
         >
           {children}
@@ -232,6 +258,32 @@ function FooterLink({
   );
 }
 
+function FooterInlineLink({
+  href,
+  children,
+  external,
+}: {
+  href: string;
+  children: ReactNode;
+  external?: boolean;
+}) {
+  const className = "transition-colors hover:text-white/70";
+
+  if (isExternalHref(href, external)) {
+    return (
+      <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined} className={className}>
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
 function FooterSocialLink({
   href,
   icon,
@@ -247,6 +299,8 @@ function FooterSocialLink({
     <li>
       <a
         href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
         aria-label={`${label} da Rodogarcia`}
         className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 px-3 py-2 text-sm text-white/64 transition-colors hover:border-white/16 hover:bg-white/6 hover:text-white"
       >

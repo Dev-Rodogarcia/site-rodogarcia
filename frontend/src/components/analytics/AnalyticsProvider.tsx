@@ -15,7 +15,7 @@ const DEFAULT_CONSENT_SETTINGS: ConsentSettings = {
   enabled: true,
   version: 1,
   title: "Usamos cookies para melhorar sua experiencia",
-  description: "Utilizamos cookies necessarios e, com sua permissao, cookies de analytics e marketing.",
+  description: "Utilizamos cookies necessários e, com sua permissão, cookies de analytics e marketing.",
   acceptAllLabel: "Aceitar todos",
   rejectLabel: "Recusar opcionais",
   preferencesLabel: "Preferencias",
@@ -31,7 +31,7 @@ const DEFAULT_CONSENT_SETTINGS: ConsentSettings = {
     {
       key: "analytics",
       label: "Analytics",
-      description: "Ajudam a melhorar paginas, conteudo e desempenho.",
+      description: "Ajudam a melhorar páginas, conteúdo e desempenho.",
       required: false,
       enabledByDefault: false,
     },

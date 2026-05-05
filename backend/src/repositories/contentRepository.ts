@@ -1,4 +1,5 @@
 import { storagePaths } from "../config/storagePaths.js";
+import { sanitizeFooterLinks } from "../services/footerLinksContent.js";
 import { migratePageContent } from "../services/pageContent.js";
 import type { ContentData, HomePageContent, ServicesPageContent } from "../types/content.js";
 import { readJsonFile, writeJsonFile } from "../utils/jsonStore.js";
@@ -95,6 +96,10 @@ function serializeContent(content: ContentData) {
       content.quotePage && typeof content.quotePage === "object"
         ? content.quotePage
         : undefined,
+    footerLinks:
+      content.footerLinks && typeof content.footerLinks === "object"
+        ? content.footerLinks
+        : undefined,
     heroSlides: sortByOrder(
       Array.isArray(rawContent.heroSlides) ? rawContent.heroSlides : []
     ),
@@ -185,6 +190,10 @@ export const contentRepository = {
           : undefined,
       quotePage:
         data.quotePage && typeof data.quotePage === "object" ? data.quotePage : undefined,
+      footerLinks:
+        data.footerLinks && typeof data.footerLinks === "object"
+          ? data.footerLinks
+          : undefined,
       homePage:
         data.homePage && typeof data.homePage === "object"
           ? data.homePage
@@ -200,9 +209,11 @@ export const contentRepository = {
       siteTexts: readJsonFile<Record<string, unknown>>(storagePaths.siteTexts, {}),
       mediaSlots: mediaSlotsRepository.read<Record<string, unknown>>({}),
     });
+    migrated.footerLinks = sanitizeFooterLinks(normalized.footerLinks);
 
     if (
       shouldPersistPageMigration(data) ||
+      !data.footerLinks ||
       !data.homePage?.regionalPresence ||
       !data.homePage?.trackingCta
     ) {
