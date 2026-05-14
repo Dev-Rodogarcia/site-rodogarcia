@@ -38,6 +38,7 @@ function emptyHomePage(): HomePageContent {
       ],
     },
     socialProof: { title: "", feedbacks: [] },
+    quickActions: [],
   };
 }
 

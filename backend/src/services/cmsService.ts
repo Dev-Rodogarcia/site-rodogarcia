@@ -47,7 +47,8 @@ export type HomeSectionKey =
   | "section3"
   | "regionalPresence"
   | "trackingCta"
-  | "socialProof";
+  | "socialProof"
+  | "quickActions";
 export type ServicesPageSectionKey = "modules" | "finalCta" | "faq";
 
 const ENTITY_KEYS: Record<Entity, keyof ContentData> = {
@@ -297,6 +298,44 @@ function sanitizeHomeTrackingCta(payload: Record<string, unknown>): HomePageCont
   };
 }
 
+function sanitizeQuickActionType(value: unknown): "link" | "external" | "download" | "modal" {
+  if (value === "external") return "external";
+  if (value === "download") return "download";
+  if (value === "modal") return "modal";
+  return "link";
+}
+
+function sanitizeQuickActionItem(
+  payload: Record<string, unknown>,
+  index: number
+) {
+  return {
+    id: sanitizeText(payload.id, 80) || generateId("quick_action"),
+    order: Number(payload.order ?? index + 1),
+    label: sanitizeText(payload.label, 40),
+    href: sanitizeUrl(payload.href),
+    icon: sanitizeText(payload.icon, 40),
+    type: sanitizeQuickActionType(payload.type),
+    enabled: Boolean(payload.enabled ?? true),
+    downloadFile: sanitizeUrl(payload.downloadFile),
+  };
+}
+
+function sanitizeQuickActions(items: unknown[]) {
+  return withOrder(
+    items
+      .slice(0, 12)
+      .map((action, index) =>
+        sanitizeQuickActionItem(
+          action && typeof action === "object" && !Array.isArray(action)
+            ? (action as Record<string, unknown>)
+            : {},
+          index
+        )
+      )
+  );
+}
+
 const BRAZIL_UF = new Set([
   "AC",
   "AL",
@@ -514,6 +553,9 @@ function sanitizeHomePage(payload: unknown): HomePageContent {
   home.socialProof = sanitizeHomeSocialProof(
     isRecord(source.socialProof) ? source.socialProof : {}
   );
+  home.quickActions = sanitizeQuickActions(
+    Array.isArray(source.quickActions) ? source.quickActions : []
+  );
   return home;
 }
 
@@ -644,6 +686,8 @@ function validateHomeSection(section: HomeSectionKey, home: HomePageContent) {
       return validateHomeTrackingCta(home.trackingCta);
     case "socialProof":
       return validateHomeSocialProof(home.socialProof);
+    case "quickActions":
+      return null;
   }
 }
 
@@ -970,6 +1014,11 @@ export function updateHomeSection(section: HomeSectionKey, body: Record<string, 
       break;
     case "socialProof":
       home.socialProof = sanitizeHomeSocialProof(payload);
+      break;
+    case "quickActions":
+      home.quickActions = sanitizeQuickActions(
+        Array.isArray(payload.quickActions) ? payload.quickActions : []
+      );
       break;
   }
 

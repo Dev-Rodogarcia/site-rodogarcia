@@ -37,6 +37,13 @@ function normalizeBackgroundType(value: unknown): "wavy" | "straight" {
   return value === "straight" ? "straight" : "wavy";
 }
 
+function normalizeQuickActionType(value: unknown): "link" | "external" | "download" | "modal" {
+  if (value === "external") return "external";
+  if (value === "download") return "download";
+  if (value === "modal") return "modal";
+  return "link";
+}
+
 function publicAssetUrl(value: unknown) {
   const url = sanitizeUrl(value);
   if (url.startsWith("/public/")) return url.slice("/public".length) || "/";
@@ -319,6 +326,21 @@ function normalizeHomePage(content: ContentData): HomePageContent {
       feedbacks,
     };
   }
+
+  const rawQuickActions = arrayValue(source.quickActions as RawItem[]);
+  homePage.quickActions = sortByOrder(rawQuickActions)
+    .filter((item) => item.enabled !== false)
+    .slice(0, 12)
+    .map((item, index) => ({
+      id: String(item.id ?? `quick-action-${index + 1}`),
+      order: Number(item.order ?? index + 1),
+      label: sanitizeText(item.label, 40),
+      href: sanitizeUrl(item.href),
+      icon: sanitizeText(item.icon, 40),
+      type: normalizeQuickActionType(item.type),
+      enabled: true,
+      downloadFile: sanitizeUrl(item.downloadFile),
+    }));
 
   return homePage;
 }

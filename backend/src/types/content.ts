@@ -3,6 +3,18 @@ export type HeroBackgroundType = "wavy" | "straight";
 export type ButtonVariant = "solid" | "outline";
 export type HomeMediaType = "image" | "video";
 export type HomeHeroMode = "text-media-buttons" | "text-media" | "media-only";
+export type QuickActionType = "link" | "external" | "download" | "modal";
+
+export interface QuickAction {
+  id: string;
+  order?: number;
+  label: string;
+  href: string;
+  icon: string;
+  type: QuickActionType;
+  enabled: boolean;
+  downloadFile?: string;
+}
 
 export interface HomeMedia {
   type: HomeMediaType;
@@ -133,6 +145,7 @@ export interface HomePageContent {
   regionalPresence: HomeRegionalPresence;
   trackingCta: HomeTrackingCta;
   socialProof: HomeSocialProof;
+  quickActions?: QuickAction[];
 }
 
 export interface ServicesModuleImage {

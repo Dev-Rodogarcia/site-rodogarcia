@@ -109,6 +109,7 @@ export const updateHomeSection3Controller = updateHomeSectionController("section
 export const updateHomeRegionalPresenceController = updateHomeSectionController("regionalPresence");
 export const updateHomeTrackingCtaController = updateHomeSectionController("trackingCta");
 export const updateHomeSocialProofController = updateHomeSectionController("socialProof");
+export const updateHomeQuickActionsController = updateHomeSectionController("quickActions");
 
 function updateServicesPageSectionController(section: ServicesPageSectionKey): RequestHandler {
   return asyncHandler((req, res) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -12,13 +12,15 @@ import {
   HouseLine,
   Info,
   List,
+  MagnifyingGlass,
   ShieldCheck,
-  User,
   X,
 } from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
-import { auth, drawerNavigation, site } from "@/lib/routes";
+import { drawerNavigation, site } from "@/lib/routes";
+import { SiteSearchPanel } from "@/components/search/SiteSearchPanel";
+import { useSiteSearch } from "@/components/search/SiteSearchProvider";
 
 const DARK_HERO_ROUTES = [
   site.home,
@@ -61,10 +63,18 @@ function matchesRoute(pathname: string, href: string) {
 export function SiteHeader() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const {
+    isOpen: searchOpen,
+    openSearch,
+    closeSearch,
+    toggleSearch,
+  } = useSiteSearch();
   const isHidden = useScrollDirection();
   const pathname = usePathname();
   const hasDarkHero = DARK_HERO_ROUTES.some((route) => matchesRoute(pathname, route));
-  const isOverlay = !isScrolled;
+  const hasSolidChrome = isScrolled || searchOpen;
+  const isOverlay = !hasSolidChrome;
   const useLightChrome = isOverlay && hasDarkHero;
 
   useEffect(() => {
@@ -83,6 +93,42 @@ export function SiteHeader() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pathname]);
+
+  /* Ctrl+K / Cmd+K shortcut to open search */
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        toggleSearch();
+        return;
+      }
+
+      if (e.key === "Escape" && searchOpen) {
+        e.preventDefault();
+        closeSearch();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [closeSearch, searchOpen, toggleSearch]);
+
+  useEffect(() => {
+    closeSearch();
+  }, [closeSearch, pathname]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (headerRef.current?.contains(target)) return;
+      closeSearch();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [closeSearch, searchOpen]);
 
   const isActive = (href: string) => {
     if (href === site.home) return pathname === site.home;
@@ -110,18 +156,19 @@ export function SiteHeader() {
   return (
     <>
       <header
+        ref={headerRef}
         className={[
           "fixed top-0 inset-x-0 z-50",
           "transition-transform duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-          isHidden && isScrolled ? "-translate-y-full pointer-events-none" : "translate-y-0",
+          isHidden && isScrolled && !searchOpen ? "-translate-y-full pointer-events-none" : "translate-y-0",
         ].join(" ")}
         aria-label="Cabecalho do site"
       >
         <div
           className={[
             "absolute inset-0 transition-all duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)] origin-top",
-            isScrolled
-              ? "bg-white/95 translate-y-0 border-b border-black/5 opacity-100 shadow-[0_4px_24px_rgba(0,0,0,0.04)] backdrop-blur-md"
+            hasSolidChrome
+              ? "bg-white/94 translate-y-0 border-b border-slate-900/[0.06] opacity-100 shadow-[0_18px_60px_rgba(15,23,42,0.085)] backdrop-blur-xl"
               : "pointer-events-none -translate-y-full border-transparent bg-white/0 opacity-0 shadow-none backdrop-blur-none",
           ].join(" ")}
           aria-hidden="true"
@@ -164,14 +211,18 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex flex-1 items-center justify-end gap-0.5 sm:gap-2">
-            <Link
-              href={auth.login}
-              className={["hidden sm:block", iconButtonClassName].join(" ")}
-              aria-label="Entrar na conta"
-              title="Entrar"
+            <button
+              type="button"
+              id="site-search-trigger"
+              className={["hidden sm:flex", iconButtonClassName].join(" ")}
+              aria-label="Buscar no site (Ctrl+K)"
+              title="Buscar (Ctrl+K)"
+              aria-expanded={searchOpen}
+              aria-controls="site-search-panel"
+              onClick={openSearch}
             >
-              <User size={22} weight="bold" />
-            </Link>
+              <MagnifyingGlass size={22} weight="bold" />
+            </button>
             <Link
               href={site.quote}
               className={quoteButtonClassName}
@@ -182,6 +233,8 @@ export function SiteHeader() {
             </Link>
           </div>
         </div>
+
+        <SiteSearchPanel open={searchOpen} onClose={closeSearch} />
       </header>
 
       <div
@@ -250,13 +303,14 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-black/8 p-4">
-          <Link
-            href={auth.login}
-            onClick={() => setDrawerOpen(false)}
-            className="w-full rounded-xl border border-black/12 px-4 py-2.5 text-center text-sm font-medium transition-colors hover:bg-black/5"
+          <button
+            type="button"
+            onClick={() => { setDrawerOpen(false); openSearch(); }}
+            className="w-full rounded-xl border border-black/12 px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-black/5 flex items-center gap-2"
           >
-            Entrar
-          </Link>
+            <MagnifyingGlass size={16} weight="bold" className="text-[var(--primary)]" aria-hidden="true" />
+            Buscar no site
+          </button>
           <Link
             href={site.quote}
             onClick={() => setDrawerOpen(false)}

@@ -95,6 +95,7 @@ export const api = {
     homeSection1: "/api/admin/home/section-1",
     homeSection2: "/api/admin/home/section-2",
     homeSection3: "/api/admin/home/section-3",
+    homeQuickActions: "/api/admin/home/quick-actions",
     footerLinks: "/api/admin/footer-links",
     footerLinksSection: (sectionKey: string) =>
       `/api/admin/footer-links/${sectionKey}`,

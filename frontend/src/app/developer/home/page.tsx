@@ -18,7 +18,7 @@ import {
   adminResourceKeys,
   invalidateAdminResource,
 } from "@/hooks/useAdminResource";
-import { api } from "@/lib/routes";
+import { api, external, site } from "@/lib/routes";
 import type {
   HomeFeedback,
   HomeHeroButton,
@@ -31,6 +31,7 @@ import type {
   HomeRegionalUnit,
   HomeServiceCard,
   OperationalUnit,
+  QuickAction,
 } from "@/types/content";
 import { cn } from "@/lib/utils";
 import {
@@ -55,6 +56,7 @@ import {
 
 type SaveKey =
   | "hero"
+  | "quickActions"
   | "section1"
   | "section2"
   | "section3"
@@ -70,38 +72,44 @@ const HOME_STEPS = [
     description: "Carrossel inicial, mídias e botões de entrada da Home.",
   },
   {
-    key: "section1",
+    key: "quickActions",
     step: "Etapa 2",
+    title: "Atalhos e Taxas",
+    description: "Botões rápidos abaixo do hero, incluindo o PDF de taxas.",
+  },
+  {
+    key: "section1",
+    step: "Etapa 3",
     title: "Previsibilidade",
     description: "Título, 3 abas clicáveis e CTA da primeira seção.",
   },
   {
     key: "section2",
-    step: "Etapa 3",
+    step: "Etapa 4",
     title: "Operacao conectada",
     description: "Ate 5 itens da area escura em desktop e mobile.",
   },
   {
     key: "section3",
-    step: "Etapa 4",
+    step: "Etapa 5",
     title: "Linhas de servico",
     description: "Badge, texto principal e cards paginados de soluções.",
   },
   {
     key: "regionalPresence",
-    step: "Etapa 5",
+    step: "Etapa 6",
     title: "Presenca Regional",
     description: "Unidades exibidas no mapa e no card de unidade ativa.",
   },
   {
     key: "trackingCta",
-    step: "Etapa 6",
+    step: "Etapa 7",
     title: "Rastreie sua carga",
     description: "Somente textos e links dos dois botões da área de rastreio.",
   },
   {
     key: "socialProof",
-    step: "Etapa 7",
+    step: "Etapa 8",
     title: "Prova social",
     description: "Depoimentos, logos, estrelas, ordem e visibilidade.",
   },
@@ -125,6 +133,109 @@ const EMPTY_BUTTON: HomeHeroButton = {
   color: "#1d4ed8",
   variant: "solid",
 };
+
+const QUICK_ACTION_ICON_OPTIONS = [
+  "FilePdf",
+  "Calculator",
+  "MagnifyingGlass",
+  "Truck",
+  "MapPin",
+  "WhatsappLogo",
+  "Phone",
+  "Envelope",
+  "ChatCircleDots",
+  "Headset",
+  "Package",
+  "Handshake",
+  "FileText",
+  "ArrowSquareOut",
+] as const;
+
+const QUICK_ACTION_TYPE_OPTIONS: Array<{
+  value: QuickAction["type"];
+  label: string;
+}> = [
+  { value: "link", label: "Link interno" },
+  { value: "external", label: "Link externo" },
+  { value: "download", label: "Download" },
+  { value: "modal", label: "Scroll/âncora" },
+];
+
+const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  {
+    id: "qa-taxas",
+    order: 1,
+    label: "Taxas",
+    href: "",
+    icon: "FilePdf",
+    type: "download",
+    enabled: false,
+    downloadFile: "",
+  },
+  {
+    id: "qa-cotacao",
+    order: 2,
+    label: "Cotação",
+    href: site.quote,
+    icon: "Calculator",
+    type: "link",
+    enabled: true,
+  },
+  {
+    id: "qa-rastreamento",
+    order: 3,
+    label: "Rastreamento",
+    href: external.tracking,
+    icon: "MagnifyingGlass",
+    type: "external",
+    enabled: true,
+  },
+  {
+    id: "qa-coleta",
+    order: 4,
+    label: "Solicitar Coleta",
+    href: site.contact,
+    icon: "Truck",
+    type: "link",
+    enabled: true,
+  },
+  {
+    id: "qa-cidades",
+    order: 5,
+    label: "Cidades",
+    href: "#mapa-regional",
+    icon: "MapPin",
+    type: "modal",
+    enabled: true,
+  },
+  {
+    id: "qa-whatsapp",
+    order: 6,
+    label: "WhatsApp",
+    href: external.whatsappCommercial,
+    icon: "WhatsappLogo",
+    type: "external",
+    enabled: true,
+  },
+  {
+    id: "qa-telefone",
+    order: 7,
+    label: "Telefone",
+    href: external.phoneHref,
+    icon: "Phone",
+    type: "external",
+    enabled: true,
+  },
+  {
+    id: "qa-email",
+    order: 8,
+    label: "E-mail",
+    href: external.commercialEmail,
+    icon: "Envelope",
+    type: "external",
+    enabled: true,
+  },
+];
 
 const BRAZIL_UFS = [
   "AC",
@@ -198,6 +309,7 @@ function emptyHomePage(): HomePageContent {
       ],
     },
     socialProof: { title: "", feedbacks: [] },
+    quickActions: DEFAULT_QUICK_ACTIONS.map((action) => ({ ...action })),
   };
 }
 
@@ -282,12 +394,36 @@ function emptyRegionalUnit(): HomeRegionalUnit {
   };
 }
 
+function emptyQuickAction(index: number): QuickAction {
+  return {
+    id: createId("quick-action"),
+    order: index + 1,
+    label: "",
+    href: "",
+    icon: "FileText",
+    type: "link",
+    enabled: true,
+    downloadFile: "",
+  };
+}
+
 function normalizeTrackingButtons(buttons?: HomeHeroButton[]) {
   const fallback = emptyHomePage().trackingCta.buttons;
   return Array.from({ length: 2 }, (_, index) => ({
     ...fallback[index],
     ...(buttons?.[index] ?? {}),
     enabled: buttons?.[index]?.enabled ?? true,
+  }));
+}
+
+function normalizeQuickActions(actions?: QuickAction[]) {
+  const source = Array.isArray(actions) && actions.length > 0 ? actions : DEFAULT_QUICK_ACTIONS;
+  return source.slice(0, 12).map((action, index) => ({
+    ...emptyQuickAction(index),
+    ...action,
+    order: Number(action.order ?? index + 1),
+    enabled: action.enabled ?? true,
+    downloadFile: action.downloadFile ?? "",
   }));
 }
 
@@ -332,6 +468,7 @@ function normalizeHomePage(data?: HomePageContent): HomePageContent {
         ? data.socialProof.feedbacks
         : [],
     },
+    quickActions: normalizeQuickActions(data.quickActions),
   };
 }
 
@@ -633,6 +770,7 @@ export default function DeveloperHomePage() {
   const [saving, setSaving] = useState<SaveKey | "">("");
   const [status, setStatus] = useState<{ tone: "success" | "error" | "info"; text: string } | null>(null);
   const [openHeroSlide, setOpenHeroSlide] = useState<number | null>(null);
+  const [openQuickAction, setOpenQuickAction] = useState<number | null>(null);
   const [openSection1Item, setOpenSection1Item] = useState<number | null>(null);
   const [openSection2Item, setOpenSection2Item] = useState<number | null>(null);
   const [openSection3Card, setOpenSection3Card] = useState<number | null>(null);
@@ -668,6 +806,7 @@ export default function DeveloperHomePage() {
   const summary = useMemo(
     () => ({
       hero: home.hero.slides.length,
+      quickActions: (home.quickActions ?? []).filter((item) => item.enabled !== false).length,
       section2: home.section2.items.length,
       units: home.regionalPresence.units.filter((item) => item.active !== false).length,
       feedbacks: home.socialProof.feedbacks.filter((item) => item.active !== false).length,
@@ -718,6 +857,47 @@ export default function DeveloperHomePage() {
         ),
       },
     }));
+  }
+
+  function updateQuickAction(index: number, patch: Partial<QuickAction>) {
+    setHome((current) => {
+      const quickActions = normalizeQuickActions(current.quickActions);
+      quickActions[index] = { ...quickActions[index], ...patch };
+      return {
+        ...current,
+        quickActions,
+      };
+    });
+  }
+
+  function addQuickAction() {
+    setHome((current) => {
+      const quickActions = [
+        ...normalizeQuickActions(current.quickActions),
+        emptyQuickAction(normalizeQuickActions(current.quickActions).length),
+      ];
+      setOpenQuickAction(quickActions.length - 1);
+      return {
+        ...current,
+        quickActions,
+      };
+    });
+  }
+
+  function removeQuickAction(index: number) {
+    setHome((current) => {
+      const quickActions = normalizeQuickActions(current.quickActions).filter(
+        (_, actionIndex) => actionIndex !== index
+      );
+      setOpenQuickAction((open) => {
+        if (open === null) return null;
+        return Math.max(0, Math.min(open, quickActions.length - 1));
+      });
+      return {
+        ...current,
+        quickActions,
+      };
+    });
   }
 
   function updateSection1Item(index: number, patch: Partial<HomeInteractiveItem>) {
@@ -866,9 +1046,10 @@ export default function DeveloperHomePage() {
       <DeveloperHero
         eyebrow="Home - Pagina Inicial"
         title="Editor completo da Home."
-        description="Edite os cinco blocos principais da página inicial em um único lugar, com limites claros e dados padronizados."
+        description="Edite os blocos principais da página inicial em um único lugar, com limites claros e dados padronizados."
         stats={[
           { label: "Hero", value: summary.hero },
+          { label: "Atalhos", value: summary.quickActions },
           { label: "Seção 2", value: summary.section2 },
           { label: "Unidades", value: summary.units },
           { label: "Feedbacks", value: summary.feedbacks },
@@ -927,7 +1108,7 @@ export default function DeveloperHomePage() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-8">
           {HOME_STEPS.map((step, index) => {
             const active = step.key === activeStep;
             return (
@@ -1099,10 +1280,174 @@ export default function DeveloperHomePage() {
         </DeveloperCard>
         ) : null}
 
+        {activeStep === "quickActions" ? (
+        <DeveloperCard id="quick-actions" className="p-5 sm:p-6">
+          <DeveloperSectionHeading
+            eyebrow="Etapa 2 - atalhos abaixo do hero"
+            title="Atalhos rápidos e botão de Taxas"
+            description="Controle os botões compactos exibidos logo abaixo do hero. Downloads só aparecem no site quando estiverem ativos e com URL configurada."
+            action={
+              <button type="button" onClick={addQuickAction} className={developerSecondaryButtonClassName}>
+                <Plus size={16} weight="bold" />
+                Novo atalho
+              </button>
+            }
+          />
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void saveSection("quickActions", api.admin.homeQuickActions, {
+                quickActions: normalizeQuickActions(home.quickActions),
+              });
+            }}
+          >
+            {normalizeQuickActions(home.quickActions).map((action, index) => {
+              const target = action.type === "download" ? action.downloadFile || action.href : action.href;
+              return (
+                <HomeAccordionCard
+                  key={action.id}
+                  label={`Atalho ${index + 1}`}
+                  title={action.label || "Atalho sem texto"}
+                  description={
+                    action.type === "download"
+                      ? target
+                        ? "Download configurado para a faixa de atalhos."
+                        : "Download oculto no site até receber uma URL."
+                      : target
+                        ? "Atalho configurado para a faixa abaixo do hero."
+                        : "Atalho oculto no site até receber um destino."
+                  }
+                  active={action.enabled !== false && Boolean(action.label && target)}
+                  open={openQuickAction === index}
+                  onToggle={() => setOpenQuickAction(openQuickAction === index ? null : index)}
+                  actions={
+                    <>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setHome((current) => ({
+                            ...current,
+                            quickActions: moveItem(normalizeQuickActions(current.quickActions), index, -1),
+                          }))
+                        }
+                        className={developerGhostButtonClassName}
+                      >
+                        <ArrowUp size={16} weight="bold" />
+                        Subir
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setHome((current) => ({
+                            ...current,
+                            quickActions: moveItem(normalizeQuickActions(current.quickActions), index, 1),
+                          }))
+                        }
+                        className={developerGhostButtonClassName}
+                      >
+                        <ArrowDown size={16} weight="bold" />
+                        Descer
+                      </button>
+                      <button type="button" onClick={() => removeQuickAction(index)} className={developerDangerButtonClassName}>
+                        <Trash size={16} weight="bold" />
+                        Remover
+                      </button>
+                    </>
+                  }
+                >
+                  <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-2 xl:grid-cols-4")}>
+                    <DeveloperField label="Texto do botão" required>
+                      <input
+                        value={action.label}
+                        onChange={(event) => updateQuickAction(index, { label: event.target.value })}
+                        maxLength={40}
+                        className={developerInputClassName}
+                      />
+                    </DeveloperField>
+                    <DeveloperField label="Tipo" required>
+                      <select
+                        value={action.type}
+                        onChange={(event) =>
+                          updateQuickAction(index, {
+                            type: event.target.value as QuickAction["type"],
+                          })
+                        }
+                        className={developerInputClassName}
+                      >
+                        {QUICK_ACTION_TYPE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </DeveloperField>
+                    <DeveloperField label="Ícone" required>
+                      <select
+                        value={action.icon}
+                        onChange={(event) => updateQuickAction(index, { icon: event.target.value })}
+                        className={developerInputClassName}
+                      >
+                        {QUICK_ACTION_ICON_OPTIONS.map((icon) => (
+                          <option key={icon} value={icon}>
+                            {icon}
+                          </option>
+                        ))}
+                      </select>
+                    </DeveloperField>
+                    <label className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
+                      <input
+                        type="checkbox"
+                        checked={action.enabled !== false}
+                        onChange={(event) => updateQuickAction(index, { enabled: event.target.checked })}
+                        className="h-4 w-4 accent-[var(--primary)]"
+                      />
+                      Atalho ativo
+                    </label>
+                  </div>
+
+                  <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-2")}>
+                    <DeveloperField label={action.type === "modal" ? "Âncora" : "Link"} required={action.type !== "download"}>
+                      <input
+                        value={action.href}
+                        onChange={(event) => updateQuickAction(index, { href: event.target.value })}
+                        className={developerInputClassName}
+                        placeholder={action.type === "modal" ? "#mapa-regional" : "/cotacao"}
+                      />
+                    </DeveloperField>
+                    <DeveloperField
+                      label="Arquivo para download"
+                      required={action.type === "download"}
+                      hint="Use uma URL interna ou externa do PDF. Este campo alimenta o botão Taxas."
+                    >
+                      <input
+                        value={action.downloadFile ?? ""}
+                        onChange={(event) => updateQuickAction(index, { downloadFile: event.target.value })}
+                        className={developerInputClassName}
+                        placeholder="/uploads/taxas.pdf"
+                      />
+                    </DeveloperField>
+                  </div>
+
+                  {action.type === "download" && action.enabled !== false && !target ? (
+                    <div className="mt-4">
+                      <DeveloperMessage tone="info">
+                        Este download está ativo, mas ficará oculto no site até receber uma URL de arquivo ou link.
+                      </DeveloperMessage>
+                    </div>
+                  ) : null}
+                </HomeAccordionCard>
+              );
+            })}
+            <SaveButton saving={saving === "quickActions"}>Salvar atalhos</SaveButton>
+          </form>
+        </DeveloperCard>
+        ) : null}
+
         {activeStep === "section1" ? (
         <DeveloperCard id="section-1" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 2 - primeira seção após o hero"
+            eyebrow="Etapa 3 - primeira seção após os atalhos"
             title="Previsibilidade para crescer"
             description="Exatamente 3 itens clicáveis. A descrição é truncada visualmente em 2 linhas no site."
           />
@@ -1151,7 +1496,7 @@ export default function DeveloperHomePage() {
         {activeStep === "section2" ? (
         <DeveloperCard id="section-2" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 3 - área de operação"
+            eyebrow="Etapa 4 - área de operação"
             title="Todas as frentes da operação se encontram aqui"
             description="Máximo de 5 itens. A ordem aqui define a ordem desktop e mobile."
             action={
@@ -1215,7 +1560,7 @@ export default function DeveloperHomePage() {
         {activeStep === "section3" ? (
         <DeveloperCard id="section-3" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 4 - linhas de servico"
+            eyebrow="Etapa 5 - linhas de servico"
             title="Soluções para a complexidade da sua operação"
             description="O site mostra 3 cards por página, com paginação visual e rotação automática."
             action={
@@ -1297,7 +1642,7 @@ export default function DeveloperHomePage() {
         {activeStep === "regionalPresence" ? (
         <DeveloperCard id="regional-presence" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 5 - Presença Regional"
+            eyebrow="Etapa 6 - Presença Regional"
             title="Unidades exibidas na Página Inicial"
             description="Cada card é salvo dentro da Home. A lista antiga de unidades serve apenas como referência para preencher campos."
             action={
@@ -1495,7 +1840,7 @@ export default function DeveloperHomePage() {
         {activeStep === "trackingCta" ? (
         <DeveloperCard id="tracking-cta" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 6 - Rastreie sua carga"
+            eyebrow="Etapa 7 - Rastreie sua carga"
             title="Botões da seção de rastreio"
             description="Edite somente texto e link dos dois botões exibidos na Página Inicial."
           />
@@ -1552,7 +1897,7 @@ export default function DeveloperHomePage() {
         {activeStep === "socialProof" ? (
         <DeveloperCard id="social-proof" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 5 - carrossel de depoimentos"
+            eyebrow="Etapa 8 - carrossel de depoimentos"
             title="Prova Social da Home"
             description="Lista livre de feedbacks. A ordem aqui e a ordem exibida no carrossel da Home."
             action={

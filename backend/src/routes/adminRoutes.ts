@@ -28,6 +28,7 @@ import {
   updateHomeRegionalPresenceController,
   updateHomeTrackingCtaController,
   updateHomeSocialProofController,
+  updateHomeQuickActionsController,
   updateCmsPageSectionController,
   updateServicesFaqController,
   updateServicesFinalCtaController,
@@ -113,6 +114,13 @@ adminRouter.put(
   requireJson,
   requireCsrf,
   updateHomeSocialProofController
+);
+adminRouter.put(
+  "/home/quick-actions",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHomeQuickActionsController
 );
 adminRouter.get("/services-page", getServicesPageController);
 adminRouter.put(
