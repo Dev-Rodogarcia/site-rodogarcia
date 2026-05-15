@@ -150,12 +150,13 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,10,24,0.14)_0%,rgba(4,10,24,0.1)_38%,rgba(4,10,24,0.78)_100%)]" />
                     </>
                   )}
+                  <div className="decorative-grid absolute inset-0" data-theme="dark" />
                   <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0)_120px)]" />
                 </div>
 
                 {!isImageOnly ? (
                   <div className="relative z-10 mx-auto grid min-h-[clamp(704px,96vh,1012px)] max-w-[1320px] grid-cols-1 items-center gap-10 px-6 pb-26 pt-24 sm:px-8 sm:pb-28 sm:pt-28 lg:grid-cols-[minmax(0,504px)_minmax(0,1fr)] lg:gap-14 lg:px-10 lg:pt-32 xl:px-12">
-                    <div className="flex max-w-[504px] flex-col justify-center self-center">
+                    <div className="flex w-full max-w-[504px] min-w-0 flex-col justify-center self-center">
                       <HeadingTag className="max-w-[11ch] text-[clamp(3rem,6vw,6rem)] font-bold leading-[0.94] tracking-[-0.065em] text-white">
                         {title}
                       </HeadingTag>
@@ -163,7 +164,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                         {description}
                       </p>
                       {actions.length > 0 ? (
-                        <div className={actions.length > 1 ? "mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-wrap" : "mt-8 flex flex-wrap gap-3"}>
+                        <div className={actions.length > 1 ? "mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap" : "mt-8 flex flex-wrap gap-3"}>
                           {actions.map((button, buttonIndex) => (
                             <HeroActionLink
                               key={`${button.label}-${buttonIndex}`}

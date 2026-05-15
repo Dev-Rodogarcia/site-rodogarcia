@@ -151,25 +151,20 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
       id="site-search-panel"
       role="search"
       aria-hidden={!open}
+      inert={!open}
       className={[
-        "relative overflow-hidden",
-        "transition-[max-height,opacity,transform,padding] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "absolute inset-x-0 top-[4.5rem] overflow-hidden border-t border-[var(--border)] bg-white/95 shadow-[0_18px_42px_rgba(15,23,42,0.07)] backdrop-blur-md",
+        "origin-top transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
         open
-          ? "max-h-[620px] translate-y-0 pb-6 pt-4 opacity-100 sm:pb-7 sm:pt-5 lg:pb-8 lg:pt-6"
-          : "pointer-events-none max-h-0 -translate-y-2 pb-0 opacity-0",
+          ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+          : "pointer-events-none -translate-y-2 scale-[0.99] opacity-0",
       ].join(" ")}
     >
-      <div className="mx-auto max-w-[980px] px-4 sm:px-8 lg:px-10">
-        <div
-          className={[
-            "overflow-hidden rounded-[26px] border border-slate-900/[0.065] bg-white/94",
-            "shadow-[0_26px_80px_rgba(15,23,42,0.12)] ring-1 ring-white/80 backdrop-blur-2xl",
-          ].join(" ")}
-        >
+      <div className="mx-auto max-w-[980px] px-4 pb-10 pt-4 sm:px-8 sm:pb-12 sm:pt-5 lg:px-10">
           <div
             className={[
-              "m-3 flex items-center gap-3 rounded-[20px] border border-[var(--primary)]/16 bg-white px-3.5 py-3.5",
-              "shadow-[0_14px_36px_rgba(29,78,216,0.11)] ring-4 ring-[var(--primary)]/10 sm:m-4 sm:px-4 sm:py-4",
+              "flex items-center gap-3 rounded-2xl border border-[var(--primary)]/18 bg-[var(--color-surface-strong)] px-3.5 py-3.5",
+              "shadow-[0_10px_24px_rgba(15,23,42,0.06)] sm:px-4 sm:py-4",
             ].join(" ")}
           >
             <MagnifyingGlass
@@ -193,7 +188,7 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
                 "placeholder:text-[var(--color-muted-raw)]/70",
                 "focus-visible:shadow-none focus-visible:ring-0",
               ].join(" ")}
-              aria-label={placeholder}
+              aria-label="Buscar no site"
               aria-autocomplete="list"
               aria-controls="site-search-results"
               aria-expanded={open}
@@ -205,7 +200,7 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
               type="button"
               aria-label="Fechar busca"
               onClick={onClose}
-              className="shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-[var(--foreground)] focus-visible:ring-4 focus-visible:ring-[var(--primary)]/18"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--color-muted-raw)] transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
             >
               <X size={18} weight="bold" />
             </button>
@@ -216,8 +211,8 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
               id="site-search-results"
               ref={listRef}
               role="listbox"
-              aria-label={placeholder}
-              className="max-h-[320px] overflow-y-auto px-3 pb-3 pt-1 sm:max-h-[360px] sm:px-4 sm:pb-4 sm:pt-1"
+              aria-label="Resultados da busca"
+              className="scrollbar-ds mt-3 max-h-[320px] overflow-y-auto pr-2 sm:max-h-[360px]"
             >
               {results.map((item, index) => {
                 const isActive = index === activeIndex;
@@ -228,6 +223,7 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
                     role="option"
                     aria-selected={isActive}
                     onMouseEnter={() => setActiveIndex(index)}
+                    onFocus={() => setActiveIndex(index)}
                   >
                     <SearchResultLink item={item} active={isActive} onClose={onClose} />
                   </li>
@@ -235,12 +231,12 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
               })}
             </ul>
           ) : (
-            <div className="px-5 py-8 text-center text-sm font-medium text-slate-400">
-              {query}
+            <div className="mt-3 rounded-xl bg-[var(--color-surface-2)] px-5 py-8 text-center text-sm font-semibold text-[var(--color-muted-raw)]">
+              Nenhum resultado para "{query}"
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 border-t border-[var(--border)]/80 px-4 py-2.5 text-[10px] font-semibold text-slate-400 sm:px-5">
+          <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-[var(--border)] pt-3 text-[10px] font-semibold text-[var(--color-muted-raw)]">
             <span className="inline-flex items-center gap-1">
               <ArrowDown size={11} aria-hidden="true" />
               <ArrowUp size={11} aria-hidden="true" />
@@ -252,7 +248,6 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
               ESC
             </span>
           </div>
-        </div>
       </div>
     </div>
   );
@@ -268,10 +263,10 @@ function SearchResultLink({
   onClose: () => void;
 }) {
   const className = [
-    "flex w-full items-center gap-3 rounded-[18px] px-3.5 py-3 text-left transition-all duration-150 sm:px-4",
+    "flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left transition-[background-color,color,box-shadow] duration-150 sm:px-4",
     active
       ? "bg-[var(--color-primary-soft)] text-[var(--primary)] shadow-[inset_0_0_0_1px_rgba(29,78,216,0.08)]"
-      : "text-[var(--foreground)] hover:bg-slate-50",
+      : "text-[var(--foreground)] hover:bg-[var(--color-surface-2)]",
   ].join(" ");
 
   const content = <ResultContent item={item} active={active} />;
@@ -308,8 +303,8 @@ function ResultContent({ item, active }: { item: SearchItem; active: boolean }) 
               className={[
                 "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase",
                 active
-                  ? "bg-white/70 text-[var(--primary)]"
-                  : "bg-slate-100 text-slate-400",
+                  ? "bg-white/80 text-[var(--primary)]"
+                  : "bg-[var(--color-surface-2)] text-[var(--color-muted-raw)]",
               ].join(" ")}
             >
               {item.category}
@@ -317,20 +312,20 @@ function ResultContent({ item, active }: { item: SearchItem; active: boolean }) 
           ) : null}
         </div>
         {item.description ? (
-          <p className="mt-1 truncate text-xs font-medium leading-snug text-slate-400">
+          <p className="mt-1 truncate text-xs font-medium leading-snug text-[var(--color-muted-raw)]">
             {item.description}
           </p>
         ) : null}
       </div>
-      <ArrowElbowDownLeft
-        size={15}
-        weight="bold"
+      <span
         className={[
-          "shrink-0 transition-all duration-150",
-          active ? "translate-x-0 opacity-60" : "translate-x-1 opacity-0",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--primary)] transition-opacity duration-150",
+          active ? "opacity-70" : "opacity-0",
         ].join(" ")}
         aria-hidden="true"
-      />
+      >
+        <ArrowElbowDownLeft size={15} weight="bold" />
+      </span>
     </>
   );
 }

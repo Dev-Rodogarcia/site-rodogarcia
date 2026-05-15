@@ -129,8 +129,10 @@ export default async function SobrePage() {
         }))}
       />
 
-      <PageSection>
-        <PageContainer>
+      <PageSection className="relative overflow-hidden">
+        <div className="decorative-grid absolute inset-0" data-theme="light" />
+
+        <PageContainer className="relative z-10">
           <SectionHeader
             eyebrow="Base da marca"
             title="Três pilares sustentam a percepção de confiança."
@@ -138,22 +140,24 @@ export default async function SobrePage() {
             align="center"
           />
 
-          <div className="mt-16 sm:mt-20 grid gap-6 md:grid-cols-3 md:gap-12 lg:gap-16">
+          <div className="mt-12 grid gap-4 sm:mt-16 md:grid-cols-3 md:gap-5 lg:gap-6">
             {HIGHLIGHTS.map((item, index) => (
               <div 
                 key={item.title} 
-                className="group relative flex flex-col border-l-4 md:border-l-2 md:hover:border-l-4 border-[var(--primary)]/20 md:border-slate-100 md:hover:border-[var(--primary)]/30 pl-6 md:pl-6 lg:pl-8 py-5 md:py-3 md:hover:py-5 pr-4 md:pr-2 md:hover:pr-4 transition-all duration-300"
+                className="group relative isolate flex min-h-[240px] flex-col overflow-hidden rounded-[var(--radius-action-lg)] border border-[var(--color-action-border)] bg-[var(--color-action-surface)] p-5 shadow-[var(--shadow-action)] ring-1 ring-[var(--color-action-ring)] backdrop-blur-xl transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out before:pointer-events-none before:absolute before:inset-0 before:-z-[1] before:bg-[linear-gradient(135deg,rgba(29,78,216,0.09),rgba(6,182,212,0.045)_46%,transparent_76%)] before:opacity-0 before:transition-opacity before:duration-300 after:pointer-events-none after:absolute after:inset-x-5 after:top-0 after:h-px after:bg-[linear-gradient(90deg,transparent,var(--color-action-highlight),transparent)] hover:-translate-y-px hover:border-[var(--primary)]/26 hover:bg-[var(--color-action-surface-hover)] hover:shadow-[var(--shadow-action-hover)] hover:before:opacity-100 sm:p-6"
               >
-                {/* Fundo dinâmico (Gradient) - Ativo no mobile, invisível no desktop por padrão, ativo no hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/[0.04] to-transparent rounded-r-2xl opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10" />
-
-                <span className="mb-3 md:mb-4 block text-[2.75rem] md:text-[2.5rem] md:group-hover:text-[2.75rem] font-bold md:font-light md:group-hover:font-bold tracking-tighter text-[var(--primary)]/80 md:text-slate-300 md:group-hover:text-[var(--primary)]/80 transition-all duration-300">
-                  0{index + 1}.
-                </span>
-                <h3 className="text-2xl md:text-xl md:group-hover:text-2xl font-extrabold md:font-bold md:group-hover:font-extrabold tracking-[-0.04em] text-[var(--foreground)] transition-all duration-300">
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-[calc(var(--radius-action)_-_2px)] border border-[var(--primary)]/10 bg-[var(--color-primary-soft)] text-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+                    <item.icon size={23} weight="duotone" aria-hidden="true" />
+                  </span>
+                  <span className="font-mono text-[13px] font-extrabold tracking-[0.18em] text-[var(--primary)]/46 transition-colors duration-300 group-hover:text-[var(--primary)]/75">
+                    0{index + 1}
+                  </span>
+                </div>
+                <h3 className="text-xl font-extrabold leading-tight tracking-[-0.03em] text-[var(--foreground)]">
                   {item.title}
                 </h3>
-                <p className="mt-3 text-[15px] md:text-sm md:group-hover:text-[15px] leading-8 md:leading-7 md:group-hover:leading-8 text-[var(--foreground)]/70 md:text-[var(--color-muted-raw)] md:group-hover:text-[var(--foreground)]/70 transition-all duration-300">
+                <p className="mt-3 text-[15px] leading-7 text-[var(--color-muted-raw)]">
                   {item.description}
                 </p>
               </div>
@@ -162,14 +166,13 @@ export default async function SobrePage() {
         </PageContainer>
       </PageSection>
 
-      <section className="relative overflow-hidden py-12 sm:py-16 lg:py-20 bg-[var(--foreground)]">
-        {/* Background elements matching the premium AboutHero background */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(29,78,216,0.12),transparent_50%),radial-gradient(circle_at_100%_100%,rgba(56,189,248,0.06),transparent_40%)]" />
+      <section className="relative overflow-hidden bg-[#020617] py-12 sm:py-16 lg:py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.15)_0%,rgba(2,6,23,1)_70%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.025)_0%,transparent_60%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(rgba(255,255,255,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.3)_1px,transparent_1px)] [background-size:40px_40px]" />
+        <div className="decorative-grid absolute inset-0" data-theme="dark" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--primary)]/30 to-transparent opacity-80" />
 
-        <PageContainer>
+        <PageContainer className="relative z-10">
           <div className="relative space-y-8">
             <SectionHeader
               eyebrow="História"
@@ -184,9 +187,11 @@ export default async function SobrePage() {
         </PageContainer>
       </section>
 
-      <PageSection>
-        <PageContainer>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+      <PageSection className="relative overflow-hidden">
+        <div className="decorative-grid absolute inset-0" data-theme="light" />
+
+        <PageContainer className="relative z-10">
+          <div className="mb-16 max-w-2xl">
             <div className="max-w-2xl">
               <SectionHeader
                 eyebrow="Valores"
@@ -195,16 +200,18 @@ export default async function SobrePage() {
                 align="left"
               />
             </div>
+          </div>
 
+          <ValuesSection />
+
+          <div className="mt-8 flex justify-center">
             <Link
               href={site.business}
-              className="inline-flex min-h-14 shrink-0 items-center justify-center rounded-full bg-[var(--foreground)] px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(15,23,42,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(15,23,42,0.16)] hover:bg-[var(--primary)]"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] px-6 text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--foreground)] shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,transform] duration-200 hover:border-[var(--primary)]/20 hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 active:scale-[0.99]"
             >
               Quero ser parceiro
             </Link>
           </div>
-
-          <ValuesSection />
         </PageContainer>
       </PageSection>
 
@@ -212,8 +219,10 @@ export default async function SobrePage() {
       <ComplianceSection content={aboutPage.compliance} />
 
       {/* SEÇÃO CTA FINAL SIMPLIFICADA */}
-      <section className="py-20 sm:py-32">
-        <PageContainer>
+      <section className="relative overflow-hidden py-20 sm:py-32">
+        <div className="decorative-grid absolute inset-0" data-theme="light" />
+
+        <PageContainer className="relative z-10">
           <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
             <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--primary)] mb-4">
               Próximo passo

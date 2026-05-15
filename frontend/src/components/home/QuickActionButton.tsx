@@ -48,31 +48,61 @@ interface QuickActionButtonProps {
   action: QuickAction;
   onModalClick?: (action: QuickAction) => void;
   disabled?: boolean;
+  variant?: "card" | "icon" | "primary";
 }
 
-const buttonBaseClass = [
-  "group/btn relative isolate flex min-h-[110px] w-full min-w-0 flex-col items-center justify-center gap-3 overflow-hidden rounded-[20px]",
-  "border border-white/74 bg-white/74 px-3 py-4 text-center backdrop-blur-xl sm:min-h-[116px] lg:min-h-[126px] lg:px-3.5 lg:py-5",
-  "shadow-[0_10px_28px_rgba(15,23,42,0.055)] ring-1 ring-slate-900/[0.045]",
-  "cursor-pointer transition-all duration-200 ease-out",
-  "before:pointer-events-none before:absolute before:inset-0 before:-z-[1] before:bg-[linear-gradient(145deg,rgba(29,78,216,0.08),rgba(6,182,212,0.045)_44%,rgba(255,255,255,0)_72%)] before:opacity-0 before:transition-opacity before:duration-200",
-  "after:pointer-events-none after:absolute after:inset-x-4 after:top-0 after:h-px after:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.94),transparent)]",
-  "hover:-translate-y-1 hover:border-[var(--primary)]/20 hover:bg-white/94 hover:shadow-[0_18px_42px_rgba(15,23,42,0.105)] hover:ring-[var(--primary)]/20 hover:before:opacity-100",
-  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/24 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f8fc]",
-  "active:translate-y-0 active:scale-[0.99] active:shadow-[0_8px_18px_rgba(15,23,42,0.08)]",
-  "disabled:cursor-not-allowed disabled:opacity-70",
+const actionSurfaceClass = [
+  "group/btn relative isolate overflow-hidden border border-[var(--color-action-border)] bg-[var(--color-action-surface)] text-[var(--foreground)] backdrop-blur-xl",
+  "shadow-[var(--shadow-action)] ring-1 ring-[var(--color-action-ring)]",
+  "cursor-pointer transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out",
+  "before:pointer-events-none before:absolute before:inset-0 before:-z-[1] before:bg-[linear-gradient(135deg,rgba(29,78,216,0.1),rgba(6,182,212,0.055)_46%,transparent_76%)] before:opacity-0 before:transition-opacity before:duration-300",
+  "after:pointer-events-none after:absolute after:inset-x-4 after:top-0 after:h-px after:bg-[linear-gradient(90deg,transparent,var(--color-action-highlight),transparent)]",
+  "hover:-translate-y-px hover:border-[var(--primary)]/28 hover:bg-[var(--color-action-surface-hover)] hover:shadow-[var(--shadow-action-hover)] hover:before:opacity-100",
+  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20",
+  "active:translate-y-0 active:scale-[0.99]",
+  "disabled:cursor-not-allowed disabled:opacity-65",
 ].join(" ");
 
-const iconWrapClass = [
-  "relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[16px] sm:h-12 sm:w-12",
-  "border border-[var(--primary)]/12 bg-[linear-gradient(135deg,rgba(29,78,216,0.14),rgba(6,182,212,0.12))] text-[var(--primary)]",
-  "shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-all duration-200",
-  "before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,var(--primary),var(--accent))] before:opacity-0 before:transition-opacity before:duration-200",
-  "group-hover/btn:-translate-y-1 group-hover/btn:scale-[1.05] group-hover/btn:text-white group-hover/btn:shadow-[0_12px_24px_rgba(29,78,216,0.24)] group-hover/btn:before:opacity-100",
+const iconButtonClass = [
+  actionSurfaceClass,
+  "flex h-14 w-14 shrink-0 items-center justify-center rounded-full sm:h-[60px] sm:w-[60px]",
 ].join(" ");
+
+const cardButtonClass = [
+  actionSurfaceClass,
+  "flex min-h-[104px] w-full min-w-0 flex-col items-center justify-center gap-2.5 rounded-[var(--radius-action)] px-3 py-4 text-center",
+].join(" ");
+
+const primaryButtonClass = [
+  actionSurfaceClass,
+  "flex min-h-[78px] w-full min-w-0 items-center justify-between gap-3 rounded-[var(--radius-action)] px-4 py-3.5 text-left sm:min-h-[84px] sm:px-5",
+].join(" ");
+
+const cardIconWrapClass = [
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-[calc(var(--radius-action)_-_4px)]",
+  "border border-[var(--primary)]/10 bg-[var(--color-primary-soft)] text-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]",
+  "transition-[background-color,box-shadow,transform] duration-300 ease-out group-hover/btn:-translate-y-px group-hover/btn:shadow-[0_12px_24px_rgba(29,78,216,0.14)]",
+].join(" ");
+
+const primaryIconWrapClass = [
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-[calc(var(--radius-action)_-_4px)]",
+  "border border-[var(--primary)]/12 bg-[var(--color-primary-soft)] text-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.76)]",
+  "transition-[background-color,box-shadow,transform] duration-300 ease-out group-hover/btn:-translate-y-0.5 group-hover/btn:shadow-[0_14px_28px_rgba(29,78,216,0.16)]",
+].join(" ");
+
+const iconOnlyClass =
+  "text-[var(--primary)] opacity-95 transition-[opacity,transform] duration-300 ease-out group-hover/btn:scale-105 group-hover/btn:opacity-100";
 
 const labelClass =
-  "relative z-[1] max-w-full text-balance text-center text-[12px] font-extrabold leading-snug text-[var(--foreground)] sm:text-[13px] lg:text-[12.5px] xl:text-[13px]";
+  "max-w-full truncate whitespace-nowrap text-xs font-extrabold leading-snug text-[var(--foreground)]";
+
+const primaryLabelClass =
+  "max-w-full truncate text-sm font-extrabold leading-tight tracking-[-0.01em] text-[var(--foreground)]";
+
+const primaryArrowClass = [
+  "ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/42 text-[var(--primary)]",
+  "transition-[background-color,border-color,transform] duration-300 ease-out group-hover/btn:translate-x-0.5 group-hover/btn:border-[var(--primary)]/18 group-hover/btn:bg-white/72",
+].join(" ");
 
 function resolveDownloadHref(action: QuickAction) {
   const rawAction = action as QuickAction & {
@@ -97,16 +127,33 @@ function resolveActionHref(action: QuickAction) {
   return action.href || rawAction.url || "";
 }
 
-export function QuickActionButton({ action, onModalClick, disabled }: QuickActionButtonProps) {
+export function QuickActionButton({
+  action,
+  onModalClick,
+  disabled,
+  variant = "card",
+}: QuickActionButtonProps) {
   const Icon = ICON_MAP[action.icon] ?? FileText;
   const href = resolveActionHref(action);
+  const isIconVariant = variant === "icon";
+  const isPrimaryVariant = variant === "primary";
+  const buttonClassName = isIconVariant
+    ? iconButtonClass
+    : isPrimaryVariant
+      ? primaryButtonClass
+      : cardButtonClass;
 
   const iconElement = (
-    <span className={iconWrapClass} aria-hidden="true">
+    <span
+      className={
+        isIconVariant ? iconOnlyClass : isPrimaryVariant ? primaryIconWrapClass : cardIconWrapClass
+      }
+      aria-hidden="true"
+    >
       <Icon
-        size={22}
+        size={isIconVariant ? 27 : isPrimaryVariant ? 20 : 20}
         weight="duotone"
-        className="relative z-[1] transition-transform duration-200 group-hover/btn:-rotate-3 group-hover/btn:scale-105"
+        className="transition-colors duration-200"
       />
     </span>
   );
@@ -114,7 +161,18 @@ export function QuickActionButton({ action, onModalClick, disabled }: QuickActio
   const content = (
     <>
       {iconElement}
-      <span className={labelClass}>{action.label}</span>
+      {isIconVariant ? null : isPrimaryVariant ? (
+        <>
+          <span className="flex min-w-0 flex-1 items-center">
+            <span className={primaryLabelClass}>{action.label}</span>
+          </span>
+          <span className={primaryArrowClass} aria-hidden="true">
+            <ArrowSquareOut size={16} weight="bold" />
+          </span>
+        </>
+      ) : (
+        <span className={labelClass}>{action.label}</span>
+      )}
     </>
   );
 
@@ -123,8 +181,9 @@ export function QuickActionButton({ action, onModalClick, disabled }: QuickActio
       <button
         type="button"
         disabled
-        className={buttonBaseClass}
+        className={buttonClassName}
         aria-label={action.label}
+        title={action.label}
       >
         {content}
       </button>
@@ -139,8 +198,9 @@ export function QuickActionButton({ action, onModalClick, disabled }: QuickActio
         download
         target="_blank"
         rel="noopener noreferrer"
-        className={buttonBaseClass}
+        className={buttonClassName}
         aria-label={action.label}
+        title={action.label}
       >
         {content}
       </a>
@@ -153,8 +213,9 @@ export function QuickActionButton({ action, onModalClick, disabled }: QuickActio
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={buttonBaseClass}
+        className={buttonClassName}
         aria-label={action.label}
+        title={action.label}
       >
         {content}
       </a>
@@ -165,14 +226,16 @@ export function QuickActionButton({ action, onModalClick, disabled }: QuickActio
     return (
       <button
         type="button"
-        className={buttonBaseClass}
+        className={buttonClassName}
         aria-label={action.label}
+        title={action.label}
         onClick={() => {
           if (onModalClick) {
             onModalClick(action);
           } else if (href) {
             const el = document.querySelector(href);
-            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            el?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
           }
         }}
       >
@@ -182,7 +245,7 @@ export function QuickActionButton({ action, onModalClick, disabled }: QuickActio
   }
 
   return (
-    <Link href={href} className={buttonBaseClass} aria-label={action.label}>
+    <Link href={href} className={buttonClassName} aria-label={action.label} title={action.label}>
       {content}
     </Link>
   );

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { Buildings, Quotes, Star } from "@phosphor-icons/react";
+import { Buildings, CaretLeft, CaretRight, Quotes, Star } from "@phosphor-icons/react";
 import type { HomeFeedback, HomeSocialProof } from "@/types/content";
 
 interface TestimonialsCarouselProps {
@@ -71,6 +71,25 @@ export default function TestimonialsCarousel({
   );
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.9, 0.6]);
 
+  const goToTestimonial = useCallback(
+    (index: number) => {
+      const nextIndex = (index + totalSlides) % totalSlides;
+      activeIndexRef.current = nextIndex;
+      setCurrentIdx(nextIndex);
+      lastChangeTime.current = Date.now();
+
+      const sectionTop = containerRef.current?.offsetTop;
+      if (typeof sectionTop !== "number") return;
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({
+        top: sectionTop + nextIndex * window.innerHeight * 0.8,
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+    },
+    [totalSlides]
+  );
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -128,7 +147,7 @@ export default function TestimonialsCarousel({
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_46%),radial-gradient(circle_at_88%_18%,rgba(34,211,238,0.14),transparent_28%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,transparent_42%)]" />
-        <div className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,0.34)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.34)_1px,transparent_1px)] [background-size:30px_30px]" />
+        <div className="decorative-grid absolute inset-0" data-theme="dark" />
 
         <div className="pointer-events-none relative z-40 w-full shrink-0 px-6 text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200 drop-shadow-md">
@@ -191,6 +210,21 @@ export default function TestimonialsCarousel({
           </AnimatePresence>
         </div>
 
+        {totalSlides > 1 ? (
+          <div className="pointer-events-none absolute inset-x-3 top-1/2 z-40 flex -translate-y-1/2 items-center justify-between sm:inset-x-6 lg:inset-x-10">
+            <TestimonialNavButton
+              label="Depoimento anterior"
+              direction="previous"
+              onClick={() => goToTestimonial(currentIdx - 1)}
+            />
+            <TestimonialNavButton
+              label="Próximo depoimento"
+              direction="next"
+              onClick={() => goToTestimonial(currentIdx + 1)}
+            />
+          </div>
+        ) : null}
+
         <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-40 flex flex-col items-center gap-3 sm:bottom-10">
           <div className="font-mono text-xs font-medium tracking-widest text-white/60 sm:text-sm">
             {String(currentIdx + 1).padStart(2, "0")} / {String(totalSlides).padStart(2, "0")}
@@ -206,5 +240,30 @@ export default function TestimonialsCarousel({
         </div>
       </motion.div>
     </section>
+  );
+}
+
+function TestimonialNavButton({
+  label,
+  direction,
+  onClick,
+}: {
+  label: string;
+  direction: "previous" | "next";
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.075] text-white/82 shadow-[0_12px_28px_rgba(2,6,23,0.24)] backdrop-blur-md transition-[background-color,border-color,transform,color] duration-200 ease-out hover:-translate-y-px hover:border-white/20 hover:bg-white/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/16 sm:h-12 sm:w-12"
+    >
+      {direction === "previous" ? (
+        <CaretLeft size={22} weight="bold" aria-hidden="true" />
+      ) : (
+        <CaretRight size={22} weight="bold" aria-hidden="true" />
+      )}
+    </button>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { X } from "@phosphor-icons/react";
 import { usePhoneMask } from "@/hooks/usePhoneMask";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { api, isAdminRoute, isAuthRoute } from "@/lib/routes";
 
 interface PopupConfig {
@@ -175,8 +177,16 @@ export default function ExitPopup() {
   const lastDesktopY = useRef<number | null>(null);
   const cameFromBelow = useRef(false);
   const closeTimer = useRef<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useFocusTrap({
+    active: open && rendered,
+    containerRef: dialogRef,
+    initialFocusRef: firstFieldRef,
+    onEscape: () => closePopup("esc"),
+  });
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -242,16 +252,6 @@ export default function ExitPopup() {
     },
     [shouldShow]
   );
-
-  useEffect(() => {
-    if (!open) return;
-    setRendered(true);
-    setClosing(false);
-    const timer = window.setTimeout(() => {
-      (firstFieldRef.current ?? closeButtonRef.current)?.focus();
-    }, 80);
-    return () => window.clearTimeout(timer);
-  }, [open]);
 
   useEffect(() => {
     if (!config) return;
@@ -412,10 +412,6 @@ export default function ExitPopup() {
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="rg-popup-title"
-      aria-describedby="rg-popup-description"
       className={[
         "fixed inset-0 z-[9999] flex",
         mobile ? "items-end justify-center p-3 pb-0 sm:p-5" : "items-center justify-center p-4 sm:p-6",
@@ -431,31 +427,34 @@ export default function ExitPopup() {
       />
 
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rg-popup-title"
+        aria-describedby="rg-popup-description"
+        tabIndex={-1}
         className={[
-          "relative w-full overflow-hidden border border-white/30 bg-[var(--color-surface)] shadow-[0_34px_110px_rgba(2,6,23,0.32)] backdrop-blur-2xl",
+          "relative w-full overflow-hidden border border-[var(--border)] bg-[var(--color-surface)] shadow-[0_24px_60px_rgba(2,6,23,0.18)] backdrop-blur-md",
           "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
           closing ? "translate-y-2 scale-[0.97] opacity-0" : "translate-y-0 scale-100 opacity-100",
           mobile
-            ? "max-h-[92dvh] max-w-[680px] overflow-y-auto rounded-t-[30px] px-5 pb-5 pt-6 sm:rounded-[30px] sm:p-6"
-            : "max-w-[520px] rounded-[30px] p-6 sm:p-7",
+            ? "max-h-[92dvh] max-w-[680px] overflow-y-auto rounded-t-[22px] px-5 pb-5 pt-6 sm:rounded-[22px] sm:p-6"
+            : "max-w-[520px] rounded-[22px] p-6 sm:p-7",
         ].join(" ")}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,rgba(6,182,212,0.72),rgba(29,78,216,0.92),rgba(255,255,255,0.34))]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(29,78,216,0.08),transparent)]" />
-
         <button
           type="button"
           onClick={() => closePopup("button")}
           aria-label="Fechar popup"
           ref={closeButtonRef}
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-white/70 text-lg leading-none text-[var(--color-muted-raw)] shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/45"
+          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] text-[var(--color-muted-raw)] shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-colors duration-200 hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
         >
-          ×
+          <X size={18} weight="bold" aria-hidden="true" />
         </button>
 
         <div className="relative space-y-5">
           {popupImage ? (
-            <div className="overflow-hidden rounded-[24px] border border-white/40 bg-[var(--color-surface-2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">
+            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)]">
               <img
                 src={popupImage}
                 alt=""
@@ -501,7 +500,7 @@ export default function ExitPopup() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={80}
-                  className="h-12 w-full rounded-[18px] border border-[var(--border)] bg-[var(--color-surface-2)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-all duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-strong)] focus:border-[var(--primary)] focus:bg-[var(--color-surface-strong)] focus:ring-4 focus:ring-[var(--primary)]/14"
+                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
               />
             )}
             {config.enableEmail && (
@@ -513,7 +512,7 @@ export default function ExitPopup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 maxLength={160}
-                  className="h-12 w-full rounded-[18px] border border-[var(--border)] bg-[var(--color-surface-2)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-all duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-strong)] focus:border-[var(--primary)] focus:bg-[var(--color-surface-strong)] focus:ring-4 focus:ring-[var(--primary)]/14"
+                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
               />
             )}
             {config.enablePhone && (
@@ -528,7 +527,7 @@ export default function ExitPopup() {
                   setPhone(e.target.value);
                 }}
                 maxLength={20}
-                  className="h-12 w-full rounded-[18px] border border-[var(--border)] bg-[var(--color-surface-2)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-all duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-strong)] focus:border-[var(--primary)] focus:bg-[var(--color-surface-strong)] focus:ring-4 focus:ring-[var(--primary)]/14"
+                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
               />
             )}
 
@@ -543,14 +542,14 @@ export default function ExitPopup() {
                 type="submit"
                 disabled={formStatus === "loading"}
                   aria-busy={formStatus === "loading"}
-                  className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-bold text-white shadow-[0_16px_34px_rgba(29,78,216,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_20px_42px_rgba(29,78,216,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/45 focus-visible:ring-offset-2 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-[var(--primary)] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_26px_rgba(29,78,216,0.24)] transition-colors duration-200 hover:bg-[var(--color-primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
               >
                 {formStatus === "loading" ? "Enviando..." : config.buttonText}
               </button>
               <button
                 type="button"
                 onClick={() => closePopup("cancel")}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] px-5 py-2.5 text-sm font-bold text-[var(--color-foreground-soft)] transition-all duration-200 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/35"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-5 py-2.5 text-sm font-bold text-[var(--color-foreground-soft)] transition-colors duration-200 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
               >
                 {config.closeText}
               </button>

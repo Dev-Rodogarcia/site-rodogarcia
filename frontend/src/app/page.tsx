@@ -242,7 +242,7 @@ export default async function HomePage() {
       {homePage.regionalPresence.units.length > 0 ? (
         <section id="mapa-regional" className="relative overflow-hidden bg-slate-950 py-20 xl:py-24">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
+          <div className="decorative-grid absolute inset-0" data-theme="dark" />
 
           <div className="relative mx-auto max-w-[1440px] px-6">
             <BrazilMapWrapper units={homePage.regionalPresence.units} />
