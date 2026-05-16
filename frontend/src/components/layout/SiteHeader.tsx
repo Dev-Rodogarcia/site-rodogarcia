@@ -117,6 +117,14 @@ export function SiteHeader() {
   }, [closeSearch, pathname]);
 
   useEffect(() => {
+    if (drawerOpen) closeSearch();
+  }, [drawerOpen, closeSearch]);
+
+  useEffect(() => {
+    if (searchOpen) setDrawerOpen(false);
+  }, [searchOpen]);
+
+  useEffect(() => {
     if (!searchOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {

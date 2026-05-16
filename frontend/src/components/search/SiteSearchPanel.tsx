@@ -154,10 +154,10 @@ export function SiteSearchPanel({ open, onClose }: SiteSearchPanelProps) {
       inert={!open}
       className={[
         "absolute inset-x-0 top-[4.5rem] overflow-hidden border-t border-[var(--border)] bg-white/95 shadow-[0_18px_42px_rgba(15,23,42,0.07)] backdrop-blur-md",
-        "origin-top transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+        "transition-all duration-[400ms] ease-out transform origin-top",
         open
-          ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
-          : "pointer-events-none -translate-y-2 scale-[0.99] opacity-0",
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 -translate-y-4 pointer-events-none",
       ].join(" ")}
     >
       <div className="mx-auto max-w-[980px] px-4 pb-10 pt-4 sm:px-8 sm:pb-12 sm:pt-5 lg:px-10">
