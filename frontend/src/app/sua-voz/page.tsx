@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function SuaVozPage() {
   return (
-    <PageShell>
+    <PageShell className="pb-0 sm:pb-0 lg:pb-0">
       <div className="relative overflow-hidden bg-slate-950">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
