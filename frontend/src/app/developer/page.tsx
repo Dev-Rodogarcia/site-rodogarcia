@@ -28,16 +28,63 @@ import {
 } from "@/components/developer/ui";
 
 interface ContentSummary {
-  heroSlides: Array<{ active?: boolean }>;
-  dnaSlides: Array<{ active?: boolean }>;
-  vagas: Array<{ active?: boolean; ativo?: boolean; featured?: boolean }>;
-  feedbacks: Array<{ active?: boolean; ativo?: boolean }>;
+  homePage?: {
+    hero?: { slides?: Array<{ active?: boolean }> };
+    section1?: { items?: Array<unknown> };
+    section2?: { items?: Array<{ active?: boolean }> };
+    section3?: { cards?: Array<unknown> };
+    regionalPresence?: { units?: Array<{ active?: boolean }> };
+    socialProof?: { feedbacks?: Array<{ active?: boolean }> };
+    quickActions?: Array<{ enabled?: boolean }>;
+  };
+  careersPage?: {
+    jobs?: Array<{ active?: boolean }>;
+  };
+  aboutPage?: {
+    hero?: { title?: string; description?: string; media?: { src?: string } };
+    compliance?: {
+      image?: { src?: string };
+      title?: string;
+      description?: string;
+      certificateText?: string;
+    };
+    finalCta?: {
+      title?: string;
+      description?: string;
+      buttons?: Array<{ label?: string; url?: string }>;
+    };
+  };
+  contactPage?: {
+    heroWhatsappButton?: { label?: string; url?: string };
+    mainChannels?: Array<unknown>;
+    info?: {
+      companyTitle?: string;
+      address?: string;
+      hours?: string;
+      channelGuideTitle?: string;
+      channelGuideDescription?: string;
+      documentsDescription?: string;
+      quickSupportDescription?: string;
+      indicators?: Array<unknown>;
+    };
+    finalCta?: { buttons?: Array<unknown> };
+  };
+  footerLinks?: {
+    footer?: {
+      description?: string;
+      proposalButton?: { label?: string; url?: string };
+      supportButton?: { label?: string; url?: string };
+      columns?: Array<unknown>;
+      bottomLinks?: Array<unknown>;
+      copyrightText?: string;
+      locationText?: string;
+    };
+  };
   units: Array<{ active?: boolean; ativo?: boolean }>;
 }
 
 interface DashboardData {
   content: ContentSummary;
-  siteTexts: Record<string, string>;
   analytics: {
     totalPageViews: number;
     uniqueSessions: number;
@@ -111,10 +158,9 @@ export default function DeveloperDashboardPage() {
   const { data, loading, error } = useAdminResource<DashboardData>({
     key: adminResourceKeys.dashboard,
     fetcher: async (apiRequest) => {
-      const [contentRes, siteTextsRes, analyticsRes, popupRes, leadsRes, imagesRes] =
+      const [contentRes, analyticsRes, popupRes, leadsRes, imagesRes] =
         await Promise.all([
           apiRequest<{ content: ContentSummary }>(api.admin.content),
-          apiRequest<{ siteTexts: Record<string, string> }>(api.admin.siteTexts),
           apiRequest<DashboardData["analytics"]>(`${api.analytics.stats}?days=30`),
           apiRequest<DashboardData["popup"]>(`${api.popup.events}?days=30`),
           apiRequest<DashboardData["leads"]>(`${api.admin.leads}?limit=200`),
@@ -123,7 +169,6 @@ export default function DeveloperDashboardPage() {
 
       if (
         !contentRes.success ||
-        !siteTextsRes.success ||
         !analyticsRes.success ||
         !popupRes.success ||
         !leadsRes.success ||
@@ -133,7 +178,6 @@ export default function DeveloperDashboardPage() {
           success: false,
           error:
             contentRes.error ??
-            siteTextsRes.error ??
             analyticsRes.error ??
             popupRes.error ??
             leadsRes.error ??
@@ -146,13 +190,19 @@ export default function DeveloperDashboardPage() {
         success: true,
         data: {
           content: contentRes.data?.content ?? {
-            heroSlides: [],
-            dnaSlides: [],
-            vagas: [],
-            feedbacks: [],
+            homePage: {
+              hero: { slides: [] },
+              section1: { items: [] },
+              section2: { items: [] },
+              section3: { cards: [] },
+              regionalPresence: { units: [] },
+              socialProof: { feedbacks: [] },
+              quickActions: [],
+            },
+            careersPage: { jobs: [] },
+            footerLinks: { footer: { columns: [], bottomLinks: [] } },
             units: [],
           },
-          siteTexts: siteTextsRes.data?.siteTexts ?? {},
           analytics: analyticsRes.data ?? {
             totalPageViews: 0,
             uniqueSessions: 0,
@@ -169,71 +219,104 @@ export default function DeveloperDashboardPage() {
   const summary = useMemo(() => {
     if (!data) return null;
 
-    const heroActive = data.content.heroSlides.filter((item) => item.active !== false).length;
-    const dnaActive = data.content.dnaSlides.filter((item) => item.active !== false).length;
-    const jobsActive = data.content.vagas.filter(
-      (item) => item.active !== false && item.ativo !== false
-    ).length;
-    const jobsFeatured = data.content.vagas.filter(
-      (item) =>
-        (item.active !== false || item.ativo !== false) &&
-        item.featured === true
-    ).length;
-    const feedbacksActive = data.content.feedbacks.filter(
-      (item) => item.active !== false && item.ativo !== false
-    ).length;
+    const homePage = data.content.homePage;
+    const heroSlides = homePage?.hero?.slides ?? [];
+    const section1Items = homePage?.section1?.items ?? [];
+    const operationItems = homePage?.section2?.items ?? [];
+    const serviceCards = homePage?.section3?.cards ?? [];
+    const regionalUnits = homePage?.regionalPresence?.units ?? [];
+    const quickActions = homePage?.quickActions ?? [];
+    const homeFeedbacks = homePage?.socialProof?.feedbacks ?? [];
+    const careersJobs = data.content.careersPage?.jobs ?? [];
+
+    const heroActive = heroSlides.filter((item) => item.active !== false).length;
+    const operationsActive = operationItems.filter((item) => item.active !== false).length;
+    const jobsActive = careersJobs.filter((item) => item.active !== false).length;
+    const feedbacksActive = homeFeedbacks.filter((item) => item.active !== false).length;
     const unitsActive = data.content.units.filter(
       (item) => item.active !== false && item.ativo !== false
     ).length;
+    const regionalUnitsActive = regionalUnits.filter((item) => item.active !== false).length;
     const uploadImages = data.images.images.filter((item) => item.source === "upload").length;
     const contentImages = data.images.images.filter((item) => item.usedInContent).length;
     const editableItems =
-      data.content.heroSlides.length +
-      data.content.dnaSlides.length +
-      data.content.vagas.length +
-      data.content.feedbacks.length +
+      heroSlides.length +
+      section1Items.length +
+      operationItems.length +
+      serviceCards.length +
+      quickActions.length +
+      careersJobs.length +
+      homeFeedbacks.length +
       data.content.units.length;
-    const totalActive = heroActive + dnaActive + jobsActive + feedbacksActive + unitsActive;
+    const totalActive = heroActive + operationsActive + jobsActive + feedbacksActive + unitsActive;
 
     const coverageHome = calculateCoverage(
       Number(heroActive > 0) +
-        Number(dnaActive > 0) +
-        Number(jobsFeatured > 0) +
-        Number(unitsActive > 0),
-      4
+        Number(section1Items.length > 0) +
+        Number(operationsActive > 0) +
+        Number(serviceCards.length > 0) +
+        Number(regionalUnitsActive > 0),
+      5
+    );
+    const coverageCareers = calculateCoverage(
+      Number(careersJobs.length > 0) +
+        Number(jobsActive > 0),
+      2
+    );
+    const coverageFooter = calculateCoverage(
+      (() => {
+        const footer = data.content.footerLinks?.footer;
+        return countFilled([
+          footer?.description,
+          footer?.proposalButton?.label,
+          footer?.proposalButton?.url,
+          footer?.supportButton?.label,
+          footer?.supportButton?.url,
+          footer?.columns?.length,
+          footer?.bottomLinks?.length,
+          footer?.copyrightText,
+          footer?.locationText,
+        ]);
+      })(),
+      9
     );
     const coverageAbout = calculateCoverage(
-      countFilled([
-        data.siteTexts.aboutHeroTag,
-        data.siteTexts.aboutHeroTitle,
-        data.siteTexts.aboutHeroSubtitle,
-        data.siteTexts.aboutHeroImage,
-        data.siteTexts.aboutStat1Number,
-        data.siteTexts.aboutStat1Description,
-        data.siteTexts.aboutStat2Number,
-        data.siteTexts.aboutStat2Description,
-        data.siteTexts.aboutStat3Number,
-        data.siteTexts.aboutStat3Description,
-      ]),
+      (() => {
+        const about = data.content.aboutPage;
+        return countFilled([
+          about?.hero?.title,
+          about?.hero?.description,
+          about?.hero?.media?.src,
+          about?.compliance?.image?.src,
+          about?.compliance?.title,
+          about?.compliance?.description,
+          about?.compliance?.certificateText,
+          about?.finalCta?.title,
+          about?.finalCta?.description,
+          about?.finalCta?.buttons?.length,
+        ]);
+      })(),
       10
     );
     const coverageContact = calculateCoverage(
-      countFilled([
-        data.siteTexts.contactPageTitle,
-        data.siteTexts.contactPageSubtitle,
-        data.siteTexts.contactPhoneNumber,
-        data.siteTexts.contactPhoneHours,
-        data.siteTexts.contactEmailAddress,
-        data.siteTexts.contactEmailResponse,
-        data.siteTexts.contactWhatsappUrl,
-        data.siteTexts.contactWhatsappLabel,
-        data.siteTexts.contactAddressLine,
-        data.siteTexts.contactAddressZip,
-        data.siteTexts.contactAddressCountry,
-        data.siteTexts.contactCtaLabel,
-        data.siteTexts.contactCtaUrl,
-      ]),
-      13
+      (() => {
+        const contact = data.content.contactPage;
+        return countFilled([
+          contact?.heroWhatsappButton?.label,
+          contact?.heroWhatsappButton?.url,
+          contact?.mainChannels?.length,
+          contact?.info?.companyTitle,
+          contact?.info?.address,
+          contact?.info?.hours,
+          contact?.info?.channelGuideTitle,
+          contact?.info?.channelGuideDescription,
+          contact?.info?.documentsDescription,
+          contact?.info?.quickSupportDescription,
+          contact?.info?.indicators?.length,
+          contact?.finalCta?.buttons?.length,
+        ]);
+      })(),
+      12
     );
     const coverageContent = calculateCoverage(
       Number(feedbacksActive > 0) + Number(contentImages > 0) + Number(uploadImages > 0),
@@ -242,8 +325,8 @@ export default function DeveloperDashboardPage() {
 
     return {
       heroActive,
-      dnaActive,
-      jobsFeatured,
+      operationsActive,
+      jobsActive,
       feedbacksActive,
       unitsActive,
       uploadImages,
@@ -251,6 +334,8 @@ export default function DeveloperDashboardPage() {
       editableItems,
       publicationRate: calculateCoverage(totalActive, editableItems || 1),
       coverageHome,
+      coverageCareers,
+      coverageFooter,
       coverageAbout,
       coverageContact,
       coverageContent,
@@ -311,7 +396,7 @@ export default function DeveloperDashboardPage() {
               title="Itens editáveis"
               value={summary.editableItems.toLocaleString("pt-BR")}
               icon={Sparkle}
-              helper="Hero, DNA, vagas, feedbacks e unidades cadastrados no storage principal."
+              helper="Home, páginas internas, footer e unidades conforme o CMS atual."
             />
             <DashboardMetric
               title="Page views"
@@ -342,6 +427,8 @@ export default function DeveloperDashboardPage() {
               />
               <div className="space-y-4">
                 <CoverageRow label="Home" value={summary.coverageHome} />
+                <CoverageRow label="Trabalhe Conosco" value={summary.coverageCareers} />
+                <CoverageRow label="Footer links" value={summary.coverageFooter} />
                 <CoverageRow label="Sobre" value={summary.coverageAbout} />
                 <CoverageRow label="Contato" value={summary.coverageContact} />
                 <CoverageRow label="Mídia e social proof" value={summary.coverageContent} />
@@ -356,7 +443,7 @@ export default function DeveloperDashboardPage() {
                     {summary.publicationRate}%
                   </p>
                   <p className="mt-2 text-sm text-[var(--color-muted-raw)]">
-                    Hero ativos: {summary.heroActive} • DNA ativos: {summary.dnaActive}
+                    Hero ativos: {summary.heroActive} • operações ativas: {summary.operationsActive}
                   </p>
                 </div>
 
@@ -384,8 +471,8 @@ export default function DeveloperDashboardPage() {
               <div className="space-y-3">
                 {[
                   {
-                    label: "Vagas em destaque",
-                    value: summary.jobsFeatured.toLocaleString("pt-BR"),
+                    label: "Vagas ativas",
+                    value: summary.jobsActive.toLocaleString("pt-BR"),
                     icon: Briefcase,
                   },
                   {

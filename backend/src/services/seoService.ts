@@ -3,6 +3,7 @@ import { HttpError } from "../utils/http.js";
 import { sanitizePath, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 import { recordAuditAction } from "./auditService.js";
 import type { Request } from "express";
+import { sanitizeInternalImageUrl } from "./mediaValidationService.js";
 
 const DEFAULT_ROUTES = [
   { path: "/", label: "Home", title: "Rodogarcia Transportes | Logística com previsibilidade nacional" },
@@ -79,7 +80,7 @@ function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettin
     slug: sanitizeText(input.slug, 120) || (path === "/" ? "/" : path.replace(/^\//, "")),
     ogTitle: sanitizeText(input.ogTitle, 95) || title,
     ogDescription: sanitizeText(input.ogDescription, 220) || description,
-    ogImage: sanitizeUrl(input.ogImage) || fallback?.ogImage || "/foto5.png",
+    ogImage: sanitizeInternalImageUrl(input.ogImage, "SEO: imagem social") || fallback?.ogImage || "/foto5.png",
     updatedAt: input.updatedAt,
   };
 }

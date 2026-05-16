@@ -47,6 +47,21 @@ function copyFixture(relativePath, targetPath) {
   fs.copyFileSync(path.join(ROOT_DIR, relativePath), targetPath);
 }
 
+function copyDirectoryFixture(relativePath, targetPath) {
+  const sourcePath = path.join(ROOT_DIR, relativePath);
+  if (!fs.existsSync(sourcePath)) return;
+  fs.mkdirSync(targetPath, { recursive: true });
+  for (const entry of fs.readdirSync(sourcePath, { withFileTypes: true })) {
+    const sourceEntry = path.join(sourcePath, entry.name);
+    const targetEntry = path.join(targetPath, entry.name);
+    if (entry.isDirectory()) {
+      copyDirectoryFixture(path.relative(ROOT_DIR, sourceEntry), targetEntry);
+    } else {
+      fs.copyFileSync(sourceEntry, targetEntry);
+    }
+  }
+}
+
 function startProcess({ cwd, script, args = [], env }) {
   const command = npmCommand(script, args);
   const child = spawn(command.command, command.args, {
@@ -97,6 +112,7 @@ function startServers(storeDir) {
 
   copyFixture("backend/storage/content.json", contentStorePath);
   copyFixture("backend/storage/site-texts.json", siteTextsStorePath);
+  copyDirectoryFixture("backend/storage/uploads", path.join(storeDir, "uploads"));
 
   const backendEnv = {
     ...process.env,

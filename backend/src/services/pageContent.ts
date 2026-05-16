@@ -11,10 +11,11 @@ import type {
   QuoteDirectChannel,
   QuoteOtherChannel,
   QuotePageContent,
-  Vaga,
+  LegacyJob,
 } from "../types/content.js";
 import { generateId } from "../utils/ids.js";
 import { sanitizeHexColor, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
+import { sanitizeInternalImageUrl } from "./mediaValidationService.js";
 
 export const PAGE_KEYS = ["about", "business", "contact", "careers", "quote"] as const;
 export type CmsPageKey = (typeof PAGE_KEYS)[number];
@@ -76,7 +77,7 @@ function withOrder<T extends { order?: number }>(items: T[]) {
 }
 
 function publicAssetUrl(value: unknown) {
-  const url = sanitizeUrl(value);
+  const url = sanitizeInternalImageUrl(value, "Imagem da página");
   return url.startsWith("/public/") ? url.slice("/public".length) || "/" : url;
 }
 
@@ -580,7 +581,7 @@ export function sanitizeContactPage(payload: unknown): ContactPageContent {
   };
 }
 
-function jobFromLegacy(job: Vaga, index: number): CareersPageJob {
+function jobFromLegacy(job: LegacyJob, index: number): CareersPageJob {
   return {
     id: sanitizeText(job.id, 80) || `career-job-${index + 1}`,
     order: Number(job.order ?? index + 1),
@@ -608,7 +609,7 @@ function sanitizeCareersJob(payload: RawRecord, index: number): CareersPageJob {
   };
 }
 
-export function sanitizeCareersPage(payload: unknown, legacyJobs: Vaga[] = []): CareersPageContent {
+export function sanitizeCareersPage(payload: unknown, legacyJobs: LegacyJob[] = []): CareersPageContent {
   const hasPayload = isRecord(payload);
   const source = hasPayload ? payload : {};
   const hero = isRecord(source.hero) ? source.hero : {};
@@ -712,7 +713,7 @@ function legacyMediaSlot(
   key: string,
   fallback = ""
 ) {
-  return sanitizeUrl(source?.[key]) || fallback;
+  return sanitizeInternalImageUrl(source?.[key], `Slot ${key}`) || fallback;
 }
 
 function aboutPageFromLegacy(

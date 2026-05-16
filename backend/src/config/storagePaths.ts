@@ -66,6 +66,10 @@ export const storagePaths = {
     "CONSENT_SETTINGS_STORE_PATH",
     path.join(env.storageRoot, "consent-settings.json")
   ),
+  cookieConsents: resolveStoragePath(
+    "COOKIE_CONSENTS_STORE_PATH",
+    path.join(privateRoot, "cookie-consents.json")
+  ),
   leads: resolveStoragePath(
     "LEADS_STORE_PATH",
     path.join(env.storageRoot, "leads.json")

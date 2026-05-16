@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  Copy,
   ImagesSquare,
   MagicWand,
   UploadSimple,
@@ -91,6 +90,10 @@ function formatBytes(bytes: number) {
 
 function mediaTypeFromUrl(value: string): "image" | "video" {
   return /\.(mp4|webm|ogg)$/i.test(value) ? "video" : "image";
+}
+
+function mediaTypeForSlot(slotKey: string): "image" | "video" {
+  return slotKey.endsWith(".video") ? "video" : "image";
 }
 
 export default function ImagensPage() {
@@ -291,17 +294,6 @@ export default function ImagensPage() {
     await refresh();
   }
 
-  async function copyUrl(url: string) {
-    try {
-      await navigator.clipboard.writeText(url);
-      setStatus("info");
-      setMessage(`URL copiada: ${url}`);
-    } catch {
-      setStatus("error");
-      setMessage("Não foi possível copiar a URL.");
-    }
-  }
-
   return (
     <DeveloperPage>
       <DeveloperHero
@@ -455,28 +447,34 @@ export default function ImagensPage() {
 
             <div className="space-y-4">
               <DeveloperField label="URL atual">
-                <input
-                  list="image-url-options"
+                <select
                   value={fromUrl}
                   onChange={(event) => setFromUrl(event.target.value)}
                   className={developerInputClassName}
-                />
+                >
+                  <option value="">Selecione uma mídia da biblioteca</option>
+                  {images.map((image) => (
+                    <option key={image.url} value={image.url}>
+                      {image.name} - {image.url}
+                    </option>
+                  ))}
+                </select>
               </DeveloperField>
 
               <DeveloperField label="Nova URL">
-                <input
-                  list="image-url-options"
+                <select
                   value={toUrl}
                   onChange={(event) => setToUrl(event.target.value)}
                   className={developerInputClassName}
-                />
+                >
+                  <option value="">Selecione uma mídia da biblioteca</option>
+                  {images.map((image) => (
+                    <option key={image.url} value={image.url}>
+                      {image.name} - {image.url}
+                    </option>
+                  ))}
+                </select>
               </DeveloperField>
-
-              <datalist id="image-url-options">
-                {images.map((image) => (
-                  <option key={image.url} value={image.url} />
-                ))}
-              </datalist>
 
               <button
                 type="button"
@@ -515,15 +513,25 @@ export default function ImagensPage() {
                           <span className="truncate text-xs font-semibold text-[var(--foreground)]" title={label}>
                             {label}
                           </span>
-                          <input
-                            list="image-url-options"
+                          <select
                             value={slots[slotKey] ?? ""}
                             onChange={(event) =>
                               setSlots((current) => ({ ...current, [slotKey]: event.target.value }))
                             }
                             className={`${developerInputClassName} min-h-9 py-2 text-xs`}
-                            placeholder="/uploads/imagem.webp"
-                          />
+                          >
+                            <option value="">Usar fallback do site</option>
+                            {images
+                              .filter((image) => {
+                                const itemType = image.mediaType ?? mediaTypeFromUrl(image.url);
+                                return itemType === mediaTypeForSlot(slotKey);
+                              })
+                              .map((image) => (
+                                <option key={image.url} value={image.url}>
+                                  {image.name} - {image.url}
+                                </option>
+                              ))}
+                          </select>
                         </div>
                       ))}
                     </div>
@@ -620,22 +628,26 @@ export default function ImagensPage() {
                           <button
                             type="button"
                             onClick={() => {
+                              setFromUrl(image.url);
+                              setStatus("info");
+                              setMessage(`Mídia preenchida como origem: ${image.url}`);
+                            }}
+                            className={`${developerSecondaryButtonClassName} min-h-10 rounded-xl px-3 py-2 text-xs`}
+                          >
+                            <ImagesSquare size={16} weight="bold" />
+                            Usar como origem
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
                               setToUrl(image.url);
                               setStatus("info");
-                              setMessage(`URL preenchida como destino: ${image.url}`);
+                              setMessage(`Mídia preenchida como destino: ${image.url}`);
                             }}
                             className={`${developerSecondaryButtonClassName} min-h-10 rounded-xl px-3 py-2 text-xs`}
                           >
                             <ImagesSquare size={16} weight="bold" />
                             Usar como destino
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void copyUrl(image.url)}
-                            className={`${developerSecondaryButtonClassName} min-h-10 rounded-xl px-3 py-2 text-xs`}
-                          >
-                            <Copy size={16} weight="bold" />
-                            Copiar URL
                           </button>
                         </div>
                       </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { fetchPublicContent } from "@/lib/api";
 import type { HomePageContent } from "@/types/content";
 import BrazilMapWrapper from "@/components/home/BrazilMapWrapper";
-import DnaCarousel from "@/components/home/DnaCarousel";
+import OperationsCarousel from "@/components/home/OperationsCarousel";
 import FinalQuoteCtaSection from "@/components/home/FinalQuoteCtaSection";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import PostHeroInteractiveShowcase from "@/components/home/PostHeroInteractiveShowcase";
@@ -236,7 +236,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <DnaCarousel section={homePage.section2} />
+      <OperationsCarousel section={homePage.section2} />
       <ServiceLinesRebrand section={homePage.section3} />
 
       {homePage.regionalPresence.units.length > 0 ? (

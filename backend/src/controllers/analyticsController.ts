@@ -3,6 +3,7 @@ import {
   createAnalyticsEvent,
   getAnalyticsStats,
   readAnalyticsConfig,
+  readPublicAnalyticsConfig,
   updateAnalyticsConfig,
 } from "../services/analyticsService.js";
 import { publicUser } from "../services/authService.js";
@@ -23,6 +24,10 @@ export const getAnalyticsConfigController: RequestHandler = asyncHandler((req, r
     csrfToken: req.auth!.session.csrfToken,
     config: readAnalyticsConfig(),
   });
+});
+
+export const getPublicAnalyticsConfigController: RequestHandler = asyncHandler((_req, res) => {
+  res.json({ config: readPublicAnalyticsConfig() });
 });
 
 export const updateAnalyticsConfigController: RequestHandler = asyncHandler((req, res) => {

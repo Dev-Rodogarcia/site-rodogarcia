@@ -26,7 +26,7 @@ import {
 import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { seo, site } from "@/lib/routes";
-import type { Feedback } from "@/types/content";
+import type { HomeFeedback } from "@/types/content";
 
 export const dynamic = "force-dynamic";
 
@@ -162,13 +162,13 @@ const FALLBACK_PARTNERS: PartnerLogo[] = [
   { name: "Kemira", category: "Industria Quimica", image: "/feedbacks/kemira.jpg" },
 ];
 
-function normalizePartners(feedbacks: Feedback[]): PartnerLogo[] {
+function normalizePartners(feedbacks: HomeFeedback[]): PartnerLogo[] {
   const partners = feedbacks
-    .filter((item) => item.active !== false && item.ativo !== false)
+    .filter((item) => item.active !== false)
     .map((item) => ({
-      name: String(item.company ?? item.empresa ?? item.name ?? "").trim(),
-      category: String(item.role ?? item.highlight ?? "Cliente Rodogarcia").trim(),
-      image: String(item.photo ?? item.image ?? "").trim(),
+      name: String(item.company ?? item.name ?? "").trim(),
+      category: String(item.role ?? "Cliente Rodogarcia").trim(),
+      image: String(item.photo ?? "").trim(),
     }))
     .filter((item) => item.name && item.image);
 
@@ -177,7 +177,7 @@ function normalizePartners(feedbacks: Feedback[]): PartnerLogo[] {
 
 export default async function ParaEmpresasPage() {
   const content = await fetchPublicContent();
-  const partners = normalizePartners(content.data?.feedbacks ?? []);
+  const partners = normalizePartners(content.data?.homePage.socialProof.feedbacks ?? []);
   const businessPage = content.data?.businessPage;
   const scaleButtons = businessPage?.scaleCta.buttons ?? [
     { label: "Solicitar cotação", url: site.quote },

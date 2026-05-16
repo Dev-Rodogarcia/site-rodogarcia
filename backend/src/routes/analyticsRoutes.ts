@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createAnalyticsEventController,
   getAnalyticsConfigController,
+  getPublicAnalyticsConfigController,
   getAnalyticsStatsController,
   updateAnalyticsConfigController,
 } from "../controllers/analyticsController.js";
@@ -18,6 +19,7 @@ analyticsRouter.post(
   requireJson,
   createAnalyticsEventController
 );
+analyticsRouter.get("/public-config", getPublicAnalyticsConfigController);
 analyticsRouter.get("/stats", requireAdmin, getAnalyticsStatsController);
 analyticsRouter.get("/config", requireAdmin, getAnalyticsConfigController);
 analyticsRouter.post(

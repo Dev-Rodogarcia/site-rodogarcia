@@ -38,6 +38,7 @@ import {
   DeveloperMediaField,
   DeveloperMediaPreview,
 } from "@/components/developer/DeveloperMediaField";
+import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import {
   DeveloperCard,
   DeveloperColorField,
@@ -710,22 +711,22 @@ function HomeMediaEditor({
                 className={developerInputClassName}
               />
             </DeveloperField>
-            <DeveloperField label="Midia desktop" hint="Opcional. Substitui o arquivo principal no desktop.">
-              <input
-                value={current.desktopSrc ?? ""}
-                onChange={(event) => onChange({ ...current, desktopSrc: event.target.value })}
-                className={developerInputClassName}
-                placeholder="/uploads/desktop.webp"
-              />
-            </DeveloperField>
-            <DeveloperField label="Midia mobile" hint="Opcional. Substitui o arquivo principal no mobile.">
-              <input
-                value={current.mobileSrc ?? ""}
-                onChange={(event) => onChange({ ...current, mobileSrc: event.target.value })}
-                className={developerInputClassName}
-                placeholder="/uploads/mobile.webp"
-              />
-            </DeveloperField>
+            <DeveloperMediaField
+              label="Midia desktop"
+              mediaType={current.type}
+              value={current.desktopSrc ?? ""}
+              onChange={(desktopSrc) => onChange({ ...current, desktopSrc })}
+              hint="Opcional. Substitui o arquivo principal no desktop."
+              showPreview={false}
+            />
+            <DeveloperMediaField
+              label="Midia mobile"
+              mediaType={current.type}
+              value={current.mobileSrc ?? ""}
+              onChange={(mobileSrc) => onChange({ ...current, mobileSrc })}
+              hint="Opcional. Substitui o arquivo principal no mobile."
+              showPreview={false}
+            />
           </div>
 
           {current.type === "video" ? (
@@ -1066,6 +1067,9 @@ export default function DeveloperHomePage() {
           <DeveloperMessage tone={status.tone}>{status.text}</DeveloperMessage>
         </div>
       ) : null}
+      <div className="mt-5">
+        <DeveloperResponsivePreview href={site.home} title="Preview Home" />
+      </div>
 
       <section className="mt-5 rounded-[26px] border border-[var(--border)] bg-white/88 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.06)] backdrop-blur sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

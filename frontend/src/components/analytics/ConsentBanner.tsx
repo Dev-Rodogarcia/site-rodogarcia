@@ -71,6 +71,37 @@ export function setStoredConsent(value: StoredConsent) {
   }
 }
 
+function clearOptionalCookie(name: string) {
+  const expires = "Thu, 01 Jan 1970 00:00:00 GMT";
+  const hostParts = window.location.hostname.split(".");
+  const domains = [
+    window.location.hostname,
+    hostParts.length > 1 ? `.${hostParts.slice(-2).join(".")}` : "",
+  ].filter(Boolean);
+
+  document.cookie = `${name}=; expires=${expires}; path=/; SameSite=Lax`;
+  for (const domain of domains) {
+    document.cookie = `${name}=; expires=${expires}; path=/; domain=${domain}; SameSite=Lax`;
+  }
+}
+
+export function clearOptionalConsentStorage() {
+  if (typeof window === "undefined") return;
+  const cookieNames = document.cookie
+    .split(";")
+    .map((item) => item.split("=")[0]?.trim())
+    .filter((name): name is string => Boolean(name))
+    .filter((name) => /^(_ga|_gid|_gat|_gcl|_clck|_clsk|fbp|fr)/i.test(name));
+
+  cookieNames.forEach(clearOptionalCookie);
+
+  try {
+    sessionStorage.removeItem("rg_analytics_session_id");
+  } catch {
+    /* ignore */
+  }
+}
+
 interface ConsentBannerProps {
   settings: ConsentSettings;
   onConsent: (value: StoredConsent) => void;
@@ -133,6 +164,9 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     };
     const value = { version: settings.version, decision, categories: normalized };
     setStoredConsent(value);
+    if (decision === "rejected" || normalized.analytics === false || normalized.marketing === false) {
+      clearOptionalConsentStorage();
+    }
     onConsent(value);
     setClosing(true);
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -146,7 +180,23 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     );
   }
 
-  if (!visible || !settings.enabled) return null;
+  if (!visible || !settings.enabled) {
+    const stored = getStoredConsent();
+    if (!settings.enabled || !stored) return null;
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setPreferencesOpen(true);
+          setSelected(stored.categories ?? defaultCategories);
+          setVisible(true);
+        }}
+        className="fixed bottom-4 left-4 z-[9997] inline-flex min-h-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-bold text-[var(--foreground)] shadow-[0_12px_28px_rgba(2,6,23,0.12)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
+      >
+        Cookies
+      </button>
+    );
+  }
 
   return (
     <div

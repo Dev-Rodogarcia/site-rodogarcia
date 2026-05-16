@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { HomeOperationItem, HomeSection2 } from "@/types/content";
 
-interface DnaCarouselProps {
+interface OperationsCarouselProps {
   section: HomeSection2;
 }
 
@@ -61,7 +61,7 @@ function buildSpotlightSlides(slides: HomeOperationItem[]): SpotlightSlide[] {
       if (!title && !text && !desktopAsset && !mobileAsset) return null;
 
       return {
-        id: slide.id || `dna-${index + 1}`,
+        id: slide.id || `operation-${index + 1}`,
         title,
         text,
         desktopAsset,
@@ -133,7 +133,7 @@ function SpotlightMedia({
   return <img {...imageProps} />;
 }
 
-export default function DnaCarousel({ section }: DnaCarouselProps) {
+export default function OperationsCarousel({ section }: OperationsCarouselProps) {
   const spotlightSlides = buildSpotlightSlides(section.items);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -213,7 +213,7 @@ export default function DnaCarousel({ section }: DnaCarouselProps) {
       (entries) => {
         for (const entry of entries) {
           const index = Number(
-            (entry.target as HTMLButtonElement).dataset.dnaIndex ?? "-1"
+            (entry.target as HTMLButtonElement).dataset.operationIndex ?? "-1"
           );
 
           if (index < 0) continue;
@@ -259,7 +259,7 @@ export default function DnaCarousel({ section }: DnaCarouselProps) {
     <section
       className="relative overflow-hidden bg-slate-950 py-16 sm:py-20"
       aria-roledescription="galeria"
-      aria-label="DNA Rodogarcia"
+      aria-label="Operacao conectada Rodogarcia"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -287,7 +287,7 @@ export default function DnaCarousel({ section }: DnaCarouselProps) {
                 aria-label={
                   slide.title
                     ? `Ver ${slide.title}`
-                    : `Ver item ${index + 1} do DNA Rodogarcia`
+                    : `Ver item ${index + 1} da operacao conectada`
                 }
                 aria-pressed={isActive}
                 onMouseEnter={() => {
@@ -310,7 +310,7 @@ export default function DnaCarousel({ section }: DnaCarouselProps) {
                 <div className="absolute inset-0">
                   <SpotlightMedia
                     src={slide.desktopAsset}
-                    alt={slide.title || "DNA Rodogarcia"}
+                    alt={slide.title || "Operacao conectada Rodogarcia"}
                     active={isActive}
                     className={`h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                       isActive ? "scale-[1.02]" : "scale-100"
@@ -366,11 +366,11 @@ export default function DnaCarousel({ section }: DnaCarouselProps) {
                   ref={(node) => {
                     mobileCardRefs.current[index] = node;
                   }}
-                  data-dna-index={index}
+                  data-operation-index={index}
                   aria-label={
                     slide.title
                       ? `Ver ${slide.title}`
-                      : `Ver item ${index + 1} do DNA Rodogarcia`
+                      : `Ver item ${index + 1} da operacao conectada`
                   }
                   aria-pressed={isActive}
                   onClick={() => {
@@ -385,7 +385,7 @@ export default function DnaCarousel({ section }: DnaCarouselProps) {
                   <div className="absolute inset-0">
                     <SpotlightMedia
                       src={slide.mobileAsset}
-                      alt={slide.title || "DNA Rodogarcia"}
+                      alt={slide.title || "Operacao conectada Rodogarcia"}
                       active={isActive}
                       className={`h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                         isActive ? "scale-[1.02]" : "scale-100"

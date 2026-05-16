@@ -3,7 +3,7 @@ import { auditLogRepository } from "../repositories/jsonRepositories.js";
 import { getClientIp } from "../security/rateLimit.js";
 import { publicUser } from "./authService.js";
 import { generateId } from "../utils/ids.js";
-import { sanitizeText } from "../utils/sanitize.js";
+import { maskIpAddress, sanitizeText } from "../utils/sanitize.js";
 
 function sanitizeMetadata(input: unknown) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return undefined;
@@ -34,7 +34,7 @@ export function recordAuditAction({
     target: sanitizeText(target, 160),
     actorId: user?.id ?? "",
     actorEmail: user?.email ?? "",
-    ip: req ? getClientIp(req) : "",
+    ip: req ? maskIpAddress(getClientIp(req)) : "",
     metadata: sanitizeMetadata(metadata),
   });
   auditLogRepository.write(logs.slice(-5000));

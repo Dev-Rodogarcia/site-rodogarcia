@@ -17,7 +17,7 @@ export default function DevTopbar({ onOpenNavigation }: DevTopbarProps) {
 
   return (
     <header className="relative z-40 mx-3 mt-3 overflow-hidden rounded-lg border border-white/10 bg-slate-950/95 text-white shadow-[0_8px_24px_rgba(0,0,0,0.1)] backdrop-blur-xl sm:mx-4 sm:mt-4 lg:mx-6">
-      {/* Padrão DNA fornecido */}
+      {/* Textura visual do painel */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
       

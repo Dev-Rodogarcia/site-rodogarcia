@@ -1,6 +1,11 @@
 import type { Request } from "express";
-import { consentSettingsRepository } from "../repositories/jsonRepositories.js";
-import { sanitizeText } from "../utils/sanitize.js";
+import {
+  consentSettingsRepository,
+  cookieConsentRepository,
+} from "../repositories/jsonRepositories.js";
+import { getClientIp } from "../security/rateLimit.js";
+import { generateId } from "../utils/ids.js";
+import { maskIpAddress, sanitizeText } from "../utils/sanitize.js";
 import { recordAuditAction } from "./auditService.js";
 
 const DEFAULT_CONSENT = {
@@ -117,4 +122,103 @@ export function updateConsentSettings(req: Request | undefined, body: Record<str
     metadata: { version: String(next.version), enabled: String(next.enabled) },
   });
   return next;
+}
+
+function deviceFromUserAgent(userAgent: string) {
+  if (/ipad|tablet/i.test(userAgent)) return "tablet";
+  if (/mobile|android|iphone/i.test(userAgent)) return "mobile";
+  return userAgent ? "desktop" : "";
+}
+
+function sanitizeBooleanMap(input: unknown) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  return Object.fromEntries(
+    Object.entries(input as Record<string, unknown>)
+      .slice(0, 12)
+      .map(([key, value]) => [sanitizeText(key, 40).toLowerCase(), Boolean(value)])
+      .filter(([key]) => Boolean(key))
+  );
+}
+
+function sanitizeStringArray(input: unknown, maxItems = 12) {
+  if (!Array.isArray(input)) return [];
+  return input
+    .slice(0, maxItems)
+    .map((item) => sanitizeText(item, 120))
+    .filter(Boolean);
+}
+
+function sanitizeConsentDecision(value: unknown) {
+  const decision = sanitizeText(value, 40).toLowerCase();
+  if (["accepted", "rejected", "custom", "partial", "revoked"].includes(decision)) {
+    return decision;
+  }
+  return "custom";
+}
+
+export function recordCookieConsent(req: Request) {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const userAgent = sanitizeText(req.header("user-agent") ?? "", 300);
+  const decision = sanitizeConsentDecision(body.decision);
+  const settings = readConsentSettings();
+  const entry = {
+    id: generateId("cookie_consent"),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    decision,
+    status: decision,
+    type: decision,
+    version: Math.max(1, Math.min(999, Math.round(Number(body.version) || settings.version))),
+    consentTextVersion: String(body.consentTextVersion ?? body.version ?? settings.version),
+    categories: sanitizeBooleanMap(body.categories),
+    sessionId: sanitizeText(body.sessionId, 100),
+    userAgent,
+    device: sanitizeText(body.device, 40) || deviceFromUserAgent(userAgent),
+    approximateLocation:
+      body.locationAllowed === true ? sanitizeText(body.approximateLocation, 120) : "",
+    ipMasked: maskIpAddress(getClientIp(req)),
+    scriptsLoaded: sanitizeStringArray(body.scriptsLoaded),
+    scriptsFailed: sanitizeStringArray(body.scriptsFailed),
+    logs: [
+      {
+        at: new Date().toISOString(),
+        action: decision === "revoked" ? "consent.revoked" : "consent.saved",
+        version: String(body.version ?? settings.version),
+      },
+    ],
+  };
+
+  const consents = cookieConsentRepository.read();
+  consents.push(entry);
+  cookieConsentRepository.write(consents.slice(-50_000));
+  return entry;
+}
+
+export function listCookieConsents(filters: Record<string, unknown> = {}) {
+  const status = sanitizeText(filters.status ?? filters.decision, 40).toLowerCase();
+  const device = sanitizeText(filters.device, 40).toLowerCase();
+  const from = Date.parse(String(filters.from ?? ""));
+  const to = Date.parse(String(filters.to ?? ""));
+  const page = Math.max(1, Math.round(Number(filters.page) || 1));
+  const pageSize = Math.min(Math.max(Math.round(Number(filters.pageSize ?? filters.limit) || 50), 1), 250);
+
+  const filtered = cookieConsentRepository
+    .read()
+    .filter((entry) => {
+      const createdAt = Date.parse(String(entry.createdAt ?? ""));
+      if (status && String(entry.status ?? entry.decision ?? "").toLowerCase() !== status) return false;
+      if (device && String(entry.device ?? "").toLowerCase() !== device) return false;
+      if (Number.isFinite(from) && createdAt < from) return false;
+      if (Number.isFinite(to) && createdAt > to) return false;
+      return true;
+    })
+    .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+
+  const start = (page - 1) * pageSize;
+  return {
+    consents: filtered.slice(start, start + pageSize),
+    total: filtered.length,
+    page,
+    pageSize,
+  };
 }

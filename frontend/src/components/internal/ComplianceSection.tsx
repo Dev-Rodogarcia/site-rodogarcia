@@ -16,7 +16,14 @@ interface ComplianceContent {
   certificateUrl?: string;
 }
 
-const CERTIFICATIONS = [
+interface CertificationItem {
+  title: string;
+  description: string;
+  image: string;
+  alt?: string;
+}
+
+const CERTIFICATIONS: CertificationItem[] = [
   {
     title: "ISO 9001",
     description: "Gestão da qualidade aplicada em cada camada da operação.",
@@ -77,13 +84,42 @@ const getLightboxImageClass = (title: string) => {
 };
 
 export function ComplianceSection({ content }: { content?: ComplianceContent }) {
-  void content;
-  return <LegacyComplianceSection />;
+  const cmsCertification =
+    content?.image?.src && content.title
+      ? {
+          title: content.certificateText || content.title,
+          description: content.description,
+          image: content.image.src,
+          alt: content.image.alt || content.title,
+        }
+      : null;
+  const certifications = cmsCertification
+    ? [
+        cmsCertification,
+        ...CERTIFICATIONS.filter((item) => item.image !== cmsCertification.image),
+      ]
+    : CERTIFICATIONS;
+
+  return (
+    <CertificationScroller
+      certifications={certifications}
+      eyebrow={content?.certificateText || "Governança & Compliance"}
+      title={content?.title || "Excelência em cada operação"}
+    />
+  );
 }
 
-function LegacyComplianceSection() {
+function CertificationScroller({
+  certifications,
+  eyebrow,
+  title,
+}: {
+  certifications: CertificationItem[];
+  eyebrow: string;
+  title: string;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const totalSlides = CERTIFICATIONS.length;
+  const totalSlides = certifications.length;
   const [currentIdx, setCurrentIdx] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -168,7 +204,7 @@ function LegacyComplianceSection() {
       style={{ height: `${totalSlides * 100}vh` }}
     >
       <div className="pointer-events-none absolute left-0 right-0 top-0 w-full">
-        {CERTIFICATIONS.map((_, index) => (
+        {certifications.map((_, index) => (
           <div
             key={`ghost-${index}`}
             className="ghost-block h-screen w-full"
@@ -194,12 +230,12 @@ function LegacyComplianceSection() {
           <div className="mb-3 inline-flex items-center gap-3">
             <span className="h-px w-6 bg-sky-500" />
             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-400 sm:text-xs">
-              Governança & Compliance
+              {eyebrow}
             </h2>
             <span className="h-px w-6 bg-sky-500" />
           </div>
           <h3 className="mb-2 text-xl font-extrabold tracking-tight text-white drop-shadow-lg sm:text-3xl md:text-4xl">
-            Excelência em cada operação
+            {title}
           </h3>
         </div>
 
@@ -219,22 +255,22 @@ function LegacyComplianceSection() {
                   triggerRefs.current[currentIdx] = node;
                 }}
                 onClick={() => setLightboxIndex(currentIdx)}
-                aria-label={`Abrir visualização do certificado ${CERTIFICATIONS[currentIdx].title}`}
+                aria-label={`Abrir visualização do certificado ${certifications[currentIdx].title}`}
                 className="relative z-10 flex w-full flex-col items-center justify-center rounded-2xl text-center outline-none transition-transform duration-200 hover:scale-[1.01] focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 motion-reduce:transition-none"
               >
                 <div className="mb-6 flex w-full items-center justify-center sm:mb-8 md:mb-10">
                   <img
-                    src={CERTIFICATIONS[currentIdx].image}
-                    alt={CERTIFICATIONS[currentIdx].title}
-                    className={getCertImageClass(CERTIFICATIONS[currentIdx].title)}
+                    src={certifications[currentIdx].image}
+                    alt={certifications[currentIdx].alt || certifications[currentIdx].title}
+                    className={getCertImageClass(certifications[currentIdx].title)}
                   />
                 </div>
                 <div className="flex w-full shrink-0 flex-col items-center px-4">
                   <h3 className="mb-3 text-3xl font-extrabold tracking-tight text-white drop-shadow-lg sm:mb-4 sm:text-4xl md:text-5xl lg:text-6xl">
-                    {CERTIFICATIONS[currentIdx].title}
+                    {certifications[currentIdx].title}
                   </h3>
                   <p className="max-w-lg text-base leading-relaxed text-white/80 sm:text-lg md:text-xl">
-                    {CERTIFICATIONS[currentIdx].description}
+                    {certifications[currentIdx].description}
                   </p>
                 </div>
               </button>
@@ -260,7 +296,7 @@ function LegacyComplianceSection() {
             {String(currentIdx + 1).padStart(2, "0")} / {String(totalSlides).padStart(2, "0")}
           </div>
           <div className="flex gap-2">
-            {CERTIFICATIONS.map((_, index) => (
+            {certifications.map((_, index) => (
               <div
                 key={index}
                 className={`h-1 rounded-full transition-all duration-300 ${
@@ -275,6 +311,7 @@ function LegacyComplianceSection() {
       {lightboxIndex !== null ? (
         <CertificateLightbox
           index={lightboxIndex}
+          certifications={certifications}
           onIndexChange={setLightboxIndex}
           onClose={closeLightbox}
         />
@@ -310,10 +347,12 @@ function CertificateNavButton({
 
 function CertificateLightbox({
   index,
+  certifications,
   onIndexChange,
   onClose,
 }: {
   index: number;
+  certifications: CertificationItem[];
   onIndexChange: (index: number) => void;
   onClose: (index: number) => void;
 }) {
@@ -321,8 +360,8 @@ function CertificateLightbox({
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const cert = CERTIFICATIONS[index];
-  const total = CERTIFICATIONS.length;
+  const cert = certifications[index];
+  const total = certifications.length;
   const previousIndex = (index - 1 + total) % total;
   const nextIndex = (index + 1) % total;
 
@@ -400,7 +439,7 @@ function CertificateLightbox({
           <div className="flex min-h-0 w-full items-center justify-center rounded-2xl bg-[var(--color-surface-strong)] px-4 py-6 sm:px-8 sm:py-8">
             <img
               src={cert.image}
-              alt={cert.title}
+              alt={cert.alt || cert.title}
               className={getLightboxImageClass(cert.title)}
             />
           </div>
@@ -415,7 +454,7 @@ function CertificateLightbox({
           </div>
 
           <div className="mt-5 flex items-center justify-center gap-2" aria-hidden="true">
-            {CERTIFICATIONS.map((item, itemIndex) => (
+            {certifications.map((item, itemIndex) => (
               <span
                 key={item.title}
                 className={[

@@ -351,6 +351,14 @@ export default function ExitPopup() {
     );
   }
 
+  function dispatchPopupFormTracking(status: "success" | "fail", reason = "") {
+    window.dispatchEvent(
+      new CustomEvent(status === "success" ? "rg:form-success" : "rg:form-fail", {
+        detail: { form: "exit-intent-popup", reason },
+      })
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!config) return;
@@ -358,11 +366,13 @@ export default function ExitPopup() {
     if (config.enableName && !name.trim()) {
       setErrorMsg("Informe seu nome.");
       setFormStatus("error");
+      dispatchPopupFormTracking("fail", "validation_name");
       return;
     }
     if (config.enableEmail && !email.trim()) {
       setErrorMsg("Informe um e-mail válido.");
       setFormStatus("error");
+      dispatchPopupFormTracking("fail", "validation_email");
       return;
     }
 
@@ -388,17 +398,22 @@ export default function ExitPopup() {
         lead?: { id: string };
       };
       if (!res.ok) {
-        setErrorMsg(data.error ?? "Falha ao enviar dados.");
+        const reason = data.error ?? "Falha ao enviar dados.";
+        setErrorMsg(reason);
         setFormStatus("error");
+        dispatchPopupFormTracking("fail", reason);
         return;
       }
       writeLocal(STORAGE.submittedAt, Date.now());
       setFormStatus("success");
+      dispatchPopupFormTracking("success");
       trackEvent("popup_submitted", { leadId: data.lead?.id ?? "" });
       setTimeout(() => closePopup("auto_after_submit"), 1200);
     } catch {
-      setErrorMsg("Erro de conexão. Tente novamente.");
+      const reason = "Erro de conexão. Tente novamente.";
+      setErrorMsg(reason);
       setFormStatus("error");
+      dispatchPopupFormTracking("fail", reason);
     }
   }
 

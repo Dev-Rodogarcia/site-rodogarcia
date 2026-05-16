@@ -59,16 +59,10 @@ export const admin = {
   businessPage: "/developer/para-empresas",
   contactPage: "/developer/fale-conosco",
   careersPage: "/developer/trabalhe-conosco",
-    quotePage: "/developer/cotacao",
-    footerLinks: "/developer/footer-links",
-  homeHero: "/developer/home-hero",
-  homeDna: "/developer/home-dna",
-  feedbacks: "/developer/servicos-feedbacks",
-  jobs: "/developer/vagas",
+  quotePage: "/developer/cotacao",
+  footerLinks: "/developer/footer-links",
   units: "/developer/unidades",
-  aboutHero: "/developer/sobre-hero",
   popup: "/developer/popup-exit",
-  contactInfo: "/developer/contato-info",
   users: "/developer/usuarios",
   images: "/developer/imagens",
   analytics: "/developer/analytics",
@@ -76,6 +70,7 @@ export const admin = {
   tracking: "/developer/rastreamento",
   leads: "/developer/leads",
   cookies: "/developer/lgpd-cookies",
+  cookieMonitoring: "/developer/monitoramento-cookies",
   prefix: "/developer/",
 } as const;
 
@@ -114,6 +109,7 @@ export const api = {
     mediaSlots: "/api/admin/media-slots",
     seoSettings: "/api/admin/seo-settings",
     consentSettings: "/api/admin/consent-settings",
+    cookieConsents: "/api/admin/cookie-consents",
     leads: "/api/admin/leads",
     trackingEvents: "/api/admin/tracking-events",
     auditLog: "/api/admin/audit-log",
@@ -123,6 +119,7 @@ export const api = {
   },
   analytics: {
     config: "/api/analytics/config",
+    publicConfig: "/api/analytics/public-config",
     event: "/api/analytics/event",
     stats: "/api/analytics/stats",
   },
@@ -142,6 +139,7 @@ export const api = {
   },
   consent: {
     settings: "/api/consent-settings",
+    events: "/api/consent-events",
   },
   tracking: {
     event: "/api/tracking/event",
@@ -223,6 +221,7 @@ export const adminNavigationGroups = [
       { href: admin.images, label: "Imagens", key: "images" },
       { href: admin.popup, label: "Popup de saída", key: "popup" },
       { href: admin.cookies, label: "LGPD/Cookies", key: "cookies" },
+      { href: admin.cookieMonitoring, label: "Consentimentos", key: "cookie-monitoring" },
       { href: admin.analytics, label: "Analytics", key: "analytics" },
       { href: admin.tracking, label: "Rastreamento", key: "tracking" },
       { href: admin.leads, label: "Leads", key: "leads" },

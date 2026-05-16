@@ -5,10 +5,7 @@ import type {
   BusinessPageContent,
   CareersPageContent,
   ContactPageContent,
-  DnaSlide,
-  Feedback,
   FooterLinksContent,
-  HeroSlide,
   HomePageContent,
   OperationalUnit,
   QuotePageContent,
@@ -34,19 +31,6 @@ export interface PublicContentResponse {
   careersPage: CareersPageContent;
   quotePage: QuotePageContent;
   footerLinks: FooterLinksContent;
-  heroSlides: HeroSlide[];
-  dnaSlides: DnaSlide[];
-  featuredJobs: Array<{
-    id: string;
-    title: string;
-    status: string;
-    location: string;
-    workType: string;
-    contractType: string;
-    description: string;
-    applyUrl: string;
-  }>;
-  feedbacks: Feedback[];
   units: OperationalUnit[];
   siteTexts: Record<string, string>;
   updatedAt: string;

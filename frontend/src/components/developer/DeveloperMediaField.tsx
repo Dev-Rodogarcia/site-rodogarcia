@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowSquareOut, ImagesSquare, MagnifyingGlassPlus } from "@phosphor-icons/react";
 import { adminResourceKeys, useAdminResource } from "@/hooks/useAdminResource";
 import { admin, api } from "@/lib/routes";
@@ -59,7 +59,6 @@ export function DeveloperMediaField({
   showPreview = true,
 }: DeveloperMediaFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const listId = useId();
   const { data, loading, error } = useAdminResource<AdminMediaRecord[]>({
     key: adminResourceKeys.images,
     fetcher: async (request) => {
@@ -100,12 +99,27 @@ export function DeveloperMediaField({
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
         <input
+          type="hidden"
           value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className={developerInputClassName}
-          list={listId}
-          placeholder={mediaType === "video" ? "/uploads/video.mp4" : "/uploads/midia.webp"}
+          required={required}
+          readOnly
         />
+        <div
+          className={cn(
+            developerInputClassName,
+            "flex min-h-12 items-center overflow-hidden bg-white/78 text-left"
+          )}
+          title={trimmedValue || "Nenhuma mídia selecionada"}
+        >
+          <span
+            className={cn(
+              "block truncate",
+              trimmedValue ? "text-[var(--foreground)]" : "text-[var(--color-muted-raw)]"
+            )}
+          >
+            {trimmedValue || "Nenhuma mídia selecionada"}
+          </span>
+        </div>
         <button
           type="button"
           onClick={() => setPickerOpen((current) => !current)}
@@ -115,6 +129,15 @@ export function DeveloperMediaField({
           Biblioteca
         </button>
       </div>
+      {trimmedValue && !required ? (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className={cn(developerGhostButtonClassName, "min-h-9 rounded-xl px-3 py-2 text-xs")}
+        >
+          Limpar seleção
+        </button>
+      ) : null}
 
       {pickerOpen ? (
         <div className="rounded-[22px] border border-slate-200/86 bg-slate-50/76 p-3">
@@ -140,52 +163,51 @@ export function DeveloperMediaField({
           {error ? <DeveloperMessage tone="error">{error}</DeveloperMessage> : null}
 
           {!loading && media.length > 0 ? (
-            <>
-              <datalist id={listId}>
-                {media.map((item) => (
-                  <option key={item.url} value={item.url} />
-                ))}
-              </datalist>
-              <div className="grid gap-2 sm:grid-cols-3">
-                {media.map((item) => {
-                  const itemType = item.mediaType ?? mediaTypeFromUrl(item.url);
-                  return (
-                    <button
-                      key={item.url}
-                      type="button"
-                      onClick={() => onChange(item.url)}
-                      className={cn(
-                        "group overflow-hidden rounded-[16px] border text-left transition-all hover:-translate-y-0.5",
-                        value === item.url
-                          ? "border-[var(--primary)] bg-[var(--primary)]/8"
-                          : "border-[var(--border)] bg-white/82"
-                      )}
-                    >
-                      {itemType === "video" ? (
-                        <div className="flex h-20 items-center justify-center bg-slate-950 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                          Video
-                        </div>
-                      ) : (
-                        <img
-                          src={item.thumbnailUrl || item.url}
-                          alt={item.name}
-                          className="h-20 w-full object-cover"
-                          loading="lazy"
-                        />
-                      )}
-                      <div className="p-2">
-                        <p className="truncate text-xs font-semibold text-[var(--foreground)]">
-                          {item.name}
-                        </p>
-                        <p className="mt-1 truncate text-[11px] text-[var(--color-muted-raw)]">
-                          {item.usedInContent ? "Em uso" : item.source} - {itemType}
-                        </p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {media.map((item) => {
+                const itemType = item.mediaType ?? mediaTypeFromUrl(item.url);
+                return (
+                  <button
+                    key={item.url}
+                    type="button"
+                    onClick={() => onChange(item.url)}
+                    className={cn(
+                      "group overflow-hidden rounded-[16px] border text-left transition-all hover:-translate-y-0.5",
+                      value === item.url
+                        ? "border-[var(--primary)] bg-[var(--primary)]/8"
+                        : "border-[var(--border)] bg-white/82"
+                    )}
+                  >
+                    {itemType === "video" ? (
+                      <div className="flex h-20 items-center justify-center bg-slate-950 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                        Video
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
+                    ) : (
+                      <img
+                        src={item.thumbnailUrl || item.url}
+                        alt={item.name}
+                        className="h-20 w-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <div className="p-2">
+                      <p className="truncate text-xs font-semibold text-[var(--foreground)]">
+                        {item.name}
+                      </p>
+                      <p className="mt-1 truncate text-[11px] text-[var(--color-muted-raw)]">
+                        {item.usedInContent ? "Em uso" : item.source} - {itemType}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {!loading && !error && media.length === 0 ? (
+            <DeveloperMessage tone="info">
+              Nenhuma mídia compatível encontrada na biblioteca.
+            </DeveloperMessage>
           ) : null}
         </div>
       ) : null}
@@ -281,7 +303,7 @@ export function DeveloperMediaPreview({
                 Nenhuma mídia selecionada
               </p>
               <p className="max-w-[22ch] text-[11px] leading-5 text-[var(--color-muted-raw)]">
-                Escolha um arquivo da biblioteca ou informe uma URL valida.
+                Escolha um arquivo da biblioteca.
               </p>
             </div>
           )}

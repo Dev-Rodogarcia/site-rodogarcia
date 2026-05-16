@@ -36,7 +36,18 @@ export function createApp() {
   );
   app.use(express.json({ limit: "8mb" }));
   app.use(cookieParser());
-  app.use("/uploads", express.static(env.uploadsDir, { fallthrough: true }));
+  app.use(
+    "/uploads",
+    express.static(env.uploadsDir, {
+      fallthrough: true,
+      immutable: true,
+      maxAge: "1y",
+      setHeaders(res) {
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      },
+    })
+  );
   app.use("/api", apiRouter);
   app.get("/health", (_req, res) => res.json({ ok: true }));
 

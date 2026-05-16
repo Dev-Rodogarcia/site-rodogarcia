@@ -17,20 +17,20 @@ import { sanitizePath, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 import { HttpError } from "../utils/http.js";
 import { generateId } from "../utils/ids.js";
 import { recordAuditAction } from "./auditService.js";
+import {
+  IMAGE_EXTENSIONS,
+  MEDIA_EXTENSIONS,
+  VIDEO_EXTENSIONS,
+  assertInternalMediaUrl,
+} from "./mediaValidationService.js";
 
 const MAX_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_UPLOAD_BYTES = 64 * 1024 * 1024;
-const IMAGE_EXTENSIONS = new Set([
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".webp",
-  ".gif",
-  ".svg",
-  ".avif",
-]);
-const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".ogg"]);
-const MEDIA_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS]);
+const WEBP_QUALITY = clampNumber(process.env.MEDIA_WEBP_QUALITY, 82, 60, 95);
+const WEBP_THUMB_QUALITY = clampNumber(process.env.MEDIA_WEBP_THUMB_QUALITY, 72, 55, 90);
+const WEBP_MEDIUM_WIDTH = clampNumber(process.env.MEDIA_WEBP_MEDIUM_WIDTH, 960, 480, 1600);
+const WEBP_LARGE_WIDTH = clampNumber(process.env.MEDIA_WEBP_LARGE_WIDTH, 1440, 960, 2400);
+const WEBP_OPTIMIZED_WIDTH = clampNumber(process.env.MEDIA_WEBP_OPTIMIZED_WIDTH, 1920, 1200, 3200);
 const UPLOAD_IMAGE_MIME_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -72,6 +72,14 @@ export interface AdminImageRecord {
   originalUrl?: string;
   optimizedUrl?: string;
   thumbnailUrl?: string;
+  mediumUrl?: string;
+  largeUrl?: string;
+}
+
+function clampNumber(value: unknown, fallback: number, min: number, max: number) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(parsed)));
 }
 
 function walkFiles(rootDir: string, relativeDir = ""): string[] {
@@ -233,6 +241,8 @@ export function listAdminImages(): AdminImageRecord[] {
       originalUrl: sanitizePath(item.originalUrl),
       optimizedUrl: sanitizePath(item.optimizedUrl ?? item.url),
       thumbnailUrl: sanitizePath(item.thumbnailUrl),
+      mediumUrl: sanitizePath(item.mediumUrl),
+      largeUrl: sanitizePath(item.largeUrl),
     } satisfies AdminImageRecord;
   });
 
@@ -312,23 +322,37 @@ export async function saveAdminImageFromBuffer({
   const originalName = `${base}${MIME_TO_EXTENSION[mimeType]}`;
   const optimizedName = `${base}.webp`;
   const thumbnailName = `${base}-thumb.webp`;
+  const mediumName = `${base}-medium.webp`;
+  const largeName = `${base}-large.webp`;
   const originalPath = path.join(env.uploadsDir, originalName);
   const optimizedPath = path.join(env.uploadsDir, optimizedName);
   const thumbnailPath = path.join(env.uploadsDir, thumbnailName);
+  const mediumPath = path.join(env.uploadsDir, mediumName);
+  const largePath = path.join(env.uploadsDir, largeName);
 
   fs.writeFileSync(originalPath, buffer);
   const pipeline = sharp(buffer, { failOn: "none" }).rotate();
   const metadata = await pipeline.metadata();
   await sharp(buffer, { failOn: "none" })
     .rotate()
-    .resize({ width: 1920, withoutEnlargement: true })
-    .webp({ quality: 82, effort: 4 })
+    .resize({ width: WEBP_OPTIMIZED_WIDTH, withoutEnlargement: true })
+    .webp({ quality: WEBP_QUALITY, effort: 4 })
     .toFile(optimizedPath);
   await sharp(buffer, { failOn: "none" })
     .rotate()
     .resize({ width: 420, height: 260, fit: "cover" })
-    .webp({ quality: 72, effort: 4 })
+    .webp({ quality: WEBP_THUMB_QUALITY, effort: 4 })
     .toFile(thumbnailPath);
+  await sharp(buffer, { failOn: "none" })
+    .rotate()
+    .resize({ width: WEBP_MEDIUM_WIDTH, withoutEnlargement: true })
+    .webp({ quality: WEBP_QUALITY, effort: 4 })
+    .toFile(mediumPath);
+  await sharp(buffer, { failOn: "none" })
+    .rotate()
+    .resize({ width: WEBP_LARGE_WIDTH, withoutEnlargement: true })
+    .webp({ quality: WEBP_QUALITY, effort: 4 })
+    .toFile(largePath);
 
   const record = {
     id: generateId("media"),
@@ -338,6 +362,8 @@ export async function saveAdminImageFromBuffer({
     originalUrl: `/uploads/${originalName}`,
     optimizedUrl: `/uploads/${optimizedName}`,
     thumbnailUrl: `/uploads/${thumbnailName}`,
+    mediumUrl: `/uploads/${mediumName}`,
+    largeUrl: `/uploads/${largeName}`,
     format: "webp",
     originalFormat: mimeType,
     width: metadata.width ?? 0,
@@ -345,6 +371,9 @@ export async function saveAdminImageFromBuffer({
     originalSize: buffer.length,
     optimizedSize: fs.statSync(optimizedPath).size,
     thumbnailSize: fs.statSync(thumbnailPath).size,
+    mediumSize: fs.statSync(mediumPath).size,
+    largeSize: fs.statSync(largePath).size,
+    webpQuality: WEBP_QUALITY,
     uploadedAt: new Date().toISOString(),
   };
   writeMediaLibrary([record, ...readMediaLibrary()].slice(0, 5000));
@@ -433,8 +462,8 @@ export async function saveAdminImage(fileName: string, dataUrl: string, req?: Re
 }
 
 export function replaceAdminImageReferences(fromUrlRaw: string, toUrlRaw: string, req?: Request) {
-  const fromUrl = sanitizeUrl(fromUrlRaw);
-  const toUrl = sanitizeUrl(toUrlRaw);
+  const fromUrl = assertInternalMediaUrl(fromUrlRaw, { kind: "all", required: true, label: "URL atual" });
+  const toUrl = assertInternalMediaUrl(toUrlRaw, { kind: "all", required: true, label: "Nova URL" });
   if (!fromUrl || !toUrl) throw new HttpError(422, "Informe URLs validas.");
 
   writeContentData(replaceReferences(readContentData(), fromUrl, toUrl));
@@ -463,7 +492,10 @@ export function updateMediaSlots(req: Request | undefined, body: Record<string, 
     ...current,
     ...Object.fromEntries(
       Object.entries(body)
-        .map(([key, value]) => [sanitizeText(key, 120), sanitizeUrl(value)])
+        .map(([key, value]) => [
+          sanitizeText(key, 120),
+          assertInternalMediaUrl(value, { kind: "all", required: false, label: `Slot ${key}` }),
+        ])
         .filter(([key, value]) => key && value)
     ),
   };

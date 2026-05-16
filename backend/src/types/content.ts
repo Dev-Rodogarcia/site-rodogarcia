@@ -470,7 +470,7 @@ export interface QuotePageContent {
   };
 }
 
-export interface HeroButton {
+export interface LegacyHeroButton {
   label: string;
   url: string;
   enabled: boolean;
@@ -478,7 +478,7 @@ export interface HeroButton {
   variant?: ButtonVariant;
 }
 
-export interface HeroSlide {
+export interface LegacyHeroSlide {
   id: string;
   order?: number;
   title: string;
@@ -490,12 +490,12 @@ export interface HeroSlide {
   layoutMode?: HeroLayoutMode;
   fullImageButtonsEnabled?: boolean;
   fullImageBackgroundType?: HeroBackgroundType;
-  buttons: HeroButton[];
+  buttons: LegacyHeroButton[];
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface DnaSlide {
+export interface LegacyOperationSlide {
   id: string;
   order?: number;
   title: string;
@@ -512,7 +512,7 @@ export interface DnaSlide {
   updatedAt?: string;
 }
 
-export interface Feedback {
+export interface LegacyFeedback {
   id: string;
   order?: number;
   name?: string;
@@ -536,7 +536,7 @@ export interface Feedback {
   updatedAt?: string;
 }
 
-export interface Vaga {
+export interface LegacyJob {
   id: string;
   order?: number;
   title: string;
@@ -588,9 +588,13 @@ export interface ContentData {
   careersPage?: CareersPageContent;
   quotePage?: QuotePageContent;
   footerLinks?: FooterLinksContent;
-  heroSlides: HeroSlide[];
-  dnaSlides: DnaSlide[];
-  feedbacks: Feedback[];
-  vagas: Vaga[];
+  /** Legacy storage only: old root hero slides kept for migration safety, not an active CMS module. */
+  heroSlides: LegacyHeroSlide[];
+  /** Legacy storage only: old operation carousel key kept so old JSON is not destroyed on read/write. */
+  dnaSlides: LegacyOperationSlide[];
+  /** Legacy storage only: old feedback collection kept for migration safety, not an active CMS module. */
+  feedbacks: LegacyFeedback[];
+  /** Legacy storage only: old jobs collection migrates into careersPage.jobs. */
+  vagas: LegacyJob[];
   units: OperationalUnit[];
 }

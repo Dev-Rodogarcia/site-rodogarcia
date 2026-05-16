@@ -7,10 +7,11 @@ import {
 import { RATE_LIMITS, getClientIp, getRateLimitState, registerHit } from "../security/rateLimit.js";
 import { generateId } from "../utils/ids.js";
 import { HttpError } from "../utils/http.js";
-import { sanitizeEmail, sanitizePath, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
+import { sanitizeEmail, sanitizePath, sanitizeText } from "../utils/sanitize.js";
 import { createLeadRecord } from "./leadsService.js";
 import { recordAuditAction } from "./auditService.js";
 import { recordTrackingEvent } from "./trackingService.js";
+import { sanitizeInternalImageUrl } from "./mediaValidationService.js";
 
 const DEFAULT_CONFIG = {
   enabled: true,
@@ -72,7 +73,7 @@ export function updatePopupConfig(raw: Record<string, unknown>, req?: Request): 
     successMessage:
       sanitizeText(config.successMessage, 280) || DEFAULT_CONFIG.successMessage,
     badgeText: sanitizeText(config.badgeText, 60) || DEFAULT_CONFIG.badgeText,
-    image: sanitizeUrl(config.image),
+    image: sanitizeInternalImageUrl(config.image, "Popup: imagem padrão"),
     delaySeconds: Math.min(Math.max(0, Number(config.delaySeconds) || 10), 120),
     cooldownHours: Math.min(Math.max(0, Number(config.cooldownHours) || 24), 720),
     maxShowsPerSession: Math.min(
@@ -92,7 +93,7 @@ export function updatePopupConfig(raw: Record<string, unknown>, req?: Request): 
         sanitizeText((config.desktop as Record<string, unknown> | undefined)?.description, 280) ||
         sanitizeText(config.description, 280) ||
         DEFAULT_CONFIG.desktop.description,
-      image: sanitizeUrl((config.desktop as Record<string, unknown> | undefined)?.image),
+      image: sanitizeInternalImageUrl((config.desktop as Record<string, unknown> | undefined)?.image, "Popup: imagem desktop"),
     },
     mobile: {
       ...DEFAULT_CONFIG.mobile,
@@ -105,7 +106,7 @@ export function updatePopupConfig(raw: Record<string, unknown>, req?: Request): 
         sanitizeText((config.mobile as Record<string, unknown> | undefined)?.description, 280) ||
         sanitizeText(config.description, 280) ||
         DEFAULT_CONFIG.mobile.description,
-      image: sanitizeUrl((config.mobile as Record<string, unknown> | undefined)?.image),
+      image: sanitizeInternalImageUrl((config.mobile as Record<string, unknown> | undefined)?.image, "Popup: imagem mobile"),
       sheetTitle:
         sanitizeText((config.mobile as Record<string, unknown> | undefined)?.sheetTitle, 80) ||
         DEFAULT_CONFIG.mobile.sheetTitle,

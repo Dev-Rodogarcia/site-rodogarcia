@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function LegacyContatoInfoPage() {
+export default function ContactInfoRedirectPage() {
   redirect("/developer/fale-conosco");
 }

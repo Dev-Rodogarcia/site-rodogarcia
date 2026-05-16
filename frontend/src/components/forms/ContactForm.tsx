@@ -21,6 +21,14 @@ type FormValues = z.infer<typeof schema>;
 const fieldClassName =
   "w-full rounded-2xl border border-[var(--border)]/70 bg-white/82 px-4 py-3.5 text-sm text-[var(--foreground)] placeholder:text-[var(--color-muted-raw)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition-all duration-200 focus:border-[var(--primary)]/28 focus:bg-white focus:ring-4 focus:ring-[var(--primary)]/10";
 
+function dispatchFormTracking(status: "success" | "fail", reason = "") {
+  window.dispatchEvent(
+    new CustomEvent(status === "success" ? "rg:form-success" : "rg:form-fail", {
+      detail: { form: "contact", reason },
+    })
+  );
+}
+
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
@@ -47,15 +55,20 @@ export default function ContactForm() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setErrorMsg(data.error ?? "Erro ao enviar mensagem.");
+        const reason = data.error ?? "Erro ao enviar mensagem.";
+        setErrorMsg(reason);
         setStatus("error");
+        dispatchFormTracking("fail", reason);
         return;
       }
       setStatus("success");
+      dispatchFormTracking("success");
       reset();
     } catch {
-      setErrorMsg("Erro de conexão. Tente novamente.");
+      const reason = "Erro de conexão. Tente novamente.";
+      setErrorMsg(reason);
       setStatus("error");
+      dispatchFormTracking("fail", reason);
     }
   }
 
@@ -84,7 +97,7 @@ export default function ContactForm() {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, () => dispatchFormTracking("fail", "validation"))}
       className="grid gap-6 rounded-[32px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(241,245,249,0.94)_100%)] p-6 shadow-[0_24px_56px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-8"
       noValidate
     >

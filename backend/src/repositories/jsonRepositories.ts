@@ -33,6 +33,9 @@ export const trackingEventRepository = listRepository<Record<string, unknown>>(
 export const auditLogRepository = listRepository<Record<string, unknown>>(
   storagePaths.auditLog
 );
+export const cookieConsentRepository = listRepository<Record<string, unknown>>(
+  storagePaths.cookieConsents
+);
 export const mediaLibraryRepository = listRepository<Record<string, unknown>>(
   storagePaths.mediaLibrary
 );

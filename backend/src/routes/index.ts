@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getConsentSettingsController } from "../controllers/consentController.js";
+import {
+  getConsentSettingsController,
+  recordCookieConsentController,
+} from "../controllers/consentController.js";
 import { getMediaSlotsController } from "../controllers/mediaController.js";
 import { getPublicContentController } from "../controllers/publicContentController.js";
 import { getPublicSeoController } from "../controllers/seoController.js";
@@ -18,6 +21,12 @@ apiRouter.get("/public/content", getPublicContentController);
 apiRouter.get("/public/seo", getPublicSeoController);
 apiRouter.get("/public/media-slots", getMediaSlotsController);
 apiRouter.get("/consent-settings", getConsentSettingsController);
+apiRouter.post(
+  "/consent-events",
+  requireAllowedOrigin,
+  requireJson,
+  recordCookieConsentController
+);
 apiRouter.post(
   "/tracking/event",
   requireAllowedOrigin,

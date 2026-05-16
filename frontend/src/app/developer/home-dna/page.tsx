@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function HomeDnaRedirectPage() {
+export default function HomeOperationsRedirectPage() {
   redirect("/developer/home#section-2");
 }

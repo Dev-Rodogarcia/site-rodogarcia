@@ -37,8 +37,13 @@ import type {
 import { generateId } from "../utils/ids.js";
 import { sanitizeEmail, sanitizeHexColor, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 import { HttpError } from "../utils/http.js";
+import {
+  sanitizeInternalImageUrl,
+  sanitizeInternalMediaUrl,
+  sanitizeInternalVideoUrl,
+} from "./mediaValidationService.js";
 
-export type Entity = "hero" | "dna" | "vagas" | "feedbacks" | "units";
+export type Entity = "units";
 type RawItem = Record<string, unknown> & { id: string; order?: number };
 export type HomeSectionKey =
   | "hero"
@@ -52,10 +57,6 @@ export type HomeSectionKey =
 export type ServicesPageSectionKey = "modules" | "finalCta" | "faq";
 
 const ENTITY_KEYS: Record<Entity, keyof ContentData> = {
-  hero: "heroSlides",
-  dna: "dnaSlides",
-  vagas: "vagas",
-  feedbacks: "feedbacks",
   units: "units",
 };
 
@@ -77,77 +78,6 @@ function getCollection(content: ContentData, entity: Entity) {
 function setCollection(content: ContentData, entity: Entity, items: RawItem[]) {
   const raw = content as unknown as Record<string, RawItem[]>;
   raw[ENTITY_KEYS[entity]] = sortByOrder(items);
-}
-
-function sanitizeHeroPayload(payload: Record<string, unknown>) {
-  return {
-    title: sanitizeText(payload.title, 120),
-    description: sanitizeText(payload.description, 420),
-    image: sanitizeUrl(payload.image),
-    desktopImage: sanitizeUrl(payload.desktopImage),
-    mobileImage: sanitizeUrl(payload.mobileImage),
-    active: Boolean(payload.active ?? true),
-    layoutMode: payload.layoutMode === "full-image" ? "full-image" : "text-image",
-    fullImageButtonsEnabled: Boolean(payload.fullImageButtonsEnabled),
-    fullImageBackgroundType:
-      payload.fullImageBackgroundType === "straight" ? "straight" : "wavy",
-    buttons: Array.isArray(payload.buttons)
-      ? (payload.buttons as Array<Record<string, unknown>>)
-          .slice(0, 2)
-          .map((button) => ({
-            label: sanitizeText(button.label, 40),
-            url: sanitizeUrl(button.url),
-            enabled: Boolean(button.enabled),
-            color: sanitizeHexColor(button.color),
-            variant: button.variant === "outline" ? "outline" : "solid",
-          }))
-      : [],
-  };
-}
-
-function sanitizeDnaPayload(payload: Record<string, unknown>) {
-  return {
-    title: sanitizeText(payload.title, 120),
-    text: sanitizeText(payload.text, 420),
-    image: sanitizeUrl(payload.image),
-    video: sanitizeUrl(payload.video),
-    desktopImage: sanitizeUrl(payload.desktopImage),
-    mobileImage: sanitizeUrl(payload.mobileImage),
-    desktopVideo: sanitizeUrl(payload.desktopVideo),
-    mobileVideo: sanitizeUrl(payload.mobileVideo),
-    active: Boolean(payload.active ?? true),
-    layoutMode: payload.layoutMode === "full-image" ? "full-image" : "text-image",
-  };
-}
-
-function sanitizeVagaPayload(payload: Record<string, unknown>) {
-  return {
-    titulo: sanitizeText(payload.titulo ?? payload.title, 120),
-    descricao: sanitizeText(payload.descricao ?? payload.description, 600),
-    local: sanitizeText(payload.local ?? payload.location, 120),
-    tipo: sanitizeText(payload.tipo ?? payload.contractType, 40),
-    ativo: Boolean(payload.ativo ?? payload.active ?? true),
-    featured: Boolean(payload.featured),
-    status: sanitizeText(payload.status, 40),
-    workType: sanitizeText(payload.workType, 40),
-    applyUrl: sanitizeUrl(payload.applyUrl),
-  };
-}
-
-function sanitizeFeedbackPayload(payload: Record<string, unknown>) {
-  const highlight = sanitizeText(payload.highlight ?? payload.resultadoTexto, 120);
-  return {
-    nome: sanitizeText(payload.nome ?? payload.name, 80),
-    empresa: sanitizeText(payload.empresa ?? payload.company, 120),
-    texto: sanitizeText(payload.texto ?? payload.comment ?? payload.testimonial, 800),
-    nota: Math.min(5, Math.max(1, Number(payload.nota ?? payload.rating ?? 5))),
-    ativo: Boolean(payload.ativo ?? payload.active ?? true),
-    role: sanitizeText(payload.role, 80),
-    photo: sanitizeUrl(payload.photo ?? payload.image),
-    resultadoIcon: sanitizeText(payload.resultadoIcon, 40),
-    resultadoTexto: highlight,
-    highlight,
-  };
 }
 
 function sanitizeState(value: unknown) {
@@ -173,14 +103,6 @@ function sanitizeUnitPayload(payload: Record<string, unknown>) {
 
 function sanitizeEntityPayload(entity: Entity, payload: Record<string, unknown>) {
   switch (entity) {
-    case "hero":
-      return sanitizeHeroPayload(payload);
-    case "dna":
-      return sanitizeDnaPayload(payload);
-    case "vagas":
-      return sanitizeVagaPayload(payload);
-    case "feedbacks":
-      return sanitizeFeedbackPayload(payload);
     case "units":
       return sanitizeUnitPayload(payload);
   }
@@ -254,14 +176,24 @@ function withOrder<T extends { order?: number }>(items: T[]): T[] {
 
 function sanitizeHomeMedia(payload: unknown): HomeMedia {
   const media = isRecord(payload) ? payload : {};
-  const src = sanitizeUrl(media.src);
+  const explicitType = media.type === "video" ? "video" : media.type === "image" ? "image" : null;
+  const src = explicitType === "video"
+    ? sanitizeInternalVideoUrl(media.src, "Mídia: vídeo")
+    : explicitType === "image"
+      ? sanitizeInternalImageUrl(media.src, "Mídia: imagem")
+      : sanitizeInternalMediaUrl(media.src, "Mídia");
+  const type = inferMediaType(src, media.type);
   return {
-    type: inferMediaType(src, media.type),
+    type,
     src,
     alt: sanitizeText(media.alt, 140),
-    poster: sanitizeUrl(media.poster),
-    desktopSrc: sanitizeUrl(media.desktopSrc),
-    mobileSrc: sanitizeUrl(media.mobileSrc),
+    poster: sanitizeInternalImageUrl(media.poster, "Mídia: poster"),
+    desktopSrc: type === "video"
+      ? sanitizeInternalVideoUrl(media.desktopSrc, "Mídia: vídeo desktop")
+      : sanitizeInternalImageUrl(media.desktopSrc, "Mídia: imagem desktop"),
+    mobileSrc: type === "video"
+      ? sanitizeInternalVideoUrl(media.mobileSrc, "Mídia: vídeo mobile")
+      : sanitizeInternalImageUrl(media.mobileSrc, "Mídia: imagem mobile"),
   };
 }
 
@@ -514,7 +446,7 @@ function sanitizeHomeFeedback(payload: Record<string, unknown>, index: number): 
     role: sanitizeText(payload.role, 80),
     company: sanitizeText(payload.company, 120),
     testimonial: sanitizeText(payload.testimonial, 800),
-    photo: sanitizeUrl(payload.photo),
+    photo: sanitizeInternalImageUrl(payload.photo, "Prova social: foto"),
     rating: Math.min(5, Math.max(1, Math.round(Number(payload.rating ?? 5)))),
     active: Boolean(payload.active ?? true),
   };
@@ -711,7 +643,7 @@ function sanitizeServicesModule(payload: Record<string, unknown>, index: number)
     id: sanitizeText(payload.id, 80) || `services-module-${index + 1}`,
     order: Number(payload.order ?? index + 1),
     image: {
-      src: sanitizeUrl(rawImage.src ?? payload.imageSrc),
+      src: sanitizeInternalImageUrl(rawImage.src ?? payload.imageSrc, "Serviços: imagem"),
       alt: sanitizeText(rawImage.alt ?? payload.imageAlt, 160),
       position: sanitizeText(rawImage.position, 60),
     },
@@ -815,35 +747,6 @@ function normalizeServicesForAdmin(content: ContentData): ServicesPageContent {
 }
 
 function validateEntityPayload(entity: Entity, payload: Record<string, unknown>) {
-  if (entity === "hero") {
-    const layoutMode = payload.layoutMode === "full-image" ? "full-image" : "text-image";
-    if (!payload.title || !payload.image) return "Título e imagem são obrigatórios.";
-    if (layoutMode === "text-image" && !payload.description) {
-      return "Descrição obrigatória para hero com texto.";
-    }
-  }
-  if (entity === "dna") {
-    const layoutMode = payload.layoutMode === "full-image" ? "full-image" : "text-image";
-    if (!payload.title && !payload.image && !payload.video) {
-      return "Informe ao menos título, imagem ou vídeo.";
-    }
-    if (payload.title && !payload.image && !payload.video) {
-      return "Imagem ou vídeo são obrigatórios quando houver título.";
-    }
-    if (layoutMode === "text-image" && !payload.text) {
-      return "Texto obrigatório para slide DNA com texto.";
-    }
-  }
-  if (entity === "vagas") {
-    if (!payload.titulo || !payload.local || !payload.tipo || !payload.descricao || !payload.applyUrl) {
-      return "Título, localização, contrato, descrição e link são obrigatórios.";
-    }
-  }
-  if (entity === "feedbacks") {
-    if (!payload.nome || !payload.empresa || !payload.texto || !payload.role) {
-      return "Nome, cargo, empresa e depoimento são obrigatórios.";
-    }
-  }
   if (entity === "units") {
     if (!payload.name || !payload.state || !payload.address) {
       return "Nome, estado e endereço são obrigatórios.";
@@ -856,51 +759,6 @@ function validateEntityPayload(entity: Entity, payload: Record<string, unknown>)
 }
 
 function normalizeAdminItem(entity: Entity, item: RawItem) {
-  if (entity === "hero") {
-    return {
-      ...item,
-      title: sanitizeText(item.title, 120),
-      description: sanitizeText(item.description, 420),
-      image: sanitizeUrl(item.image),
-      desktopImage: sanitizeUrl(item.desktopImage),
-      mobileImage: sanitizeUrl(item.mobileImage),
-      active: Boolean(item.active ?? true),
-      layoutMode: item.layoutMode === "full-image" ? "full-image" : "text-image",
-      fullImageButtonsEnabled: Boolean(item.fullImageButtonsEnabled),
-      fullImageBackgroundType:
-        item.fullImageBackgroundType === "straight" ? "straight" : "wavy",
-      buttons: Array.isArray(item.buttons) ? item.buttons : [],
-    };
-  }
-  if (entity === "dna") {
-    return {
-      ...item,
-      title: sanitizeText(item.title ?? item.titulo, 120),
-      text: sanitizeText(item.text ?? item.descricao, 420),
-      image: sanitizeUrl(item.image ?? item.imagem),
-      video: sanitizeUrl(item.video),
-      desktopImage: sanitizeUrl(item.desktopImage),
-      mobileImage: sanitizeUrl(item.mobileImage),
-      desktopVideo: sanitizeUrl(item.desktopVideo),
-      mobileVideo: sanitizeUrl(item.mobileVideo),
-      active: Boolean(item.active ?? true),
-      layoutMode: item.layoutMode === "full-image" ? "full-image" : "text-image",
-    };
-  }
-  if (entity === "vagas") {
-    return {
-      ...item,
-      title: sanitizeText(item.title ?? item.titulo, 120),
-      location: sanitizeText(item.location ?? item.local, 120),
-      contractType: sanitizeText(item.contractType ?? item.tipo, 40),
-      description: sanitizeText(item.description ?? item.descricao, 600),
-      active: Boolean(item.active ?? item.ativo ?? true),
-      featured: Boolean(item.featured),
-      status: sanitizeText(item.status, 40),
-      workType: sanitizeText(item.workType, 40),
-      applyUrl: sanitizeUrl(item.applyUrl),
-    };
-  }
   if (entity === "units") {
     return {
       ...item,
@@ -918,24 +776,6 @@ function normalizeAdminItem(entity: Entity, item: RawItem) {
       active: Boolean(item.active ?? item.ativo ?? true),
     };
   }
-
-  const rating = Math.min(5, Math.max(1, Number(item.nota ?? item.rating ?? 5)));
-  const testimonial = sanitizeText(item.testimonial ?? item.comment ?? item.texto, 800);
-  const highlight = sanitizeText(item.highlight ?? item.resultadoTexto, 120);
-  return {
-    ...item,
-    name: sanitizeText(item.name ?? item.nome, 80),
-    company: sanitizeText(item.company ?? item.empresa, 120),
-    testimonial,
-    rating,
-    active: Boolean(item.ativo ?? item.active ?? true),
-    role: sanitizeText(item.role, 80),
-    photo: sanitizeUrl(item.photo ?? item.image),
-    image: sanitizeUrl(item.photo ?? item.image),
-    highlight,
-    resultadoIcon: sanitizeText(item.resultadoIcon, 40),
-    resultadoTexto: highlight,
-  };
 }
 
 export function getSiteTexts() {

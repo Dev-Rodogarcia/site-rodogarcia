@@ -7,13 +7,17 @@ import {
 import { RATE_LIMITS, getClientIp, getRateLimitState, registerHit } from "../security/rateLimit.js";
 import { generateId } from "../utils/ids.js";
 import { HttpError } from "../utils/http.js";
-import { sanitizePath, sanitizeText } from "../utils/sanitize.js";
+import { maskIpAddress, sanitizePath, sanitizeText } from "../utils/sanitize.js";
 
 const ALLOWED_EVENTS = new Set([
   "click",
   "scroll",
   "form_submit",
+  "form_start",
+  "form_success",
+  "form_fail",
   "download",
+  "outbound_link",
   "cta_click",
   "popup_open",
   "popup_shown",
@@ -24,6 +28,7 @@ const ALLOWED_EVENTS = new Set([
   "page_view",
   "session_start",
   "session_end",
+  "time_on_page",
   "cookie_accept",
   "cookie_reject",
   "cookie_preferences",
@@ -82,7 +87,7 @@ export function recordTrackingEvent(input: {
     device: sanitizeText(input.device, 60),
     metadata: sanitizeMetadata(input.metadata),
     userAgent: input.req ? sanitizeText(input.req.header("user-agent") ?? "", 240) : "",
-    ip: input.req ? getClientIp(input.req) : "",
+    ip: input.req ? maskIpAddress(getClientIp(input.req)) : "",
     timestamp: Date.now(),
     createdAt,
   };

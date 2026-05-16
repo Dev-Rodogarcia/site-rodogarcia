@@ -43,6 +43,20 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": ["Organization", "LocalBusiness"],
+  name: "Rodogarcia Transportes",
+  url: seo.baseUrl,
+  logo: seo.absoluteUrl("/logo.svg"),
+  image: seo.absoluteUrl(seo.defaultOgImage),
+  description:
+    "Soluções logísticas nacionais com transporte fracionado, distribuição e cargas especiais.",
+  telephone: "0800 591 4557",
+  areaServed: "BR",
+  sameAs: [seo.baseUrl],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,6 +69,10 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${plusJakarta.variable}`}
     >
       <body className="min-h-dvh">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <ShellLayout>{children}</ShellLayout>
       </body>
     </html>

@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import {
   getConsentSettingsController,
+  listCookieConsentsController,
   updateConsentSettingsController,
 } from "../controllers/consentController.js";
 import {
@@ -206,6 +207,7 @@ adminRouter.post(
 );
 
 adminRouter.get("/consent-settings", getConsentSettingsController);
+adminRouter.get("/cookie-consents", listCookieConsentsController);
 adminRouter.post(
   "/consent-settings",
   requireAllowedOrigin,

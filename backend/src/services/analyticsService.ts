@@ -14,7 +14,11 @@ const ALLOWED_EVENTS = new Set([
   "click",
   "scroll",
   "form_submit",
+  "form_start",
+  "form_success",
+  "form_fail",
   "download",
+  "outbound_link",
   "cta_click",
   "popup_open",
   "popup_shown",
@@ -22,6 +26,7 @@ const ALLOWED_EVENTS = new Set([
   "page_view",
   "session_start",
   "session_end",
+  "time_on_page",
 ]);
 
 const analyticsConfigSchema = z.object({
@@ -82,6 +87,23 @@ function readEvents(): AnalyticsEvent[] {
 export function readAnalyticsConfig() {
   const parsed = analyticsConfigSchema.safeParse(analyticsConfigRepository.read());
   return parsed.success ? parsed.data : {};
+}
+
+export function readPublicAnalyticsConfig() {
+  const config = readAnalyticsConfig();
+  return {
+    tracking: config.tracking ?? {},
+    providers: {
+      ga4:
+        config.providers?.ga4?.enabled && config.providers.ga4.measurementId
+          ? { enabled: true, measurementId: config.providers.ga4.measurementId }
+          : { enabled: false, measurementId: "" },
+      clarity:
+        config.providers?.clarity?.enabled && config.providers.clarity.projectId
+          ? { enabled: true, projectId: config.providers.clarity.projectId }
+          : { enabled: false, projectId: "" },
+    },
+  };
 }
 
 export function updateAnalyticsConfig(body: Record<string, unknown>) {

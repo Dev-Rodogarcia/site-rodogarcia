@@ -6,6 +6,7 @@ import { ArrowSquareOut, CheckCircle, Plus, SortAscending, Trash } from "@phosph
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { DeveloperMediaField } from "@/components/developer/DeveloperMediaField";
 import { DeveloperCmsAccordion } from "@/components/developer/DeveloperCmsAccordion";
+import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import {
   DeveloperCard,
   DeveloperColorField,
@@ -294,6 +295,9 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
 
       {loading ? <div className="mt-5"><DeveloperMessage tone="info">Carregando...</DeveloperMessage></div> : null}
       {status ? <div className="mt-5"><DeveloperMessage tone={status.tone}>{status.text}</DeveloperMessage></div> : null}
+      <div className="mt-5">
+        <DeveloperResponsivePreview href={meta.publicHref} title={`Preview ${meta.title.replace(/\.$/, "")}`} />
+      </div>
 
       <div className="mt-5 grid gap-5">
         {pageKey === "about" ? (
