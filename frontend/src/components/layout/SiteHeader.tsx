@@ -196,6 +196,12 @@ export function SiteHeader() {
               logoStateClassName,
             ].join(" ")}
             aria-label="Rodogarcia - Pagina inicial"
+            onClick={(e) => {
+              if (pathname === site.home) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
           >
             <Image
               src="/logo.svg"

@@ -71,9 +71,25 @@ export default function TestimonialsCarousel({
   );
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.9, 0.6]);
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   const goToTestimonial = useCallback(
     (index: number) => {
-      const nextIndex = (index + totalSlides) % totalSlides;
+      if (index >= totalSlides) {
+        // Release native scroll and continue down the page
+        const sectionTop = containerRef.current?.offsetTop;
+        const sectionHeight = containerRef.current?.offsetHeight;
+        if (typeof sectionTop === "number" && typeof sectionHeight === "number") {
+          window.scrollTo({
+            top: sectionTop + sectionHeight,
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          });
+        }
+        return;
+      }
+
+      const nextIndex = Math.max(0, index); // Prevent backward loop
       activeIndexRef.current = nextIndex;
       setCurrentIdx(nextIndex);
       lastChangeTime.current = Date.now();
@@ -89,6 +105,28 @@ export default function TestimonialsCarousel({
     },
     [totalSlides]
   );
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      goToTestimonial(currentIdx + 1);
+    } else if (isRightSwipe) {
+      goToTestimonial(currentIdx - 1);
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -144,6 +182,9 @@ export default function TestimonialsCarousel({
       <motion.div
         style={{ filter, opacity, willChange: "filter, opacity" }}
         className="sticky top-0 flex h-screen flex-col items-center overflow-hidden pb-20 pt-20 sm:pb-24 sm:pt-24"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_46%),radial-gradient(circle_at_88%_18%,rgba(34,211,238,0.14),transparent_28%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,transparent_42%)]" />
@@ -211,7 +252,7 @@ export default function TestimonialsCarousel({
         </div>
 
         {totalSlides > 1 ? (
-          <div className="pointer-events-none absolute inset-x-3 top-1/2 z-40 flex -translate-y-1/2 items-center justify-between sm:inset-x-6 lg:inset-x-10">
+          <div className="pointer-events-none absolute inset-x-3 top-1/2 z-40 hidden -translate-y-1/2 items-center justify-between sm:flex sm:inset-x-6 lg:inset-x-10">
             <TestimonialNavButton
               label="Depoimento anterior"
               direction="previous"

@@ -144,9 +144,14 @@ export default function QuickActionsSection({ actions }: QuickActionsSectionProp
           <div className="mt-5 h-px w-full bg-[linear-gradient(90deg,transparent,rgba(15,23,42,0.09),rgba(29,78,216,0.11),transparent)] sm:mt-6" />
         ) : null}
 
-        <PrimaryActionsGrid actions={cardActions} />
-
-        <QuickActions actions={iconActions} />
+        <div className="mt-5 sm:mt-6 flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+          <div className="w-full order-2 lg:order-1 mt-5 lg:mt-0 lg:w-auto lg:shrink-0">
+            <QuickActions actions={iconActions} />
+          </div>
+          <div className="w-full order-1 lg:order-2 lg:flex-1 lg:max-w-[65%] xl:max-w-[70%]">
+            <PrimaryActionsGrid actions={cardActions} />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -203,7 +208,7 @@ export function QuickActions({ actions }: ActionsListProps) {
 
   return (
     <div
-      className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
+      className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:justify-start"
       role="list"
       aria-label="Atalhos rápidos"
     >
@@ -226,7 +231,7 @@ export function PrimaryActionsGrid({ actions }: ActionsListProps) {
   return (
     <motion.div
       className={cn(
-        "mt-5 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3 lg:gap-4",
+        "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3 lg:gap-4",
         actions.length === 1 ? "mx-auto max-w-sm sm:grid-cols-1" : ""
       )}
       role="list"
