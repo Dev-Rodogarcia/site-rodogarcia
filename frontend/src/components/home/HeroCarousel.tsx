@@ -155,7 +155,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                 </div>
 
                 {!isImageOnly ? (
-                  <div className="relative z-10 mx-auto grid min-h-[clamp(704px,96vh,1012px)] max-w-[1320px] grid-cols-1 items-center gap-10 px-6 pb-26 pt-28 sm:px-8 sm:pb-28 sm:pt-28 lg:grid-cols-[minmax(0,504px)_minmax(0,1fr)] lg:gap-14 lg:px-10 lg:pt-32 xl:px-12">
+                  <div className="relative z-10 mx-auto grid min-h-[clamp(704px,96vh,1012px)] max-w-[1320px] grid-cols-1 items-center gap-10 px-6 pb-26 pt-45 sm:px-8 sm:pb-28 sm:pt-28 lg:grid-cols-[minmax(0,504px)_minmax(0,1fr)] lg:gap-14 lg:px-10 lg:pt-32 xl:px-12">
                     <div className="flex w-full max-w-[504px] min-w-0 flex-col justify-center self-center">
                       <HeadingTag className="max-w-[11ch] text-[clamp(3rem,6vw,6rem)] font-bold leading-[0.94] tracking-[-0.065em] text-white">
                         {title}
