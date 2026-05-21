@@ -65,29 +65,27 @@ const actionSurfaceClass = [
 
 const iconButtonClass = [
   actionSurfaceClass,
-  "flex h-14 w-14 shrink-0 items-center justify-center rounded-full sm:h-[60px] sm:w-[60px]",
+  "flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full sm:h-[58px] sm:w-[58px]",
 ].join(" ");
 
 const cardButtonClass = [
   actionSurfaceClass,
-  "flex min-h-[104px] w-full min-w-0 flex-col items-center justify-center gap-2.5 rounded-[var(--radius-action)] px-3 py-4 text-center",
+  "flex min-h-[96px] w-full min-w-0 flex-col items-center justify-center gap-2.5 rounded-[var(--radius-action)] px-3 py-3.5 text-center",
 ].join(" ");
 
 const primaryButtonClass = [
   actionSurfaceClass,
-  "flex min-h-[78px] w-full min-w-0 items-center justify-between gap-3 rounded-[var(--radius-action)] px-4 py-3.5 text-left sm:min-h-[84px] sm:px-5",
+  "flex min-h-[64px] w-full min-w-0 items-center justify-between gap-2.5 rounded-[var(--radius-action)] px-3.5 py-3 text-left sm:min-h-[70px] sm:px-4.5",
 ].join(" ");
 
 const cardIconWrapClass = [
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-[calc(var(--radius-action)_-_4px)]",
-  "border border-[var(--primary)]/10 bg-[var(--color-primary-soft)] text-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]",
-  "transition-[background-color,box-shadow,transform] duration-300 ease-out group-hover/btn:-translate-y-px group-hover/btn:shadow-[0_12px_24px_rgba(29,78,216,0.14)]",
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)]/[0.04] text-[var(--primary)]",
+  "transition-[background-color,transform] duration-300 ease-out group-hover/btn:-translate-y-px group-hover/btn:bg-[var(--primary)]/[0.08]",
 ].join(" ");
 
 const primaryIconWrapClass = [
-  "flex h-10 w-10 shrink-0 items-center justify-center rounded-[calc(var(--radius-action)_-_4px)]",
-  "border border-[var(--primary)]/12 bg-[var(--color-primary-soft)] text-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.76)]",
-  "transition-[background-color,box-shadow,transform] duration-300 ease-out group-hover/btn:-translate-y-0.5 group-hover/btn:shadow-[0_14px_28px_rgba(29,78,216,0.16)]",
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)]/[0.04] text-[var(--primary)]",
+  "transition-[background-color,transform] duration-300 ease-out group-hover/btn:-translate-y-0.5 group-hover/btn:bg-[var(--primary)]/[0.08]",
 ].join(" ");
 
 const iconOnlyClass =
@@ -97,10 +95,10 @@ const labelClass =
   "max-w-full truncate whitespace-nowrap text-xs font-extrabold leading-snug text-[var(--foreground)]";
 
 const primaryLabelClass =
-  "max-w-full truncate text-sm font-extrabold leading-tight tracking-[-0.01em] text-[var(--foreground)]";
+  "max-w-full truncate text-[13px] font-extrabold leading-tight tracking-[-0.012em] text-[var(--foreground)] sm:text-sm";
 
 const primaryArrowClass = [
-  "ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/42 text-[var(--primary)]",
+  "ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/42 text-[var(--primary)]",
   "transition-[background-color,border-color,transform] duration-300 ease-out group-hover/btn:translate-x-0.5 group-hover/btn:border-[var(--primary)]/18 group-hover/btn:bg-white/72",
 ].join(" ");
 
@@ -151,9 +149,12 @@ export function QuickActionButton({
       aria-hidden="true"
     >
       <Icon
-        size={isIconVariant ? 27 : isPrimaryVariant ? 20 : 20}
+        size={isIconVariant ? 24 : isPrimaryVariant ? 18 : 20}
         weight="duotone"
-        className="transition-colors duration-200"
+        className={
+          "transition-colors duration-200" +
+          (isIconVariant ? " h-6 w-6 sm:h-[28px] sm:w-[28px]" : "")
+        }
       />
     </span>
   );
@@ -167,7 +168,7 @@ export function QuickActionButton({
             <span className={primaryLabelClass}>{action.label}</span>
           </span>
           <span className={primaryArrowClass} aria-hidden="true">
-            <ArrowSquareOut size={16} weight="bold" />
+            <ArrowSquareOut size={13} weight="bold" />
           </span>
         </>
       ) : (

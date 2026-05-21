@@ -108,6 +108,7 @@ interface ConsentBannerProps {
 }
 
 export default function ConsentBanner({ settings, onConsent }: ConsentBannerProps) {
+  const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
@@ -135,6 +136,10 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       ? undefined
       : () => decide("rejected", defaultCategories),
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const stored = getStoredConsent();
@@ -178,6 +183,10 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       },
       shouldReduceMotion ? 0 : 180
     );
+  }
+
+  if (!mounted) {
+    return null;
   }
 
   if (!visible || !settings.enabled) {
