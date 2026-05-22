@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CaretLeft, CaretRight, X } from "@phosphor-icons/react";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 interface ComplianceContent {
   image: {
@@ -62,26 +62,11 @@ const CERTIFICATIONS: CertificationItem[] = [
 ];
 
 const getCertImageClass = (title: string) => {
-  const base = "w-auto max-w-full object-contain drop-shadow-xl";
-  if (title === "Exército Brasileiro") {
-    return `h-[40vh] sm:h-[45vh] md:h-[40vh] lg:h-[44vh] xl:h-[46vh] max-h-[600px] ${base}`;
-  }
-  if (title === "EcoVadis" || title === "SASSMAQ") {
-    return `h-[36vh] sm:h-[40vh] md:h-[28vh] lg:h-[30vh] xl:h-[32vh] max-h-[480px] ${base}`;
-  }
-  return `h-[36vh] sm:h-[40vh] md:h-[34vh] lg:h-[36vh] xl:h-[38vh] max-h-[560px] ${base}`;
+  const base = "w-auto max-w-full object-contain drop-shadow-xl transition-all duration-300";
+  return `h-[26vh] sm:h-[30vh] md:h-[28vh] lg:h-[30vh] xl:h-[32vh] max-h-[400px] ${base}`;
 };
 
-const getLightboxImageClass = (title: string) => {
-  const base = "w-auto max-w-full object-contain";
-  if (title === "Exército Brasileiro") {
-    return `max-h-[66dvh] ${base}`;
-  }
-  if (title === "EcoVadis" || title === "SASSMAQ") {
-    return `max-h-[56dvh] ${base}`;
-  }
-  return `max-h-[62dvh] ${base}`;
-};
+
 
 export function ComplianceSection({ content }: { content?: ComplianceContent }) {
   const cmsCertification =
@@ -121,9 +106,7 @@ function CertificationScroller({
   const containerRef = useRef<HTMLDivElement>(null);
   const totalSlides = certifications.length;
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const triggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const goToCertification = useCallback(
     (index: number) => {
@@ -185,17 +168,7 @@ function CertificationScroller({
     };
   }, []);
 
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    document.body.classList.add("has-modal-open");
-    return () => document.body.classList.remove("has-modal-open");
-  }, [lightboxIndex]);
 
-  const closeLightbox = useCallback((index: number) => {
-    setCurrentIdx(index);
-    setLightboxIndex(null);
-    window.setTimeout(() => triggerRefs.current[index]?.focus({ preventScroll: true }), 0);
-  }, []);
 
   return (
     <section
@@ -249,16 +222,10 @@ function CertificationScroller({
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0 flex flex-col items-center justify-center px-6 pb-16 pt-40 md:px-12 md:pb-20 md:pt-48"
             >
-              <button
-                type="button"
-                ref={(node) => {
-                  triggerRefs.current[currentIdx] = node;
-                }}
-                onClick={() => setLightboxIndex(currentIdx)}
-                aria-label={`Abrir visualização do certificado ${certifications[currentIdx].title}`}
-                className="relative z-10 flex w-full flex-col items-center justify-center rounded-2xl text-center outline-none transition-transform duration-200 hover:scale-[1.01] focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 motion-reduce:transition-none"
+              <div
+                className="relative z-10 flex w-full flex-col items-center justify-center rounded-2xl text-center outline-none"
               >
-                <div className="mb-6 flex w-full items-center justify-center sm:mb-8 md:mb-10">
+                <div className="mb-4 flex w-full items-center justify-center sm:mb-5 md:mb-6">
                   <img
                     src={certifications[currentIdx].image}
                     alt={certifications[currentIdx].alt || certifications[currentIdx].title}
@@ -266,14 +233,15 @@ function CertificationScroller({
                   />
                 </div>
                 <div className="flex w-full shrink-0 flex-col items-center px-4">
-                  <h3 className="mb-3 text-3xl font-extrabold tracking-tight text-white drop-shadow-lg sm:mb-4 sm:text-4xl md:text-5xl lg:text-6xl">
+                  {/* w-full max-w-[30ch] text-balance garante estabilidade e evita quebra excessiva de titulos longos */}
+                  <h3 className="mx-auto mb-2 w-full max-w-[30ch] text-balance text-2xl font-extrabold leading-[1.05] tracking-[-0.01em] text-white drop-shadow-lg sm:mb-2.5 sm:text-3xl md:text-4xl lg:text-[2.8rem]">
                     {certifications[currentIdx].title}
                   </h3>
-                  <p className="max-w-lg text-base leading-relaxed text-white/80 sm:text-lg md:text-xl">
+                  <p className="mx-auto max-w-[540px] text-sm leading-relaxed text-white/80 sm:text-base md:text-[15px]">
                     {certifications[currentIdx].description}
                   </p>
                 </div>
-              </button>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -308,14 +276,6 @@ function CertificationScroller({
         </div>
       </div>
 
-      {lightboxIndex !== null ? (
-        <CertificateLightbox
-          index={lightboxIndex}
-          certifications={certifications}
-          onIndexChange={setLightboxIndex}
-          onClose={closeLightbox}
-        />
-      ) : null}
     </section>
   );
 }
@@ -342,130 +302,5 @@ function CertificateNavButton({
         <CaretRight size={22} weight="bold" aria-hidden="true" />
       )}
     </button>
-  );
-}
-
-function CertificateLightbox({
-  index,
-  certifications,
-  onIndexChange,
-  onClose,
-}: {
-  index: number;
-  certifications: CertificationItem[];
-  onIndexChange: (index: number) => void;
-  onClose: (index: number) => void;
-}) {
-  const titleId = useId();
-  const descriptionId = useId();
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const cert = certifications[index];
-  const total = certifications.length;
-  const previousIndex = (index - 1 + total) % total;
-  const nextIndex = (index + 1) % total;
-
-  useFocusTrap({
-    active: true,
-    containerRef: dialogRef,
-    initialFocusRef: closeButtonRef,
-    onEscape: () => onClose(index),
-  });
-
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        onIndexChange(previousIndex);
-        return;
-      }
-
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        onIndexChange(nextIndex);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [nextIndex, onIndexChange, previousIndex]);
-
-  return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-6">
-      <div
-        className="absolute inset-0 bg-slate-950/72 backdrop-blur-sm"
-        aria-hidden="true"
-        onClick={() => onClose(index)}
-      />
-
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        tabIndex={-1}
-        className="relative flex max-h-[92dvh] w-full max-w-[940px] flex-col overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--color-surface)] p-4 shadow-[0_24px_70px_rgba(2,6,23,0.28)] outline-none sm:p-6"
-      >
-        <button
-          ref={closeButtonRef}
-          type="button"
-          aria-label="Fechar certificado"
-          onClick={() => onClose(index)}
-          className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] text-[var(--foreground)] shadow-[0_8px_18px_rgba(15,23,42,0.08)] transition-colors hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
-        >
-          <X size={20} weight="bold" aria-hidden="true" />
-        </button>
-
-        <button
-          type="button"
-          aria-label="Certificado anterior"
-          onClick={() => onIndexChange(previousIndex)}
-          className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] text-[var(--foreground)] shadow-[0_10px_24px_rgba(15,23,42,0.1)] transition-colors hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 sm:left-5 sm:h-14 sm:w-14"
-        >
-          <CaretLeft size={24} weight="bold" aria-hidden="true" />
-        </button>
-
-        <button
-          type="button"
-          aria-label="Próximo certificado"
-          onClick={() => onIndexChange(nextIndex)}
-          className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] text-[var(--foreground)] shadow-[0_10px_24px_rgba(15,23,42,0.1)] transition-colors hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 sm:right-5 sm:h-14 sm:w-14"
-        >
-          <CaretRight size={24} weight="bold" aria-hidden="true" />
-        </button>
-
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-12 pb-4 pt-12 text-center sm:px-16 sm:pb-6 sm:pt-14">
-          <div className="flex min-h-0 w-full items-center justify-center rounded-2xl bg-[var(--color-surface-strong)] px-4 py-6 sm:px-8 sm:py-8">
-            <img
-              src={cert.image}
-              alt={cert.alt || cert.title}
-              className={getLightboxImageClass(cert.title)}
-            />
-          </div>
-
-          <div className="mt-5">
-            <h3 id={titleId} className="text-2xl font-extrabold tracking-[-0.03em] text-[var(--foreground)] sm:text-3xl">
-              {cert.title}
-            </h3>
-            <p id={descriptionId} className="mt-2 max-w-xl text-sm leading-6 text-[var(--color-muted-raw)] sm:text-base sm:leading-7">
-              {cert.description}
-            </p>
-          </div>
-
-          <div className="mt-5 flex items-center justify-center gap-2" aria-hidden="true">
-            {certifications.map((item, itemIndex) => (
-              <span
-                key={item.title}
-                className={[
-                  "h-1.5 rounded-full transition-all duration-200",
-                  itemIndex === index ? "w-8 bg-[var(--primary)]" : "w-2 bg-[var(--border)]",
-                ].join(" ")}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
