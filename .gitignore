@@ -1,12 +1,20 @@
 # Dependencies
 node_modules/
 .npm/
+.yarn/
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
 .pnpm-store/
+.pnp.*
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+bun-debug.log*
 
 # Environment variables
 .env
@@ -17,12 +25,17 @@ lerna-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.envrc
+*.local
 
 # IDE
 .vscode/
 .idea/
 .claude/
 .codex/
+.cursor/
+.fleet/
+.history/
 *.swp
 *.swo
 *~
@@ -30,14 +43,19 @@ lerna-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # Logs
+logs/
 *.log
 *.pid
 *.pid.lock
+*.seed
 
 # Sensitive local persistence
-backend/storage/private/*
+backend/storage/private/**
 !backend/storage/private/.gitkeep
 backend/storage/popup-config.json
 backend/storage/popup-events.json
@@ -49,19 +67,23 @@ backend/storage/seo-settings.json
 backend/storage/consent-settings.json
 backend/storage/media-library.json
 backend/storage/media-slots.json
+backend/storage/**/*.tmp
+backend/storage/**/.tmp-*
 
 # Runtime uploads
-backend/storage/uploads/
+backend/storage/uploads/**
 
 # Build
 .next/
 .turbo/
 .cache/
+.vite/
 .parcel-cache/
 .eslintcache
 .stylelintcache
 out/
 dist/
+build/
 coverage/
 .nyc_output/
 *.tsbuildinfo
@@ -70,6 +92,12 @@ coverage/
 # Backups
 backups/
 backup/
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.rar
 *.bak
 *.backup
 *.old
@@ -84,6 +112,9 @@ playwright-report/
 cypress/screenshots/
 cypress/videos/
 .sass-cache/
+.tmp/
+tmp/
+temp/
 .tmp-*.html
 .tmp-*.png
 tmp-dna-*.png
