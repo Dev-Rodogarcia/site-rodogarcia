@@ -1,3 +1,4 @@
+import type { Request } from "express";
 import { env } from "../config/env.js";
 import { userRepository } from "../repositories/userRepository.js";
 import type { UserRecord } from "../types/auth.js";
@@ -10,6 +11,12 @@ import {
 } from "../security/password.js";
 import { createSession } from "../security/session.js";
 import { HttpError } from "../utils/http.js";
+import {
+  RATE_LIMITS,
+  getClientIp,
+  getRateLimitState,
+  registerHit,
+} from "../security/rateLimit.js";
 
 export function publicUser(user: UserRecord) {
   return {
@@ -38,6 +45,25 @@ function assertSupremeActor(actor: UserRecord | null | undefined) {
   }
 }
 
+function assertLoginRateLimit(req: Request, email: string) {
+  const { windowMs, maxAttempts } = RATE_LIMITS.login;
+  const ip = getClientIp(req);
+  const ipState = getRateLimitState("login:ip", ip, windowMs, maxAttempts);
+  const emailState = email
+    ? getRateLimitState("login:email", email, windowMs, maxAttempts)
+    : null;
+
+  if (ipState.count >= maxAttempts || (emailState && emailState.count >= maxAttempts)) {
+    throw new HttpError(429, "Muitas tentativas de login. Tente novamente mais tarde.");
+  }
+}
+
+function registerFailedLogin(req: Request, email: string) {
+  const { windowMs } = RATE_LIMITS.login;
+  registerHit("login:ip", getClientIp(req), windowMs);
+  if (email) registerHit("login:email", email, windowMs);
+}
+
 export function listUsers() {
   return userRepository
     .list()
@@ -50,16 +76,23 @@ export function listUsers() {
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
 }
 
-export function login(emailRaw: unknown, passwordRaw: unknown) {
+export function login(req: Request) {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const emailRaw = body.email;
+  const passwordRaw = body.password;
   const email = sanitizeEmail(emailRaw);
   const password = typeof passwordRaw === "string" ? passwordRaw : "";
 
+  assertLoginRateLimit(req, email);
+
   if (!email || !password) {
+    registerFailedLogin(req, email);
     throw new HttpError(400, "E-mail e senha são obrigatórios.");
   }
 
   const user = userRepository.findByEmail(email);
   if (!user || !verifyPassword(password, user.passwordHash)) {
+    registerFailedLogin(req, email);
     throw new HttpError(401, "Credenciais invalidas.");
   }
 

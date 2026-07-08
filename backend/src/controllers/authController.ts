@@ -10,7 +10,7 @@ import { clearSessionCookie, destroySession, setSessionCookie, SESSION_COOKIE } 
 import { asyncHandler, HttpError } from "../utils/http.js";
 
 export const loginController: RequestHandler = asyncHandler((req, res) => {
-  const { user, session } = login(req.body?.email, req.body?.password);
+  const { user, session } = login(req);
   setSessionCookie(res, session);
   res.json({
     message: "Autenticado com sucesso.",

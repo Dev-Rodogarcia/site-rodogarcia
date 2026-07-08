@@ -74,6 +74,15 @@ Arquivos novos de operacao:
 - `backend/storage/private/cookie-consents.json`: registros LGPD de consentimento.
 - `backend/storage/private/tracking-events.json`: eventos agregados e anonimizados.
 
+Backups e restore do storage local:
+
+```powershell
+node scripts/backup-storage.js
+node scripts/restore-storage.js --backup backups/storage-... --confirm-restore
+```
+
+Runbook completo: `docs/backup-restore-json.md`.
+
 ## Midia e Uploads
 
 Toda imagem selecionada pelo CMS deve vir da biblioteca. Campos de midia do painel usam picker e o backend rejeita `http://`, `https://`, `data:`, `javascript:`, path traversal e arquivos nao existentes.
@@ -131,9 +140,8 @@ node scripts/tests/test-security-hardening.js
 
 Antes de publicar, confirme:
 
-- `JWT_SECRET`, `SESSION_SECRET`, `FRONTEND_ORIGIN` e `CORS_ORIGINS` configurados.
+- `JWT_SECRET` ou `SESSION_SECRET` forte, `ADMIN_SETUP_CODE` forte, `FRONTEND_ORIGIN` HTTPS e `CORS_ORIGINS` HTTPS configurados.
 - `STORAGE_ROOT` apontando para volume persistente.
 - `UPLOADS_DIR` persistente e servido apenas como arquivo estatico com `nosniff`.
 - Nenhum script de analytics configurado sem banner de consentimento ativo.
 - Backups dos JSON privados antes de migracoes ou deploys grandes.
-

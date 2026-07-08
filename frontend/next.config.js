@@ -7,13 +7,93 @@ const backendUrl = normalizeBackendUrl(
     "http://127.0.0.1:4010"
 );
 
+const isProduction = process.env.NODE_ENV === "production";
+const backendOrigin = (() => {
+  try {
+    return new URL(backendUrl).origin;
+  } catch {
+    return "";
+  }
+})();
+
+const csp = [
+  "default-src 'self'",
+  [
+    "script-src",
+    "'self'",
+    "'unsafe-inline'",
+    isProduction ? "" : "'unsafe-eval'",
+    "https://www.googletagmanager.com",
+    "https://www.clarity.ms",
+  ],
+  [
+    "connect-src",
+    "'self'",
+    backendOrigin,
+    "https://www.google-analytics.com",
+    "https://*.google-analytics.com",
+    "https://www.googletagmanager.com",
+    "https://*.clarity.ms",
+    "https://*.sentry.io",
+  ],
+  [
+    "img-src",
+    "'self'",
+    "data:",
+    "blob:",
+    backendOrigin,
+    "https://www.google-analytics.com",
+    "https://*.google-analytics.com",
+    "https://*.clarity.ms",
+  ],
+  ["media-src", "'self'", "blob:", backendOrigin],
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "frame-src 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "manifest-src 'self'",
+]
+  .map((directive) =>
+    Array.isArray(directive)
+      ? directive.filter(Boolean).join(" ")
+      : directive
+  )
+  .filter(Boolean)
+  .join("; ");
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  ...(isProduction
+    ? [
+        {
+          key: "Strict-Transport-Security",
+          value: "max-age=31536000; includeSubDomains; preload",
+        },
+      ]
+    : []),
+];
+
 /** @type {import("next").NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
   },
   async redirects() {
     return [

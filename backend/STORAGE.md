@@ -28,3 +28,5 @@ Esta pasta concentra os JSONs usados pelo backend Express.
 - `backend/storage/private/**` e `backend/storage/uploads/**` nao devem ser publicados no repositorio.
 - O backend aceita overrides por variavel de ambiente para testes e deploy.
 - Em producao, usuarios, sessoes e rate limit podem migrar para banco/store dedicado sem alterar o frontend.
+- Backups completos devem ser feitos com `node scripts/backup-storage.js` a partir da raiz e restaurados com `node scripts/restore-storage.js --backup backups/storage-... --confirm-restore`.
+- O runbook operacional fica em `docs/backup-restore-json.md`.

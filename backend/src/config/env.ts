@@ -21,16 +21,82 @@ function parseOrigins(value: string | undefined) {
     .filter(Boolean);
 }
 
+function isLocalHostname(hostname: string) {
+  return ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(hostname);
+}
+
+function validateHttpsOrigin(name: string, origin: string, errors: string[]) {
+  try {
+    const parsed = new URL(origin);
+    if (parsed.protocol !== "https:") {
+      errors.push(`${name} deve usar HTTPS em produção.`);
+    }
+    if (isLocalHostname(parsed.hostname)) {
+      errors.push(`${name} não pode apontar para localhost em produção.`);
+    }
+  } catch {
+    errors.push(`${name} deve ser uma origem absoluta válida.`);
+  }
+}
+
+function isWeakSecret(value: string) {
+  const lower = value.toLowerCase();
+  return (
+    value.length < 32 ||
+    lower.includes("dev-only") ||
+    lower.includes("change-this") ||
+    lower.includes("altere-para")
+  );
+}
+
+function isWeakSetupCode(value: string) {
+  const lower = value.toLowerCase();
+  return (
+    value.length < 16 ||
+    lower.includes("altere-para") ||
+    lower.includes("change-this") ||
+    lower.includes("dev-only")
+  );
+}
+
 const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://127.0.0.1:5010";
 const frontendOriginLocalhost =
   frontendOrigin.includes("127.0.0.1")
     ? frontendOrigin.replace("127.0.0.1", "localhost")
     : frontendOrigin.replace("localhost", "127.0.0.1");
+const nodeEnv = process.env.NODE_ENV ?? "development";
+const isProduction = nodeEnv === "production";
+const host = process.env.HOST ?? "127.0.0.1";
+const port = numberEnv("PORT", 4010);
+const extraCorsOrigins = parseOrigins(process.env.CORS_ORIGINS);
+const rawJwtSecret = process.env.JWT_SECRET ?? process.env.SESSION_SECRET ?? "";
+const jwtSecret = rawJwtSecret || "dev-only-change-this-rodogarcia-secret";
+const adminSetupCode = process.env.ADMIN_SETUP_CODE ?? "";
+
+if (isProduction) {
+  const errors: string[] = [];
+
+  if (isWeakSecret(rawJwtSecret)) {
+    errors.push("JWT_SECRET ou SESSION_SECRET deve ter pelo menos 32 caracteres fortes.");
+  }
+  if (isWeakSetupCode(adminSetupCode)) {
+    errors.push("ADMIN_SETUP_CODE deve ser forte e ter pelo menos 16 caracteres.");
+  }
+
+  validateHttpsOrigin("FRONTEND_ORIGIN", frontendOrigin, errors);
+  extraCorsOrigins.forEach((origin, index) => {
+    validateHttpsOrigin(`CORS_ORIGINS[${index}]`, origin, errors);
+  });
+
+  if (errors.length > 0) {
+    throw new Error(`Configuração de produção insegura: ${errors.join(" ")}`);
+  }
+}
 
 export const env = {
-  nodeEnv: process.env.NODE_ENV ?? "development",
-  host: process.env.HOST ?? "127.0.0.1",
-  port: numberEnv("PORT", 4010),
+  nodeEnv,
+  host,
+  port,
   backendRoot,
   repoRoot,
   storageRoot: path.resolve(
@@ -45,20 +111,18 @@ export const env = {
   frontendOrigin,
   allowedOrigins: new Set([
     frontendOrigin,
-    frontendOriginLocalhost,
-    `http://${process.env.HOST ?? "127.0.0.1"}:${numberEnv("PORT", 4010)}`,
-    ...parseOrigins(process.env.CORS_ORIGINS),
+    ...(isProduction
+      ? []
+      : [frontendOriginLocalhost, `http://${host}:${port}`]),
+    ...extraCorsOrigins,
   ]),
-  jwtSecret:
-    process.env.JWT_SECRET ??
-    process.env.SESSION_SECRET ??
-    "dev-only-change-this-rodogarcia-secret",
-  adminSetupCode: process.env.ADMIN_SETUP_CODE ?? "",
+  jwtSecret,
+  adminSetupCode,
   supremeAdminEmails: new Set([
     "dev@rodogarcia.com.br",
     ...parseOrigins(process.env.SUPREME_ADMIN_EMAILS).map((email) =>
       email.toLowerCase()
     ),
   ]),
-  isProduction: process.env.NODE_ENV === "production",
+  isProduction,
 } as const;
