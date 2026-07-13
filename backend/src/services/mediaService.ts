@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 import sharp from "sharp";
 import type { Request } from "express";
@@ -317,8 +318,7 @@ export async function saveAdminImageFromBuffer({
   }
 
   fs.mkdirSync(env.uploadsDir, { recursive: true });
-  const now = Date.now();
-  const base = `${safeFileBaseName(fileName)}-${now}`;
+  const base = `${safeFileBaseName(fileName)}-${crypto.randomUUID()}`;
   const originalName = `${base}${MIME_TO_EXTENSION[mimeType]}`;
   const optimizedName = `${base}.webp`;
   const thumbnailName = `${base}-thumb.webp`;
@@ -420,7 +420,7 @@ export async function saveAdminMediaFromBuffer({
 
   fs.mkdirSync(env.uploadsDir, { recursive: true });
   const fileExtension = MIME_TO_EXTENSION[mimeType]!;
-  const storedName = `${safeFileBaseName(fileName)}-${Date.now()}${fileExtension}`;
+  const storedName = `${safeFileBaseName(fileName)}-${crypto.randomUUID()}${fileExtension}`;
   const storedPath = path.join(env.uploadsDir, storedName);
   fs.writeFileSync(storedPath, buffer);
 

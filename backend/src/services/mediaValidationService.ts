@@ -89,10 +89,12 @@ export function isKnownLibraryMedia(value: unknown, kind: InternalMediaKind = "a
   const url = normalizeInternalMediaUrl(value);
   if (!url || !urlMatchesKind(url, kind)) return false;
 
-  if (knownUrlsFromLibrary().has(url)) return true;
-
   const filePath = safeFilePathForUrl(url);
-  return Boolean(filePath && fs.existsSync(filePath) && fs.statSync(filePath).isFile());
+  try {
+    return Boolean(filePath && fs.existsSync(filePath) && fs.statSync(filePath).isFile());
+  } catch {
+    return false;
+  }
 }
 
 export function assertInternalMediaUrl(

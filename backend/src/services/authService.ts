@@ -10,6 +10,7 @@ import {
   verifyPassword,
 } from "../security/password.js";
 import { createSession } from "../security/session.js";
+import { sessionRepository } from "../repositories/sessionRepository.js";
 import { HttpError } from "../utils/http.js";
 import {
   RATE_LIMITS,
@@ -25,17 +26,16 @@ export function publicUser(user: UserRecord) {
     name: user.name,
     role: user.role,
     isSupreme: isSupremeUser(user),
+    isOwner: user.isOwner === true,
   };
 }
 
 export function isSupremeUser(user: UserRecord | null | undefined) {
   if (!user) return false;
-  const email = user.email.toLowerCase();
-  const name = sanitizeText(user.name, 80).toLowerCase();
   return (
     user.role === "admin" &&
     user.active !== false &&
-    (env.supremeAdminEmails.has(email) || name.includes("desenvolvedor rodogarcia"))
+    user.isOwner === true
   );
 }
 
@@ -106,6 +106,7 @@ export function createUser(params: {
   password?: unknown;
   confirmPassword?: unknown;
   role?: unknown;
+  isOwner?: boolean;
 }, actor?: UserRecord) {
   if (userRepository.hasAny()) {
     assertSupremeActor(actor);
@@ -141,6 +142,7 @@ export function createUser(params: {
     name,
     role,
     active: true,
+    isOwner: params.isOwner === true,
     createdAt: nowIso,
     passwordHash: hashPassword(password),
   });
@@ -201,6 +203,13 @@ export function updateUser(
 
   const updated = userRepository.update(target.id, patch);
   if (!updated) throw new HttpError(404, "Usuário não encontrado.");
+  if (
+    patch.passwordHash ||
+    patch.active !== (target.active !== false) ||
+    patch.role !== target.role
+  ) {
+    sessionRepository.deleteByUserId(target.id);
+  }
   return updated;
 }
 
@@ -215,6 +224,7 @@ export function deleteUser(id: unknown, actor: UserRecord) {
   if (target.id === actor.id) {
     throw new HttpError(403, "Você não pode excluir sua própria conta.");
   }
+  sessionRepository.deleteByUserId(target.id);
   userRepository.delete(target.id);
 }
 
@@ -234,7 +244,7 @@ export function createInitialUser(params: {
     throw new HttpError(403, "Codigo de setup invalido.");
   }
 
-  return createUser({ ...params, role: "admin" });
+  return createUser({ ...params, role: "admin", isOwner: true });
 }
 
 export function hasAnyUser() {

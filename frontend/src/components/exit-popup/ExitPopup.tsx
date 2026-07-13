@@ -5,6 +5,7 @@ import { X } from "@phosphor-icons/react";
 import { usePhoneMask } from "@/hooks/usePhoneMask";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { api, isAdminRoute, isAuthRoute } from "@/lib/routes";
+import { getStoredConsent, type StoredConsent } from "@/components/analytics/ConsentBanner";
 
 interface PopupConfig {
   title: string;
@@ -169,6 +170,7 @@ export default function ExitPopup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [marketingAllowed, setMarketingAllowed] = useState(false);
   const { maskPhone } = usePhoneMask();
 
   const hasShown = useRef(false);
@@ -181,6 +183,23 @@ export default function ExitPopup() {
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
+  useEffect(() => {
+    const syncConsent = (event?: Event) => {
+      const detail = event instanceof CustomEvent ? (event.detail as StoredConsent | undefined) : undefined;
+      const consent = detail ?? getStoredConsent();
+      const allowed = consent?.categories.marketing === true;
+      setMarketingAllowed(allowed);
+      if (!allowed) {
+        clearFrequency();
+        setOpen(false);
+        setRendered(false);
+      }
+    };
+    syncConsent();
+    window.addEventListener("rg:consent-updated", syncConsent);
+    return () => window.removeEventListener("rg:consent-updated", syncConsent);
+  }, []);
+
   useFocusTrap({
     active: open && rendered,
     containerRef: dialogRef,
@@ -189,6 +208,7 @@ export default function ExitPopup() {
   });
 
   useEffect(() => {
+    if (!marketingAllowed) return;
     const path = window.location.pathname;
     if (isAdminRoute(path) || isAuthRoute(path)) return;
 
@@ -219,7 +239,7 @@ export default function ExitPopup() {
           setTimeout(() => triggerShow(DEFAULT_CONFIG), 900);
         }
       });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [marketingAllowed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const shouldShow = useCallback((cfg: PopupConfig) => {
     if (hasShown.current) return false;

@@ -21,6 +21,14 @@ function parseOrigins(value: string | undefined) {
     .filter(Boolean);
 }
 
+function parseTrustProxy(value: string | undefined): boolean | number | string {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized || normalized === "false" || normalized === "0") return false;
+  if (normalized === "true") return true;
+  const hops = Number(normalized);
+  return Number.isInteger(hops) && hops >= 0 ? hops : value!.trim();
+}
+
 function isLocalHostname(hostname: string) {
   return ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(hostname);
 }
@@ -69,6 +77,7 @@ const isProduction = nodeEnv === "production";
 const host = process.env.HOST ?? "127.0.0.1";
 const port = numberEnv("PORT", 4010);
 const extraCorsOrigins = parseOrigins(process.env.CORS_ORIGINS);
+const trustProxy = parseTrustProxy(process.env.TRUST_PROXY);
 const rawJwtSecret = process.env.JWT_SECRET ?? process.env.SESSION_SECRET ?? "";
 const jwtSecret = rawJwtSecret || "dev-only-change-this-rodogarcia-secret";
 const adminSetupCode = process.env.ADMIN_SETUP_CODE ?? "";
@@ -116,13 +125,8 @@ export const env = {
       : [frontendOriginLocalhost, `http://${host}:${port}`]),
     ...extraCorsOrigins,
   ]),
+  trustProxy,
   jwtSecret,
   adminSetupCode,
-  supremeAdminEmails: new Set([
-    "dev@rodogarcia.com.br",
-    ...parseOrigins(process.env.SUPREME_ADMIN_EMAILS).map((email) =>
-      email.toLowerCase()
-    ),
-  ]),
   isProduction,
 } as const;

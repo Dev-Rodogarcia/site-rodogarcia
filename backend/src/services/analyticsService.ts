@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Request } from "express";
 import {
   analyticsConfigRepository,
-  analyticsRepository,
+  trackingEventRepository,
 } from "../repositories/jsonRepositories.js";
 import { RATE_LIMITS, getClientIp, getRateLimitState, registerHit } from "../security/rateLimit.js";
 import { generateId } from "../utils/ids.js";
@@ -81,7 +81,7 @@ type AnalyticsEvent = {
 };
 
 function readEvents(): AnalyticsEvent[] {
-  return (analyticsRepository.read().events ?? []) as AnalyticsEvent[];
+  return trackingEventRepository.read() as AnalyticsEvent[];
 }
 
 export function readAnalyticsConfig() {
@@ -133,22 +133,10 @@ export function createAnalyticsEvent(req: Request) {
   }
 
   registerHit("analytics", ip, windowMs);
-  const analytics = analyticsRepository.read();
-  analytics.events.push({
-    id: generateId("evt"),
-    type: eventType,
-    event: eventType,
-    page: sanitizePath(body.page),
-    element: sanitizeText(body.element, 80),
-    value: sanitizeText(String(body.value ?? ""), 120),
-    sessionId: sanitizeText(body.sessionId, 64),
-    timestamp: Date.now(),
-    createdAt: new Date().toISOString(),
-  });
   recordTrackingEvent({
     event: eventType,
     page: body.page,
-    source: "analytics",
+    source: sanitizeText(body.source, 80) || "site",
     sessionId: body.sessionId,
     userId: body.userId,
     element: body.element,
@@ -158,10 +146,6 @@ export function createAnalyticsEvent(req: Request) {
     metadata: body.metadata,
     req,
   });
-  if (analytics.events.length > 10_000) {
-    analytics.events = analytics.events.slice(-10_000);
-  }
-  analyticsRepository.write(analytics);
 }
 
 function average(values: number[]) {
@@ -245,6 +229,7 @@ export function getAnalyticsStats(days: number) {
   const conversions = {
     forms: eventCounts.form_submit ?? 0,
     downloads: eventCounts.download ?? 0,
+    popupSubmissions: (eventCounts.popup_submit ?? 0) + (eventCounts.popup_submitted ?? 0),
     leads:
       (eventCounts.popup_submit ?? 0) +
       (eventCounts.popup_submitted ?? 0) +
@@ -252,7 +237,7 @@ export function getAnalyticsStats(days: number) {
     popupOpen: (eventCounts.popup_open ?? 0) + (eventCounts.popup_shown ?? 0),
   };
   const totalConversions =
-    conversions.forms + conversions.downloads + conversions.leads + conversions.popupOpen;
+    conversions.forms + conversions.downloads + conversions.popupSubmissions;
   const scrollValues = events
     .filter((event) => event.event === "scroll")
     .map(getNumericEventValue)

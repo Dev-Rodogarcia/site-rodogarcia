@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const CONSENT_KEY = "rg_analytics_consent";
+export const OPEN_CONSENT_PREFERENCES_EVENT = "rg:open-consent-preferences";
 
 export interface ConsentCategory {
   key: string;
@@ -43,21 +44,30 @@ export function getStoredConsent(): StoredConsent | null {
   try {
     const value = localStorage.getItem(CONSENT_KEY);
     if (!value) return null;
-    if (value === "granted") {
-      return {
-        version: 1,
-        decision: "accepted",
-        categories: { necessary: true, analytics: true, marketing: true },
-      };
+    const parsed: unknown = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const record = parsed as Record<string, unknown>;
+    if (
+      !Number.isInteger(record.version) ||
+      !["accepted", "rejected", "custom"].includes(String(record.decision)) ||
+      !record.categories ||
+      typeof record.categories !== "object" ||
+      Array.isArray(record.categories)
+    ) {
+      return null;
     }
-    if (value === "denied") {
-      return {
-        version: 1,
-        decision: "rejected",
-        categories: { necessary: true, analytics: false, marketing: false },
-      };
-    }
-    return JSON.parse(value) as StoredConsent;
+    const categories = Object.fromEntries(
+      Object.entries(record.categories as Record<string, unknown>).flatMap(([key, category]) =>
+        key.length > 0 && key.length <= 40 && typeof category === "boolean"
+          ? [[key, category] as [string, boolean]]
+          : []
+      )
+    );
+    return {
+      version: record.version as number,
+      decision: record.decision as StoredConsent["decision"],
+      categories,
+    };
   } catch {
     return null;
   }
@@ -97,6 +107,10 @@ export function clearOptionalConsentStorage() {
 
   try {
     sessionStorage.removeItem("rg_analytics_session_id");
+    sessionStorage.removeItem("rg_popup_session_id");
+    sessionStorage.removeItem("rg_exit_popup_shows_in_session");
+    localStorage.removeItem("rg_exit_popup_last_shown_at");
+    localStorage.removeItem("rg_exit_popup_submitted_at");
   } catch {
     /* ignore */
   }
@@ -128,13 +142,19 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     );
   }, [settings.categories]);
 
+  const rejectedCategories = useMemo(
+    () =>
+      Object.fromEntries(settings.categories.map((category) => [category.key, category.required])),
+    [settings.categories]
+  );
+
   useFocusTrap({
     active: visible && settings.enabled,
     containerRef: dialogRef,
     initialFocusRef: acceptAllRef,
     onEscape: settings.behavior?.requireExplicitChoice
       ? undefined
-      : () => decide("rejected", defaultCategories),
+      : () => decide("rejected", rejectedCategories),
   });
 
   useEffect(() => {
@@ -160,6 +180,20 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     };
   }, []);
 
+  useEffect(() => {
+    function openPreferences() {
+      if (!settings.enabled) return;
+      const stored = getStoredConsent();
+      setClosing(false);
+      setPreferencesOpen(true);
+      setSelected(stored?.categories ?? defaultCategories);
+      setVisible(true);
+    }
+
+    window.addEventListener(OPEN_CONSENT_PREFERENCES_EVENT, openPreferences);
+    return () => window.removeEventListener(OPEN_CONSENT_PREFERENCES_EVENT, openPreferences);
+  }, [defaultCategories, settings.enabled]);
+
   function decide(decision: StoredConsent["decision"], categories: Record<string, boolean>) {
     const normalized = {
       ...categories,
@@ -173,6 +207,7 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       clearOptionalConsentStorage();
     }
     onConsent(value);
+    window.dispatchEvent(new CustomEvent("rg:consent-updated", { detail: value }));
     setClosing(true);
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
     const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -190,21 +225,7 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
   }
 
   if (!visible || !settings.enabled) {
-    const stored = getStoredConsent();
-    if (!settings.enabled || !stored) return null;
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          setPreferencesOpen(true);
-          setSelected(stored.categories ?? defaultCategories);
-          setVisible(true);
-        }}
-        className="fixed bottom-4 left-4 z-[9997] inline-flex min-h-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-bold text-[var(--foreground)] shadow-[0_12px_28px_rgba(2,6,23,0.12)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
-      >
-        Cookies
-      </button>
-    );
+    return null;
   }
 
   return (
@@ -279,7 +300,7 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
         </button>
         <button
           type="button"
-          onClick={() => decide("rejected", defaultCategories)}
+          onClick={() => decide("rejected", rejectedCategories)}
           className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-5 py-2.5 text-xs font-bold text-[var(--color-foreground-soft)] transition-colors duration-200 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 sm:order-1"
         >
           {settings.rejectLabel}

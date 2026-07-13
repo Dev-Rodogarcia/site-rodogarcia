@@ -47,7 +47,6 @@ export const site = {
 
 export const auth = {
   login: "/auth/entrar",
-  register: "/auth/criar-conta",
   prefix: "/auth/",
 } as const;
 
@@ -148,11 +147,9 @@ export const api = {
 
 export const external = {
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
-  whatsappCommercial: "https://wa.me/5514999999999",
-  whatsappQuoteFractional:
-    "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fracionada.",
-  whatsappQuoteFull:
-    "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fechada.",
+  whatsappCommercial: site.contact,
+  whatsappQuoteFractional: site.contact,
+  whatsappQuoteFull: site.contact,
   commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   careersEmailAddress: "rh@rodogarcia.com.br",
@@ -160,7 +157,7 @@ export const external = {
   careersEmailWithSubject:
     "mailto:rh@rodogarcia.com.br?subject=Candidatura%20-%20Trabalhe%20Conosco",
   phoneDisplay: "0800 591 4557",
-  phoneHref: "tel:+551408005914557",
+  phoneHref: "tel:08005914557",
   brazilFlag: "https://flagcdn.com/w20/br.png",
 } as const;
 
@@ -296,8 +293,8 @@ export const redirectAliases = [
   { source: "/canal-de-denuncias", destination: site.voice, permanent: true },
   { source: "/entrar.html", destination: auth.login, permanent: true },
   { source: "/auth/entrar.html", destination: auth.login, permanent: true },
-  { source: "/criar-conta.html", destination: auth.register, permanent: true },
-  { source: "/auth/criar-conta.html", destination: auth.register, permanent: true },
+  { source: "/criar-conta.html", destination: auth.login, permanent: true },
+  { source: "/auth/criar-conta.html", destination: auth.login, permanent: true },
   { source: "/admin", destination: admin.root, permanent: true },
   { source: "/developer/index.html", destination: admin.root, permanent: true },
   {
@@ -308,7 +305,7 @@ export const redirectAliases = [
 ] as const satisfies readonly RedirectAlias[];
 
 export function isAuthRoute(pathname: string): boolean {
-  return pathname === auth.login || pathname === auth.register || pathname.startsWith(auth.prefix);
+  return pathname === auth.login || pathname.startsWith(auth.prefix);
 }
 
 export function isAdminRoute(pathname: string): boolean {

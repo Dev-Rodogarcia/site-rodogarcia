@@ -41,4 +41,11 @@ export const sessionRepository = {
     delete store[id];
     writeStore(store);
   },
+  deleteByUserId(userId: string): void {
+    const store = readStore();
+    const next = Object.fromEntries(
+      Object.entries(store).filter(([, session]) => session.userId !== userId)
+    );
+    writeStore(next);
+  },
 };

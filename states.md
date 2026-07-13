@@ -23,7 +23,7 @@
 - Backend Express é montado em `createApp`, com Helmet, CORS restrito, JSON limit `8mb`, cookie parser, `/uploads` estático com `nosniff`, router `/api` e `/health`.
 - O frontend aplica headers globais em `frontend/next.config.js`, incluindo CSP, `Referrer-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e HSTS somente em produção.
 - Controllers são finos; services concentram regra de negócio; repositories encapsulam JSON; `security` guarda sessão, auth, CSRF, origin e rate limit; `validators` guarda validação de borda; `utils` guarda helpers puros.
-- `readJsonFile` tolera arquivo ausente/JSON inválido retornando default; `writeJsonFile` escreve em arquivo temporário e renomeia para reduzir risco de corrupção.
+- `readJsonFile` retorna default apenas para arquivo ausente; corrupção, permissão e I/O falham fechados com cópia de preservação para JSON inválido. `writeJsonFile` escreve em arquivo temporário e renomeia para reduzir risco de arquivo truncado.
 - Conteúdo público canônico versionado fica em `backend/storage/content.json` e `backend/storage/site-texts.json`.
 - JSONs privados/runtime como usuários, sessões, consentimentos, analytics, auditoria, rate limits, leads, contatos, quotes, popup, biblioteca de mídia e uploads são ignorados pelo Git conforme `.gitignore`.
 - O `.gitignore` cobre ambientes locais, caches de package managers, arquivos de IDE/OS, logs, builds, coverage, artefatos de testes, backups compactados, storage runtime e temporários de escrita JSON.
@@ -63,13 +63,13 @@
 - Sessão administrativa usa cookie `sid` HttpOnly, `SameSite=Strict`, `Secure` em produção e TTL renovado de 8 horas.
 - CSRF é gerado por sessão e exigido em mutações administrativas.
 - Rotas admin exigem usuário ativo com role `admin`; o frontend também bloqueia `/developer` por `DeveloperAuthGate`.
-- Primeiro usuário admin só pode ser criado se não existir usuário e se `ADMIN_SETUP_CODE` conferir.
-- Após o setup, gerenciamento de usuários é restrito a usuário supremo; o usuário supremo não pode ser rebaixado, inativado ou excluído.
+- Primeiro usuário admin só pode ser criado se não existir usuário e se `ADMIN_SETUP_CODE` conferir; stores ilegíveis impedem o setup em vez de serem tratados como vazios.
+- Após o setup, gerenciamento de usuários é restrito ao `owner` persistido. Instalações legadas promovem de forma determinística o primeiro admin ativo ao primeiro gravar o store; o owner não pode ser rebaixado, inativado ou excluído.
 - Senhas novas usam bcrypt; hashes legados `pbkdf2$` ainda são verificados. Senha válida tem 10 a 72 caracteres, letra minúscula, letra maiúscula e número.
 - Em produção, o backend falha no boot se `JWT_SECRET` ou `SESSION_SECRET` for fraco/placeholder, se `ADMIN_SETUP_CODE` for fraco/placeholder, ou se `FRONTEND_ORIGIN`/`CORS_ORIGINS` não usarem HTTPS e origem não local.
-- CORS aceita `FRONTEND_ORIGIN` e valores extras em `CORS_ORIGINS`; em desenvolvimento também aceita a variação localhost/127.0.0.1 e a origem local do backend.
+- CORS aceita `FRONTEND_ORIGIN` e valores extras em `CORS_ORIGINS`; em desenvolvimento também aceita a variação localhost/127.0.0.1 e a origem local do backend. O IP do cliente vem de `req.ip`; `TRUST_PROXY` define explicitamente se o Express deve confiar no proxy.
 - Mutação pública ou administrativa deve validar origem com `requireAllowedOrigin`; payload JSON deve passar por `requireJson`.
-- Rate limits locais estão aplicados a login, leads, popup events, tracking e analytics; login bloqueia excesso de falhas por IP e por e-mail normalizado.
+- Rate limits locais estão aplicados a setup, consentimento, login, leads, popup events, tracking e analytics; login bloqueia excesso de falhas por IP e por e-mail normalizado.
 - O backend não deve retornar segredos, hashes, sessão, CSRF, IP bruto ou arquivos privados em endpoints públicos.
 - Consentimento LGPD registra decisão, categorias, versão, device, user agent, scripts carregados/falhos e IP mascarado; localização aproximada só é persistida se permitida.
 - O banner de cookies remove cookies opcionais conhecidos e storage de analytics quando consentimento é rejeitado ou revogado.
@@ -77,7 +77,7 @@
 - Campos de mídia do CMS aceitam somente URLs internas válidas. Referências externas, `data:`, `javascript:`, path traversal e arquivos inexistentes são proibidos.
 - Ao alterar schema de conteúdo, atualizar tipos backend/frontend, sanitizadores, normalizadores públicos, telas CMS, defaults/migração de leitura, testes e este estado.
 - Ao criar ou renomear rota pública, atualizar `routes.ts`, redirects/rewrites em `next.config.js` quando necessário, sitemap, robots, navegação, footer e SEO CMS.
-- O `next.config.js` está configurado com `ignoreBuildErrors`; por isso `npm run typecheck` é validação obrigatória e não pode ser substituída por `next build`.
+- O build do Next executa a checagem TypeScript; o CI também roda typecheck, testes, builds e hardening ponta a ponta antes da entrega.
 - `iniciar.bat` encerra processos nas portas padrão antes de iniciar servidores; não deve ser executado automaticamente por IA sem pedido explícito.
 
 ## Verificação Operacional
@@ -106,4 +106,10 @@
 
 ## Tarefas Pendentes
 
-Nenhuma tarefa pendente registrada neste momento.
+Nenhuma pendência acionável registrada.
+
+## Atualização recente
+
+- O rodapé `SiteFooter` voltou a ser Server Component e recebe o conteúdo público pela API no servidor, preservando o fallback canônico; o fragmento interativo de ícones sociais permanece isolado em Client Component.
+- `CookieSettingsButton` é um Client Component isolado no rodapé; ele abre as preferências por evento para o `ConsentBanner` sem reintroduzir o botão flutuante.
+- O contêiner do rodapé compartilha o grid horizontal do cabeçalho: `max-w-[1440px] px-5 sm:px-8 lg:px-10`.

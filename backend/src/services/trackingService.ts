@@ -1,7 +1,5 @@
 import type { Request } from "express";
 import {
-  analyticsRepository,
-  popupEventRepository,
   trackingEventRepository,
 } from "../repositories/jsonRepositories.js";
 import { RATE_LIMITS, getClientIp, getRateLimitState, registerHit } from "../security/rateLimit.js";
@@ -117,20 +115,9 @@ export function listTrackingEvents(filters: Record<string, unknown> = {}) {
   const to = Date.parse(String(filters.to ?? ""));
   const limit = Math.min(Math.max(Number(filters.limit) || 180, 1), 1000);
 
-  const legacyAnalytics = (analyticsRepository.read().events ?? []).map((event) => ({
-    ...(event as Record<string, unknown>),
-    source: "analytics",
-  }));
-  const legacyPopup = popupEventRepository.read().map((event) => ({
-    ...event,
-    event: event.event,
-    page: event.pagePath,
-    source: event.source || "exit-intent-popup",
-  }));
-  const legacyEvents = [...legacyAnalytics, ...legacyPopup] as Record<string, unknown>[];
   const ownEvents = trackingEventRepository.read();
 
-  return [...ownEvents, ...legacyEvents]
+  return ownEvents
     .map((event) => ({
       ...event,
       event: sanitizeText(event.event ?? event.type, 60).toLowerCase(),

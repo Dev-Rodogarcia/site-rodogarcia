@@ -210,6 +210,7 @@ export default function AnalyticsProvider({
   const pathname = usePathname();
   const [consent, setConsent] = useState<StoredConsent | null>(null);
   const [settings, setSettings] = useState<ConsentSettings>(DEFAULT_CONSENT_SETTINGS);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [analyticsConfig, setAnalyticsConfig] = useState<PublicAnalyticsConfig>({});
   const sessionId = useRef<string>("");
   const prevPath = useRef<string>("");
@@ -226,9 +227,11 @@ export default function AnalyticsProvider({
         if (data.settings) {
           setSettings({ ...DEFAULT_CONSENT_SETTINGS, ...data.settings });
         }
+        setSettingsLoaded(true);
       })
       .catch(() => {
         setSettings(DEFAULT_CONSENT_SETTINGS);
+        setSettingsLoaded(true);
       });
 
     fetch(api.analytics.publicConfig)
@@ -242,12 +245,14 @@ export default function AnalyticsProvider({
   }, []);
 
   useEffect(() => {
+    if (!settingsLoaded) return;
     const stored = getStoredConsent();
-    setConsent(stored);
-    if (hasAnalyticsConsent(stored)) {
+    const currentConsent = stored?.version === settings.version ? stored : null;
+    setConsent(currentConsent);
+    if (hasAnalyticsConsent(currentConsent)) {
       sessionId.current = getOrCreateSessionId();
     }
-  }, []);
+  }, [settings.version, settingsLoaded]);
 
   useEffect(() => {
     if (!hasAnalyticsConsent(consent)) {

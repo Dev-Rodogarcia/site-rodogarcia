@@ -9,6 +9,7 @@ export interface User {
 export interface UserRecord extends User {
   passwordHash: string;
   active?: boolean;
+  isOwner?: boolean;
 }
 
 export interface Session {

@@ -59,12 +59,13 @@ const DEFAULT_CONSENT = {
 
 function normalizeCategory(input: Record<string, unknown>) {
   const key = sanitizeText(input.key, 40).toLowerCase();
+  const required = key === "necessary";
   return {
     key: key || "custom",
     label: sanitizeText(input.label, 80) || key || "Categoria",
     description: sanitizeText(input.description, 240),
-    required: Boolean(input.required),
-    enabledByDefault: Boolean(input.enabledByDefault || input.required),
+    required,
+    enabledByDefault: required,
   };
 }
 
@@ -77,7 +78,14 @@ export function readConsentSettings() {
     desktop: { ...DEFAULT_CONSENT.desktop, ...(raw.desktop ?? {}) },
     mobile: { ...DEFAULT_CONSENT.mobile, ...(raw.mobile ?? {}) },
     categories: Array.isArray(raw.categories)
-      ? raw.categories.map((item) => normalizeCategory(item as Record<string, unknown>)).slice(0, 8)
+      ? raw.categories
+          .flatMap((item) =>
+            item && typeof item === "object" && !Array.isArray(item)
+              ? [normalizeCategory(item as Record<string, unknown>)]
+              : []
+          )
+          .filter((item, index, all) => all.findIndex((candidate) => candidate.key === item.key) === index)
+          .slice(0, 8)
       : DEFAULT_CONSENT.categories,
   };
 }
@@ -156,11 +164,28 @@ function sanitizeConsentDecision(value: unknown) {
   return "custom";
 }
 
+function resolveConsentCategories(
+  settings: ReturnType<typeof readConsentSettings>,
+  decision: string,
+  input: unknown
+) {
+  const requested = sanitizeBooleanMap(input);
+  return Object.fromEntries(
+    settings.categories.map((category) => {
+      if (category.required) return [category.key, true];
+      if (decision === "accepted") return [category.key, true];
+      if (decision === "rejected" || decision === "revoked") return [category.key, false];
+      return [category.key, requested[category.key] === true];
+    })
+  );
+}
+
 export function recordCookieConsent(req: Request) {
   const body = (req.body ?? {}) as Record<string, unknown>;
   const userAgent = sanitizeText(req.header("user-agent") ?? "", 300);
   const decision = sanitizeConsentDecision(body.decision);
   const settings = readConsentSettings();
+  const categories = resolveConsentCategories(settings, decision, body.categories);
   const entry = {
     id: generateId("cookie_consent"),
     createdAt: new Date().toISOString(),
@@ -168,9 +193,9 @@ export function recordCookieConsent(req: Request) {
     decision,
     status: decision,
     type: decision,
-    version: Math.max(1, Math.min(999, Math.round(Number(body.version) || settings.version))),
-    consentTextVersion: String(body.consentTextVersion ?? body.version ?? settings.version),
-    categories: sanitizeBooleanMap(body.categories),
+    version: settings.version,
+    consentTextVersion: String(settings.version),
+    categories,
     sessionId: sanitizeText(body.sessionId, 100),
     userAgent,
     device: sanitizeText(body.device, 40) || deviceFromUserAgent(userAgent),
@@ -183,7 +208,7 @@ export function recordCookieConsent(req: Request) {
       {
         at: new Date().toISOString(),
         action: decision === "revoked" ? "consent.revoked" : "consent.saved",
-        version: String(body.version ?? settings.version),
+        version: String(settings.version),
       },
     ],
   };

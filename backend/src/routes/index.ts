@@ -8,6 +8,7 @@ import { getPublicContentController } from "../controllers/publicContentControll
 import { getPublicSeoController } from "../controllers/seoController.js";
 import { createTrackingEventController } from "../controllers/trackingController.js";
 import { requireAllowedOrigin } from "../security/origin.js";
+import { RATE_LIMITS, requireRateLimit } from "../security/rateLimit.js";
 import { adminRouter } from "./adminRoutes.js";
 import { analyticsRouter } from "./analyticsRoutes.js";
 import { authRouter } from "./authRoutes.js";
@@ -25,6 +26,7 @@ apiRouter.post(
   "/consent-events",
   requireAllowedOrigin,
   requireJson,
+  requireRateLimit("consent", RATE_LIMITS.consent),
   recordCookieConsentController
 );
 apiRouter.post(

@@ -8,7 +8,18 @@ interface UsersStore {
 
 function readUsersFile(): UsersStore {
   const data = readJsonFile<UsersStore>(storagePaths.users, { users: [] });
-  return { users: Array.isArray(data.users) ? data.users : [] };
+  if (!data || !Array.isArray(data.users)) {
+    throw new Error("Armazenamento de usuários inválido.");
+  }
+
+  const users = data.users;
+  if (!users.some((user) => user.isOwner)) {
+    const firstAdmin = users
+      .filter((user) => user.role === "admin" && user.active !== false)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+    if (firstAdmin) firstAdmin.isOwner = true;
+  }
+  return { users };
 }
 
 function writeUsersFile(data: UsersStore): void {

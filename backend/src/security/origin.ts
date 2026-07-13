@@ -3,7 +3,7 @@ import { env } from "../config/env.js";
 
 export const requireAllowedOrigin: RequestHandler = (req, res, next) => {
   const origin = req.header("origin");
-  if (!origin || env.allowedOrigins.has(origin)) {
+  if (origin && env.allowedOrigins.has(origin)) {
     next();
     return;
   }

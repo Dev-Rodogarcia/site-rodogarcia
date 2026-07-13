@@ -105,7 +105,7 @@
           "description": "",
           "media": {
             "type": "image",
-            "src": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
+            "src": "/media/canonical/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
             "alt": "Banner visual Rodogarcia",
             "poster": "",
             "desktopSrc": "",
@@ -122,7 +122,7 @@
           "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
           "media": {
             "type": "image",
-            "src": "/public/uploads/1-1772986684149.png",
+            "src": "/media/canonical/1-1772986684149.png",
             "alt": "Banner Rodogarcia",
             "poster": "",
             "desktopSrc": "",
@@ -139,7 +139,7 @@
           "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
           "media": {
             "type": "image",
-            "src": "/public/uploads/2-1772986687188.png",
+            "src": "/media/canonical/2-1772986687188.png",
             "alt": "Banner Rodogarcia",
             "poster": "",
             "desktopSrc": "",
@@ -156,7 +156,7 @@
           "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
           "media": {
             "type": "image",
-            "src": "/public/uploads/3-1772986690224.png",
+            "src": "/media/canonical/3-1772986690224.png",
             "alt": "Banner Rodogarcia",
             "poster": "",
             "desktopSrc": "",
@@ -238,8 +238,8 @@
         {
           "id": "section2-dna-2",
           "order": 2,
-          "title": "Teste 2",
-          "description": "Teste 2 testando, testando, testando",
+          "title": "Pessoas que movem a operação",
+          "description": "Equipes preparadas para conduzir cada etapa com atenção, segurança e agilidade.",
           "media": {
             "type": "image",
             "src": "/caminhoneiro1.png",
@@ -253,8 +253,8 @@
         {
           "id": "section2-dna-3",
           "order": 3,
-          "title": "Teste 3",
-          "description": "teste 3, teste 3",
+          "title": "Visibilidade em cada entrega",
+          "description": "Acompanhamento próximo para decisões mais rápidas e clientes mais bem informados.",
           "media": {
             "type": "image",
             "src": "/caminhoneiro1.png",
@@ -331,15 +331,15 @@
           "media": {
             "type": "video",
             "src": "/Animação_de_Conversa_Sem_Manipulação_de_Objetos.mp4",
-            "alt": "Teste",
+            "alt": "Atendimento Rodogarcia",
             "poster": "",
             "desktopSrc": "",
             "mobileSrc": ""
           },
-          "badge": "Teste 2",
-          "title": "Teste 2",
+          "badge": "Atendimento próximo",
+          "title": "Relacionamento que acompanha sua carga",
           "description": "Da distribuição nacional às cargas especiais, cada frente combina execução rigorosa, rastreabilidade e inteligência operacional para sustentar o ritmo da sua entrega em qualquer cenário.",
-          "ctaLabel": "/servicos",
+          "ctaLabel": "Conhecer serviços",
           "ctaUrl": "/servicos"
         }
       ]
@@ -793,7 +793,7 @@
   "contactPage": {
     "heroWhatsappButton": {
       "label": "Abrir WhatsApp",
-      "url": "https://wa.me/5514999999999",
+      "url": "/fale-conosco",
       "external": true
     },
     "mainChannels": [
@@ -826,7 +826,7 @@
         "description": "Canal mais rápido para abrir conversa e pedir direcionamento.",
         "button": {
           "label": "Abrir WhatsApp",
-          "url": "https://wa.me/5514999999999",
+          "url": "/fale-conosco",
           "external": true
         }
       }
@@ -852,7 +852,7 @@
           "order": 3,
           "label": "WhatsApp",
           "title": "atendimento Rodogarcia",
-          "description": "https://wa.me/5514999999999"
+          "description": "/fale-conosco"
         },
         {
           "id": "address",
@@ -990,7 +990,7 @@
       "buttons": [
         {
           "label": "Falar no WhatsApp",
-          "url": "https://wa.me/5514999999999",
+          "url": "/fale-conosco",
           "external": true
         },
         {
@@ -1008,7 +1008,7 @@
         "description": "Canal ideal para distribuição e volumes com maior frequência de embarque.",
         "button": {
           "label": "Abrir WhatsApp - Fracionado",
-          "url": "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fracionada.",
+          "url": "/fale-conosco",
           "external": true
         }
       },
@@ -1019,7 +1019,7 @@
         "description": "Melhor opção para lotação, projetos de maior volume e requisitos técnicos específicos.",
         "button": {
           "label": "Abrir WhatsApp - Lotacao",
-          "url": "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fechada.",
+          "url": "/fale-conosco",
           "external": true
         }
       }
@@ -1034,7 +1034,7 @@
         "description": "Canal mais rápido para abrir conversa e pedir cotação.",
         "button": {
           "label": "Abrir WhatsApp",
-          "url": "https://wa.me/5514999999999",
+          "url": "/fale-conosco",
           "external": true
         },
         "buttonColor": "#22c55e",
@@ -1651,7 +1651,7 @@
       "updatedAt": "2026-03-05T18:22:45.352Z",
       "title": "",
       "description": "",
-      "image": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
+      "image": "/media/canonical/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
       "active": true,
       "layoutMode": "full-image",
       "fullImageButtonsEnabled": false,
@@ -1680,7 +1680,7 @@
       "updatedAt": "2026-03-08T16:19:09.308Z",
       "title": "Frete rápido e barato",
       "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
-      "image": "/public/uploads/1-1772986684149.png",
+      "image": "/media/canonical/1-1772986684149.png",
       "desktopImage": "",
       "mobileImage": "",
       "active": true,
@@ -1711,7 +1711,7 @@
       "updatedAt": "2026-03-08T16:19:46.647Z",
       "title": "Frete rápido e barato",
       "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
-      "image": "/public/uploads/2-1772986687188.png",
+      "image": "/media/canonical/2-1772986687188.png",
       "desktopImage": "",
       "mobileImage": "",
       "active": true,
@@ -1742,7 +1742,7 @@
       "updatedAt": "2026-03-08T16:20:00.174Z",
       "title": "Frete rápido e barato",
       "description": "Frete rápido e barato Frete rápido e barato Frete rápido e barato",
-      "image": "/public/uploads/3-1772986690224.png",
+      "image": "/media/canonical/3-1772986690224.png",
       "desktopImage": "",
       "mobileImage": "",
       "active": true,
@@ -1783,7 +1783,7 @@
       "updatedAt": "2026-03-05T18:30:03.639Z",
       "title": "",
       "text": "",
-      "image": "/public/uploads/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
+      "image": "/media/canonical/gemini_generated_image_43k01d43k01d43k0-1772734949859.webp",
       "active": true,
       "layoutMode": "full-image"
     },
@@ -1792,8 +1792,8 @@
       "order": 3,
       "createdAt": "2026-05-01T23:35:45.218Z",
       "updatedAt": "2026-05-01T23:35:45.218Z",
-      "title": "Teste 2",
-      "text": "Teste 2 testando, testando, testando",
+      "title": "Pessoas que movem a operação",
+      "text": "Equipes preparadas para conduzir cada etapa com atenção, segurança e agilidade.",
       "image": "/caminhoneiro1.png",
       "video": "",
       "desktopImage": "",
@@ -1808,8 +1808,8 @@
       "order": 4,
       "createdAt": "2026-05-01T23:36:18.632Z",
       "updatedAt": "2026-05-01T23:36:18.632Z",
-      "title": "Teste 3",
-      "text": "teste 3, teste 3",
+      "title": "Visibilidade em cada entrega",
+      "text": "Acompanhamento próximo para decisões mais rápidas e clientes mais bem informados.",
       "image": "/caminhoneiro1.png",
       "video": "",
       "desktopImage": "",

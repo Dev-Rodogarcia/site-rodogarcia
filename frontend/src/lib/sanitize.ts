@@ -18,7 +18,7 @@ const LEGACY_URL_ALIASES = new Map<string, string>([
   ["/trabalhe-conosco.html#formulario", `${site.careers}#candidatura`],
   ["/termos-de-uso.html", site.terms],
   ["/auth/entrar.html", auth.login],
-  ["/auth/criar-conta.html", auth.register],
+  ["/auth/criar-conta.html", auth.login],
   ["/developer/index.html", admin.root],
 ]);
 

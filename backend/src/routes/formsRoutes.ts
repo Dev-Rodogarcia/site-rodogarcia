@@ -14,9 +14,9 @@ export const formsRouter = Router();
 formsRouter.get("/contact", requireAdmin, listContactsController);
 formsRouter.post(
   "/contact",
-  requireAllowedOrigin,
   requireJson,
+  requireAllowedOrigin,
   createContactController
 );
 formsRouter.get("/quote", requireAdmin, listQuotesController);
-formsRouter.post("/quote", requireAllowedOrigin, requireJson, createQuoteController);
+formsRouter.post("/quote", requireJson, requireAllowedOrigin, createQuoteController);

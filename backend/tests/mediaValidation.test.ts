@@ -23,6 +23,8 @@ describe("mediaValidationService", () => {
 
   it("accepts media registered in the library store", async () => {
     const env = createIsolatedBackendEnv();
+    fs.mkdirSync(path.join(env.publicDir, "brand"), { recursive: true });
+    fs.writeFileSync(path.join(env.publicDir, "brand", "logo.webp"), "webp");
     fs.writeFileSync(
       path.join(env.storageRoot, "media-library.json"),
       JSON.stringify([{ url: "/brand/logo.webp", mediaType: "image" }])

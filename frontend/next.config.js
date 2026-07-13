@@ -84,9 +84,6 @@ const securityHeaders = [
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   async headers() {
     return [
       {
@@ -134,8 +131,8 @@ const nextConfig = {
       { source: "/canal-de-denuncias", destination: "/sua-voz", permanent: true },
       { source: "/entrar.html", destination: "/auth/entrar", permanent: true },
       { source: "/auth/entrar.html", destination: "/auth/entrar", permanent: true },
-      { source: "/criar-conta.html", destination: "/auth/criar-conta", permanent: true },
-      { source: "/auth/criar-conta.html", destination: "/auth/criar-conta", permanent: true },
+      { source: "/criar-conta.html", destination: "/auth/entrar", permanent: true },
+      { source: "/auth/criar-conta.html", destination: "/auth/entrar", permanent: true },
       { source: "/admin", destination: "/developer", permanent: true },
       { source: "/developer/index.html", destination: "/developer", permanent: true },
       {

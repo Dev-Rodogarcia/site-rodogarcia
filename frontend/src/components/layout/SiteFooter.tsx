@@ -1,64 +1,28 @@
-"use client";
-
-import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  FacebookLogo,
-  InstagramLogo,
-  LinkedinLogo,
-  WhatsappLogo,
-} from "@phosphor-icons/react";
-import type { FooterGlobalContent, FooterLinksContent } from "@/types/content";
+import type { FooterGlobalContent } from "@/types/content";
 import { DEFAULT_FOOTER_LINKS } from "@/lib/footerLinksDefaults";
+import { fetchPublicContent } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { site } from "@/lib/routes";
+import CookieSettingsButton from "@/components/CookieSettingsButton";
+import { FooterSocialLink } from "./FooterSocialLink";
 
 const CURRENT_YEAR = new Date().getFullYear();
-
-const SOCIAL_ICONS: Record<
-  string,
-  ComponentType<{ size?: number; weight?: "fill" | "duotone" | "regular" | "bold" }>
-> = {
-  InstagramLogo,
-  LinkedinLogo,
-  FacebookLogo,
-  WhatsappLogo,
-};
 
 function ordered<T extends { order?: number }>(items: T[] = []) {
   return [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
-export function SiteFooter() {
-  const [footer, setFooter] = useState<FooterGlobalContent>(DEFAULT_FOOTER_LINKS.footer);
-
-  useEffect(() => {
-    let alive = true;
-
-    async function loadFooterLinks() {
-      try {
-        const response = await fetch("/api/public/content", { cache: "no-store" });
-        if (!response.ok) return;
-        const data = (await response.json()) as { footerLinks?: FooterLinksContent };
-        if (alive && data.footerLinks?.footer) {
-          setFooter(data.footerLinks.footer);
-        }
-      } catch {
-        // Keep the static fallback visible if the public API is unavailable.
-      }
-    }
-
-    void loadFooterLinks();
-
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const columns = useMemo(() => ordered(footer.columns), [footer.columns]);
-  const socialLinks = useMemo(() => ordered(footer.socialLinks), [footer.socialLinks]);
-  const bottomLinks = useMemo(() => ordered(footer.bottomLinks), [footer.bottomLinks]);
+export async function SiteFooter() {
+  const content = await fetchPublicContent();
+  const footer: FooterGlobalContent = content.success && content.data
+    ? content.data.footerLinks.footer
+    : DEFAULT_FOOTER_LINKS.footer;
+  const columns = ordered(footer.columns);
+  const socialLinks = ordered(footer.socialLinks);
+  const bottomLinks = ordered(footer.bottomLinks);
 
   return (
     <footer
@@ -67,7 +31,7 @@ export function SiteFooter() {
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
-      <div className="relative mx-auto w-full max-w-[1200px] px-6">
+      <div className="relative mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-10">
         <div className="grid grid-cols-1 gap-8 border-b border-white/10 pb-12 sm:grid-cols-2 sm:gap-10 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]">
           <div className="flex flex-col gap-5 sm:col-span-2 lg:col-span-1">
             <Link href={site.home} aria-label="Rodogarcia - Página inicial">
@@ -115,16 +79,13 @@ export function SiteFooter() {
             listClassName="grid grid-cols-2 gap-3 lg:grid-cols-1 lg:gap-2.5"
           >
             {socialLinks.map((link) => {
-              const Icon = SOCIAL_ICONS[link.icon] ?? InstagramLogo;
               return (
                 <FooterSocialLink
                   key={link.id}
                   href={link.url}
-                  icon={<Icon size={16} weight="fill" />}
                   label={link.label}
-                >
-                  {link.label}
-                </FooterSocialLink>
+                  icon={link.icon}
+                />
               );
             })}
           </FooterColumn>
@@ -140,6 +101,7 @@ export function SiteFooter() {
                 {link.label}
               </FooterInlineLink>
             ))}
+            <CookieSettingsButton />
             <span>{footer.locationText}</span>
             <span>
               <a
@@ -281,32 +243,5 @@ function FooterInlineLink({
     <Link href={href} className={className}>
       {children}
     </Link>
-  );
-}
-
-function FooterSocialLink({
-  href,
-  icon,
-  label,
-  children,
-}: {
-  href: string;
-  icon: ReactNode;
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <li>
-      <a
-        href={href}
-        target={href.startsWith("http") ? "_blank" : undefined}
-        rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-        aria-label={`${label} da Rodogarcia`}
-        className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 px-3 py-2 text-sm text-white/64 transition-colors hover:border-white/16 hover:bg-white/6 hover:text-white"
-      >
-        {icon}
-        {children}
-      </a>
-    </li>
   );
 }

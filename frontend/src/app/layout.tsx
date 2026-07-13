@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ShellLayout } from "@/components/layout/ShellLayout";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { seo } from "@/lib/routes";
 
 const spaceGrotesk = Space_Grotesk({
@@ -73,7 +74,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <ShellLayout>{children}</ShellLayout>
+        <ShellLayout footer={<SiteFooter />}>{children}</ShellLayout>
       </body>
     </html>
   );

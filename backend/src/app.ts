@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "node:fs";
 import type { RequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -14,7 +15,7 @@ const helmetMiddleware = helmet as unknown as (
 export function createApp() {
   const app = express();
 
-  app.set("trust proxy", 1);
+  app.set("trust proxy", env.trustProxy);
   app.disable("x-powered-by");
 
   app.use(
@@ -34,7 +35,7 @@ export function createApp() {
       credentials: true,
     })
   );
-  app.use(express.json({ limit: "8mb" }));
+  app.use(express.json({ limit: "2mb" }));
   app.use(cookieParser());
   app.use(
     "/uploads",
@@ -50,6 +51,14 @@ export function createApp() {
   );
   app.use("/api", apiRouter);
   app.get("/health", (_req, res) => res.json({ ok: true }));
+  app.get("/ready", (_req, res) => {
+    try {
+      fs.accessSync(env.storageRoot, fs.constants.R_OK | fs.constants.W_OK);
+      res.json({ ok: true });
+    } catch {
+      res.status(503).json({ ok: false });
+    }
+  });
 
   app.use(notFoundHandler);
   app.use(errorHandler);
