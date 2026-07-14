@@ -5,14 +5,17 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet, { type HelmetOptions } from "helmet";
 import { env } from "./config/env.js";
+import { storagePaths } from "./config/storagePaths.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./utils/http.js";
+import { recoverJsonTransaction } from "./utils/jsonStore.js";
 
 const helmetMiddleware = helmet as unknown as (
   options?: Readonly<HelmetOptions>
 ) => RequestHandler;
 
 export function createApp() {
+  recoverJsonTransaction(storagePaths.mediaReplaceTransaction);
   const app = express();
 
   app.set("trust proxy", env.trustProxy);

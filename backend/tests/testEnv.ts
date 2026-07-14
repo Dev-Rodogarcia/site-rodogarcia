@@ -31,6 +31,7 @@ export function createIsolatedBackendEnv() {
   process.env.TRACKING_EVENTS_STORE_PATH = path.join(privateRoot, "tracking-events.json");
   process.env.MEDIA_LIBRARY_STORE_PATH = path.join(storageRoot, "media-library.json");
   process.env.MEDIA_SLOTS_STORE_PATH = path.join(storageRoot, "media-slots.json");
+  process.env.MEDIA_REPLACE_TRANSACTION_PATH = path.join(privateRoot, "media-replace-transaction.json");
   process.env.COOKIE_CONSENTS_STORE_PATH = path.join(privateRoot, "cookie-consents.json");
   process.env.CONSENT_SETTINGS_STORE_PATH = path.join(storageRoot, "consent-settings.json");
   process.env.AUDIT_LOG_STORE_PATH = path.join(privateRoot, "audit-log.json");

@@ -192,4 +192,59 @@ describe("CMS configuration regressions", () => {
       })
     ).toThrow(/ao menos um campo de contato/i);
   });
+
+  it("returns a safe popup configuration when legacy storage disables every contact field", async () => {
+    isolatedBackend();
+    const { popupConfigRepository } = await import("../src/repositories/jsonRepositories.js");
+    const { readPopupConfig } = await import("../src/services/popupService.js");
+
+    popupConfigRepository.write({
+      enableName: false,
+      enableEmail: false,
+      enablePhone: false,
+    });
+
+    expect(readPopupConfig()).toMatchObject({ enableEmail: true });
+  });
+
+  it("rejects empty LGPD fields and duplicate category keys instead of restoring old values", async () => {
+    isolatedBackend();
+    const { updateConsentSettings } = await import("../src/services/consentService.js");
+
+    expect(() => updateConsentSettings(undefined, { title: "" })).toThrow(/title é obrigatório/i);
+    expect(() => updateConsentSettings(undefined, { version: 0 })).toThrow(/versão inteira/i);
+    expect(() => updateConsentSettings(undefined, {
+      categories: [
+        { key: "analytics", label: "Analytics", description: "Medição agregada" },
+        { key: "analytics", label: "Duplicada", description: "Não deve persistir" },
+      ],
+    })).toThrow(/chaves das categorias/i);
+  });
+
+  it("requires valid provider identifiers before analytics can be enabled", async () => {
+    isolatedBackend();
+    const { readPublicAnalyticsConfig, updateAnalyticsConfig } = await import(
+      "../src/services/analyticsService.js"
+    );
+
+    expect(() => updateAnalyticsConfig({
+      providers: { ga4: { enabled: true, measurementId: "" } },
+    })).toThrow(/Measurement ID GA4 válido/i);
+    expect(() => updateAnalyticsConfig({
+      providers: { clarity: { enabled: true, projectId: "***" } },
+    })).toThrow(/Project ID Microsoft Clarity válido/i);
+
+    updateAnalyticsConfig({
+      providers: {
+        ga4: { enabled: true, measurementId: "g-abc1234" },
+        clarity: { enabled: true, projectId: "abc123def" },
+      },
+    });
+    expect(readPublicAnalyticsConfig()).toMatchObject({
+      providers: {
+        ga4: { enabled: true, measurementId: "G-ABC1234" },
+        clarity: { enabled: true, projectId: "abc123def" },
+      },
+    });
+  });
 });

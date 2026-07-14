@@ -62,6 +62,33 @@ describe("CMS content regressions", () => {
     expect(sanitizeQuotePage({ otherChannels: [] }).otherChannels).toEqual([]);
   });
 
+  it("preserves nested footer lists but rejects an empty required footer field", async () => {
+    isolatedBackend();
+    const {
+      DEFAULT_FOOTER_LINKS,
+      updateFooterLinksSection,
+    } = await import("../src/services/footerLinksContent.js");
+
+    const footer = updateFooterLinksSection(DEFAULT_FOOTER_LINKS, "footer", {
+      ...DEFAULT_FOOTER_LINKS.footer,
+      columns: DEFAULT_FOOTER_LINKS.footer.columns.map((column, index) =>
+        index === 0 ? { ...column, links: [] } : column
+      ),
+    });
+    expect(footer.footer.columns[0]?.links).toEqual([]);
+
+    const help = updateFooterLinksSection(DEFAULT_FOOTER_LINKS, "help", {
+      ...DEFAULT_FOOTER_LINKS.help,
+      contactCard: { ...DEFAULT_FOOTER_LINKS.help.contactCard, channelDescriptions: [] },
+    });
+    expect(help.help.contactCard.channelDescriptions).toEqual([]);
+
+    expect(() => updateFooterLinksSection(DEFAULT_FOOTER_LINKS, "footer", {
+      ...DEFAULT_FOOTER_LINKS.footer,
+      description: "",
+    })).toThrow(/Descrição do rodapé é obrigatório/i);
+  });
+
   it("persists an explicitly empty quick-action list and rejects invalid active actions", async () => {
     const env = isolatedBackend();
     createPublicAsset(env.publicDir, "caminhoneiro1.png");
@@ -127,5 +154,12 @@ describe("CMS content regressions", () => {
       metaTags: "logística nacional\ntransporte B2B\ncarga segura",
     });
     expect(getPublicSeoPage("/servicos")?.slug).toBe("servicos");
+    expect(() => updateSeoPage(undefined, {
+      path: "/servicos",
+      title: "Serviços logísticos para empresas",
+      description:
+        "Soluções logísticas nacionais com segurança, previsibilidade e rastreabilidade para empresas.",
+      canonical: "mailto:contato@example.com",
+    })).toThrow(/Canonical deve ser/i);
   });
 });

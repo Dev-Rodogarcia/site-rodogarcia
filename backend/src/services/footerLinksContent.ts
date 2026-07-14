@@ -14,6 +14,7 @@ import type {
   PageFaqItem,
 } from "../types/content.js";
 import { generateId } from "../utils/ids.js";
+import { HttpError } from "../utils/http.js";
 import { sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 
 export const FOOTER_LINK_SECTION_KEYS = ["footer", "terms", "help", "privacy"] as const;
@@ -129,6 +130,147 @@ function sanitizeActionCard(payload: RawRecord, index: number, fallback: FooterA
     icon: HELP_ICON_KEYS.has(icon) ? icon : fallback.icon,
     button: sanitizeButton(payload.button, fallback.button),
   };
+}
+
+function requireText(value: unknown, label: string, maxLength = 700) {
+  if (!sanitizeText(value, maxLength)) throw new HttpError(422, `${label} é obrigatório.`);
+}
+
+function requireRecord(value: unknown, label: string): RawRecord {
+  if (!isRecord(value)) throw new HttpError(422, `${label} é obrigatório.`);
+  return value;
+}
+
+function isFooterLink(value: unknown) {
+  return Boolean(sanitizeUrl(value) || sanitizeText(value, 600) === "#");
+}
+
+function requireButton(value: unknown, label: string) {
+  const button = requireRecord(value, label);
+  requireText(button.label, `${label}: texto`, 60);
+  if (!isFooterLink(button.url ?? button.href)) {
+    throw new HttpError(422, `${label}: link válido é obrigatório.`);
+  }
+}
+
+function requireRecords(value: unknown, label: string) {
+  if (!Array.isArray(value) || value.some((item) => !isRecord(item))) {
+    throw new HttpError(422, `${label}: informe uma lista válida.`);
+  }
+  return value as RawRecord[];
+}
+
+function requireTextArray(value: unknown, label: string, maxLength = 220) {
+  if (!Array.isArray(value)) throw new HttpError(422, `${label}: informe uma lista válida.`);
+  value.forEach((item, index) => requireText(item, `${label} ${index + 1}`, maxLength));
+}
+
+function requireButtons(value: unknown, label: string, count = 2) {
+  const buttons = requireRecords(value, label);
+  if (buttons.length !== count) throw new HttpError(422, `${label}: informe exatamente ${count} botão(ões).`);
+  buttons.forEach((button, index) => requireButton(button, `${label} ${index + 1}`));
+}
+
+function requireTextBlocks(value: unknown, label: string) {
+  requireRecords(value, label).forEach((block, index) => {
+    requireText(block.title, `${label} ${index + 1}: título`, 180);
+    requireText(block.description ?? block.body, `${label} ${index + 1}: descrição`, 700);
+  });
+}
+
+function validateFooterSectionInput(sectionKey: FooterLinkSectionKey, payload: RawRecord) {
+  if (sectionKey === "footer") {
+    requireText(payload.description, "Descrição do rodapé", 260);
+    requireButton(payload.proposalButton, "Botão de proposta");
+    requireButton(payload.supportButton, "Botão de atendimento");
+    requireText(payload.serviceHoursTitle, "Título de horários", 80);
+    requireText(payload.socialTitle, "Título de redes sociais", 80);
+    requireText(payload.copyrightText, "Texto de copyright", 160);
+    requireText(payload.locationText, "Texto de localização", 120);
+    requireText(payload.creditText, "Texto de crédito", 120);
+    if (!sanitizeUrl(payload.creditUrl)) throw new HttpError(422, "Link de crédito válido é obrigatório.");
+
+    requireRecords(payload.columns, "Colunas").forEach((column, index) => {
+      requireText(column.title, `Coluna ${index + 1}: título`, 80);
+      requireRecords(column.links, `Coluna ${index + 1}: links`).forEach((link, linkIndex) =>
+        requireButton(link, `Coluna ${index + 1}: link ${linkIndex + 1}`)
+      );
+    });
+    requireTextArray(payload.serviceHours, "Horários");
+    requireRecords(payload.socialLinks, "Redes sociais").forEach((link, index) => {
+      requireButton(link, `Rede social ${index + 1}`);
+      if (!SOCIAL_ICON_KEYS.has(sanitizeText(link.icon, 40))) {
+        throw new HttpError(422, `Rede social ${index + 1}: ícone inválido.`);
+      }
+    });
+    requireRecords(payload.bottomLinks, "Links inferiores").forEach((link, index) =>
+      requireButton(link, `Link inferior ${index + 1}`)
+    );
+    return;
+  }
+
+  if (sectionKey === "terms") {
+    const hero = requireRecord(payload.hero, "Hero de termos");
+    const summary = requireRecord(payload.summary, "Resumo de termos");
+    const reading = requireRecord(payload.reading, "Leitura de termos");
+    const finalCta = requireRecord(payload.finalCta, "CTA final de termos");
+    ["eyebrow", "titleHighlight", "titleRest", "description"].forEach((field) => requireText(hero[field], `Hero de termos: ${field}`));
+    ["eyebrow", "title", "description", "body"].forEach((field) => requireText(summary[field], `Resumo de termos: ${field}`));
+    requireButton(summary.button, "Resumo de termos: botão");
+    ["eyebrow", "title", "description"].forEach((field) => requireText(reading[field], `Leitura de termos: ${field}`));
+    requireTextBlocks(reading.blocks, "Blocos de termos");
+    requireText(finalCta.title, "CTA final de termos: título", 180);
+    requireText(finalCta.description, "CTA final de termos: descrição", 320);
+    requireButtons(finalCta.buttons, "CTA final de termos");
+    return;
+  }
+
+  if (sectionKey === "help") {
+    const hero = requireRecord(payload.hero, "Hero da central de ajuda");
+    const quickAccess = requireRecord(payload.quickAccess, "Acessos rápidos");
+    const contactCard = requireRecord(payload.contactCard, "Cartão de contato");
+    const faq = requireRecord(payload.faq, "FAQ");
+    const finalSupport = requireRecord(payload.finalSupport, "Suporte final");
+    ["eyebrow", "titleHighlight", "titleRest", "description"].forEach((field) => requireText(hero[field], `Hero da central de ajuda: ${field}`));
+    requireButtons(hero.buttons, "Hero da central de ajuda");
+    ["eyebrow", "title", "description"].forEach((field) => requireText(quickAccess[field], `Acessos rápidos: ${field}`));
+    const actions = requireRecords(quickAccess.actions, "Acessos rápidos");
+    if (actions.length !== DEFAULT_FOOTER_LINKS.help.quickAccess.actions.length) {
+      throw new HttpError(422, `Acessos rápidos: mantenha exatamente ${DEFAULT_FOOTER_LINKS.help.quickAccess.actions.length} ações.`);
+    }
+    actions.forEach((action, index) => {
+      requireText(action.title, `Ação rápida ${index + 1}: título`, 180);
+      requireText(action.description, `Ação rápida ${index + 1}: descrição`, 700);
+      if (!HELP_ICON_KEYS.has(sanitizeText(action.icon, 40))) throw new HttpError(422, `Ação rápida ${index + 1}: ícone inválido.`);
+      requireButton(action.button, `Ação rápida ${index + 1}: botão`);
+    });
+    requireText(contactCard.phone, "Contato da ajuda: telefone", 80);
+    requireText(contactCard.hours, "Contato da ajuda: horários", 180);
+    requireTextArray(contactCard.channelDescriptions, "Canais da ajuda");
+    ["eyebrow", "title", "description"].forEach((field) => requireText(faq[field], `FAQ: ${field}`));
+    const faqItems = requireRecords(faq.items, "FAQ");
+    if (faqItems.length !== DEFAULT_FOOTER_LINKS.help.faq.items.length) {
+      throw new HttpError(422, `FAQ: mantenha exatamente ${DEFAULT_FOOTER_LINKS.help.faq.items.length} perguntas.`);
+    }
+    faqItems.forEach((item, index) => {
+      requireText(item.question, `FAQ ${index + 1}: pergunta`, 180);
+      requireText(item.answer, `FAQ ${index + 1}: resposta`, 320);
+    });
+    ["eyebrow", "title", "description"].forEach((field) => requireText(finalSupport[field], `Suporte final: ${field}`));
+    requireButton(finalSupport.button, "Suporte final: botão");
+    return;
+  }
+
+  const hero = requireRecord(payload.hero, "Hero de privacidade");
+  const dataSection = requireRecord(payload.dataSection, "Seção de dados");
+  const finalCta = requireRecord(payload.finalCta, "CTA final de privacidade");
+  ["eyebrow", "titleHighlight", "titleRest", "description"].forEach((field) => requireText(hero[field], `Hero de privacidade: ${field}`));
+  requireButton(hero.button, "Hero de privacidade: botão");
+  ["eyebrow", "title", "description"].forEach((field) => requireText(dataSection[field], `Seção de dados: ${field}`));
+  requireTextBlocks(dataSection.blocks, "Blocos de privacidade");
+  requireText(finalCta.title, "CTA final de privacidade: título", 180);
+  requireText(finalCta.description, "CTA final de privacidade: descrição", 320);
+  requireButtons(finalCta.buttons, "CTA final de privacidade");
 }
 
 export const DEFAULT_FOOTER_LINKS: FooterLinksContent = {
@@ -449,7 +591,7 @@ export function sanitizeFooterGlobal(payload: unknown): FooterGlobalContent {
     columns: withOrder(
       columns
         .map((column, index) => sanitizeFooterColumn(column, index, fallback.columns[index]))
-        .filter((column) => column.title && column.links.length > 0)
+        .filter((column) => column.title)
     ),
     serviceHoursTitle: sanitizeText(source.serviceHoursTitle, 80) || fallback.serviceHoursTitle,
     serviceHours: (
@@ -559,9 +701,10 @@ export function sanitizeFooterHelp(payload: unknown): FooterLinksHelpContent {
     contactCard: {
       phone: sanitizeText(contactCard.phone, 80) || fallback.contactCard.phone,
       hours: sanitizeText(contactCard.hours, 180) || fallback.contactCard.hours,
-      channelDescriptions: (stringArrayPayload(contactCard.channelDescriptions).length > 0
-        ? stringArrayPayload(contactCard.channelDescriptions)
-        : fallback.contactCard.channelDescriptions
+      channelDescriptions: (
+        Array.isArray(contactCard.channelDescriptions)
+          ? stringArrayPayload(contactCard.channelDescriptions)
+          : fallback.contactCard.channelDescriptions
       ).slice(0, 3),
     },
     faq: {
@@ -634,6 +777,7 @@ export function updateFooterLinksSection(
   sectionKey: FooterLinkSectionKey,
   payload: RawRecord
 ): FooterLinksContent {
+  validateFooterSectionInput(sectionKey, payload);
   switch (sectionKey) {
     case "footer":
       return sanitizeFooterLinks({ ...current, footer: payload });

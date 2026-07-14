@@ -90,6 +90,10 @@ export const storagePaths = {
     "MEDIA_SLOTS_STORE_PATH",
     path.join(env.storageRoot, "media-slots.json")
   ),
+  mediaReplaceTransaction: resolveStoragePath(
+    "MEDIA_REPLACE_TRANSACTION_PATH",
+    path.join(privateRoot, "media-replace-transaction.json")
+  ),
   rateLimits: resolveStoragePath(
     "RATE_LIMITS_STORE_PATH",
     path.join(privateRoot, "rate-limits.json")

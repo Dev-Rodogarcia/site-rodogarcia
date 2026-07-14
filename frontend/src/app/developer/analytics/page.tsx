@@ -282,6 +282,18 @@ export default function AnalyticsPage() {
   } = useCarouselPagination(conversionEntries, 5);
 
   async function handleSave() {
+    const ga4MeasurementId = form.ga4MeasurementId.trim().toUpperCase();
+    const clarityProjectId = form.clarityProjectId.trim();
+    if (form.ga4Enabled && !/^(?:G|GT|AW)-[A-Z0-9]{4,}$/.test(ga4MeasurementId)) {
+      setStatus("error");
+      setStatusMessage("Informe um Measurement ID GA4 válido antes de habilitar o provedor.");
+      return;
+    }
+    if (form.clarityEnabled && !/^[A-Za-z0-9]{6,80}$/.test(clarityProjectId)) {
+      setStatus("error");
+      setStatusMessage("Informe um Project ID Microsoft Clarity válido antes de habilitar o provedor.");
+      return;
+    }
     setSaving(true);
     setStatus("");
     setStatusMessage("");
@@ -661,6 +673,8 @@ export default function AnalyticsPage() {
                         onChange={(event) =>
                           setValue(item.fieldKey, event.target.value)
                         }
+                        required={form[item.enabledKey]}
+                        aria-required={form[item.enabledKey]}
                         maxLength={item.fieldKey === "ga4MeasurementId" ? 40 : 80}
                         className={developerInputClassName}
                       />

@@ -5,6 +5,7 @@ import {
 } from "../repositories/jsonRepositories.js";
 import { getClientIp } from "../security/rateLimit.js";
 import { generateId } from "../utils/ids.js";
+import { HttpError } from "../utils/http.js";
 import { maskIpAddress, sanitizeText } from "../utils/sanitize.js";
 import { recordAuditAction } from "./auditService.js";
 
@@ -89,6 +90,46 @@ function normalizeCategories(value: unknown, fallback = DEFAULT_CONSENT.categori
   return [necessary, ...normalized.filter((item) => item.key !== "necessary")].slice(0, 8);
 }
 
+const CONSENT_TEXT_LIMITS = {
+  title: 120,
+  description: 400,
+  acceptAllLabel: 60,
+  rejectLabel: 60,
+  preferencesLabel: 60,
+  saveLabel: 60,
+} as const;
+
+function validateConsentUpdatePayload(body: Record<string, unknown>) {
+  for (const [field, maxLength] of Object.entries(CONSENT_TEXT_LIMITS)) {
+    if (field in body && !sanitizeText(body[field], maxLength)) {
+      throw new HttpError(422, `Consentimento: ${field} é obrigatório.`);
+    }
+  }
+
+  if ("version" in body) {
+    const version = body.version;
+    if (typeof version !== "number" || !Number.isInteger(version) || version < 1 || version > 999) {
+      throw new HttpError(422, "Consentimento: informe uma versão inteira entre 1 e 999.");
+    }
+  }
+
+  if (!Array.isArray(body.categories)) return;
+  const categoryKeys = new Set<string>();
+  for (const [index, candidate] of body.categories.entries()) {
+    if (!isRecord(candidate)) {
+      throw new HttpError(422, `Consentimento: categoria ${index + 1} inválida.`);
+    }
+    const key = sanitizeText(candidate.key, 40).toLowerCase();
+    if (!key || categoryKeys.has(key)) {
+      throw new HttpError(422, "Consentimento: as chaves das categorias devem ser únicas e preenchidas.");
+    }
+    if (!sanitizeText(candidate.label, 80) || !sanitizeText(candidate.description, 240)) {
+      throw new HttpError(422, `Consentimento: nome e descrição são obrigatórios na categoria ${index + 1}.`);
+    }
+    categoryKeys.add(key);
+  }
+}
+
 export function readConsentSettings() {
   const raw = consentSettingsRepository.read<typeof DEFAULT_CONSENT>(DEFAULT_CONSENT);
   const behavior: Record<string, unknown> = isRecord(raw.behavior) ? raw.behavior : {};
@@ -131,6 +172,7 @@ export function readConsentSettings() {
 }
 
 export function updateConsentSettings(req: Request | undefined, body: Record<string, unknown>) {
+  validateConsentUpdatePayload(body);
   const current = readConsentSettings();
   const behavior = isRecord(body.behavior) ? body.behavior : {};
   const mobile = isRecord(body.mobile) ? body.mobile : {};

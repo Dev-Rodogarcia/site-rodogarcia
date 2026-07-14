@@ -68,6 +68,29 @@ const analyticsConfigSchema = z.object({
 
 type AnalyticsConfig = z.infer<typeof analyticsConfigSchema>;
 
+const GA4_MEASUREMENT_ID = /^(?:G|GT|AW)-[A-Z0-9]{4,}$/;
+const CLARITY_PROJECT_ID = /^[A-Za-z0-9]{6,80}$/;
+
+function normalizeStoredProviders(config: AnalyticsConfig): AnalyticsConfig {
+  const providers = config.providers;
+  if (!providers) return config;
+
+  const measurementId = sanitizeText(providers.ga4?.measurementId, 40).toUpperCase();
+  const projectId = sanitizeText(providers.clarity?.projectId, 80);
+  return {
+    ...config,
+    providers: {
+      ...providers,
+      ga4: providers.ga4
+        ? { ...providers.ga4, measurementId, enabled: providers.ga4.enabled === true && GA4_MEASUREMENT_ID.test(measurementId) }
+        : undefined,
+      clarity: providers.clarity
+        ? { ...providers.clarity, projectId, enabled: providers.clarity.enabled === true && CLARITY_PROJECT_ID.test(projectId) }
+        : undefined,
+    },
+  };
+}
+
 type AnalyticsEvent = {
   id: string;
   type: string;
@@ -88,7 +111,7 @@ function readEvents(): StoredAnalyticsEvent[] {
 
 export function readAnalyticsConfig() {
   const parsed = analyticsConfigSchema.safeParse(analyticsConfigRepository.read());
-  return parsed.success ? parsed.data : {};
+  return parsed.success ? normalizeStoredProviders(parsed.data) : {};
 }
 
 export function readPublicAnalyticsConfig() {
@@ -158,6 +181,23 @@ function mergeAnalyticsConfig(
   return merged;
 }
 
+function validateEnabledProviderIds(config: AnalyticsConfig) {
+  const ga4 = config.providers?.ga4;
+  const clarity = config.providers?.clarity;
+  const measurementId = sanitizeText(ga4?.measurementId, 40).toUpperCase();
+  const projectId = sanitizeText(clarity?.projectId, 80);
+
+  if (ga4) ga4.measurementId = measurementId;
+  if (clarity) clarity.projectId = projectId;
+
+  if (ga4?.enabled && !GA4_MEASUREMENT_ID.test(measurementId)) {
+    throw new HttpError(422, "Informe um Measurement ID GA4 válido antes de habilitar o provedor.");
+  }
+  if (clarity?.enabled && !CLARITY_PROJECT_ID.test(projectId)) {
+    throw new HttpError(422, "Informe um Project ID Microsoft Clarity válido antes de habilitar o provedor.");
+  }
+}
+
 export function updateAnalyticsConfig(body: Record<string, unknown>) {
   const incoming = analyticsConfigSchema.safeParse(body);
   if (!incoming.success) {
@@ -171,6 +211,7 @@ export function updateAnalyticsConfig(body: Record<string, unknown>) {
     throw new HttpError(422, "Configuracao de analytics invalida.");
   }
 
+  validateEnabledProviderIds(parsed.data);
   analyticsConfigRepository.write(parsed.data);
   return parsed.data;
 }

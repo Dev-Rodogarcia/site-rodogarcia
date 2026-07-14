@@ -129,14 +129,19 @@ function normalizePopupConfig(config: Record<string, unknown>, strictMedia: bool
   };
 }
 
+function withSafeContactField(config: PopupConfig): PopupConfig {
+  if (config.enableName || config.enableEmail || config.enablePhone) return config;
+  return { ...config, enableEmail: true };
+}
+
 export function readPopupConfig(): PopupConfig {
   const raw = popupConfigRepository.read<Record<string, unknown>>(DEFAULT_CONFIG);
-  return normalizePopupConfig({
+  return withSafeContactField(normalizePopupConfig({
     ...DEFAULT_CONFIG,
     ...raw,
     desktop: { ...DEFAULT_CONFIG.desktop, ...(isRecord(raw.desktop) ? raw.desktop : {}) },
     mobile: { ...DEFAULT_CONFIG.mobile, ...(isRecord(raw.mobile) ? raw.mobile : {}) },
-  }, false);
+  }, false));
 }
 
 export function updatePopupConfig(raw: Record<string, unknown>, req?: Request): PopupConfig {

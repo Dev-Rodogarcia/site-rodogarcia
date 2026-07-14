@@ -77,6 +77,35 @@ describe("CMS media and lead regressions", () => {
     ).toMatchObject({ status: 422, message: expect.stringMatching(/mesmo tipo/i) });
   });
 
+  it("replaces media references through the journaled multi-store transaction", async () => {
+    const env = isolatedBackend();
+    const fromUrl = createPublicAsset(env.publicDir, "from.png");
+    const toUrl = createPublicAsset(env.publicDir, "to.png");
+    createPublicAsset(env.publicDir, "certificados/certificado-sassmaq.png");
+    createPublicAsset(env.publicDir, "caminhoneiro1.png");
+    const {
+      mediaSlotsRepository,
+      popupConfigRepository,
+      seoSettingsRepository,
+    } = await import("../src/repositories/jsonRepositories.js");
+    const { readSiteTextsData, writeSiteTextsData } = await import("../src/services/contentService.js");
+    const { replaceAdminImageReferences } = await import("../src/services/mediaService.js");
+    const { storagePaths } = await import("../src/config/storagePaths.js");
+
+    writeSiteTextsData({ asset: fromUrl });
+    mediaSlotsRepository.write({ "home.cert.iso": fromUrl });
+    popupConfigRepository.write({ image: fromUrl });
+    seoSettingsRepository.write({ image: fromUrl });
+
+    replaceAdminImageReferences(fromUrl, toUrl);
+
+    expect(readSiteTextsData()).toEqual({ asset: toUrl });
+    expect(mediaSlotsRepository.read({})).toEqual({ "home.cert.iso": toUrl });
+    expect(popupConfigRepository.read({})).toMatchObject({ image: toUrl });
+    expect(seoSettingsRepository.read({})).toMatchObject({ image: toUrl });
+    expect(fs.existsSync(storagePaths.mediaReplaceTransaction)).toBe(false);
+  });
+
   it("deduplicates mirrored lead stores before calculating source aggregates", async () => {
     isolatedBackend();
     const {

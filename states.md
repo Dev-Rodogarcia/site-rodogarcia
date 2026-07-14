@@ -20,7 +20,7 @@
 - O CMS usa `SessionProvider`, `DeveloperAuthGate`, `DeveloperShell`, `DevSidebar`, `DevTopbar`, hooks administrativos e componentes compartilhados de `components/developer` e `components/ui`.
 - Mutação client-side no CMS passa por `useApiRequest`, que injeta `X-CSRF-Token` automaticamente para métodos inseguros.
 - Cache leve de recursos administrativos fica em `useAdminResource`; coleções CRUD ordenáveis usam `useAdminCollection`.
-- Backend Express é montado em `createApp`, com Helmet, CORS restrito, JSON limit `8mb`, cookie parser, `/uploads` estático com `nosniff`, router `/api` e `/health`.
+- Backend Express é montado em `createApp`, com Helmet, CORS restrito, JSON limit `2mb` para JSON e uploads multipart separados, cookie parser, `/uploads` estático com `nosniff`, router `/api` e `/health`.
 - O frontend aplica headers globais em `frontend/next.config.js`, incluindo CSP, `Referrer-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e HSTS somente em produção.
 - O preview responsivo do CMS abre somente rotas públicas listadas com `?preview=cms`; nessa combinação, CSP e `X-Frame-Options` permitem frame apenas pela mesma origem. Rotas administrativas, de autenticação, APIs e o acesso público comum permanecem com bloqueio total de framing.
 - Controllers são finos; services concentram regra de negócio; repositories encapsulam JSON; `security` guarda sessão, auth, CSRF, origin e rate limit; `validators` guarda validação de borda; `utils` guarda helpers puros.
@@ -121,6 +121,14 @@
 Nenhuma pendência acionável registrada.
 
 ## Atualização recente
+
+- Relatório consolidado da auditoria CMS foi registrado em `docs/auditoria-integracao-cms.md`: 387 contratos rastreados, 30 controles aposentados e os 357 contratos ativos funcionais após o fechamento das pendências técnicas.
+- A suíte de regressão do CMS passou a ter 9 arquivos e 30 testes, cobrindo conteúdo, SEO, LGPD, popup, mídia, leads, URLs, arrays vazios, IDs de providers, transação de mídia e isolamento dos storages.
+- Slots de mídia editáveis foram restringidos às sete certificações usadas pela Home, aceitam somente imagens, rejeitam chaves desconhecidas e preservam limpeza explícita.
+- O tratamento HTTP reconhece limites e JSON malformado por `code`, `type` e `status`, retornando 413/400 de forma segura em vez de mascarar o erro como 500.
+- A substituição de mídia usa journal de transação em `storage/private`, com rollback em falha e recuperação no boot antes das rotas Express serem montadas; isso cobre conteúdo, textos, slots, popup e SEO no mesmo lote.
+- Configurações legadas de popup sem campo de contato são normalizadas de forma segura na leitura; LGPD passa a rejeitar textos vazios, versão inválida e categorias com chave repetida, enquanto Analytics exige IDs válidos antes de habilitar GA4 ou Clarity.
+- A validação final incluiu build backend/frontend, hardening isolado e renderização headless de páginas públicas em 1440, 768 e 390 pixels; os servidores temporários foram encerrados sem tocar nos processos existentes das portas 4010/5010.
 
 - Em `/developer/usuarios`, o formulário de criação fica compacto e fixo em desktop, enquanto os acessos cadastrados usam cartões mais densos, lista paginada em grupos de quatro e controles sempre visíveis para acompanhar o crescimento das contas.
 - O editor de SEO foi reorganizado em superfícies de busca orgânica, diretivas, compartilhamento e opções avançadas; a lista de rotas fica compacta e fixa em desktop, e o salvamento permanece acessível em uma barra inferior com preview integrado.

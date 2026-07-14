@@ -68,11 +68,22 @@ function readRawSettings() {
   });
 }
 
+function isSeoRecord(value: unknown): value is Partial<SeoPageSettings> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function sanitizeCanonical(value: unknown, fallback: string) {
+  const canonical = sanitizeUrl(value);
+  return canonical.startsWith("/") || /^https?:\/\//i.test(canonical)
+    ? canonical
+    : fallback;
+}
+
 function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettings): SeoPageSettings {
   const path = sanitizePath(input.path) || fallback?.path || "/";
   const title = sanitizeText(input.title, 90) || fallback?.title || "Rodogarcia Transportes";
   const description = sanitizeText(input.description, 180) || fallback?.description || DEFAULT_DESCRIPTION;
-  const canonical = sanitizeUrl(input.canonical) || path;
+  const canonical = sanitizeCanonical(input.canonical, path);
   return {
     path,
     label: sanitizeText(input.label, 80) || fallback?.label || path,
@@ -92,7 +103,7 @@ function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettin
 
 export function readSeoSettings() {
   const raw = readRawSettings();
-  const rawPages = Array.isArray(raw.pages) ? raw.pages : [];
+  const rawPages = Array.isArray(raw.pages) ? raw.pages.filter(isSeoRecord) : [];
   const existing = new Map(rawPages.map((page) => [page.path, page]));
   const pages = defaultPages().map((defaults) => normalizePage(existing.get(defaults.path) ?? defaults, defaults));
   return {
@@ -106,6 +117,15 @@ export function updateSeoPage(req: Request | undefined, body: Record<string, unk
   if (!path) throw new HttpError(422, "Rota SEO invalida.");
   if (!DEFAULT_ROUTES.some((route) => route.path === path)) {
     throw new HttpError(422, "A rota SEO não pertence ao conjunto público editável.");
+  }
+  if ("canonical" in body && !sanitizeCanonical(body.canonical, "")) {
+    throw new HttpError(422, "Canonical deve ser um caminho interno ou URL HTTP(S) válida.");
+  }
+  if ("title" in body && !sanitizeText(body.title, 90)) {
+    throw new HttpError(422, "Título SEO é obrigatório.");
+  }
+  if ("description" in body && !sanitizeText(body.description, 180)) {
+    throw new HttpError(422, "Descrição SEO é obrigatória.");
   }
   const settings = readSeoSettings();
   const current = settings.pages.find((page) => page.path === path);

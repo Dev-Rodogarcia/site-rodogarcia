@@ -124,6 +124,28 @@ export default function CookiesPage() {
   }, [categoryPageCount]);
 
   async function handleSave() {
+    const requiredTexts = [
+      form.title,
+      form.description,
+      form.acceptAllLabel,
+      form.rejectLabel,
+      form.preferencesLabel,
+      form.saveLabel,
+    ];
+    const hasInvalidCategory = form.categories.some(
+      (category) => !category.label.trim() || !category.description.trim()
+    );
+    if (
+      requiredTexts.some((value) => !value.trim()) ||
+      !Number.isInteger(form.version) ||
+      form.version < 1 ||
+      form.version > 999 ||
+      hasInvalidCategory
+    ) {
+      setStatus("error");
+      setMessage("Preencha os textos obrigatórios, as categorias e uma versão entre 1 e 999.");
+      return;
+    }
     setSaving(true);
     setStatus("");
     const response = await apiRequest(api.admin.consentSettings, { method: "POST", body: JSON.stringify(form) });
@@ -186,7 +208,7 @@ export default function CookiesPage() {
               ["rejectLabel", "Recusar opcionais"],
               ["preferencesLabel", "Abrir preferências"],
               ["saveLabel", "Salvar preferências"],
-            ].map(([key, label]) => <DeveloperField key={key} label={label}><input value={String(form[key as keyof ConsentSettings] ?? "")} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} className={developerInputClassName} /></DeveloperField>)}
+            ].map(([key, label]) => <DeveloperField key={key} label={label} required><input required value={String(form[key as keyof ConsentSettings] ?? "")} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} className={developerInputClassName} /></DeveloperField>)}
           </div>
         </DeveloperCard>
 
@@ -220,10 +242,10 @@ export default function CookiesPage() {
                 <article key={`${category.key}-${index}`} className="rounded-[18px] border border-slate-200 bg-slate-50/80 p-4 shadow-[0_5px_14px_rgba(15,23,42,0.025)]">
                   <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary)]">Categoria {index + 1}</p>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <DeveloperField label="Nome"><input value={category.label} onChange={(event) => updateCategory(index, { label: event.target.value })} className={developerInputClassName} /></DeveloperField>
+                    <DeveloperField label="Nome" required><input required value={category.label} onChange={(event) => updateCategory(index, { label: event.target.value })} className={developerInputClassName} /></DeveloperField>
                     <DeveloperField label="Chave" tooltip="Identificador técnico fixo usado pelo site."><input value={category.key} readOnly aria-readonly="true" className={`${developerInputClassName} cursor-not-allowed bg-slate-100 text-slate-500`} /></DeveloperField>
                   </div>
-                  <div className="mt-4"><DeveloperField label="Descrição"><textarea rows={2} value={category.description} onChange={(event) => updateCategory(index, { description: event.target.value })} className={`${developerInputClassName} resize-none`} /></DeveloperField></div>
+                  <div className="mt-4"><DeveloperField label="Descrição" required><textarea required rows={2} value={category.description} onChange={(event) => updateCategory(index, { description: event.target.value })} className={`${developerInputClassName} resize-none`} /></DeveloperField></div>
                   <div className="mt-4 flex flex-wrap gap-3"><ToggleField label="Obrigatória" checked={category.required} disabled onChange={() => {}} tooltip="Somente a categoria necessária é obrigatória." /><ToggleField label="Ativa por padrão" checked={category.enabledByDefault} disabled onChange={() => {}} tooltip="Categorias opcionais exigem escolha explícita e não são pré-selecionadas." /></div>
                 </article>
               );

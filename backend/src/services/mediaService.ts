@@ -4,6 +4,7 @@ import path from "node:path";
 import sharp from "sharp";
 import type { Request } from "express";
 import { env } from "../config/env.js";
+import { storagePaths } from "../config/storagePaths.js";
 import {
   mediaLibraryRepository,
   mediaSlotsRepository,
@@ -13,9 +14,8 @@ import {
 import {
   readContentData,
   readSiteTextsData,
-  writeContentData,
-  writeSiteTextsData,
 } from "./contentService.js";
+import { writeJsonFilesTransaction } from "../utils/jsonStore.js";
 import { sanitizePath, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 import { HttpError } from "../utils/http.js";
 import { generateId } from "../utils/ids.js";
@@ -469,14 +469,21 @@ export function replaceAdminImageReferences(fromUrlRaw: string, toUrlRaw: string
     throw new HttpError(422, "Substitua a referência por uma mídia do mesmo tipo.");
   }
 
-  writeContentData(replaceReferences(readContentData(), fromUrl, toUrl));
-  writeSiteTextsData(replaceReferences(readSiteTextsData(), fromUrl, toUrl));
-  writeMediaSlots(replaceReferences(readMediaSlots(), fromUrl, toUrl));
-  popupConfigRepository.write(
-    replaceReferences(popupConfigRepository.read<Record<string, unknown>>({}), fromUrl, toUrl)
-  );
-  seoSettingsRepository.write(
-    replaceReferences(seoSettingsRepository.read<Record<string, unknown>>({}), fromUrl, toUrl)
+  writeJsonFilesTransaction(
+    [
+      { filePath: storagePaths.content, data: replaceReferences(readContentData(), fromUrl, toUrl) },
+      { filePath: storagePaths.siteTexts, data: replaceReferences(readSiteTextsData(), fromUrl, toUrl) },
+      { filePath: storagePaths.mediaSlots, data: replaceReferences(readMediaSlots(), fromUrl, toUrl) },
+      {
+        filePath: storagePaths.popupConfig,
+        data: replaceReferences(popupConfigRepository.read<Record<string, unknown>>({}), fromUrl, toUrl),
+      },
+      {
+        filePath: storagePaths.seoSettings,
+        data: replaceReferences(seoSettingsRepository.read<Record<string, unknown>>({}), fromUrl, toUrl),
+      },
+    ],
+    storagePaths.mediaReplaceTransaction
   );
   recordAuditAction({
     req,
