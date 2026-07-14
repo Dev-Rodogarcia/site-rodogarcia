@@ -7,6 +7,8 @@ import { env } from "../config/env.js";
 import {
   mediaLibraryRepository,
   mediaSlotsRepository,
+  popupConfigRepository,
+  seoSettingsRepository,
 } from "../repositories/jsonRepositories.js";
 import {
   readContentData,
@@ -197,13 +199,23 @@ function getReferences() {
   collectImageReferences(readContentData(), references);
   collectImageReferences(readSiteTextsData(), references);
   collectImageReferences(readMediaSlots(), references);
+  collectImageReferences(popupConfigRepository.read<Record<string, unknown>>({}), references);
+  collectImageReferences(seoSettingsRepository.read<Record<string, unknown>>({}), references);
   return references;
 }
 
 function libraryRecordByUrl() {
   const entries: Array<[string, Record<string, unknown>]> = [];
   for (const item of readMediaLibrary()) {
-    for (const value of [item.url, item.optimizedUrl, item.originalUrl, item.thumbnailUrl]) {
+    for (const value of [
+      item.url,
+      item.optimizedUrl,
+      item.originalUrl,
+      item.thumbnailUrl,
+      item.mediumUrl,
+      item.largeUrl,
+      item.posterUrl,
+    ]) {
       const url = sanitizePath(value);
       if (url) entries.push([url, item]);
     }
@@ -449,26 +461,23 @@ export async function saveAdminMediaFromBuffer({
   return record;
 }
 
-export async function saveAdminImage(fileName: string, dataUrl: string, req?: Request) {
-  const match = String(dataUrl).match(/^data:([^;]+);base64,(.+)$/);
-  if (!match) throw new HttpError(422, "Formato de upload invalido.");
-  const buffer = Buffer.from(match[2]!, "base64");
-  return saveAdminImageFromBuffer({
-    req,
-    fileName,
-    mimeType: match[1]!,
-    buffer,
-  });
-}
-
 export function replaceAdminImageReferences(fromUrlRaw: string, toUrlRaw: string, req?: Request) {
   const fromUrl = assertInternalMediaUrl(fromUrlRaw, { kind: "all", required: true, label: "URL atual" });
   const toUrl = assertInternalMediaUrl(toUrlRaw, { kind: "all", required: true, label: "Nova URL" });
   if (!fromUrl || !toUrl) throw new HttpError(422, "Informe URLs validas.");
+  if (mediaTypeFromUrl(fromUrl) !== mediaTypeFromUrl(toUrl)) {
+    throw new HttpError(422, "Substitua a referência por uma mídia do mesmo tipo.");
+  }
 
   writeContentData(replaceReferences(readContentData(), fromUrl, toUrl));
   writeSiteTextsData(replaceReferences(readSiteTextsData(), fromUrl, toUrl));
   writeMediaSlots(replaceReferences(readMediaSlots(), fromUrl, toUrl));
+  popupConfigRepository.write(
+    replaceReferences(popupConfigRepository.read<Record<string, unknown>>({}), fromUrl, toUrl)
+  );
+  seoSettingsRepository.write(
+    replaceReferences(seoSettingsRepository.read<Record<string, unknown>>({}), fromUrl, toUrl)
+  );
   recordAuditAction({
     req,
     action: "media.replace_reference",
@@ -486,19 +495,32 @@ export function writeMediaSlots(slots: Record<string, string>) {
   mediaSlotsRepository.write(slots);
 }
 
+const EDITABLE_MEDIA_SLOTS = new Set([
+  "home.cert.iso",
+  "home.cert.sassmaq",
+  "home.cert.ecovadis",
+  "home.cert.pf",
+  "home.cert.pcsp",
+  "home.cert.exercito",
+  "home.cert.ibama",
+]);
+
 export function updateMediaSlots(req: Request | undefined, body: Record<string, unknown>) {
   const current = readMediaSlots();
-  const next = {
-    ...current,
-    ...Object.fromEntries(
-      Object.entries(body)
-        .map(([key, value]) => [
-          sanitizeText(key, 120),
-          assertInternalMediaUrl(value, { kind: "all", required: false, label: `Slot ${key}` }),
-        ])
-        .filter(([key, value]) => key && value)
-    ),
-  };
+  const next: Record<string, string> = { ...current };
+  for (const [rawKey, value] of Object.entries(body)) {
+    const key = sanitizeText(rawKey, 120);
+    if (!EDITABLE_MEDIA_SLOTS.has(key)) {
+      throw new HttpError(422, `Slot de mídia não editável: ${key || rawKey}.`);
+    }
+    const mediaUrl = assertInternalMediaUrl(value, {
+      kind: "image",
+      required: false,
+      label: `Slot ${key}`,
+    });
+    if (mediaUrl) next[key] = mediaUrl;
+    else delete next[key];
+  }
   writeMediaSlots(next);
   recordAuditAction({
     req,

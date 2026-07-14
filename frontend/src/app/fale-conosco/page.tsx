@@ -12,6 +12,7 @@ import {
   PageContainer,
   PageHero,
   PageShell,
+  SemanticLink,
   SectionHeader,
   SurfaceCard,
   SurfaceSection,
@@ -148,7 +149,7 @@ export default async function FaleConoscoPage() {
         <SectionHeader
           eyebrow="Canais principais"
           title="Escolha o canal mais adequado para cada situação."
-          description="A página pública agora consome os mesmos dados editados no CMS interno."
+          description="Escolha o canal mais adequado para sua necessidade e fale com a equipe Rodogarcia."
           align="center"
         />
 
@@ -168,14 +169,13 @@ export default async function FaleConoscoPage() {
                 {item.description}
               </p>
               <div className="mt-6 min-[1200px]:mt-auto min-[1200px]:pt-6">
-                <a
+                <SemanticLink
                   href={item.button.url}
-                  target={item.button.external ? "_blank" : undefined}
-                  rel={item.button.external ? "noopener noreferrer" : undefined}
+                  external={item.button.external}
                   className={item.tone}
                 >
                   {item.button.label}
-                </a>
+                </SemanticLink>
               </div>
             </SurfaceCard>
           ))}
@@ -202,7 +202,7 @@ export default async function FaleConoscoPage() {
                 Canais, horário e dados da matriz.
               </h2>
               <p className="mt-4 max-w-[58ch] text-sm leading-7 text-white/62 sm:text-base">
-                Tudo o que aparece aqui vem do painel administrativo, sem depender do HTML legado.
+                Canais oficiais reunidos para agilizar seu atendimento comercial e operacional.
               </p>
 
               <div className="mt-8 border-t border-white/10">

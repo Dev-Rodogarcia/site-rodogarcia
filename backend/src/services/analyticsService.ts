@@ -5,7 +5,6 @@ import {
   trackingEventRepository,
 } from "../repositories/jsonRepositories.js";
 import { RATE_LIMITS, getClientIp, getRateLimitState, registerHit } from "../security/rateLimit.js";
-import { generateId } from "../utils/ids.js";
 import { HttpError } from "../utils/http.js";
 import { sanitizePath, sanitizeText } from "../utils/sanitize.js";
 import { recordTrackingEvent } from "./trackingService.js";
@@ -67,6 +66,8 @@ const analyticsConfigSchema = z.object({
     .optional(),
 });
 
+type AnalyticsConfig = z.infer<typeof analyticsConfigSchema>;
+
 type AnalyticsEvent = {
   id: string;
   type: string;
@@ -107,14 +108,69 @@ export function readPublicAnalyticsConfig() {
   };
 }
 
+function mergeAnalyticsConfig(
+  current: AnalyticsConfig,
+  incoming: AnalyticsConfig
+): AnalyticsConfig {
+  const merged: AnalyticsConfig = { ...current, ...incoming };
+
+  if (current.consent || incoming.consent) {
+    merged.consent = {
+      ...current.consent,
+      ...incoming.consent,
+      categories:
+        current.consent?.categories || incoming.consent?.categories
+          ? {
+              ...current.consent?.categories,
+              ...incoming.consent?.categories,
+            }
+          : undefined,
+    };
+  }
+
+  if (current.tracking || incoming.tracking) {
+    merged.tracking = { ...current.tracking, ...incoming.tracking };
+  }
+
+  if (current.providers || incoming.providers) {
+    merged.providers = {
+      ...current.providers,
+      ...incoming.providers,
+      ga4:
+        current.providers?.ga4 || incoming.providers?.ga4
+          ? { ...current.providers?.ga4, ...incoming.providers?.ga4 }
+          : undefined,
+      clarity:
+        current.providers?.clarity || incoming.providers?.clarity
+          ? { ...current.providers?.clarity, ...incoming.providers?.clarity }
+          : undefined,
+      sentry:
+        current.providers?.sentry || incoming.providers?.sentry
+          ? { ...current.providers?.sentry, ...incoming.providers?.sentry }
+          : undefined,
+    };
+  }
+
+  if (current.seo || incoming.seo) {
+    merged.seo = { ...current.seo, ...incoming.seo };
+  }
+
+  return merged;
+}
+
 export function updateAnalyticsConfig(body: Record<string, unknown>) {
-  const parsed = analyticsConfigSchema.safeParse({
-    ...readAnalyticsConfig(),
-    ...body,
-  });
+  const incoming = analyticsConfigSchema.safeParse(body);
+  if (!incoming.success) {
+    throw new HttpError(422, "Configuracao de analytics invalida.");
+  }
+
+  const parsed = analyticsConfigSchema.safeParse(
+    mergeAnalyticsConfig(readAnalyticsConfig(), incoming.data)
+  );
   if (!parsed.success) {
     throw new HttpError(422, "Configuracao de analytics invalida.");
   }
+
   analyticsConfigRepository.write(parsed.data);
   return parsed.data;
 }
@@ -228,14 +284,16 @@ export function getAnalyticsStats(days: number) {
     .slice(0, 8)
     .map(([path, views]) => ({ path, page: path, views }));
 
+  const successfulForms = events.filter(
+    (event) =>
+      event.event === "form_success" &&
+      sanitizeText(event.element, 120) !== "exit-intent-popup"
+  ).length;
   const conversions = {
-    forms: eventCounts.form_submit ?? 0,
+    forms: successfulForms,
     downloads: eventCounts.download ?? 0,
     popupSubmissions: (eventCounts.popup_submit ?? 0) + (eventCounts.popup_submitted ?? 0),
-    leads:
-      (eventCounts.popup_submit ?? 0) +
-      (eventCounts.popup_submitted ?? 0) +
-      (eventCounts.form_submit ?? 0),
+    leads: eventCounts.lead_created ?? 0,
     popupOpen: (eventCounts.popup_open ?? 0) + (eventCounts.popup_shown ?? 0),
   };
   const totalConversions =

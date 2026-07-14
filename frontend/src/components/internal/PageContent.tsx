@@ -14,6 +14,13 @@ export interface PageAction {
   external?: boolean;
 }
 
+interface SemanticLinkProps {
+  href: string;
+  external?: boolean;
+  className?: string;
+  children: ReactNode;
+}
+
 interface StatItem {
   value: string;
   label: string;
@@ -719,22 +726,43 @@ export function ActionLink({
     </>
   );
 
-  if (isExternal) {
+  return (
+    <SemanticLink
+      href={action.href}
+      external={isExternal}
+      className={cn(sharedClassName, variantClassName, className)}
+    >
+      {content}
+    </SemanticLink>
+  );
+}
+
+export function SemanticLink({
+  href,
+  external = false,
+  className,
+  children,
+}: SemanticLinkProps) {
+  const isWebUrl = /^https?:\/\//i.test(href);
+  const usesNativeNavigation =
+    external || isWebUrl || href.startsWith("mailto:") || href.startsWith("tel:");
+
+  if (usesNativeNavigation) {
     return (
       <a
-        href={action.href}
-        target={action.href.startsWith("http") ? "_blank" : undefined}
-        rel={action.href.startsWith("http") ? "noopener noreferrer" : undefined}
-        className={cn(sharedClassName, variantClassName, className)}
+        href={href}
+        target={isWebUrl ? "_blank" : undefined}
+        rel={isWebUrl ? "noopener noreferrer" : undefined}
+        className={className}
       >
-        {content}
+        {children}
       </a>
     );
   }
 
   return (
-    <Link href={action.href} className={cn(sharedClassName, variantClassName, className)}>
-      {content}
+    <Link href={href} className={className}>
+      {children}
     </Link>
   );
 }

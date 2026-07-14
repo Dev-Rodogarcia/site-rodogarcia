@@ -33,7 +33,6 @@ export interface PublicContentResponse {
   footerLinks: FooterLinksContent;
   units: OperationalUnit[];
   siteTexts: Record<string, string>;
-  updatedAt: string;
 }
 
 /**

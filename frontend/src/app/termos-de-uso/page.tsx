@@ -9,7 +9,7 @@ import {
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { fetchFooterLinksContent, toPageAction } from "@/lib/footerLinksPublic";
 import { seo, site } from "@/lib/routes";
-import { Info, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
+import { Info } from "@phosphor-icons/react/dist/ssr";
 
 const fallbackMetadata: Metadata = {
   title: "Termos de Uso",
@@ -59,8 +59,8 @@ export default async function TermosDeUsoPage() {
 
       <PageSection>
         <PageContainer>
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-            <div>
+          <div className="mx-auto max-w-[920px]">
+            <div className="rounded-[30px] border border-[var(--border)] bg-white/72 p-6 shadow-[0_18px_46px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-8 lg:p-10">
               <SectionHeader
                 eyebrow={terms.summary.eyebrow}
                 title={terms.summary.title}
@@ -69,27 +69,11 @@ export default async function TermosDeUsoPage() {
               <p className="mt-6 text-sm leading-7 text-[var(--color-muted-raw)]">
                 {terms.summary.body}
               </p>
-              <div className="mt-6 border-t border-[var(--border)] pt-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-                  Uso responsável
-                </p>
-                <p className="mt-2 max-w-[64ch] text-sm leading-6 text-[var(--color-muted-raw)]">
-                  As informações publicadas podem ser atualizadas para acompanhar serviços, canais oficiais e regras aplicáveis.
-                </p>
-              </div>
-            </div>
-
-            <aside className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
-              <ShieldCheck size={24} weight="duotone" className="text-[var(--primary)]" />
-              <h3 className="font-semibold tracking-[-0.02em] text-[var(--foreground)]">Privacidade e dados</h3>
-              <p className="text-sm leading-7 text-[var(--color-muted-raw)]">
-                O tratamento de dados pessoais é detalhado em nossa página de privacidade, alinhado à LGPD.
-              </p>
               <ActionLink
                 action={toPageAction(terms.summary.button)}
-                className="mt-2 w-full"
+                className="mt-7 w-full sm:w-auto"
               />
-            </aside>
+            </div>
           </div>
         </PageContainer>
       </PageSection>

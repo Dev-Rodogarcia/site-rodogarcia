@@ -52,66 +52,104 @@ const ALLOWED_EVENTS = new Set([
 
 type PopupConfig = typeof DEFAULT_CONFIG;
 
-export function readPopupConfig(): PopupConfig {
-  return popupConfigRepository.read(DEFAULT_CONFIG);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-export function updatePopupConfig(raw: Record<string, unknown>, req?: Request): PopupConfig {
-  const config = {
-    ...readPopupConfig(),
-    ...raw,
-  };
-  const sanitized = {
-    enabled: Boolean(config.enabled),
+function configNumber(value: unknown, fallback: number, min: number, max: number) {
+  if (value === undefined || value === null || value === "") return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(Math.max(min, parsed), max) : fallback;
+}
+
+function configBoolean(value: unknown, fallback: boolean) {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function storedImage(value: unknown, label: string) {
+  try {
+    return sanitizeInternalImageUrl(value, label);
+  } catch {
+    return "";
+  }
+}
+
+function normalizePopupConfig(config: Record<string, unknown>, strictMedia: boolean): PopupConfig {
+  const desktop = isRecord(config.desktop) ? config.desktop : {};
+  const mobile = isRecord(config.mobile) ? config.mobile : {};
+  const normalizeImage = strictMedia ? sanitizeInternalImageUrl : storedImage;
+  return {
+    enabled: configBoolean(config.enabled, DEFAULT_CONFIG.enabled),
     title: sanitizeText(config.title, 120) || DEFAULT_CONFIG.title,
     description: sanitizeText(config.description, 280) || DEFAULT_CONFIG.description,
-    enableName: Boolean(config.enableName),
-    enableEmail: Boolean(config.enableEmail),
-    enablePhone: Boolean(config.enablePhone),
+    enableName: configBoolean(config.enableName, DEFAULT_CONFIG.enableName),
+    enableEmail: configBoolean(config.enableEmail, DEFAULT_CONFIG.enableEmail),
+    enablePhone: configBoolean(config.enablePhone, DEFAULT_CONFIG.enablePhone),
     buttonText: sanitizeText(config.buttonText, 60) || DEFAULT_CONFIG.buttonText,
     closeText: sanitizeText(config.closeText, 40) || DEFAULT_CONFIG.closeText,
     successMessage:
       sanitizeText(config.successMessage, 280) || DEFAULT_CONFIG.successMessage,
     badgeText: sanitizeText(config.badgeText, 60) || DEFAULT_CONFIG.badgeText,
-    image: sanitizeInternalImageUrl(config.image, "Popup: imagem padrão"),
-    delaySeconds: Math.min(Math.max(0, Number(config.delaySeconds) || 10), 120),
-    cooldownHours: Math.min(Math.max(0, Number(config.cooldownHours) || 24), 720),
-    maxShowsPerSession: Math.min(
-      Math.max(1, Number(config.maxShowsPerSession) || 1),
-      10
+    image: normalizeImage(config.image, "Popup: imagem padrão"),
+    delaySeconds: configNumber(config.delaySeconds, DEFAULT_CONFIG.delaySeconds, 0, 120),
+    cooldownHours: configNumber(config.cooldownHours, DEFAULT_CONFIG.cooldownHours, 0, 720),
+    maxShowsPerSession: Math.round(
+      configNumber(config.maxShowsPerSession, DEFAULT_CONFIG.maxShowsPerSession, 1, 10)
     ),
-    mobileScrollTrigger: Boolean(config.mobileScrollTrigger),
-    mobileBackButtonTrigger: Boolean(config.mobileBackButtonTrigger),
+    mobileScrollTrigger: configBoolean(config.mobileScrollTrigger, DEFAULT_CONFIG.mobileScrollTrigger),
+    mobileBackButtonTrigger: configBoolean(
+      config.mobileBackButtonTrigger,
+      DEFAULT_CONFIG.mobileBackButtonTrigger
+    ),
     desktop: {
-      ...DEFAULT_CONFIG.desktop,
-      ...((config.desktop && typeof config.desktop === "object") ? config.desktop : {}),
       title:
-        sanitizeText((config.desktop as Record<string, unknown> | undefined)?.title, 120) ||
+        sanitizeText(desktop.title, 120) ||
         sanitizeText(config.title, 120) ||
         DEFAULT_CONFIG.desktop.title,
       description:
-        sanitizeText((config.desktop as Record<string, unknown> | undefined)?.description, 280) ||
+        sanitizeText(desktop.description, 280) ||
         sanitizeText(config.description, 280) ||
         DEFAULT_CONFIG.desktop.description,
-      image: sanitizeInternalImageUrl((config.desktop as Record<string, unknown> | undefined)?.image, "Popup: imagem desktop"),
+      image: normalizeImage(desktop.image, "Popup: imagem desktop"),
     },
     mobile: {
-      ...DEFAULT_CONFIG.mobile,
-      ...((config.mobile && typeof config.mobile === "object") ? config.mobile : {}),
       title:
-        sanitizeText((config.mobile as Record<string, unknown> | undefined)?.title, 120) ||
+        sanitizeText(mobile.title, 120) ||
         sanitizeText(config.title, 120) ||
         DEFAULT_CONFIG.mobile.title,
       description:
-        sanitizeText((config.mobile as Record<string, unknown> | undefined)?.description, 280) ||
+        sanitizeText(mobile.description, 280) ||
         sanitizeText(config.description, 280) ||
         DEFAULT_CONFIG.mobile.description,
-      image: sanitizeInternalImageUrl((config.mobile as Record<string, unknown> | undefined)?.image, "Popup: imagem mobile"),
+      image: normalizeImage(mobile.image, "Popup: imagem mobile"),
       sheetTitle:
-        sanitizeText((config.mobile as Record<string, unknown> | undefined)?.sheetTitle, 80) ||
+        sanitizeText(mobile.sheetTitle, 80) ||
         DEFAULT_CONFIG.mobile.sheetTitle,
     },
   };
+}
+
+export function readPopupConfig(): PopupConfig {
+  const raw = popupConfigRepository.read<Record<string, unknown>>(DEFAULT_CONFIG);
+  return normalizePopupConfig({
+    ...DEFAULT_CONFIG,
+    ...raw,
+    desktop: { ...DEFAULT_CONFIG.desktop, ...(isRecord(raw.desktop) ? raw.desktop : {}) },
+    mobile: { ...DEFAULT_CONFIG.mobile, ...(isRecord(raw.mobile) ? raw.mobile : {}) },
+  }, false);
+}
+
+export function updatePopupConfig(raw: Record<string, unknown>, req?: Request): PopupConfig {
+  const current = readPopupConfig();
+  const sanitized = normalizePopupConfig({
+    ...current,
+    ...raw,
+    desktop: { ...current.desktop, ...(isRecord(raw.desktop) ? raw.desktop : {}) },
+    mobile: { ...current.mobile, ...(isRecord(raw.mobile) ? raw.mobile : {}) },
+  }, true);
+  if (!sanitized.enableName && !sanitized.enableEmail && !sanitized.enablePhone) {
+    throw new HttpError(422, "Ative ao menos um campo de contato no popup.");
+  }
   popupConfigRepository.write(sanitized);
   recordAuditAction({
     req,
@@ -203,7 +241,7 @@ export function createPopupEvent(req: Request) {
     event: eventName,
     pagePath: sanitizePath(body.pagePath ?? body.page),
     source: sanitizeText(body.source, 40),
-    mobile: Boolean(body.mobile),
+    mobile: body.mobile === true,
     sessionId: sanitizeText(body.sessionId, 80),
     metadata: sanitizeMetadata(body.metadata),
   };

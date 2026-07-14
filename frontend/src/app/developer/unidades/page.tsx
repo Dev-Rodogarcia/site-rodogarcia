@@ -65,6 +65,10 @@ const EMPTY_FORM: UnitFormState = {
 };
 
 const UNIT_TYPES = ["matriz", "filial", "ponto de apoio"] as const;
+const BRAZILIAN_STATE_CODES = [
+  "ac", "al", "ap", "am", "ba", "ce", "df", "es", "go", "ma", "mt", "ms", "mg",
+  "pa", "pb", "pr", "pe", "pi", "rj", "rn", "rs", "ro", "rr", "sc", "sp", "se", "to",
+] as const;
 
 function normalizeUnit(item: Record<string, unknown>): UnitItem {
   return {
@@ -137,8 +141,8 @@ export default function UnidadesPage() {
       logisticsInfo: form.logisticsInfo.trim(),
     };
 
-    if (!payload.name || !payload.state || !payload.address) {
-      setStatus("Preencha nome, estado e endereco.");
+    if (!payload.name || !BRAZILIAN_STATE_CODES.includes(payload.state as (typeof BRAZILIAN_STATE_CODES)[number]) || !payload.address) {
+      setStatus("Preencha nome, uma UF brasileira válida e endereço.");
       return;
     }
 
@@ -191,7 +195,7 @@ export default function UnidadesPage() {
       <DeveloperHero
         eyebrow="Conteudo - Unidades"
         title="Editor de unidades, filiais e pontos de apoio."
-        description="Esses registros alimentam o mapa da home, o seletor de unidade ativa e os dados operacionais exibidos no site."
+        description="Base operacional usada como referência no editor da Home. A publicação no mapa ocorre ao selecionar e salvar a unidade em Página Inicial."
         stats={[
           { label: "Unidades", value: items.length },
           { label: "Ativas", value: items.filter((item) => item.active).length },
@@ -203,13 +207,14 @@ export default function UnidadesPage() {
           <DeveloperSectionHeading
             eyebrow={editingId ? "Edicao" : "Nova unidade"}
             title={editingId ? "Atualizar unidade" : "Cadastrar unidade"}
-            description="Use UF com duas letras para destacar automaticamente o estado no mapa."
+            description="Use UF com duas letras; depois selecione este registro na Presença Regional da Página Inicial para publicar um snapshot no mapa."
           />
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid gap-4 sm:grid-cols-2">
               <DeveloperField label="Nome da unidade" required>
                 <input
+                  required
                   value={form.name}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, name: event.target.value }))
@@ -221,6 +226,7 @@ export default function UnidadesPage() {
 
               <DeveloperField label="Tipo" required>
                 <select
+                  required
                   value={form.type}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, type: event.target.value }))
@@ -238,15 +244,19 @@ export default function UnidadesPage() {
 
             <div className="grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
               <DeveloperField label="UF" required>
-                <input
+                <select
+                  required
                   value={form.state}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, state: event.target.value }))
                   }
-                  maxLength={2}
                   className={developerInputClassName}
-                  placeholder="sp"
-                />
+                >
+                  <option value="">Selecione</option>
+                  {BRAZILIAN_STATE_CODES.map((state) => (
+                    <option key={state} value={state}>{state.toUpperCase()}</option>
+                  ))}
+                </select>
               </DeveloperField>
 
               <DeveloperField label="Cidade">
@@ -263,6 +273,7 @@ export default function UnidadesPage() {
 
             <DeveloperField label="Endereco" required>
               <input
+                required
                 value={form.address}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, address: event.target.value }))
@@ -286,6 +297,7 @@ export default function UnidadesPage() {
 
               <DeveloperField label="E-mail">
                 <input
+                  type="email"
                   value={form.email}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, email: event.target.value }))
@@ -303,6 +315,7 @@ export default function UnidadesPage() {
                   setForm((current) => ({ ...current, contactUrl: event.target.value }))
                 }
                 className={developerInputClassName}
+                maxLength={600}
                 placeholder="/fale-conosco"
               />
             </DeveloperField>
@@ -347,7 +360,7 @@ export default function UnidadesPage() {
                   }
                   className="h-4 w-4 accent-[var(--primary)]"
                 />
-                Unidade padrão do mapa
+                Unidade padrão da base
               </label>
 
               <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
@@ -390,7 +403,7 @@ export default function UnidadesPage() {
           <DeveloperSectionHeading
             eyebrow="Unidades cadastradas"
             title="Mapa operacional"
-            description="Ordene, ative e ajuste o que aparece no mapa da home."
+            description="Ordene, ative e ajuste a base de referência disponível no editor da Home."
             action={
               <button type="button" onClick={resetForm} className={developerSecondaryButtonClassName}>
                 <Plus size={16} weight="bold" />
@@ -511,7 +524,7 @@ export default function UnidadesPage() {
                 Nenhuma unidade cadastrada ainda.
               </p>
               <p className="mt-2 text-sm text-[var(--color-muted-raw)]">
-                Cadastre a primeira unidade para alimentar o mapa da home.
+                Cadastre a primeira unidade para disponibilizá-la como referência no editor da Home.
               </p>
             </div>
           ) : null}

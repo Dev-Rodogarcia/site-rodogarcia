@@ -25,7 +25,7 @@ const DEFAULT_CONSENT = {
     reopenOnVersionChange: true,
   },
   desktop: {
-    position: "bottom-right",
+    position: "bottom-center",
     compact: true,
   },
   mobile: {
@@ -69,32 +69,75 @@ function normalizeCategory(input: Record<string, unknown>) {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function booleanOr(value: unknown, fallback: boolean) {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function normalizeCategories(value: unknown, fallback = DEFAULT_CONSENT.categories) {
+  const normalized = Array.isArray(value)
+    ? value
+        .filter(isRecord)
+        .map(normalizeCategory)
+        .filter((item, index, all) => all.findIndex((candidate) => candidate.key === item.key) === index)
+    : fallback.map((item) => normalizeCategory(item));
+  const necessary = normalized.find((item) => item.key === "necessary") ??
+    normalizeCategory(DEFAULT_CONSENT.categories[0]);
+  return [necessary, ...normalized.filter((item) => item.key !== "necessary")].slice(0, 8);
+}
+
 export function readConsentSettings() {
   const raw = consentSettingsRepository.read<typeof DEFAULT_CONSENT>(DEFAULT_CONSENT);
+  const behavior: Record<string, unknown> = isRecord(raw.behavior) ? raw.behavior : {};
+  const desktop: Record<string, unknown> = isRecord(raw.desktop) ? raw.desktop : {};
+  const mobile: Record<string, unknown> = isRecord(raw.mobile) ? raw.mobile : {};
+  const mobilePosition = sanitizeText(mobile.position, 40);
   return {
-    ...DEFAULT_CONSENT,
-    ...raw,
-    behavior: { ...DEFAULT_CONSENT.behavior, ...(raw.behavior ?? {}) },
-    desktop: { ...DEFAULT_CONSENT.desktop, ...(raw.desktop ?? {}) },
-    mobile: { ...DEFAULT_CONSENT.mobile, ...(raw.mobile ?? {}) },
-    categories: Array.isArray(raw.categories)
-      ? raw.categories
-          .flatMap((item) =>
-            item && typeof item === "object" && !Array.isArray(item)
-              ? [normalizeCategory(item as Record<string, unknown>)]
-              : []
-          )
-          .filter((item, index, all) => all.findIndex((candidate) => candidate.key === item.key) === index)
-          .slice(0, 8)
-      : DEFAULT_CONSENT.categories,
+    enabled: booleanOr(raw.enabled, DEFAULT_CONSENT.enabled),
+    version: Math.max(1, Math.min(999, Math.round(Number(raw.version) || DEFAULT_CONSENT.version))),
+    title: sanitizeText(raw.title, 120) || DEFAULT_CONSENT.title,
+    description: sanitizeText(raw.description, 400) || DEFAULT_CONSENT.description,
+    acceptAllLabel: sanitizeText(raw.acceptAllLabel, 60) || DEFAULT_CONSENT.acceptAllLabel,
+    rejectLabel: sanitizeText(raw.rejectLabel, 60) || DEFAULT_CONSENT.rejectLabel,
+    preferencesLabel: sanitizeText(raw.preferencesLabel, 60) || DEFAULT_CONSENT.preferencesLabel,
+    saveLabel: sanitizeText(raw.saveLabel, 60) || DEFAULT_CONSENT.saveLabel,
+    style: "floating",
+    behavior: {
+      requireExplicitChoice: booleanOr(
+        behavior.requireExplicitChoice,
+        DEFAULT_CONSENT.behavior.requireExplicitChoice
+      ),
+      blockAnalyticsUntilConsent: true,
+      reopenOnVersionChange: booleanOr(
+        behavior.reopenOnVersionChange,
+        DEFAULT_CONSENT.behavior.reopenOnVersionChange
+      ),
+    },
+    desktop: {
+      position: "bottom-center",
+      compact: booleanOr(desktop.compact, DEFAULT_CONSENT.desktop.compact),
+    },
+    mobile: {
+      position: ["bottom-sheet", "center-modal"].includes(mobilePosition)
+        ? mobilePosition
+        : DEFAULT_CONSENT.mobile.position,
+      compact: booleanOr(mobile.compact, DEFAULT_CONSENT.mobile.compact),
+    },
+    categories: normalizeCategories(raw.categories),
   };
 }
 
 export function updateConsentSettings(req: Request | undefined, body: Record<string, unknown>) {
   const current = readConsentSettings();
+  const behavior = isRecord(body.behavior) ? body.behavior : {};
+  const mobile = isRecord(body.mobile) ? body.mobile : {};
+  const mobilePosition = sanitizeText(mobile.position, 40);
   const next = {
     ...current,
-    enabled: body.enabled === undefined ? current.enabled : Boolean(body.enabled),
+    enabled: booleanOr(body.enabled, current.enabled),
     version: Math.max(1, Math.min(999, Math.round(Number(body.version) || current.version))),
     title: sanitizeText(body.title, 120) || current.title,
     description: sanitizeText(body.description, 400) || current.description,
@@ -102,23 +145,30 @@ export function updateConsentSettings(req: Request | undefined, body: Record<str
     rejectLabel: sanitizeText(body.rejectLabel, 60) || current.rejectLabel,
     preferencesLabel: sanitizeText(body.preferencesLabel, 60) || current.preferencesLabel,
     saveLabel: sanitizeText(body.saveLabel, 60) || current.saveLabel,
-    style: sanitizeText(body.style, 40) || current.style,
+    style: "floating",
     behavior: {
-      ...current.behavior,
-      ...((body.behavior && typeof body.behavior === "object") ? body.behavior : {}),
+      requireExplicitChoice: booleanOr(
+        behavior.requireExplicitChoice,
+        current.behavior.requireExplicitChoice
+      ),
+      blockAnalyticsUntilConsent: true,
+      reopenOnVersionChange: booleanOr(
+        behavior.reopenOnVersionChange,
+        current.behavior.reopenOnVersionChange
+      ),
     },
     desktop: {
       ...current.desktop,
-      ...((body.desktop && typeof body.desktop === "object") ? body.desktop : {}),
+      position: "bottom-center",
     },
     mobile: {
-      ...current.mobile,
-      ...((body.mobile && typeof body.mobile === "object") ? body.mobile : {}),
+      position: ["bottom-sheet", "center-modal"].includes(mobilePosition)
+        ? mobilePosition
+        : current.mobile.position,
+      compact: booleanOr(mobile.compact, current.mobile.compact),
     },
     categories: Array.isArray(body.categories)
-      ? body.categories
-          .map((item) => normalizeCategory(item as Record<string, unknown>))
-          .slice(0, 8)
+      ? normalizeCategories(body.categories, current.categories)
       : current.categories,
     updatedAt: new Date().toISOString(),
   };
@@ -143,7 +193,7 @@ function sanitizeBooleanMap(input: unknown) {
   return Object.fromEntries(
     Object.entries(input as Record<string, unknown>)
       .slice(0, 12)
-      .map(([key, value]) => [sanitizeText(key, 40).toLowerCase(), Boolean(value)])
+      .map(([key, value]) => [sanitizeText(key, 40).toLowerCase(), value === true])
       .filter(([key]) => Boolean(key))
   );
 }

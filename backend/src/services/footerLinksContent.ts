@@ -38,7 +38,7 @@ const external = {
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   phoneDisplay: "0800 591 4557",
-  phoneHref: "tel:+551408005914557",
+  phoneHref: "tel:08005914557",
 } as const;
 
 type RawRecord = Record<string, unknown>;
@@ -48,8 +48,11 @@ function isRecord(value: unknown): value is RawRecord {
 }
 
 function arrayPayload(value: unknown): RawRecord[] {
-  return Array.isArray(value) ? (value as RawRecord[]) : [];
+  return Array.isArray(value) ? value.filter(isRecord) : [];
 }
+
+const SOCIAL_ICON_KEYS = new Set(["InstagramLogo", "LinkedinLogo", "FacebookLogo", "WhatsappLogo"]);
+const HELP_ICON_KEYS = new Set(["Package", "ChatCircleDots", "ShieldCheck"]);
 
 function stringArrayPayload(value: unknown): string[] {
   return Array.isArray(value) ? value.map((item) => sanitizeText(item, 220)).filter(Boolean) : [];
@@ -65,10 +68,7 @@ function sanitizeButton(payload: unknown, fallback: PageButton): PageButton {
   return {
     label: sanitizeText(source.label, 60) || fallback.label,
     url,
-    external:
-      typeof source.external === "boolean"
-        ? source.external
-        : url.startsWith("http") || url.startsWith("mailto:") || url.startsWith("tel:"),
+    external: url.startsWith("http") || url.startsWith("mailto:") || url.startsWith("tel:"),
   };
 }
 
@@ -91,7 +91,7 @@ function sanitizeFooterLink(payload: RawRecord, index: number, fallback?: Footer
 function sanitizeFooterColumn(payload: RawRecord, index: number, fallback?: FooterLinkColumn): FooterLinkColumn {
   const rawLinks = arrayPayload(payload.links);
   const fallbackLinks = fallback?.links ?? [];
-  const sourceLinks = rawLinks.length > 0 ? rawLinks : fallbackLinks;
+  const sourceLinks = Array.isArray(payload.links) ? rawLinks : fallbackLinks;
   return {
     id: sanitizeText(payload.id, 80) || fallback?.id || generateId("footer_column"),
     order: Number(payload.order ?? index + 1),
@@ -123,9 +123,10 @@ function sanitizeFaqItem(payload: RawRecord, index: number, fallback: PageFaqIte
 }
 
 function sanitizeActionCard(payload: RawRecord, index: number, fallback: FooterActionCard): FooterActionCard {
+  const icon = sanitizeText(payload.icon, 40);
   return {
     ...sanitizeTextBlock(payload, index, fallback),
-    icon: sanitizeText(payload.icon, 40) || fallback.icon,
+    icon: HELP_ICON_KEYS.has(icon) ? icon : fallback.icon,
     button: sanitizeButton(payload.button, fallback.button),
   };
 }
@@ -435,11 +436,11 @@ export function sanitizeFooterGlobal(payload: unknown): FooterGlobalContent {
   const source = isRecord(payload) ? payload : {};
   const fallback = DEFAULT_FOOTER_LINKS.footer;
   const rawColumns = arrayPayload(source.columns);
-  const columns = rawColumns.length > 0 ? rawColumns : fallback.columns as unknown as RawRecord[];
+  const columns = Array.isArray(source.columns) ? rawColumns : fallback.columns as unknown as RawRecord[];
   const rawSocial = arrayPayload(source.socialLinks);
-  const socialSource = rawSocial.length > 0 ? rawSocial : fallback.socialLinks as unknown as RawRecord[];
+  const socialSource = Array.isArray(source.socialLinks) ? rawSocial : fallback.socialLinks as unknown as RawRecord[];
   const rawBottom = arrayPayload(source.bottomLinks);
-  const bottomSource = rawBottom.length > 0 ? rawBottom : fallback.bottomLinks as unknown as RawRecord[];
+  const bottomSource = Array.isArray(source.bottomLinks) ? rawBottom : fallback.bottomLinks as unknown as RawRecord[];
 
   return {
     description: sanitizeText(source.description, 260) || fallback.description,
@@ -451,9 +452,10 @@ export function sanitizeFooterGlobal(payload: unknown): FooterGlobalContent {
         .filter((column) => column.title && column.links.length > 0)
     ),
     serviceHoursTitle: sanitizeText(source.serviceHoursTitle, 80) || fallback.serviceHoursTitle,
-    serviceHours: (stringArrayPayload(source.serviceHours).length > 0
-      ? stringArrayPayload(source.serviceHours)
-      : fallback.serviceHours
+    serviceHours: (
+      Array.isArray(source.serviceHours)
+        ? stringArrayPayload(source.serviceHours)
+        : fallback.serviceHours
     ).slice(0, 5),
     socialTitle: sanitizeText(source.socialTitle, 80) || fallback.socialTitle,
     socialLinks: withOrder(
@@ -462,7 +464,9 @@ export function sanitizeFooterGlobal(payload: unknown): FooterGlobalContent {
           const fallbackSocial = fallback.socialLinks[index];
           return {
             ...sanitizeFooterLink(item, index, fallbackSocial),
-            icon: sanitizeText(item.icon, 40) || fallbackSocial?.icon || "InstagramLogo",
+            icon: SOCIAL_ICON_KEYS.has(sanitizeText(item.icon, 40))
+              ? sanitizeText(item.icon, 40)
+              : fallbackSocial?.icon || "InstagramLogo",
           } satisfies FooterSocialLink;
         })
         .filter((item) => item.label && item.url)
@@ -487,13 +491,15 @@ export function sanitizeFooterTerms(payload: unknown): FooterLinksTermsContent {
   const reading = isRecord(source.reading) ? source.reading : {};
   const finalCta = isRecord(source.finalCta) ? source.finalCta : {};
   const rawBlocks = arrayPayload(reading.blocks);
-  const blocksSource = rawBlocks.length > 0 ? rawBlocks : fallback.reading.blocks as unknown as RawRecord[];
+  const blocksSource = Array.isArray(reading.blocks)
+    ? rawBlocks
+    : fallback.reading.blocks as unknown as RawRecord[];
 
   return {
     hero: {
       eyebrow: sanitizeText(hero.eyebrow, 80) || fallback.hero.eyebrow,
-      titleHighlight: sanitizeText(hero.titleHighlight, 80) || fallback.hero.titleHighlight,
-      titleRest: sanitizeText(hero.titleRest, 80) || fallback.hero.titleRest,
+      titleHighlight: sanitizeText(hero.titleHighlight, 90) || fallback.hero.titleHighlight,
+      titleRest: sanitizeText(hero.titleRest, 90) || fallback.hero.titleRest,
       description: sanitizeText(hero.description, 260) || fallback.hero.description,
     },
     summary: {
@@ -505,8 +511,8 @@ export function sanitizeFooterTerms(payload: unknown): FooterLinksTermsContent {
     },
     reading: {
       eyebrow: sanitizeText(reading.eyebrow, 80) || fallback.reading.eyebrow,
-      title: sanitizeText(reading.title, 160) || fallback.reading.title,
-      description: sanitizeText(reading.description, 260) || fallback.reading.description,
+      title: sanitizeText(reading.title, 220) || fallback.reading.title,
+      description: sanitizeText(reading.description, 280) || fallback.reading.description,
       blocks: withOrder(
         blocksSource
           .map((block, index) => sanitizeTextBlock(block, index, fallback.reading.blocks[index]))
@@ -542,8 +548,8 @@ export function sanitizeFooterHelp(payload: unknown): FooterLinksHelpContent {
     },
     quickAccess: {
       eyebrow: sanitizeText(quickAccess.eyebrow, 80) || fallback.quickAccess.eyebrow,
-      title: sanitizeText(quickAccess.title, 180) || fallback.quickAccess.title,
-      description: sanitizeText(quickAccess.description, 260) || fallback.quickAccess.description,
+      title: sanitizeText(quickAccess.title, 220) || fallback.quickAccess.title,
+      description: sanitizeText(quickAccess.description, 280) || fallback.quickAccess.description,
       actions: withOrder(
         fallback.quickAccess.actions.map((item, index) =>
           sanitizeActionCard(actionPayload[index] ?? {}, index, item)
@@ -560,8 +566,8 @@ export function sanitizeFooterHelp(payload: unknown): FooterLinksHelpContent {
     },
     faq: {
       eyebrow: sanitizeText(faq.eyebrow, 80) || fallback.faq.eyebrow,
-      title: sanitizeText(faq.title, 180) || fallback.faq.title,
-      description: sanitizeText(faq.description, 260) || fallback.faq.description,
+      title: sanitizeText(faq.title, 220) || fallback.faq.title,
+      description: sanitizeText(faq.description, 280) || fallback.faq.description,
       items: withOrder(
         fallback.faq.items.map((item, index) => sanitizeFaqItem(faqPayload[index] ?? {}, index, item))
       ),
@@ -582,7 +588,9 @@ export function sanitizeFooterPrivacy(payload: unknown): FooterLinksPrivacyConte
   const dataSection = isRecord(source.dataSection) ? source.dataSection : {};
   const finalCta = isRecord(source.finalCta) ? source.finalCta : {};
   const rawBlocks = arrayPayload(dataSection.blocks);
-  const blockSource = rawBlocks.length > 0 ? rawBlocks.slice(0, 5) : fallback.dataSection.blocks as unknown as RawRecord[];
+  const blockSource = Array.isArray(dataSection.blocks)
+    ? rawBlocks.slice(0, 5)
+    : fallback.dataSection.blocks as unknown as RawRecord[];
 
   return {
     hero: {

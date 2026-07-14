@@ -146,6 +146,7 @@ export default function DeveloperServicesPage() {
   const [status, setStatus] = useState<{ tone: "success" | "error" | "info"; text: string } | null>(null);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [previewRevision, setPreviewRevision] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -201,6 +202,7 @@ export default function DeveloperServicesPage() {
     }
 
     setServices(normalizeServicesPage(response.data?.servicesPage));
+    setPreviewRevision((revision) => revision + 1);
     setStatus({ tone: "success", text: "Bloco salvo com sucesso." });
     invalidateAdminResource([adminResourceKeys.dashboard, adminResourceKeys.images]);
   }
@@ -263,7 +265,7 @@ export default function DeveloperServicesPage() {
       ) : null}
 
       <div className="mt-5">
-        <DeveloperResponsivePreview href={site.services} title="Preview Serviços" />
+        <DeveloperResponsivePreview href={site.services} title="Preview Serviços" revision={previewRevision} />
       </div>
 
       <div className="mt-5 grid gap-5">
@@ -366,21 +368,26 @@ export default function DeveloperServicesPage() {
                       <CountHint value={activeModule.image.alt} maxLength={160} />
                       </DeveloperField>
                       <DeveloperField
-                      label="Classe de enquadramento"
-                      hint="Uso técnico para preservar o corte visual atual."
+                      label="Enquadramento da imagem"
+                      hint="Escolha o ponto principal preservado no corte do card."
                       className="xl:col-span-2"
                       >
-                      <input
+                      <select
                         value={activeModule.image.position ?? ""}
                         onChange={(event) =>
                           updateModule(activeModuleIndex, {
                             image: { ...activeModule.image, position: event.target.value },
                           })
                         }
-                        maxLength={60}
                         className={developerInputClassName}
-                        placeholder="object-[50%_45%]"
-                      />
+                      >
+                        <option value="">Centralizado</option>
+                        <option value="object-top">Topo</option>
+                        <option value="object-bottom">Base</option>
+                        <option value="object-left">Esquerda</option>
+                        <option value="object-right">Direita</option>
+                        <option value="object-[50%_45%]">Centro levemente acima</option>
+                      </select>
                       </DeveloperField>
                     </div>
                   </div>

@@ -209,6 +209,7 @@ export const adminNavigationGroups = [
       { href: admin.careersPage, label: "Trabalho Con.", key: "careers-page" },
       { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
       { href: admin.footerLinks, label: "FOOTER LINKS", key: "footer-links" },
+      { href: admin.units, label: "Base de unidades", key: "units" },
     ],
   },
   {

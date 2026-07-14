@@ -56,7 +56,7 @@ const DEFAULT_CONFIG: PopupConfig = {
   mobileBackButtonTrigger: true,
   desktop: {
     title: "Antes de sair...",
-    description: "Receba uma proposta personalizada para sua operaÃ§Ã£o logÃ­stica.",
+    description: "Receba uma proposta personalizada para sua operação logística.",
     image: "",
   },
   mobile: {
@@ -233,11 +233,7 @@ export default function ExitPopup() {
         }
       })
       .catch(() => {
-        setConfig(DEFAULT_CONFIG);
-        if (testMode) {
-          clearFrequency();
-          setTimeout(() => triggerShow(DEFAULT_CONFIG), 900);
-        }
+        setConfig(null);
       });
   }, [marketingAllowed]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -357,6 +353,9 @@ export default function ExitPopup() {
 
   function closePopup(closeType: string) {
     if (closing) return;
+    if (closeType !== "auto_after_submit" && formStatus !== "success") {
+      trackEvent("popup_ignored", { closeType });
+    }
     trackEvent("popup_closed", { closeType });
     setClosing(true);
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -393,6 +392,18 @@ export default function ExitPopup() {
       setErrorMsg("Informe um e-mail válido.");
       setFormStatus("error");
       dispatchPopupFormTracking("fail", "validation_email");
+      return;
+    }
+    if (config.enableEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMsg("Informe um e-mail válido.");
+      setFormStatus("error");
+      dispatchPopupFormTracking("fail", "validation_email");
+      return;
+    }
+    if (config.enablePhone && phone.replace(/\D/g, "").length < 10) {
+      setErrorMsg("Informe um telefone válido.");
+      setFormStatus("error");
+      dispatchPopupFormTracking("fail", "validation_phone");
       return;
     }
 
@@ -553,8 +564,8 @@ export default function ExitPopup() {
             {config.enablePhone && (
               <input
                 type="tel"
-                placeholder="Telefone (opcional)"
-                  aria-label="Telefone (opcional)"
+                placeholder="Seu telefone"
+                  aria-label="Seu telefone"
                   ref={!config.enableName && !config.enableEmail ? firstFieldRef : undefined}
                 value={phone}
                 onChange={(e) => {

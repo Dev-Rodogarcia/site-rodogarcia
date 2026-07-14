@@ -233,8 +233,8 @@ export function QuickActionButton({
         onClick={() => {
           if (onModalClick) {
             onModalClick(action);
-          } else if (href) {
-            const el = document.querySelector(href);
+          } else if (href.startsWith("#")) {
+            const el = document.getElementById(href.slice(1));
             const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             el?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
           }

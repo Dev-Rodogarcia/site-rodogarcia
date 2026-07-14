@@ -57,16 +57,6 @@ const ACCEPTED_MEDIA_TYPES = [
   "video/ogg",
 ] as const;
 const MEDIA_SLOT_LABELS: Record<string, string> = {
-  "home.hero.default": "Home - Hero padrão",
-  "home.showcase.quote": "Home - Showcase cotação",
-  "home.showcase.tracking": "Home - Showcase rastreio",
-  "home.showcase.coverage": "Home - Showcase cobertura",
-  "home.services.distribution.video": "Home - Serviços distribuição vídeo",
-  "home.services.distribution.poster": "Home - Serviços distribuição poster",
-  "home.services.indoor.video": "Home - Servicos indoor video",
-  "home.services.indoor.poster": "Home - Servicos indoor poster",
-  "home.services.special.video": "Home - Servicos cargas especiais video",
-  "home.services.special.poster": "Home - Servicos cargas especiais poster",
   "home.cert.iso": "Home - Certificado ISO",
   "home.cert.sassmaq": "Home - Certificado SASSMAQ",
   "home.cert.ecovadis": "Home - Certificado EcoVadis",
@@ -74,14 +64,6 @@ const MEDIA_SLOT_LABELS: Record<string, string> = {
   "home.cert.pcsp": "Home - Policia Civil SP",
   "home.cert.exercito": "Home - Exercito Brasileiro",
   "home.cert.ibama": "Home - IBAMA",
-  "services.hero": "Serviços - Hero/OG",
-  "about.hero": "Sobre - Hero",
-  "business.hero": "Empresas - Hero/OG",
-  "careers.hero": "Carreiras - Hero/OG",
-  "careers.culture": "Carreiras - Cultura/beneficios",
-  "contact.og": "Contato - OG",
-  "popup.desktop": "Popup - Desktop",
-  "popup.mobile": "Popup - Mobile",
 };
 
 function formatBytes(bytes: number) {
@@ -164,7 +146,13 @@ export default function ImagensPage() {
   );
 
   useEffect(() => {
-    if (data?.slots) setSlots(data.slots);
+    if (data?.slots) {
+      setSlots(
+        Object.fromEntries(
+          Object.keys(MEDIA_SLOT_LABELS).map((key) => [key, data.slots[key] ?? ""])
+        )
+      );
+    }
   }, [data?.slots]);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -221,7 +209,7 @@ export default function ImagensPage() {
   async function handleUpload() {
     if (!uploadFile || !fileName) {
       setStatus("error");
-      setMessage("Selecione uma imagem antes de enviar.");
+      setMessage("Selecione uma mídia antes de enviar.");
       return;
     }
 
@@ -301,7 +289,7 @@ export default function ImagensPage() {
       <DeveloperHero
         eyebrow="Mídia - Biblioteca"
         title="Biblioteca, otimização e slots de imagens."
-        description="Envie imagens otimizadas, substitua referências e controle slots usados pelo site."
+        description="Envie imagens ou vídeos, substitua referências e controle slots usados pelo site."
         stats={[
           { label: "Total", value: summary.total },
           { label: "Uploads", value: summary.uploads },
@@ -336,9 +324,9 @@ export default function ImagensPage() {
         <DeveloperCard>
           <DeveloperSectionHeading
             eyebrow="Upload"
-            title="Enviar e otimizar imagem"
-            description="O backend valida o arquivo, gera WebP otimizado e thumbnail."
-            tooltip="A imagem enviada é validada, otimizada e registrada com tamanho, formato e data de upload."
+            title="Enviar mídia"
+            description="O backend valida imagens e vídeos; imagens recebem WebP e tamanhos responsivos."
+            tooltip="A mídia é validada pela assinatura real. Imagens são otimizadas; vídeos compatíveis são preservados."
           />
 
           <div className="space-y-5">
@@ -435,7 +423,7 @@ export default function ImagensPage() {
 
             <button type="button" onClick={handleUpload} disabled={uploading} className={developerPrimaryButtonClassName}>
               <UploadSimple size={18} weight="bold" />
-              {uploading ? "Otimizando..." : "Enviar e otimizar"}
+              {uploading ? "Enviando..." : "Enviar mídia"}
             </button>
           </div>
 
@@ -443,8 +431,8 @@ export default function ImagensPage() {
             <DeveloperSectionHeading
               eyebrow="Substituição"
               title="Trocar referências no conteúdo"
-              description="Atualiza caminhos de imagem em content.json e site-texts.json."
-              tooltip="Substitui uma URL antiga por outra nos conteúdos do CMS. Exemplo: trocar /old.png por /uploads/new.webp."
+              description="Atualiza caminhos em conteúdo, textos, slots, SEO e popup."
+              tooltip="Substitui uma URL antiga por outra em todos os storages de conteúdo que usam mídia."
             />
 
             <div className="space-y-4">

@@ -27,7 +27,7 @@ interface CookieConsentLog {
 interface CookieConsentRecord {
   id: string;
   createdAt: string;
-  decision: "accepted" | "rejected" | "custom" | "revoked";
+  decision: "accepted" | "rejected" | "custom" | "partial" | "revoked";
   status: string;
   version: number;
   consentTextVersion: string;
@@ -131,7 +131,7 @@ export default function CookieMonitoringPage() {
                   <option value="">Todos</option>
                   <option value="accepted">Aceito</option>
                   <option value="rejected">Recusado</option>
-                  <option value="custom">Parcial</option>
+                  <option value="partial">Parcial</option>
                   <option value="revoked">Revogado</option>
                 </select>
               </DeveloperField>

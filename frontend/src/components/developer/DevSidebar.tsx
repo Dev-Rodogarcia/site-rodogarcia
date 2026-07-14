@@ -17,6 +17,7 @@ import {
   ImagesSquare,
   ListMagnifyingGlass,
   MagnifyingGlass,
+  MapPin,
   Phone,
   SignOut,
   Sparkle,
@@ -60,6 +61,7 @@ const iconMap: Record<string, SidebarIcon> = {
   leads: EnvelopeSimple,
   seo: MagnifyingGlass,
   users: UsersThree,
+  units: MapPin,
 };
 
 function SidebarScrollArea({

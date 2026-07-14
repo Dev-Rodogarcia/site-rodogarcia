@@ -183,6 +183,13 @@ export default async function ServicosPage() {
               <div className="space-y-14 sm:space-y-16 lg:space-y-18">
                 {serviceModules.map((module, index) => {
                   const isInverted = index % 2 === 1;
+                  const objectPosition = {
+                    "object-top": "center top",
+                    "object-bottom": "center bottom",
+                    "object-left": "left center",
+                    "object-right": "right center",
+                    "object-[50%_45%]": "50% 45%",
+                  }[module.image.position ?? ""] ?? "center center";
 
                   return (
                     <article
@@ -199,7 +206,8 @@ export default async function ServicosPage() {
                           alt={module.image.alt}
                           fill
                           sizes="(min-width: 1024px) 54vw, 100vw"
-                          className={`object-cover ${module.image.position ?? ""}`}
+                          className="object-cover"
+                          style={{ objectPosition }}
                         />
                         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0.18)_100%)]" />
                       </div>

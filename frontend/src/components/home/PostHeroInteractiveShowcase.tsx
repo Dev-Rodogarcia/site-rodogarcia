@@ -87,6 +87,7 @@ export default function PostHeroInteractiveShowcase({
 
   const activeItem = items[current] ?? items[0];
   const mediaSrc = activeItem.media.desktopSrc || activeItem.media.src;
+  const mobileMediaSrc = activeItem.media.mobileSrc || mediaSrc;
 
   return (
     <section ref={sectionRef} className="bg-[var(--color-surface-2)] py-16">
@@ -118,17 +119,24 @@ export default function PostHeroInteractiveShowcase({
                   poster={activeItem.media.poster}
                   className="aspect-square w-full object-cover"
                 >
+                  {mobileMediaSrc !== mediaSrc ? (
+                    <source media="(max-width: 1023px)" src={mobileMediaSrc} />
+                  ) : null}
                   <source src={mediaSrc} />
                 </video>
               ) : (
-                <img
-                  key={mediaSrc}
-                  src={mediaSrc}
-                  alt={activeItem.media.alt || activeItem.title}
-                  className="aspect-square w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
+                <picture key={mediaSrc} className="contents">
+                  {mobileMediaSrc !== mediaSrc ? (
+                    <source media="(max-width: 1023px)" srcSet={mobileMediaSrc} />
+                  ) : null}
+                  <img
+                    src={mediaSrc}
+                    alt={activeItem.media.alt || activeItem.title}
+                    className="aspect-square w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
               )}
             </div>
           </div>

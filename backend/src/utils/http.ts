@@ -20,10 +20,25 @@ export const notFoundHandler: RequestHandler = (_req, res) => {
 };
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
-  const status = error instanceof HttpError ? error.status : 500;
+  const errorName = error instanceof Error ? error.name : "";
+  const errorCode =
+    error && typeof error === "object" && "code" in error
+      ? String((error as { code?: unknown }).code ?? "")
+      : "";
+  const isMulterError = errorName === "MulterError";
+  const isBodyTooLarge = errorCode === "LIMIT_FILE_SIZE" || errorCode === "entity.too.large";
+  const status = error instanceof HttpError
+    ? error.status
+    : isBodyTooLarge
+      ? 413
+      : isMulterError
+        ? 422
+        : 500;
   const message =
-    error instanceof Error && status < 500
-      ? error.message
+    isBodyTooLarge
+      ? "Arquivo ou payload excede o limite permitido."
+      : error instanceof Error && status < 500
+        ? error.message
       : "Erro interno no servidor.";
   res.status(status).json({ error: message });
 };

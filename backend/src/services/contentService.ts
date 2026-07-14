@@ -472,6 +472,5 @@ export function preparePublicContent(content: ContentData) {
     footerLinks: getFooterLinksContent(content) satisfies FooterLinksContent,
     units,
     siteTexts: readSiteTextsData(),
-    updatedAt: new Date().toISOString(),
   };
 }

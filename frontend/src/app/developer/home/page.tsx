@@ -213,9 +213,9 @@ const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
     id: "qa-whatsapp",
     order: 6,
     label: "WhatsApp",
-    href: external.whatsappCommercial,
+    href: site.contact,
     icon: "WhatsappLogo",
-    type: "external",
+    type: "link",
     enabled: true,
   },
   {
@@ -418,7 +418,7 @@ function normalizeTrackingButtons(buttons?: HomeHeroButton[]) {
 }
 
 function normalizeQuickActions(actions?: QuickAction[]) {
-  const source = Array.isArray(actions) && actions.length > 0 ? actions : DEFAULT_QUICK_ACTIONS;
+  const source = Array.isArray(actions) ? actions : DEFAULT_QUICK_ACTIONS;
   return source.slice(0, 12).map((action, index) => ({
     ...emptyQuickAction(index),
     ...action,
@@ -790,6 +790,7 @@ export default function DeveloperHomePage() {
   const [openSection3Card, setOpenSection3Card] = useState<number | null>(null);
   const [activeRegionalUnit, setActiveRegionalUnit] = useState(0);
   const [openFeedback, setOpenFeedback] = useState<number | null>(null);
+  const [previewRevision, setPreviewRevision] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -858,6 +859,7 @@ export default function DeveloperHomePage() {
     }
 
     setHome(normalizeHomePage(response.data?.homePage));
+    setPreviewRevision((revision) => revision + 1);
     setStatus({ tone: "success", text: "Bloco salvo com sucesso." });
     invalidateAdminResource([adminResourceKeys.dashboard, adminResourceKeys.images]);
   }
@@ -1081,7 +1083,7 @@ export default function DeveloperHomePage() {
         </div>
       ) : null}
       <div className="mt-5">
-        <DeveloperResponsivePreview href={site.home} title="Preview Home" />
+        <DeveloperResponsivePreview href={site.home} title="Preview Home" revision={previewRevision} />
       </div>
 
       <section className="mt-5 rounded-[26px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.9)_0%,rgba(239,246,255,0.86)_54%,rgba(224,242,254,0.78)_100%)] p-5 shadow-[0_16px_38px_rgba(29,78,216,0.08)] backdrop-blur sm:p-6">

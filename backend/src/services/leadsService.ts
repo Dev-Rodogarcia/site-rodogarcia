@@ -13,8 +13,8 @@ export type LeadStatus = "new" | "contacted" | "qualified" | "archived";
 
 function getDeviceFromRequest(req?: Request) {
   const userAgent = req?.header("user-agent") ?? "";
-  if (/mobile|android|iphone|ipad/i.test(userAgent)) return "mobile";
   if (/tablet|ipad/i.test(userAgent)) return "tablet";
+  if (/mobile|android|iphone/i.test(userAgent)) return "mobile";
   return userAgent ? "desktop" : "";
 }
 
@@ -41,6 +41,7 @@ function normalizeLegacyLead(input: Record<string, unknown>, sourceFallback: str
 }
 
 export function createLeadRecord({
+  id,
   req,
   source,
   pagePath,
@@ -51,6 +52,7 @@ export function createLeadRecord({
   sessionId,
   metadata,
 }: {
+  id?: unknown;
   req?: Request;
   source: string;
   pagePath?: unknown;
@@ -63,7 +65,7 @@ export function createLeadRecord({
 }) {
   const now = new Date().toISOString();
   const lead = {
-    id: generateId("lead"),
+    id: sanitizeText(id, 100) || generateId("lead"),
     createdAt: now,
     updatedAt: now,
     source: sanitizeText(source, 60),
@@ -128,7 +130,29 @@ export function listUnifiedLeads(filters: Record<string, unknown> = {}) {
 
   const unique = new Map<string, ReturnType<typeof normalizeLegacyLead>>();
   for (const lead of [...central, ...popup, ...contacts, ...quotes]) {
-    unique.set(lead.id, lead);
+    const metadata = lead.metadata as Record<string, unknown> | undefined;
+    const sourceRecordId =
+      lead.source === "contact-form"
+        ? sanitizeText(metadata?.contactId, 100)
+        : lead.source === "quote-form"
+          ? sanitizeText(metadata?.quoteId, 100)
+          : "";
+    const rawSourceId =
+      lead.source === "contact-form" && lead.id.startsWith("contact_")
+        ? lead.id
+        : lead.source === "quote-form" && lead.id.startsWith("quote_")
+          ? lead.id
+          : "";
+    const sourceIdentity = sourceRecordId || rawSourceId;
+    const fallbackIdentity =
+      (lead.source === "contact-form" || lead.source === "quote-form") &&
+      (lead.email || lead.phone)
+        ? `${lead.source}:${lead.email || lead.phone}:${lead.createdAt.slice(0, 19)}`
+        : lead.id;
+    const identity = sourceIdentity
+      ? `${lead.source}:${sourceIdentity}`
+      : fallbackIdentity;
+    if (!unique.has(identity)) unique.set(identity, lead);
   }
 
   const filtered = [...unique.values()]
@@ -152,11 +176,17 @@ export function listUnifiedLeads(filters: Record<string, unknown> = {}) {
       return true;
     })
     .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+  const sourceTotals = filtered.reduce<Record<string, number>>((totals, lead) => {
+    const key = lead.source || "sem-origem";
+    totals[key] = (totals[key] ?? 0) + 1;
+    return totals;
+  }, {});
   const start = (page - 1) * pageSize;
 
   return {
     leads: filtered.slice(start, start + pageSize),
     total: filtered.length,
+    sourceTotals,
     page,
     pageSize,
   };

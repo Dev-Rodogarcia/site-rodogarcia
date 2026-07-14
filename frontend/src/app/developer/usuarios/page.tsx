@@ -85,6 +85,7 @@ function formatDate(value?: string) {
 function getPasswordChecks(password: string) {
   return [
     { label: "10 caracteres", valid: password.length >= 10 },
+    { label: "Até 72 caracteres", valid: password.length <= 72 },
     { label: "Letra minúscula", valid: /[a-z]/.test(password) },
     { label: "Letra maiúscula", valid: /[A-Z]/.test(password) },
     { label: "Número", valid: /[0-9]/.test(password) },
@@ -285,7 +286,7 @@ export default function UsuariosPage() {
       <DeveloperHero
         eyebrow="Segurança - Usuários"
         title="Criação de usuários do CMS."
-        description="Cadastre novos acessos internos sem usar a tela pública de setup inicial. Cada criação exige sessão admin ativa e token CSRF."
+        description="Cadastre novos acessos internos sem usar a tela pública de setup inicial. A gestão exige a conta suprema ativa e token CSRF."
         stats={[
           { label: "Usuários", value: users.length },
           { label: "Admins ativos", value: adminCount },
@@ -330,6 +331,7 @@ export default function UsuariosPage() {
                   setForm((current) => ({ ...current, name: event.target.value }))
                 }
                 maxLength={80}
+                required
                 autoComplete="name"
                 className={developerInputClassName}
               />
@@ -343,6 +345,7 @@ export default function UsuariosPage() {
                   setForm((current) => ({ ...current, email: event.target.value }))
                 }
                 maxLength={160}
+                required
                 autoComplete="email"
                 className={developerInputClassName}
               />
@@ -351,15 +354,15 @@ export default function UsuariosPage() {
             <DeveloperField
               label="Perfil de acesso"
               required
-              hint="Admin acessa todo o painel. Usuário fica reservado para fluxos internos futuros."
-              tooltip="Define a função e as permissões do usuário. Exemplo: Administrador pode criar novos acessos."
+              hint="Admin acessa o painel. A gestão de acessos continua exclusiva da conta suprema."
+              tooltip="Define o acesso ao CMS; este perfil não concede a um administrador comum permissão para gerenciar usuários."
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
                   {
                     value: "admin" as const,
                     label: "Administrador",
-                    description: "Pode acessar o Developer e criar outros usuários.",
+                    description: "Pode acessar o CMS, sem gerenciar outros usuários.",
                   },
                   {
                     value: "user" as const,
@@ -404,6 +407,8 @@ export default function UsuariosPage() {
                       password: event.target.value,
                     }))
                   }
+                  maxLength={72}
+                  required
                   autoComplete="new-password"
                   className={developerInputClassName}
                 />
@@ -419,6 +424,8 @@ export default function UsuariosPage() {
                       confirmPassword: event.target.value,
                     }))
                   }
+                  maxLength={72}
+                  required
                   autoComplete="new-password"
                   className={developerInputClassName}
                 />
@@ -533,18 +540,22 @@ export default function UsuariosPage() {
 
                   {editingThis ? (
                   <div className="mt-3 grid gap-3 rounded-xl border border-slate-200 bg-white/82 p-3 lg:grid-cols-2">
-                      <DeveloperField label="Nome">
+                      <DeveloperField label="Nome" required>
                         <input
                           value={String(editing.name ?? "")}
                           onChange={(event) => setEditing((current) => ({ ...current, name: event.target.value }))}
+                          maxLength={80}
+                          required
                           className={developerInputClassName}
                         />
                       </DeveloperField>
-                      <DeveloperField label="E-mail">
+                      <DeveloperField label="E-mail" required>
                         <input
                           type="email"
                           value={String(editing.email ?? "")}
                           onChange={(event) => setEditing((current) => ({ ...current, email: event.target.value }))}
+                          maxLength={160}
+                          required
                           className={developerInputClassName}
                         />
                       </DeveloperField>
@@ -613,7 +624,13 @@ export default function UsuariosPage() {
                           onClick={() => void removeUser(user)}
                           disabled={locked || mutatingId === user.id}
                           className={developerDangerButtonClassName}
-                          title={user.protected ? "O usuário supremo não pode ser excluído." : "Excluir usuário"}
+                          title={
+                            user.protected
+                              ? "O usuário supremo não pode ser excluído."
+                              : locked
+                                ? "Exclusão restrita ao usuário supremo."
+                                : "Excluir usuário"
+                          }
                         >
                           <Trash size={16} weight="bold" />
                           Excluir

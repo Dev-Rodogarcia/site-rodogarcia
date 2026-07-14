@@ -28,6 +28,14 @@ interface TrackingEvent {
   metadata?: Record<string, unknown>;
 }
 
+interface AuditEvent {
+  id: string;
+  action?: string;
+  target?: string;
+  actorEmail?: string;
+  createdAt: string;
+}
+
 interface TrackingResponse {
   events: TrackingEvent[];
   summary: {
@@ -70,10 +78,10 @@ export default function TrackingPage() {
       };
     },
   });
-  const { data: auditData } = useAdminResource<{ events: TrackingEvent[] }>({
+  const { data: auditData } = useAdminResource<{ events: AuditEvent[] }>({
     key: `${adminResourceKeys.tracking(appliedKey)}:audit`,
     fetcher: async (request) => {
-      const response = await request<{ events?: TrackingEvent[] }>(auditPath);
+      const response = await request<{ events?: AuditEvent[] }>(auditPath);
       return response.success
         ? { success: true, data: { events: response.data?.events ?? [] } }
         : { success: false, error: response.error };
@@ -239,7 +247,19 @@ export default function TrackingPage() {
             <div className="space-y-2">
               {(auditData?.events ?? []).slice(0, 10).map((event) => (
                 <div key={event.id} className="rounded-lg border border-[var(--border)] bg-white/76 px-3 py-2">
-                  <p className="text-sm font-semibold text-[var(--foreground)]">{event.event || event.type}</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    {event.action || "Ação administrativa"}
+                  </p>
+                  {event.target ? (
+                    <p className="mt-0.5 truncate text-xs text-[var(--color-muted-raw)]">
+                      {event.target}
+                    </p>
+                  ) : null}
+                  {event.actorEmail ? (
+                    <p className="mt-0.5 truncate text-xs text-[var(--color-muted-raw)]">
+                      {event.actorEmail}
+                    </p>
+                  ) : null}
                   <p className="text-xs text-[var(--color-muted-raw)]">{formatDateTime(event.createdAt)}</p>
                 </div>
               ))}

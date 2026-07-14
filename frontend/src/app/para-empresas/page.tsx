@@ -426,7 +426,7 @@ export default async function ParaEmpresasPage() {
         <div className="relative mx-auto max-w-[980px] px-5 sm:px-8">
           <div className="max-w-[680px]">
             <h2 id="faq-title" className="text-[clamp(2.1rem,4vw,3.8rem)] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--foreground)]">
-              Perguntas Frequentes
+              {businessPage?.faq.title || "Perguntas Frequentes"}
             </h2>
             <p className="mt-4 text-base text-[var(--color-muted-raw)] sm:text-lg">
               Tire suas dúvidas sobre nosso modelo de atuação B2B.

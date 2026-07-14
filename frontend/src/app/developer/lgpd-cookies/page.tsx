@@ -61,7 +61,7 @@ const DEFAULT_SETTINGS: ConsentSettings = {
   saveLabel: "Salvar preferências",
   style: "floating",
   behavior: { requireExplicitChoice: true, blockAnalyticsUntilConsent: true, reopenOnVersionChange: true },
-  desktop: { position: "bottom-right", compact: true },
+  desktop: { position: "bottom-center", compact: true },
   mobile: { position: "bottom-sheet", compact: false },
   categories: [],
 };
@@ -71,15 +71,17 @@ function ToggleField({
   checked,
   onChange,
   tooltip,
+  disabled = false,
 }: {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
   tooltip?: string;
+  disabled?: boolean;
 }) {
   return (
-    <label className="flex min-h-12 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-[var(--foreground)] shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-4 w-4 accent-[var(--primary)]" />
+    <label className={cn("flex min-h-12 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-[var(--foreground)] shadow-[0_4px_12px_rgba(15,23,42,0.025)]", disabled && "cursor-not-allowed opacity-70")}>
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} className="h-4 w-4 accent-[var(--primary)]" />
       <span className="inline-flex items-center gap-1.5">
         {label}
         {tooltip ? <DeveloperTooltip content={tooltip} /> : null}
@@ -95,6 +97,7 @@ export default function CookiesPage() {
   const [status, setStatus] = useState<"" | "success" | "error">("");
   const [message, setMessage] = useState("");
   const [categoryPage, setCategoryPage] = useState(0);
+  const [previewRevision, setPreviewRevision] = useState(0);
 
   const { data, loading, error, refresh } = useAdminResource<ConsentSettings>({
     key: adminResourceKeys.consent,
@@ -133,6 +136,7 @@ export default function CookiesPage() {
     invalidateAdminResource([adminResourceKeys.consent, adminResourceKeys.dashboard]);
     setStatus("success");
     setMessage("Configuração de LGPD/cookies salva com sucesso.");
+    setPreviewRevision((revision) => revision + 1);
     await refresh();
   }
 
@@ -161,7 +165,7 @@ export default function CookiesPage() {
       {status ? <div className="mt-5"><DeveloperMessage tone={status === "success" ? "success" : "error"}>{message}</DeveloperMessage></div> : null}
 
       <div className="mt-5">
-        <DeveloperResponsivePreview href={site.home} title="Preview do consentimento" showConsent />
+        <DeveloperResponsivePreview href={site.home} title="Preview do consentimento" showConsent revision={previewRevision} />
       </div>
 
       <div className="mt-5 grid gap-5">
@@ -192,14 +196,14 @@ export default function CookiesPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <ToggleField label="Banner ativo" checked={form.enabled} onChange={(enabled) => setForm((current) => ({ ...current, enabled }))} tooltip="Liga ou desliga o banner no site público." />
               <ToggleField label="Exigir escolha" checked={form.behavior.requireExplicitChoice} onChange={(requireExplicitChoice) => setForm((current) => ({ ...current, behavior: { ...current.behavior, requireExplicitChoice } }))} tooltip="Mantém o banner até o visitante tomar uma decisão." />
-              <ToggleField label="Bloquear analytics" checked={form.behavior.blockAnalyticsUntilConsent} onChange={(blockAnalyticsUntilConsent) => setForm((current) => ({ ...current, behavior: { ...current.behavior, blockAnalyticsUntilConsent } }))} tooltip="Impede analytics antes do aceite compatível." />
+              <ToggleField label="Bloquear analytics" checked disabled onChange={() => {}} tooltip="Regra obrigatória: analytics permanece bloqueado antes do consentimento compatível." />
               <ToggleField label="Reabrir por versão" checked={form.behavior.reopenOnVersionChange} onChange={(reopenOnVersionChange) => setForm((current) => ({ ...current, behavior: { ...current.behavior, reopenOnVersionChange } }))} tooltip="Exibe o banner novamente após atualizar a versão." />
             </div>
           </DeveloperCard>
           <DeveloperCard className="p-5 sm:p-6">
             <DeveloperSectionHeading eyebrow="Posicionamento" title="Desktop e mobile" description="O preview acima mostra os três breakpoints reais." />
             <div className="grid gap-4">
-              <DeveloperField label="Posição no desktop"><select value={form.desktop.position} onChange={(event) => setForm((current) => ({ ...current, desktop: { ...current.desktop, position: event.target.value } }))} className={developerInputClassName}><option value="bottom-right">Canto inferior direito</option><option value="bottom-left">Canto inferior esquerdo</option><option value="bottom-full">Faixa inferior</option></select></DeveloperField>
+              <DeveloperField label="Posição no desktop" tooltip="O layout público usa a posição central responsiva."><select value="bottom-center" disabled className={`${developerInputClassName} cursor-not-allowed bg-slate-100`}><option value="bottom-center">Inferior centralizado</option></select></DeveloperField>
               <DeveloperField label="Posição no mobile"><select value={form.mobile.position} onChange={(event) => setForm((current) => ({ ...current, mobile: { ...current.mobile, position: event.target.value } }))} className={developerInputClassName}><option value="bottom-sheet">Painel inferior</option><option value="center-modal">Modal central</option></select></DeveloperField>
             </div>
           </DeveloperCard>
@@ -217,10 +221,10 @@ export default function CookiesPage() {
                   <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary)]">Categoria {index + 1}</p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <DeveloperField label="Nome"><input value={category.label} onChange={(event) => updateCategory(index, { label: event.target.value })} className={developerInputClassName} /></DeveloperField>
-                    <DeveloperField label="Chave" tooltip="Identificador técnico da categoria."><input value={category.key} onChange={(event) => updateCategory(index, { key: event.target.value })} className={developerInputClassName} /></DeveloperField>
+                    <DeveloperField label="Chave" tooltip="Identificador técnico fixo usado pelo site."><input value={category.key} readOnly aria-readonly="true" className={`${developerInputClassName} cursor-not-allowed bg-slate-100 text-slate-500`} /></DeveloperField>
                   </div>
                   <div className="mt-4"><DeveloperField label="Descrição"><textarea rows={2} value={category.description} onChange={(event) => updateCategory(index, { description: event.target.value })} className={`${developerInputClassName} resize-none`} /></DeveloperField></div>
-                  <div className="mt-4 flex flex-wrap gap-3"><ToggleField label="Obrigatória" checked={category.required} onChange={(required) => updateCategory(index, { required })} tooltip="Categorias obrigatórias permanecem ativas." /><ToggleField label="Ativa por padrão" checked={category.enabledByDefault} onChange={(enabledByDefault) => updateCategory(index, { enabledByDefault })} tooltip="Pré-seleciona uma categoria opcional." /></div>
+                  <div className="mt-4 flex flex-wrap gap-3"><ToggleField label="Obrigatória" checked={category.required} disabled onChange={() => {}} tooltip="Somente a categoria necessária é obrigatória." /><ToggleField label="Ativa por padrão" checked={category.enabledByDefault} disabled onChange={() => {}} tooltip="Categorias opcionais exigem escolha explícita e não são pré-selecionadas." /></div>
                 </article>
               );
             })}

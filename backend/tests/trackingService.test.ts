@@ -48,4 +48,107 @@ describe("trackingService", () => {
       expect.objectContaining({ userId: expect.anything() })
     );
   });
+
+  it("calculates the filtered summary over the full tracking history", async () => {
+    createIsolatedBackendEnv();
+    const { trackingEventRepository } = await import(
+      "../src/repositories/jsonRepositories.js"
+    );
+    const { getTrackingSummary, listTrackingEvents } = await import(
+      "../src/services/trackingService.js"
+    );
+    const timestamp = Date.now();
+
+    trackingEventRepository.write(
+      Array.from({ length: 1005 }, (_, index) => ({
+        id: `tracking-${index}`,
+        event: "page_view",
+        type: "page_view",
+        page: "/servicos",
+        timestamp: timestamp + index,
+        createdAt: new Date(timestamp + index).toISOString(),
+      }))
+    );
+
+    expect(listTrackingEvents({ limit: 10 })).toHaveLength(10);
+    expect(getTrackingSummary({ limit: 10 })).toMatchObject({
+      total: 1005,
+      byType: { page_view: 1005 },
+      topPages: [{ page: "/servicos", total: 1005 }],
+    });
+  });
+
+  it("counts only completed forms as form conversions", async () => {
+    createIsolatedBackendEnv();
+    const { trackingEventRepository } = await import(
+      "../src/repositories/jsonRepositories.js"
+    );
+    const { getAnalyticsStats } = await import("../src/services/analyticsService.js");
+    const timestamp = Date.now();
+    const names = [
+      ["form_submit", "contact"],
+      ["form_success", "contact"],
+      ["form_success", "exit-intent-popup"],
+      ["popup_submitted", "exit-intent-popup"],
+      ["lead_created", "contact"],
+      ["lead_created", "exit-intent-popup"],
+    ] as const;
+
+    trackingEventRepository.write(
+      names.map(([event, element], index) => ({
+        id: `tracking-${index}`,
+        event,
+        type: event,
+        element,
+        page: "/",
+        sessionId: `session-${index}`,
+        timestamp: timestamp + index,
+        createdAt: new Date(timestamp + index).toISOString(),
+      }))
+    );
+
+    expect(getAnalyticsStats(30).stats.conversions).toMatchObject({
+      forms: 1,
+      popupSubmissions: 1,
+      leads: 2,
+      total: 2,
+    });
+  });
+
+  it("preserves legacy analytics settings when the active controls are updated", async () => {
+    createIsolatedBackendEnv();
+    const { analyticsConfigRepository } = await import(
+      "../src/repositories/jsonRepositories.js"
+    );
+    const { updateAnalyticsConfig } = await import("../src/services/analyticsService.js");
+
+    analyticsConfigRepository.write({
+      siteUrl: "https://rodogarcia.com.br",
+      consent: { bannerEnabled: true, version: 2 },
+      tracking: { enabled: true, heartbeatSeconds: 45, scrollMilestones: [25, 50] },
+      providers: {
+        ga4: { enabled: false, measurementId: "" },
+        sentry: { enabled: true, dsn: "https://example.invalid/legacy" },
+      },
+      seo: { enableSearchConsole: true, sitemapUrl: "/sitemap.xml" },
+    });
+
+    const updated = updateAnalyticsConfig({
+      tracking: { enabled: false, scrollMilestones: [50, 100] },
+      providers: {
+        ga4: { enabled: true, measurementId: "G-TEST123" },
+      },
+    });
+
+    expect(updated).toMatchObject({
+      siteUrl: "https://rodogarcia.com.br",
+      consent: { bannerEnabled: true, version: 2 },
+      tracking: { enabled: false, heartbeatSeconds: 45, scrollMilestones: [50, 100] },
+      providers: {
+        ga4: { enabled: true, measurementId: "G-TEST123" },
+        sentry: { enabled: true, dsn: "https://example.invalid/legacy" },
+      },
+      seo: { enableSearchConsole: true, sitemapUrl: "/sitemap.xml" },
+    });
+  });
 });

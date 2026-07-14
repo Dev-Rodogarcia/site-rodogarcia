@@ -275,13 +275,14 @@ export default function SeoPage() {
               </span>
             </label>
             <DeveloperField
-              label="Slug / rota"
-              tooltip="Caminho público da página. Ex.: /sobre ou /servicos."
+              label="Rota vinculada"
+              tooltip="A rota é definida pelo aplicativo e não pode ser renomeada pelo SEO."
             >
               <input
                 value={form.slug}
-                onChange={(event) => setValue("slug", event.target.value)}
-                className={developerInputClassName}
+                readOnly
+                aria-readonly="true"
+                className={`${developerInputClassName} cursor-not-allowed bg-slate-100 text-slate-500`}
               />
             </DeveloperField>
           </div>
@@ -292,10 +293,10 @@ export default function SeoPage() {
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)] lg:items-start">
             <div className="space-y-4">
               <DeveloperField label="OG Title" tooltip="Título usado em previews de redes sociais. Ex.: Conheça a Rodogarcia.">
-                <input value={form.ogTitle} onChange={(event) => setValue("ogTitle", event.target.value)} className={developerInputClassName} />
+                <input value={form.ogTitle} maxLength={95} onChange={(event) => setValue("ogTitle", event.target.value)} className={developerInputClassName} />
               </DeveloperField>
               <DeveloperField label="OG Description" tooltip="Descrição usada no card de redes sociais. Ex.: resumo curto da página para WhatsApp e LinkedIn.">
-                <textarea rows={2} value={form.ogDescription} onChange={(event) => setValue("ogDescription", event.target.value)} className={`${developerInputClassName} resize-none`} />
+                <textarea rows={2} value={form.ogDescription} maxLength={220} onChange={(event) => setValue("ogDescription", event.target.value)} className={`${developerInputClassName} resize-none`} />
               </DeveloperField>
             </div>
             <DeveloperImageField
@@ -320,6 +321,7 @@ export default function SeoPage() {
               <textarea
                 rows={3}
                 value={form.metaTags}
+                maxLength={1000}
                 onChange={(event) => setValue("metaTags", event.target.value)}
                 className={`${developerInputClassName} resize-none`}
                 placeholder="theme-color=#ffffff"

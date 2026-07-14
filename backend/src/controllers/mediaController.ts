@@ -3,30 +3,27 @@ import {
   listAdminImages,
   readMediaSlots,
   replaceAdminImageReferences,
-  saveAdminImage,
   saveAdminMediaFromBuffer,
   updateMediaSlots,
 } from "../services/mediaService.js";
-import { asyncHandler } from "../utils/http.js";
+import { asyncHandler, HttpError } from "../utils/http.js";
 
 export const listImagesController: RequestHandler = asyncHandler((_req, res) => {
   res.json({ images: listAdminImages() });
 });
 
 export const uploadImageController: RequestHandler = asyncHandler((req, res) => {
-  const body = req.body ?? {};
   const files = req.files as
     | Partial<Record<"image" | "media", Express.Multer.File[]>>
     | undefined;
   const file = req.file ?? files?.media?.[0] ?? files?.image?.[0];
-  const upload = file
-    ? saveAdminMediaFromBuffer({
-        req,
-        fileName: file.originalname,
-        mimeType: file.mimetype,
-        buffer: file.buffer,
-      })
-    : saveAdminImage(String(body.fileName ?? ""), String(body.dataUrl ?? ""), req);
+  if (!file) throw new HttpError(422, "Selecione uma mídia para upload.");
+  const upload = saveAdminMediaFromBuffer({
+    req,
+    fileName: file.originalname,
+    mimeType: file.mimetype,
+    buffer: file.buffer,
+  });
 
   return Promise.resolve(upload).then((image) => {
     res.status(201).json({

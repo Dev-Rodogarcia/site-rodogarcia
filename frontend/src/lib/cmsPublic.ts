@@ -45,7 +45,7 @@ export async function buildCmsMetadata(
 
   return {
     ...fallback,
-    title,
+    title: { absolute: String(title) },
     description,
     alternates: { ...(fallback.alternates ?? {}), canonical: seo.absoluteUrl(canonical) },
     robots: {
@@ -57,7 +57,7 @@ export async function buildCmsMetadata(
       ...(fallback.openGraph ?? {}),
       title: String(ogTitle),
       description: String(ogDescription),
-      url: seo.absoluteUrl(path),
+      url: seo.absoluteUrl(canonical),
       images: [{ url: seo.absoluteUrl(ogImage) }],
     },
     twitter: {

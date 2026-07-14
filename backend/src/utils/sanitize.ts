@@ -10,6 +10,22 @@ export function sanitizeText(value: unknown, maxLength = 240): string {
     .slice(0, maxLength);
 }
 
+export function sanitizeMultilineText(value: unknown, maxLength = 1000): string {
+  if (typeof value !== "string" && typeof value !== "number") return "";
+  return String(value)
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) =>
+      line
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+        .replace(/[ \t]+/g, " ")
+        .trim()
+    )
+    .filter(Boolean)
+    .join("\n")
+    .slice(0, maxLength);
+}
+
 export function sanitizeEmail(value: unknown): string {
   const email = sanitizeText(value, 160).toLowerCase();
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : "";
@@ -18,6 +34,9 @@ export function sanitizeEmail(value: unknown): string {
 export function sanitizeUrl(value: unknown): string {
   const raw = sanitizeText(value, 600);
   if (!raw) return "";
+  if (/^#[A-Za-z][A-Za-z0-9_:.-]*$/.test(raw)) {
+    return raw;
+  }
   if (raw.startsWith("/")) {
     return sanitizePath(raw);
   }

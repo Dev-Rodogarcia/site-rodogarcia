@@ -245,6 +245,11 @@ export default function PopupExitPage() {
       setStatusMessage("Preencha título, descrição e texto do botão antes de salvar.");
       return;
     }
+    if (!config.enableName && !config.enableEmail && !config.enablePhone) {
+      setStatus("error");
+      setStatusMessage("Ative ao menos um campo de contato antes de salvar.");
+      return;
+    }
 
     setSaving(true);
     setStatus("");
@@ -438,6 +443,7 @@ export default function PopupExitPage() {
                 <DeveloperField label="Título desktop">
                   <input
                     value={config.desktop?.title ?? ""}
+                    maxLength={120}
                     onChange={(event) =>
                       setConfig((current) => ({
                         ...current,
@@ -451,6 +457,7 @@ export default function PopupExitPage() {
                   <textarea
                     rows={3}
                     value={config.desktop?.description ?? ""}
+                    maxLength={280}
                     onChange={(event) =>
                       setConfig((current) => ({
                         ...current,
@@ -485,6 +492,7 @@ export default function PopupExitPage() {
                 <DeveloperField label="Título mobile">
                   <input
                     value={config.mobile?.title ?? ""}
+                    maxLength={120}
                     onChange={(event) =>
                       setConfig((current) => ({
                         ...current,
@@ -498,6 +506,7 @@ export default function PopupExitPage() {
                   <textarea
                     rows={3}
                     value={config.mobile?.description ?? ""}
+                    maxLength={280}
                     onChange={(event) =>
                       setConfig((current) => ({
                         ...current,
@@ -510,6 +519,7 @@ export default function PopupExitPage() {
                 <DeveloperField label="Título da folha mobile" className="sm:col-start-2 sm:row-start-1">
                   <input
                     value={config.mobile?.sheetTitle ?? ""}
+                    maxLength={80}
                     onChange={(event) =>
                       setConfig((current) => ({
                         ...current,
@@ -578,10 +588,10 @@ export default function PopupExitPage() {
               >
                 <input
                   type="number"
-                  min={0}
+                  min={1}
                   value={config.maxShowsPerSession}
                   onChange={(event) =>
-                    setValue("maxShowsPerSession", Number(event.target.value) || 0)
+                    setValue("maxShowsPerSession", Number(event.target.value) || 1)
                   }
                   className={developerInputClassName}
                 />

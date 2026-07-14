@@ -19,6 +19,16 @@ export function createIsolatedBackendEnv() {
   process.env.FRONTEND_PUBLIC_DIR = publicDir;
   process.env.CONTENT_STORE_PATH = path.join(storageRoot, "content.json");
   process.env.SITE_TEXTS_STORE_PATH = path.join(storageRoot, "site-texts.json");
+  process.env.CONTACTS_STORE_PATH = path.join(storageRoot, "contacts.json");
+  process.env.QUOTES_STORE_PATH = path.join(storageRoot, "quotes.json");
+  process.env.POPUP_CONFIG_STORE_PATH = path.join(storageRoot, "popup-config.json");
+  process.env.POPUP_LEADS_STORE_PATH = path.join(storageRoot, "popup-leads.json");
+  process.env.POPUP_EVENTS_STORE_PATH = path.join(storageRoot, "popup-events.json");
+  process.env.ANALYTICS_STORE_PATH = path.join(privateRoot, "analytics.json");
+  process.env.ANALYTICS_CONFIG_PATH = path.join(privateRoot, "analytics-config.json");
+  process.env.SEO_SETTINGS_STORE_PATH = path.join(storageRoot, "seo-settings.json");
+  process.env.LEADS_STORE_PATH = path.join(storageRoot, "leads.json");
+  process.env.TRACKING_EVENTS_STORE_PATH = path.join(privateRoot, "tracking-events.json");
   process.env.MEDIA_LIBRARY_STORE_PATH = path.join(storageRoot, "media-library.json");
   process.env.MEDIA_SLOTS_STORE_PATH = path.join(storageRoot, "media-slots.json");
   process.env.COOKIE_CONSENTS_STORE_PATH = path.join(privateRoot, "cookie-consents.json");

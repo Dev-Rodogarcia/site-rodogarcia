@@ -39,13 +39,14 @@ export function createContact(req: Request) {
   contacts.push(entry);
   contactRepository.write(contacts);
   createLeadRecord({
+    id: entry.id,
     req,
     source: "contact-form",
     pagePath: "/fale-conosco",
     name: entry.name,
     email: entry.email,
     phone: entry.phone,
-    metadata: { subject: entry.subject },
+    metadata: { subject: entry.subject, contactId: entry.id },
   });
   recordTrackingEvent({
     event: "form_submit",
@@ -90,6 +91,7 @@ export function createQuote(req: Request) {
   quotes.push(entry);
   quoteRepository.write(quotes);
   createLeadRecord({
+    id: entry.id,
     req,
     source: "quote-form",
     pagePath: "/cotacao",

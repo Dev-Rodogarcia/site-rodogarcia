@@ -99,7 +99,10 @@ export default function QuickActionsSection({ actions }: QuickActionsSectionProp
   const visible = useMemo(
     () =>
       actions
-        .filter((action) => action.enabled !== false && action.label.trim())
+        .filter(
+          (action) =>
+            action.enabled !== false && action.label.trim() && hasActionTarget(action)
+        )
         .slice()
         .sort((a, b) => (a.order ?? 999) - (b.order ?? 999)),
     [actions]

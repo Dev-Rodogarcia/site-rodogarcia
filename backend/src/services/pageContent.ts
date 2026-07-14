@@ -45,17 +45,15 @@ const site = {
 
 const external = {
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
-  whatsappCommercial: "https://wa.me/5514999999999",
-  whatsappQuoteFractional:
-    "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fracionada.",
-  whatsappQuoteFull:
-    "https://wa.me/5514999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20para%20carga%20fechada.",
+  whatsappCommercial: site.contact,
+  whatsappQuoteFractional: site.contact,
+  whatsappQuoteFull: site.contact,
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
   careersEmailWithSubject:
     "mailto:rh@rodogarcia.com.br?subject=Candidatura%20-%20Trabalhe%20Conosco",
   phoneDisplay: "0800 591 4557",
-  phoneHref: "tel:+551408005914557",
+  phoneHref: "tel:08005914557",
 } as const;
 
 type RawRecord = Record<string, unknown>;
@@ -87,10 +85,7 @@ function sanitizeButton(payload: unknown, fallback: PageButton): PageButton {
   return {
     label: sanitizeText(source.label, 40) || fallback.label,
     url,
-    external:
-      typeof source.external === "boolean"
-        ? source.external
-        : url.startsWith("http") || url.startsWith("mailto:") || url.startsWith("tel:"),
+    external: url.startsWith("http") || url.startsWith("mailto:") || url.startsWith("tel:"),
   };
 }
 
@@ -202,7 +197,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
   heroWhatsappButton: {
     label: "Abrir WhatsApp",
     url: external.whatsappCommercial,
-    external: true,
+    external: false,
   },
   mainChannels: [
     {
@@ -224,7 +219,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
       order: 3,
       title: "WhatsApp comercial",
       description: "Canal mais rápido para abrir conversa e pedir direcionamento.",
-      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
+      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: false },
     },
   ],
   info: {
@@ -359,7 +354,7 @@ const DEFAULT_CAREERS_PAGE: CareersPageContent = {
 const DEFAULT_QUOTE_PAGE: QuotePageContent = {
   hero: {
     buttons: [
-      { label: "Falar no WhatsApp", url: external.whatsappCommercial, external: true },
+      { label: "Falar no WhatsApp", url: external.whatsappCommercial, external: false },
       { label: "Ver contato completo", url: site.contact },
     ],
   },
@@ -373,7 +368,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       button: {
         label: "Abrir WhatsApp - Fracionado",
         url: external.whatsappQuoteFractional,
-        external: true,
+        external: false,
       },
     },
     {
@@ -385,7 +380,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       button: {
         label: "Abrir WhatsApp - Lotação",
         url: external.whatsappQuoteFull,
-        external: true,
+        external: false,
       },
     },
   ],
@@ -397,7 +392,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       iconColor: "#22c55e",
       title: "WhatsApp comercial",
       description: "Canal mais rápido para abrir conversa e pedir cotação.",
-      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
+      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: false },
       buttonColor: "#22c55e",
       active: true,
     },
@@ -603,7 +598,7 @@ function sanitizeCareersJob(payload: RawRecord, index: number): CareersPageJob {
     type: sanitizeText(payload.type ?? payload.contractType, 40),
     description: sanitizeText(payload.description, 220),
     applyUrl: sanitizeUrl(payload.applyUrl),
-    active: Boolean(payload.active ?? true),
+    active: typeof payload.active === "boolean" ? payload.active : true,
     createdAt: sanitizeText(payload.createdAt, 40),
     updatedAt: sanitizeText(payload.updatedAt, 40),
   };
@@ -683,7 +678,7 @@ function sanitizeOtherChannel(payload: RawRecord, index: number): QuoteOtherChan
     description: sanitizeText(payload.description, 220) || fallback.description,
     button: sanitizeButton(payload.button, fallback.button),
     buttonColor: sanitizeHexColor(payload.buttonColor) || fallback.buttonColor,
-    active: Boolean(payload.active ?? true),
+    active: typeof payload.active === "boolean" ? payload.active : true,
     createdAt: sanitizeText(payload.createdAt, 40) || nowIso,
     updatedAt: sanitizeText(payload.updatedAt, 40) || nowIso,
   };
@@ -892,6 +887,7 @@ export function sanitizeQuotePage(payload: unknown): QuotePageContent {
   const source = isRecord(payload) ? payload : {};
   const hero = isRecord(source.hero) ? source.hero : {};
   const finalCta = isRecord(source.finalCta) ? source.finalCta : {};
+  const hasOtherChannels = Array.isArray(source.otherChannels);
   const otherChannels = arrayPayload(source.otherChannels);
   return {
     hero: {
@@ -903,7 +899,7 @@ export function sanitizeQuotePage(payload: unknown): QuotePageContent {
       )
     ),
     otherChannels: withOrder(
-      (otherChannels.length > 0 ? otherChannels : DEFAULT_QUOTE_PAGE.otherChannels).map(
+      (hasOtherChannels ? otherChannels : DEFAULT_QUOTE_PAGE.otherChannels).map(
         (channel, index) => sanitizeOtherChannel(channel as RawRecord, index)
       )
     ),

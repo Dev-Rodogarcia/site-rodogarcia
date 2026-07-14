@@ -1,6 +1,11 @@
 import { seoSettingsRepository } from "../repositories/jsonRepositories.js";
 import { HttpError } from "../utils/http.js";
-import { sanitizePath, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
+import {
+  sanitizeMultilineText,
+  sanitizePath,
+  sanitizeText,
+  sanitizeUrl,
+} from "../utils/sanitize.js";
 import { recordAuditAction } from "./auditService.js";
 import type { Request } from "express";
 import { sanitizeInternalImageUrl } from "./mediaValidationService.js";
@@ -73,11 +78,11 @@ function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettin
     label: sanitizeText(input.label, 80) || fallback?.label || path,
     title,
     description,
-    metaTags: sanitizeText(input.metaTags, 1000),
-    index: input.index !== false,
-    follow: input.follow !== false,
+    metaTags: sanitizeMultilineText(input.metaTags, 1000),
+    index: typeof input.index === "boolean" ? input.index : fallback?.index ?? true,
+    follow: typeof input.follow === "boolean" ? input.follow : fallback?.follow ?? true,
     canonical,
-    slug: sanitizeText(input.slug, 120) || (path === "/" ? "/" : path.replace(/^\//, "")),
+    slug: path === "/" ? "/" : path.replace(/^\//, ""),
     ogTitle: sanitizeText(input.ogTitle, 95) || title,
     ogDescription: sanitizeText(input.ogDescription, 220) || description,
     ogImage: sanitizeInternalImageUrl(input.ogImage, "SEO: imagem social") || fallback?.ogImage || "/foto5.png",
@@ -87,11 +92,9 @@ function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettin
 
 export function readSeoSettings() {
   const raw = readRawSettings();
-  const existing = new Map((raw.pages ?? []).map((page) => [page.path, page]));
+  const rawPages = Array.isArray(raw.pages) ? raw.pages : [];
+  const existing = new Map(rawPages.map((page) => [page.path, page]));
   const pages = defaultPages().map((defaults) => normalizePage(existing.get(defaults.path) ?? defaults, defaults));
-  for (const page of raw.pages ?? []) {
-    if (!pages.some((item) => item.path === page.path)) pages.push(normalizePage(page));
-  }
   return {
     pages,
     updatedAt: raw.updatedAt,
@@ -101,6 +104,9 @@ export function readSeoSettings() {
 export function updateSeoPage(req: Request | undefined, body: Record<string, unknown>) {
   const path = sanitizePath(body.path);
   if (!path) throw new HttpError(422, "Rota SEO invalida.");
+  if (!DEFAULT_ROUTES.some((route) => route.path === path)) {
+    throw new HttpError(422, "A rota SEO não pertence ao conjunto público editável.");
+  }
   const settings = readSeoSettings();
   const current = settings.pages.find((page) => page.path === path);
   const nextPage = normalizePage({ ...current, ...body, updatedAt: new Date().toISOString() }, current);

@@ -132,8 +132,10 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                 <div className="absolute inset-0">
                   <HeroMedia
                     src={getDesktopAsset(slide)}
-                    alt=""
-                    decorative
+                    mobileSrc={getMobileAsset(slide)}
+                    poster={slide.media.poster}
+                    alt={slide.media.alt || (isImageOnly ? "Destaque Rodogarcia" : "")}
+                    decorative={!isImageOnly}
                     blurred={!isImageOnly}
                     priority={index === 0}
                     active={isCurrent}
@@ -177,6 +179,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                       <div className="mt-10 overflow-hidden rounded-[28px] lg:hidden">
                         <HeroMedia
                           src={getMobileAsset(slide)}
+                          poster={slide.media.poster}
                           alt={slide.media.alt || title}
                           active={isCurrent}
                           priority={index === 0}
@@ -189,6 +192,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_50%,rgba(56,189,248,0.16),transparent_24%)]" />
                         <HeroMedia
                           src={getDesktopAsset(slide)}
+                          poster={slide.media.poster}
                           alt={slide.media.alt || title}
                           active={isCurrent}
                           priority={index === 0}
@@ -237,6 +241,8 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
 function HeroMedia({
   src,
+  mobileSrc,
+  poster,
   alt,
   active,
   className,
@@ -245,6 +251,8 @@ function HeroMedia({
   priority = false,
 }: {
   src: string;
+  mobileSrc?: string;
+  poster?: string;
   alt: string;
   active: boolean;
   className: string;
@@ -270,23 +278,33 @@ function HeroMedia({
         muted
         playsInline
         preload={priority ? "auto" : "metadata"}
+        poster={poster || undefined}
         aria-hidden={decorative}
+        aria-label={decorative ? undefined : alt}
       >
+        {mobileSrc && mobileSrc !== src ? (
+          <source media="(max-width: 1023px)" src={mobileSrc} />
+        ) : null}
         <source src={src} />
       </video>
     );
   }
 
   return (
-    <img
-      src={src}
-      alt={decorative ? "" : alt}
-      aria-hidden={decorative}
-      className={`${className} ${motionClass} ${filterClass} transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)]`}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-      fetchPriority={priority ? "high" : "auto"}
-    />
+    <picture className="contents">
+      {mobileSrc && mobileSrc !== src ? (
+        <source media="(max-width: 1023px)" srcSet={mobileSrc} />
+      ) : null}
+      <img
+        src={src}
+        alt={decorative ? "" : alt}
+        aria-hidden={decorative}
+        className={`${className} ${motionClass} ${filterClass} transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)]`}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
+      />
+    </picture>
   );
 }
 

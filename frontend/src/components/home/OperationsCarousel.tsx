@@ -19,6 +19,8 @@ interface SpotlightSlide {
   text: string;
   desktopAsset: string;
   mobileAsset: string;
+  alt: string;
+  poster: string;
 }
 
 const AUTO_ADVANCE_MS = 5600;
@@ -66,6 +68,8 @@ function buildSpotlightSlides(slides: HomeOperationItem[]): SpotlightSlide[] {
         text,
         desktopAsset,
         mobileAsset: mobileAsset || desktopAsset,
+        alt: normalizeText(slide.media.alt) || title,
+        poster: resolveAssetPath(slide.media.poster),
       } satisfies SpotlightSlide;
     })
     .filter((slide): slide is SpotlightSlide => Boolean(slide));
@@ -76,11 +80,13 @@ function SpotlightMedia({
   alt,
   active,
   className,
+  poster,
 }: {
   src: string;
   alt: string;
   active: boolean;
   className: string;
+  poster?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -117,6 +123,7 @@ function SpotlightMedia({
         loop
         playsInline
         preload="metadata"
+        poster={poster || undefined}
         className={className}
       />
     );
@@ -310,7 +317,8 @@ export default function OperationsCarousel({ section }: OperationsCarouselProps)
                 <div className="absolute inset-0">
                   <SpotlightMedia
                     src={slide.desktopAsset}
-                    alt={slide.title || "Operacao conectada Rodogarcia"}
+                    alt={slide.alt || "Operação conectada Rodogarcia"}
+                    poster={slide.poster}
                     active={isActive}
                     className={`h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                       isActive ? "scale-[1.02]" : "scale-100"
@@ -385,7 +393,8 @@ export default function OperationsCarousel({ section }: OperationsCarouselProps)
                   <div className="absolute inset-0">
                     <SpotlightMedia
                       src={slide.mobileAsset}
-                      alt={slide.title || "Operacao conectada Rodogarcia"}
+                      alt={slide.alt || "Operação conectada Rodogarcia"}
+                      poster={slide.poster}
                       active={isActive}
                       className={`h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                         isActive ? "scale-[1.02]" : "scale-100"

@@ -62,26 +62,17 @@ export default async function PrivacidadePage() {
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div>
               <SectionHeader
-                eyebrow="Resumo rápido"
-                title="Privacidade aplicada aos canais oficiais do site."
-                description="A política explica quais informações podem ser recebidas, por que elas são usadas e como o titular pode solicitar orientação."
+                eyebrow={privacy.dataSection.eyebrow}
+                title={privacy.dataSection.title}
+                description={privacy.dataSection.description}
               />
-              <p className="mt-6 text-sm leading-7 text-[var(--color-muted-raw)]">
-                O tratamento de dados está relacionado aos formulários de contato, cotação, carreira e demais interações feitas voluntariamente pelo usuário nos canais digitais oficiais.
-              </p>
             </div>
 
-            <aside className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
+            <aside className="flex min-h-36 flex-col items-center justify-center gap-5 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
               <ShieldCheck size={24} weight="duotone" className="text-[var(--primary)]" />
-              <h3 className="font-semibold tracking-[-0.02em] text-[var(--foreground)]">
-                LGPD e transparência
-              </h3>
-              <p className="text-sm leading-7 text-[var(--color-muted-raw)]">
-                As informações são usadas para atendimento institucional e comercial, respeitando finalidade, necessidade e segurança.
-              </p>
               <ActionLink
                 action={toPageAction(privacy.hero.button)}
-                className="mt-2 w-full"
+                className="w-full"
               />
             </aside>
           </div>
@@ -93,15 +84,7 @@ export default async function PrivacidadePage() {
         <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
 
         <PageContainer className="relative">
-          <SectionHeader
-            eyebrow={privacy.dataSection.eyebrow}
-            title={privacy.dataSection.title}
-            description={privacy.dataSection.description}
-            theme="dark"
-            align="center"
-          />
-
-          <div className="mx-auto mt-12 max-w-3xl space-y-8">
+          <div className="mx-auto max-w-3xl space-y-8">
             {privacy.dataSection.blocks.map((section) => (
               <div key={section.id} className="border-b border-white/10 pb-8 last:border-b-0 last:pb-0">
                 <h2 className="text-xl font-semibold tracking-[-0.03em] text-white">

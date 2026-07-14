@@ -39,6 +39,57 @@ export function isSupremeUser(user: UserRecord | null | undefined) {
   );
 }
 
+type UserRole = UserRecord["role"];
+
+interface CreateUserParams {
+  name?: unknown;
+  email?: unknown;
+  password?: unknown;
+  confirmPassword?: unknown;
+  role?: unknown;
+}
+
+function parseUserRole(value: unknown, required: boolean): UserRole | undefined {
+  if (value === undefined && !required) return undefined;
+  if (value === "admin" || value === "user") return value;
+  throw new HttpError(422, "Perfil de acesso inválido.");
+}
+
+function parseUserActive(value: unknown): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value === "boolean") return value;
+  throw new HttpError(422, "O status do usuário deve ser booleano.");
+}
+
+function parseUserName(value: unknown, required: boolean): string | undefined {
+  if (value === undefined && !required) return undefined;
+  if (typeof value !== "string") {
+    throw new HttpError(422, "Informe um nome válido.");
+  }
+
+  const name = sanitizeText(value, 81);
+  if (!name) throw new HttpError(422, "Informe um nome válido.");
+  if (name.length > 80) {
+    throw new HttpError(422, "O nome deve ter no máximo 80 caracteres.");
+  }
+  return name;
+}
+
+function parseUserEmail(value: unknown, required: boolean): string | undefined {
+  if (value === undefined && !required) return undefined;
+  if (typeof value !== "string") {
+    throw new HttpError(422, "Informe um e-mail válido.");
+  }
+
+  const normalized = sanitizeText(value, 161);
+  if (normalized.length > 160) {
+    throw new HttpError(422, "O e-mail deve ter no máximo 160 caracteres.");
+  }
+  const email = sanitizeEmail(value);
+  if (!email) throw new HttpError(422, "Informe um e-mail válido.");
+  return email;
+}
+
 function assertSupremeActor(actor: UserRecord | null | undefined) {
   if (!isSupremeUser(actor)) {
     throw new HttpError(403, "Somente o usuário supremo pode gerenciar acessos.");
@@ -100,26 +151,23 @@ export function login(req: Request) {
   return { user, session };
 }
 
-export function createUser(params: {
-  name?: unknown;
-  email?: unknown;
-  password?: unknown;
-  confirmPassword?: unknown;
-  role?: unknown;
-  isOwner?: boolean;
-}, actor?: UserRecord) {
+function createUserRecord(
+  params: CreateUserParams,
+  actor: UserRecord | undefined,
+  isInitialOwner: boolean
+) {
   if (userRepository.hasAny()) {
     assertSupremeActor(actor);
   }
 
-  const name = sanitizeText(params.name, 80);
-  const email = sanitizeEmail(params.email);
+  const name = parseUserName(params.name, true)!;
+  const email = parseUserEmail(params.email, true)!;
   const password = typeof params.password === "string" ? params.password : "";
   const confirmPassword =
     typeof params.confirmPassword === "string" ? params.confirmPassword : password;
-  const role = params.role === "user" ? "user" : "admin";
+  const role = parseUserRole(params.role, true)!;
 
-  if (!name || !email || !password) {
+  if (!password) {
     throw new HttpError(422, "Preencha nome, e-mail e senha corretamente.");
   }
   if (password !== confirmPassword) {
@@ -131,7 +179,7 @@ export function createUser(params: {
     throw new HttpError(422, passwordErrors[0] ?? "Senha invalida.");
   }
 
-  if (userRepository.findByEmail(email)) {
+  if (userRepository.findAnyByEmail(email)) {
     throw new HttpError(409, "Ja existe conta com este e-mail.");
   }
 
@@ -142,10 +190,14 @@ export function createUser(params: {
     name,
     role,
     active: true,
-    isOwner: params.isOwner === true,
+    isOwner: isInitialOwner,
     createdAt: nowIso,
     passwordHash: hashPassword(password),
   });
+}
+
+export function createUser(params: CreateUserParams, actor?: UserRecord) {
+  return createUserRecord(params, actor, false);
 }
 
 export function updateUser(
@@ -164,29 +216,34 @@ export function updateUser(
   const userId = sanitizeText(id, 120);
   const target = userRepository.findById(userId);
   if (!target) throw new HttpError(404, "Usuário não encontrado.");
+  const requestedRole = parseUserRole(params.role, false);
+  const requestedActive = parseUserActive(params.active);
   if (isSupremeUser(target)) {
-    const requestedRole = params.role === "user" ? "user" : "admin";
-    const requestedActive =
-      params.active === undefined ? target.active !== false : Boolean(params.active);
-    if (requestedRole !== "admin" || !requestedActive) {
+    if (
+      (requestedRole !== undefined && requestedRole !== "admin") ||
+      requestedActive === false
+    ) {
       throw new HttpError(403, "O usuário supremo não pode perder perfil master ou ser desativado.");
     }
   }
 
   const patch: Partial<UserRecord> = {};
-  const name = sanitizeText(params.name, 80);
-  const email = sanitizeEmail(params.email);
-  if (name) patch.name = name;
-  if (email && email !== target.email) {
-    const existing = userRepository.findByEmail(email);
+  const name = parseUserName(params.name, false);
+  const email = parseUserEmail(params.email, false);
+  if (name !== undefined) patch.name = name;
+  if (email !== undefined && email !== target.email) {
+    const existing = userRepository.findAnyByEmail(email);
     if (existing && existing.id !== target.id) {
       throw new HttpError(409, "Ja existe conta com este e-mail.");
     }
     patch.email = email;
   }
-  patch.role = params.role === "user" ? "user" : "admin";
-  patch.active = params.active === undefined ? target.active !== false : Boolean(params.active);
+  if (requestedRole !== undefined) patch.role = requestedRole;
+  if (requestedActive !== undefined) patch.active = requestedActive;
 
+  if (params.password !== undefined && typeof params.password !== "string") {
+    throw new HttpError(422, "A senha deve ser uma string.");
+  }
   const password = typeof params.password === "string" ? params.password : "";
   if (password) {
     const confirmPassword =
@@ -205,8 +262,8 @@ export function updateUser(
   if (!updated) throw new HttpError(404, "Usuário não encontrado.");
   if (
     patch.passwordHash ||
-    patch.active !== (target.active !== false) ||
-    patch.role !== target.role
+    (patch.active !== undefined && patch.active !== (target.active !== false)) ||
+    (patch.role !== undefined && patch.role !== target.role)
   ) {
     sessionRepository.deleteByUserId(target.id);
   }
@@ -244,7 +301,11 @@ export function createInitialUser(params: {
     throw new HttpError(403, "Codigo de setup invalido.");
   }
 
-  return createUser({ ...params, role: "admin", isOwner: true });
+  return createUserRecord(
+    { ...params, role: "admin" },
+    undefined,
+    true
+  );
 }
 
 export function hasAnyUser() {

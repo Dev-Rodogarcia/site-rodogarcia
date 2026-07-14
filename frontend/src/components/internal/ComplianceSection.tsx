@@ -21,6 +21,7 @@ interface CertificationItem {
   description: string;
   image: string;
   alt?: string;
+  url?: string;
 }
 
 const CERTIFICATIONS: CertificationItem[] = [
@@ -76,6 +77,7 @@ export function ComplianceSection({ content }: { content?: ComplianceContent }) 
           description: content.description,
           image: content.image.src,
           alt: content.image.alt || content.title,
+          url: content.certificateUrl,
         }
       : null;
   const certifications = cmsCertification
@@ -88,7 +90,7 @@ export function ComplianceSection({ content }: { content?: ComplianceContent }) 
   return (
     <CertificationScroller
       certifications={certifications}
-      eyebrow={content?.certificateText || "Governança & Compliance"}
+      eyebrow="Governança & Compliance"
       title={content?.title || "Excelência em cada operação"}
     />
   );
@@ -240,6 +242,16 @@ function CertificationScroller({
                   <p className="mx-auto max-w-[540px] text-sm leading-relaxed text-white/80 sm:text-base md:text-[15px]">
                     {certifications[currentIdx].description}
                   </p>
+                  {certifications[currentIdx].url ? (
+                    <a
+                      href={certifications[currentIdx].url}
+                      target={certifications[currentIdx].url?.startsWith("http") ? "_blank" : undefined}
+                      rel={certifications[currentIdx].url?.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="mt-4 inline-flex min-h-10 items-center justify-center rounded-full border border-sky-300/30 bg-sky-400/10 px-5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200 transition-colors hover:bg-sky-400/20"
+                    >
+                      Ver certificado
+                    </a>
+                  ) : null}
                 </div>
               </div>
             </motion.div>

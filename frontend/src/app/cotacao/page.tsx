@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   ArrowRight,
   ClipboardText,
@@ -12,6 +11,7 @@ import {
   PageContainer,
   PageSection,
   PageShell,
+  SemanticLink,
   SectionHeader,
 } from "@/components/internal/PageContent";
 import { QuoteOtherChannelsSection } from "@/components/internal/QuoteOtherChannelsSection";
@@ -275,15 +275,14 @@ export default async function CotacaoPage() {
                 <p className="text-sm leading-7 text-[var(--color-muted-raw)]">
                   {item.description}
                 </p>
-                <a
+                <SemanticLink
                   href={item.button.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  external={item.button.external}
                   className="mt-auto inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(34,197,94,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_22px_48px_rgba(34,197,94,0.32)]"
                 >
                   <WhatsappLogo size={18} weight="fill" />
                   {item.button.label}
-                </a>
+                </SemanticLink>
               </div>
             ))}
           </div>
@@ -357,25 +356,27 @@ export default async function CotacaoPage() {
                 Escolha o canal mais confortável para abrir a conversa. Os dois CTAs continuam grandes, diretos e prontos para fechamento da jornada.
               </p>
 
-              <Link
+              <SemanticLink
                 href={quotePage.finalCta.buttons[0]?.url || site.contact}
+                external={quotePage.finalCta.buttons[0]?.external}
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-[15px] font-extrabold tracking-tight text-white shadow-[0_12px_32px_rgba(2,132,199,0.25)] transition-all duration-200 hover:-translate-y-1 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_20px_48px_rgba(2,132,199,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 sm:px-8"
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span className="min-w-0 truncate">{quotePage.finalCta.buttons[0]?.label || "Abrir contato"}</span>
                   <ArrowRight size={18} weight="bold" className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                 </span>
-              </Link>
+              </SemanticLink>
 
-              <Link
+              <SemanticLink
                 href={quotePage.finalCta.buttons[1]?.url || site.help}
+                external={quotePage.finalCta.buttons[1]?.external}
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-slate-900 px-4 text-[15px] font-bold tracking-tight text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] transition-all duration-200 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-900/30 sm:px-8"
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span className="min-w-0 truncate">{quotePage.finalCta.buttons[1]?.label || "Central de ajuda"}</span>
                   <ArrowRight size={18} weight="bold" className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                 </span>
-              </Link>
+              </SemanticLink>
             </div>
           </div>
         </PageContainer>

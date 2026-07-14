@@ -4,6 +4,7 @@ import { migratePageContent } from "../services/pageContent.js";
 import type { ContentData, HomePageContent, ServicesPageContent } from "../types/content.js";
 import { readJsonFile, writeJsonFile } from "../utils/jsonStore.js";
 import { mediaSlotsRepository } from "./jsonRepositories.js";
+import { defaultHomeQuickActions } from "../config/contentDefaults.js";
 
 function emptyHomePage(): HomePageContent {
   return {
@@ -38,7 +39,7 @@ function emptyHomePage(): HomePageContent {
       ],
     },
     socialProof: { title: "", feedbacks: [] },
-    quickActions: [],
+    quickActions: defaultHomeQuickActions(),
   };
 }
 
@@ -216,7 +217,8 @@ export const contentRepository = {
       shouldPersistPageMigration(data) ||
       !data.footerLinks ||
       !data.homePage?.regionalPresence ||
-      !data.homePage?.trackingCta
+      !data.homePage?.trackingCta ||
+      !Array.isArray(data.homePage?.quickActions)
     ) {
       writeJsonFile(storagePaths.content, serializeContent(migrated));
     }

@@ -42,6 +42,7 @@ import {
   sanitizeInternalMediaUrl,
   sanitizeInternalVideoUrl,
 } from "./mediaValidationService.js";
+import { defaultHomeQuickActions } from "../config/contentDefaults.js";
 
 export type Entity = "units";
 type RawItem = Record<string, unknown> & { id: string; order?: number };
@@ -80,14 +81,26 @@ function setCollection(content: ContentData, entity: Entity, items: RawItem[]) {
   raw[ENTITY_KEYS[entity]] = sortByOrder(items);
 }
 
+const BRAZILIAN_STATE_CODES = new Set([
+  "ac", "al", "ap", "am", "ba", "ce", "df", "es", "go", "ma", "mt", "ms", "mg",
+  "pa", "pb", "pr", "pe", "pi", "rj", "rn", "rs", "ro", "rr", "sc", "sp", "se", "to",
+]);
+const UNIT_TYPES = new Set(["matriz", "filial", "ponto de apoio"]);
+
 function sanitizeState(value: unknown) {
-  return sanitizeText(value, 2).toLowerCase().replace(/[^a-z]/g, "");
+  const state = sanitizeText(value, 2).toLowerCase().replace(/[^a-z]/g, "");
+  return BRAZILIAN_STATE_CODES.has(state) ? state : "";
+}
+
+function strictBoolean(value: unknown, fallback: boolean) {
+  return typeof value === "boolean" ? value : fallback;
 }
 
 function sanitizeUnitPayload(payload: Record<string, unknown>) {
+  const type = sanitizeText(payload.type ?? payload.tipo, 40).toLowerCase();
   return {
     name: sanitizeText(payload.name ?? payload.nome, 120),
-    type: sanitizeText(payload.type ?? payload.tipo, 40),
+    type: UNIT_TYPES.has(type) ? type : "",
     state: sanitizeState(payload.state ?? payload.estado),
     city: sanitizeText(payload.city ?? payload.cidade, 80),
     address: sanitizeText(payload.address ?? payload.endereco, 220),
@@ -96,8 +109,8 @@ function sanitizeUnitPayload(payload: Record<string, unknown>) {
     contactUrl: sanitizeUrl(payload.contactUrl ?? payload.linkContato),
     description: sanitizeText(payload.description ?? payload.descricao, 220),
     logisticsInfo: sanitizeText(payload.logisticsInfo ?? payload.infoLogistica, 260),
-    isDefault: Boolean(payload.isDefault ?? payload.matriz),
-    active: Boolean(payload.active ?? payload.ativo ?? true),
+    isDefault: strictBoolean(payload.isDefault ?? payload.matriz, false),
+    active: strictBoolean(payload.active ?? payload.ativo, true),
   };
 }
 
@@ -113,7 +126,177 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function arrayPayload(value: unknown): Record<string, unknown>[] {
-  return Array.isArray(value) ? (value as Record<string, unknown>[]) : [];
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function hasRequiredText(value: unknown) {
+  return sanitizeText(value, 2000).length > 0;
+}
+
+function validatePageButtons(value: unknown, count: number, label: string) {
+  const buttons = arrayPayload(value);
+  if (buttons.length !== count) return `${label}: informe exatamente ${count} botão(ões).`;
+  const invalidIndex = buttons.findIndex(
+    (button) => !hasRequiredText(button.label) || !sanitizeUrl(button.url)
+  );
+  return invalidIndex >= 0
+    ? `${label}: texto e link são obrigatórios no botão ${invalidIndex + 1}.`
+    : null;
+}
+
+function validateCmsPagePayload(
+  pageKey: CmsPageKey,
+  sectionKey: PageSectionKey,
+  payload: Record<string, unknown>
+) {
+  const requiredFields = (source: Record<string, unknown>, fields: string[], label: string) => {
+    const missing = fields.find((field) => !hasRequiredText(source[field]));
+    return missing ? `${label}: o campo ${missing} é obrigatório.` : null;
+  };
+  const validateMedia = (value: unknown, label: string) => {
+    const media = isRecord(value) ? value : {};
+    return requiredFields(media, ["src", "alt"], label);
+  };
+  const quoteIcons = new Set([
+    "WhatsappLogo",
+    "PhoneCall",
+    "EnvelopeSimple",
+    "ClipboardText",
+    "ChatCircleDots",
+    "Headset",
+    "MapPinLine",
+    "Truck",
+  ]);
+
+  if (pageKey === "about") {
+    if (sectionKey === "hero") {
+      return requiredFields(payload, ["title", "description"], "Sobre / Hero") ||
+        validateMedia(payload.media, "Sobre / Hero") ||
+        validatePageButtons(payload.buttons, 2, "Sobre / Hero");
+    }
+    if (sectionKey === "compliance") {
+      const requiredError = requiredFields(payload, ["title", "description", "certificateText"], "Sobre / Governança") ||
+        validateMedia(payload.image, "Sobre / Governança");
+      if (requiredError) return requiredError;
+      if (hasRequiredText(payload.certificateUrl) && !sanitizeUrl(payload.certificateUrl)) {
+        return "Sobre / Governança: informe um link de certificado válido.";
+      }
+      return null;
+    }
+    if (sectionKey === "finalCta") {
+      return requiredFields(payload, ["title", "description"], "Sobre / CTA final") ||
+        validatePageButtons(payload.buttons, 2, "Sobre / CTA final");
+    }
+  }
+
+  if (pageKey === "business") {
+    if (sectionKey === "scaleCta") return validatePageButtons(payload.buttons, 2, "Empresas / CTA");
+    if (sectionKey === "faq") {
+      if (!hasRequiredText(payload.title)) return "Empresas / FAQ: o título é obrigatório.";
+      const items = arrayPayload(payload.items);
+      if (items.length !== 4) return "Empresas / FAQ: informe exatamente 4 perguntas.";
+      const invalidIndex = items.findIndex(
+        (item) => !hasRequiredText(item.question) || !hasRequiredText(item.answer)
+      );
+      return invalidIndex >= 0
+        ? `Empresas / FAQ: pergunta e resposta são obrigatórias no item ${invalidIndex + 1}.`
+        : null;
+    }
+  }
+
+  if (pageKey === "contact") {
+    if (sectionKey === "hero") {
+      const button = isRecord(payload.heroWhatsappButton) ? payload.heroWhatsappButton : payload;
+      return validatePageButtons([button], 1, "Contato / Hero");
+    }
+    if (sectionKey === "mainChannels") {
+      const channels = arrayPayload(payload.mainChannels);
+      if (channels.length !== 3) return "Contato: informe exatamente 3 canais principais.";
+      const invalidIndex = channels.findIndex(
+        (channel) => !hasRequiredText(channel.description) || Boolean(validatePageButtons([channel.button], 1, "Contato"))
+      );
+      return invalidIndex >= 0
+        ? `Contato: descrição e botão são obrigatórios no canal ${invalidIndex + 1}.`
+        : null;
+    }
+    if (sectionKey === "info") {
+      const items = arrayPayload(payload.items);
+      const indicators = arrayPayload(payload.indicators);
+      if (items.length !== 4 || indicators.length !== 2) {
+        return "Contato: mantenha 4 itens informativos e 2 indicadores.";
+      }
+      if (items.some((item) => !hasRequiredText(item.title) || !hasRequiredText(item.description))) {
+        return "Contato: título e descrição são obrigatórios nos itens informativos.";
+      }
+      if (indicators.some((item) => !hasRequiredText(item.value) || !hasRequiredText(item.description))) {
+        return "Contato: valor e descrição são obrigatórios nos indicadores.";
+      }
+      return requiredFields(
+        payload,
+        ["companyTitle", "address", "hours", "channelGuideTitle", "channelGuideDescription", "documentsDescription", "quickSupportDescription"],
+        "Contato / Informações"
+      );
+    }
+    if (sectionKey === "finalCta") return validatePageButtons(payload.buttons, 2, "Contato / CTA final");
+  }
+
+  if (pageKey === "careers") {
+    if (["hero", "directApplication", "finalCta"].includes(sectionKey)) {
+      return validatePageButtons(payload.buttons, 2, "Carreiras / Botões");
+    }
+    if (sectionKey === "cultureImage") return validateMedia(payload, "Carreiras / Cultura");
+    if (sectionKey === "jobs") {
+      if (!Array.isArray(payload.jobs)) return "Carreiras: envie a coleção de vagas.";
+      const jobs = arrayPayload(payload.jobs);
+      if (jobs.length !== payload.jobs.length) return "Carreiras: remova itens de vaga inválidos.";
+      const invalidIndex = jobs.findIndex((job) =>
+        ["title", "location", "type", "description"].some((field) => !hasRequiredText(job[field])) ||
+        !sanitizeUrl(job.applyUrl) ||
+        (job.active !== undefined && typeof job.active !== "boolean")
+      );
+      return invalidIndex >= 0
+        ? `Carreiras: preencha todos os campos obrigatórios da vaga ${invalidIndex + 1}.`
+        : null;
+    }
+  }
+
+  if (pageKey === "quote") {
+    if (["hero", "finalCta"].includes(sectionKey)) {
+      return validatePageButtons(payload.buttons, 2, "Cotação / Botões");
+    }
+    if (sectionKey === "directChannels") {
+      const channels = arrayPayload(payload.directChannels);
+      if (channels.length !== 2) return "Cotação: informe exatamente 2 canais diretos.";
+      const invalidIndex = channels.findIndex(
+        (channel) => !hasRequiredText(channel.title) || !hasRequiredText(channel.description) || Boolean(validatePageButtons([channel.button], 1, "Cotação"))
+      );
+      return invalidIndex >= 0
+        ? `Cotação: preencha título, descrição e botão do canal ${invalidIndex + 1}.`
+        : null;
+    }
+    if (sectionKey === "otherChannels") {
+      if (!Array.isArray(payload.otherChannels)) return "Cotação: envie a coleção de canais.";
+      const otherChannels = arrayPayload(payload.otherChannels);
+      if (otherChannels.length !== payload.otherChannels.length) {
+        return "Cotação: remova itens de canal inválidos.";
+      }
+      const invalidIndex = otherChannels.findIndex(
+        (channel) =>
+          !quoteIcons.has(sanitizeText(channel.icon, 40)) ||
+          !sanitizeHexColor(channel.iconColor) ||
+          !hasRequiredText(channel.title) ||
+          !hasRequiredText(channel.description) ||
+          !sanitizeHexColor(channel.buttonColor) ||
+          (channel.active !== undefined && typeof channel.active !== "boolean") ||
+          Boolean(validatePageButtons([channel.button], 1, "Cotação"))
+      );
+      return invalidIndex >= 0
+        ? `Cotação: preencha todos os campos obrigatórios do canal ${invalidIndex + 1}.`
+        : null;
+    }
+  }
+
+  return null;
 }
 
 function emptyHomePage(): HomePageContent {
@@ -149,6 +332,7 @@ function emptyHomePage(): HomePageContent {
       ],
     },
     socialProof: { title: "", feedbacks: [] },
+    quickActions: defaultHomeQuickActions(),
   };
 }
 
@@ -207,7 +391,7 @@ function sanitizeHomeButtons(payload: unknown): HomeHeroButton[] {
   return arrayPayload(payload).slice(0, 2).map((button) => ({
     label: sanitizeText(button.label, 40),
     url: sanitizeUrl(button.url),
-    enabled: Boolean(button.enabled),
+    enabled: strictBoolean(button.enabled, true),
     color: sanitizeHexColor(button.color),
     variant: button.variant === "outline" ? "outline" : "solid",
   }));
@@ -220,7 +404,7 @@ function sanitizeHomeTrackingCta(payload: Record<string, unknown>): HomePageCont
     .map((button, index) => ({
       label: sanitizeText(button.label, 40) || fallback[index]?.label || "",
       url: sanitizeUrl(button.url) || fallback[index]?.url || "",
-      enabled: button.enabled === undefined ? true : Boolean(button.enabled),
+      enabled: strictBoolean(button.enabled, true),
       color: sanitizeHexColor(button.color) || fallback[index]?.color || "#1d4ed8",
       variant: button.variant === "outline" ? "outline" : "solid",
     }));
@@ -241,14 +425,16 @@ function sanitizeQuickActionItem(
   payload: Record<string, unknown>,
   index: number
 ) {
+  const type = sanitizeQuickActionType(payload.type);
+  const sanitizedHref = sanitizeUrl(payload.href);
   return {
     id: sanitizeText(payload.id, 80) || generateId("quick_action"),
     order: Number(payload.order ?? index + 1),
     label: sanitizeText(payload.label, 40),
-    href: sanitizeUrl(payload.href),
+    href: type === "modal" && !sanitizedHref.startsWith("#") ? "" : sanitizedHref,
     icon: sanitizeText(payload.icon, 40),
-    type: sanitizeQuickActionType(payload.type),
-    enabled: Boolean(payload.enabled ?? true),
+    type,
+    enabled: typeof payload.enabled === "boolean" ? payload.enabled : true,
     downloadFile: sanitizeUrl(payload.downloadFile),
   };
 }
@@ -319,7 +505,7 @@ function sanitizeHomeRegionalUnit(
     email: sanitizeEmail(payload.email),
     buttonLabel: sanitizeText(payload.buttonLabel, 40) || "Falar com esta unidade",
     contactUrl: sanitizeUrl(payload.contactUrl),
-    active: Boolean(payload.active ?? true),
+    active: strictBoolean(payload.active, true),
   };
 }
 
@@ -343,7 +529,7 @@ function sanitizeHomeHeroSlide(payload: Record<string, unknown>, index: number):
     title: sanitizeText(payload.title, 120),
     description: sanitizeText(payload.description, 420),
     media: sanitizeHomeMedia(payload.media),
-    active: Boolean(payload.active ?? true),
+    active: strictBoolean(payload.active, true),
     mode,
     buttons: mode === "text-media-buttons" ? sanitizeHomeButtons(payload.buttons) : [],
   };
@@ -394,7 +580,7 @@ function sanitizeHomeSection2Item(
     title: sanitizeText(payload.title, 120),
     description: sanitizeText(payload.description, 260),
     media: sanitizeHomeMedia(payload.media),
-    active: Boolean(payload.active ?? true),
+    active: strictBoolean(payload.active, true),
   };
 }
 
@@ -448,7 +634,7 @@ function sanitizeHomeFeedback(payload: Record<string, unknown>, index: number): 
     testimonial: sanitizeText(payload.testimonial, 800),
     photo: sanitizeInternalImageUrl(payload.photo, "Prova social: foto"),
     rating: Math.min(5, Math.max(1, Math.round(Number(payload.rating ?? 5)))),
-    active: Boolean(payload.active ?? true),
+    active: strictBoolean(payload.active, true),
   };
 }
 
@@ -602,6 +788,45 @@ function validateHomeSocialProof(section: HomeSocialProof) {
   return null;
 }
 
+const QUICK_ACTION_ICONS = new Set([
+  "FilePdf",
+  "Calculator",
+  "MagnifyingGlass",
+  "Truck",
+  "MapPin",
+  "WhatsappLogo",
+  "Phone",
+  "Envelope",
+  "ChatCircleDots",
+  "Headset",
+  "Package",
+  "Handshake",
+  "FileText",
+  "ArrowSquareOut",
+]);
+
+function validateHomeQuickActions(actions: NonNullable<HomePageContent["quickActions"]>) {
+  for (const [index, action] of actions.entries()) {
+    const prefix = `Atalho ${index + 1}`;
+    if (!action.label || !QUICK_ACTION_ICONS.has(action.icon)) {
+      return `${prefix}: texto e ícone válido são obrigatórios.`;
+    }
+    if (action.enabled === false) continue;
+    const target = action.type === "download" ? action.downloadFile || action.href : action.href;
+    if (!target) return `${prefix}: informe um destino ou desative o atalho.`;
+    if (action.type === "modal" && !target.startsWith("#")) {
+      return `${prefix}: ações de âncora devem usar um destino iniciado por #.`;
+    }
+    if (action.type === "external" && !/^(?:https?:|mailto:|tel:)/i.test(target)) {
+      return `${prefix}: links externos devem usar HTTP(S), mailto: ou tel:.`;
+    }
+    if (action.type === "link" && !target.startsWith("/")) {
+      return `${prefix}: links internos devem começar com /.`;
+    }
+  }
+  return null;
+}
+
 function validateHomeSection(section: HomeSectionKey, home: HomePageContent) {
   switch (section) {
     case "hero":
@@ -619,7 +844,7 @@ function validateHomeSection(section: HomeSectionKey, home: HomePageContent) {
     case "socialProof":
       return validateHomeSocialProof(home.socialProof);
     case "quickActions":
-      return null;
+      return validateHomeQuickActions(home.quickActions ?? []);
   }
 }
 
@@ -645,7 +870,15 @@ function sanitizeServicesModule(payload: Record<string, unknown>, index: number)
     image: {
       src: sanitizeInternalImageUrl(rawImage.src ?? payload.imageSrc, "Serviços: imagem"),
       alt: sanitizeText(rawImage.alt ?? payload.imageAlt, 160),
-      position: sanitizeText(rawImage.position, 60),
+      position: [
+        "object-top",
+        "object-bottom",
+        "object-left",
+        "object-right",
+        "object-[50%_45%]",
+      ].includes(sanitizeText(rawImage.position, 60))
+        ? sanitizeText(rawImage.position, 60)
+        : "",
     },
     eyebrow: sanitizeText(payload.eyebrow, 80),
     title: sanitizeText(payload.title, 180),
@@ -748,11 +981,28 @@ function normalizeServicesForAdmin(content: ContentData): ServicesPageContent {
 
 function validateEntityPayload(entity: Entity, payload: Record<string, unknown>) {
   if (entity === "units") {
-    if (!payload.name || !payload.state || !payload.address) {
-      return "Nome, estado e endereço são obrigatórios.";
+    if (!payload.name || !payload.type || !payload.state || !payload.address) {
+      return "Nome, tipo, UF brasileira e endereço são obrigatórios.";
     }
     if (!payload.phone && !payload.email) {
       return "Informe ao menos telefone ou e-mail da unidade.";
+    }
+  }
+  return null;
+}
+
+function validateEntityInput(entity: Entity, input: Record<string, unknown>) {
+  if (entity !== "units") return null;
+  const email = sanitizeText(input.email, 160);
+  if (email && !sanitizeEmail(input.email)) return "Informe um e-mail válido para a unidade.";
+  const contactUrl = sanitizeText(input.contactUrl ?? input.linkContato, 600);
+  if (contactUrl && !sanitizeUrl(contactUrl)) return "Informe um link de contato válido.";
+  for (const [key, value] of [
+    ["active", input.active ?? input.ativo],
+    ["isDefault", input.isDefault ?? input.matriz],
+  ] as const) {
+    if (value !== undefined && typeof value !== "boolean") {
+      return `${key}: informe um valor booleano válido.`;
     }
   }
   return null;
@@ -772,8 +1022,8 @@ function normalizeAdminItem(entity: Entity, item: RawItem) {
       contactUrl: sanitizeUrl(item.contactUrl ?? item.linkContato),
       description: sanitizeText(item.description ?? item.descricao, 220),
       logisticsInfo: sanitizeText(item.logisticsInfo ?? item.infoLogistica, 260),
-      isDefault: Boolean(item.isDefault ?? item.matriz),
-      active: Boolean(item.active ?? item.ativo ?? true),
+      isDefault: strictBoolean(item.isDefault ?? item.matriz, false),
+      active: strictBoolean(item.active ?? item.ativo, true),
     };
   }
 }
@@ -903,6 +1153,8 @@ export function updateCmsPageSection(
   sectionKey: PageSectionKey,
   body: Record<string, unknown>
 ) {
+  const validationError = validateCmsPagePayload(pageKey, sectionKey, body);
+  if (validationError) throw new HttpError(422, validationError);
   const content = readContentData();
   const current = getPageContent(content, pageKey);
   const nextPage = updatePageSection(current, pageKey, sectionKey, isRecord(body) ? body : {});
@@ -925,6 +1177,8 @@ export function getItems(entity: Entity) {
 export function createItem(entity: Entity, body: Record<string, unknown>) {
   const content = readContentData();
   const collection = getCollection(content, entity);
+  const inputError = validateEntityInput(entity, body);
+  if (inputError) throw new HttpError(422, inputError);
   const payload = sanitizeEntityPayload(entity, body);
   const validationError = validateEntityPayload(entity, payload);
   if (validationError) throw new HttpError(422, validationError);
@@ -937,7 +1191,10 @@ export function createItem(entity: Entity, body: Record<string, unknown>) {
     updatedAt: nowIso,
     ...payload,
   };
-  const nextItems = [...collection, newItem];
+  const nextItems = [
+    ...collection.map((item) => payload.isDefault ? { ...item, isDefault: false } : item),
+    newItem,
+  ];
   setCollection(content, entity, nextItems);
   writeContentData(content);
   return {
@@ -952,11 +1209,14 @@ export function updateItem(entity: Entity, id: string, body: Record<string, unkn
   const index = collection.findIndex((item) => item.id === id);
   if (index === -1) throw new HttpError(404, "Item não encontrado.");
 
-  const payload = sanitizeEntityPayload(entity, body);
+  const currentItem = collection[index]!;
+  const input = { ...currentItem, ...body };
+  const inputError = validateEntityInput(entity, input);
+  if (inputError) throw new HttpError(422, inputError);
+  const payload = sanitizeEntityPayload(entity, input);
   const validationError = validateEntityPayload(entity, payload);
   if (validationError) throw new HttpError(422, validationError);
 
-  const currentItem = collection[index]!;
   const updatedItem: RawItem = {
     ...currentItem,
     ...payload,
@@ -964,7 +1224,9 @@ export function updateItem(entity: Entity, id: string, body: Record<string, unkn
     order: currentItem.order,
     updatedAt: new Date().toISOString(),
   };
-  const nextItems = [...collection];
+  const nextItems = collection.map((item) =>
+    payload.isDefault && item.id !== id ? { ...item, isDefault: false } : item
+  );
   nextItems[index] = updatedItem;
   setCollection(content, entity, nextItems);
   writeContentData(content);

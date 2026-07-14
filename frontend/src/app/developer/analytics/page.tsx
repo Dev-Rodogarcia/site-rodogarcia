@@ -63,6 +63,7 @@ interface StatsResponse {
       forms: number;
       downloads: number;
       leads: number;
+      popupSubmissions?: number;
       popupOpen: number;
       total?: number;
       conversionRate?: number;
@@ -79,45 +80,21 @@ interface StatsResponse {
 }
 
 interface ConfigForm {
-  siteUrl: string;
-  consentVersion: number;
-  bannerEnabled: boolean;
   trackingEnabled: boolean;
-  consentAnalytics: boolean;
-  consentMarketing: boolean;
-  consentPerformance: boolean;
-  heartbeatSeconds: number;
   scrollMilestones: string;
   ga4Enabled: boolean;
   ga4MeasurementId: string;
   clarityEnabled: boolean;
   clarityProjectId: string;
-  sentryEnabled: boolean;
-  sentryDsn: string;
-  enableSearchConsole: boolean;
-  propertyUrl: string;
-  sitemapUrl: string;
 }
 
 const DEFAULT_FORM: ConfigForm = {
-  siteUrl: "",
-  consentVersion: 1,
-  bannerEnabled: true,
   trackingEnabled: true,
-  consentAnalytics: true,
-  consentMarketing: false,
-  consentPerformance: false,
-  heartbeatSeconds: 30,
   scrollMilestones: "25,50,75,100",
   ga4Enabled: false,
   ga4MeasurementId: "",
   clarityEnabled: false,
   clarityProjectId: "",
-  sentryEnabled: false,
-  sentryDsn: "",
-  enableSearchConsole: false,
-  propertyUrl: "",
-  sitemapUrl: "/sitemap.xml",
 };
 
 interface AnalyticsResourceData {
@@ -126,24 +103,13 @@ interface AnalyticsResourceData {
 }
 
 function hydrateForm(config: Record<string, unknown> | undefined): ConfigForm {
-  const consent = (config?.consent as Record<string, unknown> | undefined) ?? {};
-  const categories = (consent.categories as Record<string, unknown> | undefined) ?? {};
   const tracking = (config?.tracking as Record<string, unknown> | undefined) ?? {};
   const providers = (config?.providers as Record<string, unknown> | undefined) ?? {};
-  const seo = (config?.seo as Record<string, unknown> | undefined) ?? {};
   const ga4 = (providers.ga4 as Record<string, unknown> | undefined) ?? {};
   const clarity = (providers.clarity as Record<string, unknown> | undefined) ?? {};
-  const sentry = (providers.sentry as Record<string, unknown> | undefined) ?? {};
 
   return {
-    siteUrl: String(config?.siteUrl ?? ""),
-    consentVersion: Number(consent.version ?? 1),
-    bannerEnabled: Boolean(consent.bannerEnabled ?? true),
     trackingEnabled: Boolean(tracking.enabled ?? true),
-    consentAnalytics: Boolean(categories.analytics ?? true),
-    consentMarketing: Boolean(categories.marketing ?? false),
-    consentPerformance: Boolean(categories.performance ?? false),
-    heartbeatSeconds: Number(tracking.heartbeatSeconds ?? 30),
     scrollMilestones: Array.isArray(tracking.scrollMilestones)
       ? tracking.scrollMilestones.join(",")
       : DEFAULT_FORM.scrollMilestones,
@@ -151,11 +117,6 @@ function hydrateForm(config: Record<string, unknown> | undefined): ConfigForm {
     ga4MeasurementId: String(ga4.measurementId ?? ""),
     clarityEnabled: Boolean(clarity.enabled),
     clarityProjectId: String(clarity.projectId ?? ""),
-    sentryEnabled: Boolean(sentry.enabled),
-    sentryDsn: String(sentry.dsn ?? ""),
-    enableSearchConsole: Boolean(seo.enableSearchConsole ?? false),
-    propertyUrl: String(seo.propertyUrl ?? ""),
-    sitemapUrl: String(seo.sitemapUrl ?? DEFAULT_FORM.sitemapUrl),
   };
 }
 
@@ -166,19 +127,8 @@ function buildPayload(form: ConfigForm) {
     .filter((item) => Number.isFinite(item) && item > 0 && item <= 100);
 
   return {
-    siteUrl: form.siteUrl,
-    consent: {
-      bannerEnabled: form.bannerEnabled,
-      version: Math.max(1, Math.round(form.consentVersion || 1)),
-      categories: {
-        analytics: form.consentAnalytics,
-        marketing: form.consentMarketing,
-        performance: form.consentPerformance,
-      },
-    },
     tracking: {
       enabled: form.trackingEnabled,
-      heartbeatSeconds: Math.max(10, Math.round(form.heartbeatSeconds || 30)),
       scrollMilestones: [...new Set(scrollMilestones)].sort((a, b) => a - b),
     },
     providers: {
@@ -190,15 +140,6 @@ function buildPayload(form: ConfigForm) {
         enabled: form.clarityEnabled,
         projectId: form.clarityProjectId,
       },
-      sentry: {
-        enabled: form.sentryEnabled,
-        dsn: form.sentryDsn,
-      },
-    },
-    seo: {
-      enableSearchConsole: form.enableSearchConsole,
-      propertyUrl: form.propertyUrl,
-      sitemapUrl: form.sitemapUrl,
     },
   };
 }
@@ -271,13 +212,12 @@ export default function AnalyticsPage() {
     conversions?.total ??
     ((conversions?.forms ?? 0) +
       (conversions?.downloads ?? 0) +
-      (conversions?.leads ?? 0) +
-      (conversions?.popupOpen ?? 0));
+      (conversions?.popupSubmissions ?? 0));
   const conversionEntries = [
-    { label: "Formulários", value: conversions?.forms ?? 0 },
+    { label: "Formulários concluídos", value: conversions?.forms ?? 0 },
     { label: "Downloads", value: conversions?.downloads ?? 0 },
     { label: "Leads", value: conversions?.leads ?? 0 },
-    { label: "Popup exibido", value: conversions?.popupOpen ?? 0 },
+    { label: "Envios do popup", value: conversions?.popupSubmissions ?? 0 },
     { label: "Total", value: totalConversions },
   ];
 
@@ -653,92 +593,40 @@ export default function AnalyticsPage() {
         <DeveloperCard className="p-5 sm:p-6">
           <DeveloperSectionHeading
             eyebrow="Configuração"
-            title="Consentimento e integrações principais"
-            description="Formulário enxuto para o que o projeto atual realmente usa com consistência."
-            tooltip="Essas opções controlam coleta, consentimento e provedores externos usados pelo analytics."
+            title="Eventos internos e integrações"
+            description="Configura somente os recursos consumidos pela telemetria pública. O consentimento permanece centralizado em LGPD/Cookies."
+            tooltip="Estas opções controlam os eventos internos e os provedores externos efetivamente carregados pelo site."
           />
 
           <div className="space-y-5">
             <div className="rounded-[20px] border border-[#bfdbfe] bg-[linear-gradient(135deg,rgba(239,246,255,0.9),rgba(255,255,255,0.95))] p-4 sm:p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
-                Base e consentimento
+                Eventos próprios
               </p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <DeveloperField label="URL base do site">
+              <div className="mt-4 grid gap-4 sm:grid-cols-[minmax(220px,0.7fr)_minmax(280px,1.3fr)]">
+                <label className="flex min-h-12 items-center gap-3 rounded-xl border border-white bg-white/92 px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[0_5px_12px_rgba(29,78,216,0.04)]">
                   <input
-                    value={form.siteUrl}
-                    onChange={(event) => setValue("siteUrl", event.target.value)}
-                    className={developerInputClassName}
+                    type="checkbox"
+                    checked={form.trackingEnabled}
+                    onChange={(event) => setValue("trackingEnabled", event.target.checked)}
+                    className="h-4 w-4 accent-[var(--primary)]"
                   />
-                </DeveloperField>
+                  Eventos internos ativos
+                </label>
                 <DeveloperField
-                  label="Versão do consentimento"
-                  tooltip="Versão usada para pedir novo aceite quando a política muda. Exemplo: aumente de 1 para 2 após alterar categorias."
+                  label="Marcos de scroll (%)"
+                  tooltip="Percentuais em que o sistema registra profundidade de leitura. Exemplo: 25,50,75,100."
                 >
                   <input
-                    type="number"
-                    min={1}
-                    value={form.consentVersion}
-                    onChange={(event) =>
-                      setValue("consentVersion", Number(event.target.value) || 1)
-                    }
+                    value={form.scrollMilestones}
+                    onChange={(event) => setValue("scrollMilestones", event.target.value)}
                     className={developerInputClassName}
                   />
                 </DeveloperField>
               </div>
-
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                {[
-                  { key: "bannerEnabled" as const, label: "Banner ativo" },
-                  { key: "trackingEnabled" as const, label: "Tracking ativo" },
-                  { key: "consentAnalytics" as const, label: "Analytics padrão" },
-                  { key: "consentMarketing" as const, label: "Marketing padrão" },
-                  { key: "consentPerformance" as const, label: "Performance padrão" },
-                ].map((item) => (
-                  <label
-                    key={item.key}
-                    className="flex min-h-12 items-center gap-3 rounded-xl border border-white bg-white/92 px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[0_5px_12px_rgba(29,78,216,0.04)]"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form[item.key]}
-                      onChange={(event) => setValue(item.key, event.target.checked)}
-                      className="h-4 w-4 accent-[var(--primary)]"
-                    />
-                    {item.label}
-                  </label>
-                ))}
-              </div>
             </div>
 
-            <div className="grid gap-4 rounded-[20px] border border-slate-200 bg-slate-50/72 p-4 sm:grid-cols-2 sm:p-5">
-              <DeveloperField
-                label="Heartbeat da sessão (segundos)"
-                tooltip="Intervalo para registrar que a sessão continua ativa. Exemplo: 30 segundos gera leituras regulares de permanência."
-              >
-                <input
-                  type="number"
-                  min={10}
-                  value={form.heartbeatSeconds}
-                  onChange={(event) =>
-                    setValue("heartbeatSeconds", Number(event.target.value) || 30)
-                  }
-                  className={developerInputClassName}
-                />
-              </DeveloperField>
-              <DeveloperField
-                label="Marcos de scroll (%)"
-                tooltip="Percentuais em que o sistema registra profundidade de leitura. Exemplo: 25,50,75,100."
-              >
-                <input
-                  value={form.scrollMilestones}
-                  onChange={(event) => setValue("scrollMilestones", event.target.value)}
-                  className={developerInputClassName}
-                />
-              </DeveloperField>
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid gap-4 lg:grid-cols-2">
               {[
                 {
                   enabledKey: "ga4Enabled" as const,
@@ -751,12 +639,6 @@ export default function AnalyticsPage() {
                   fieldKey: "clarityProjectId" as const,
                   label: "Clarity",
                   fieldLabel: "Project ID",
-                },
-                {
-                  enabledKey: "sentryEnabled" as const,
-                  fieldKey: "sentryDsn" as const,
-                  label: "Sentry",
-                  fieldLabel: "DSN",
                 },
               ].map((item) => (
                 <div key={item.label} className={cn("rounded-[20px] border p-4 shadow-[0_6px_16px_rgba(15,23,42,0.035)]", form[item.enabledKey] ? "border-[#93c5fd] bg-[#eff6ff]" : "border-slate-200 bg-slate-50/82")}>
@@ -779,6 +661,7 @@ export default function AnalyticsPage() {
                         onChange={(event) =>
                           setValue(item.fieldKey, event.target.value)
                         }
+                        maxLength={item.fieldKey === "ga4MeasurementId" ? 40 : 80}
                         className={developerInputClassName}
                       />
                     </DeveloperField>
@@ -786,35 +669,6 @@ export default function AnalyticsPage() {
                 </div>
               ))}
             </div>
-
-            <div className="grid gap-4 rounded-[20px] border border-slate-200 bg-slate-50/72 p-4 sm:grid-cols-2 sm:p-5">
-              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-white bg-white/92 px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[0_5px_12px_rgba(15,23,42,0.04)]">
-                <input
-                  type="checkbox"
-                  checked={form.enableSearchConsole}
-                  onChange={(event) =>
-                    setValue("enableSearchConsole", event.target.checked)
-                  }
-                  className="h-4 w-4 accent-[var(--primary)]"
-                />
-                Search Console ativo
-              </label>
-              <DeveloperField label="Property URL">
-                <input
-                  value={form.propertyUrl}
-                  onChange={(event) => setValue("propertyUrl", event.target.value)}
-                  className={developerInputClassName}
-                />
-              </DeveloperField>
-            </div>
-
-            <DeveloperField label="Sitemap URL">
-              <input
-                value={form.sitemapUrl}
-                onChange={(event) => setValue("sitemapUrl", event.target.value)}
-                className={developerInputClassName}
-              />
-            </DeveloperField>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <button type="button" onClick={handleSave} disabled={saving} className={developerPrimaryButtonClassName}>

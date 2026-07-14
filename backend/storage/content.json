@@ -595,7 +595,82 @@
           "active": true
         }
       ]
-    }
+    },
+    "quickActions": [
+      {
+        "id": "qa-taxas",
+        "order": 1,
+        "label": "Taxas",
+        "href": "",
+        "icon": "FilePdf",
+        "type": "download",
+        "enabled": false,
+        "downloadFile": ""
+      },
+      {
+        "id": "qa-cotacao",
+        "order": 2,
+        "label": "Cotação",
+        "href": "/cotacao",
+        "icon": "Calculator",
+        "type": "link",
+        "enabled": true
+      },
+      {
+        "id": "qa-rastreamento",
+        "order": 3,
+        "label": "Rastreamento",
+        "href": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+        "icon": "MagnifyingGlass",
+        "type": "external",
+        "enabled": true
+      },
+      {
+        "id": "qa-coleta",
+        "order": 4,
+        "label": "Solicitar Coleta",
+        "href": "/fale-conosco",
+        "icon": "Truck",
+        "type": "link",
+        "enabled": true
+      },
+      {
+        "id": "qa-cidades",
+        "order": 5,
+        "label": "Cidades",
+        "href": "#mapa-regional",
+        "icon": "MapPin",
+        "type": "modal",
+        "enabled": true
+      },
+      {
+        "id": "qa-whatsapp",
+        "order": 6,
+        "label": "WhatsApp",
+        "href": "/fale-conosco",
+        "icon": "WhatsappLogo",
+        "type": "link",
+        "enabled": true
+      },
+      {
+        "id": "qa-telefone",
+        "order": 7,
+        "label": "Telefone",
+        "href": "tel:08005914557",
+        "icon": "Phone",
+        "type": "external",
+        "enabled": true
+      },
+      {
+        "id": "qa-email",
+        "order": 8,
+        "label": "E-mail",
+        "href": "mailto:gerente.financeiro@rodogarcia.com.br",
+        "icon": "Envelope",
+        "type": "external",
+        "enabled": true
+      }
+    ]
   },
   "servicesPage": {
     "modules": [
@@ -794,7 +869,7 @@
     "heroWhatsappButton": {
       "label": "Abrir WhatsApp",
       "url": "/fale-conosco",
-      "external": true
+      "external": false
     },
     "mainChannels": [
       {
@@ -804,7 +879,7 @@
         "description": "Canal direto para orientação inicial e alinhamento rápido.",
         "button": {
           "label": "Ligar agora",
-          "url": "tel:+5508005914557",
+          "url": "tel:08005914557",
           "external": true
         }
       },
@@ -827,7 +902,7 @@
         "button": {
           "label": "Abrir WhatsApp",
           "url": "/fale-conosco",
-          "external": true
+          "external": false
         }
       }
     ],
@@ -991,7 +1066,7 @@
         {
           "label": "Falar no WhatsApp",
           "url": "/fale-conosco",
-          "external": true
+          "external": false
         },
         {
           "label": "Ver contato completo",
@@ -1009,7 +1084,7 @@
         "button": {
           "label": "Abrir WhatsApp - Fracionado",
           "url": "/fale-conosco",
-          "external": true
+          "external": false
         }
       },
       {
@@ -1020,7 +1095,7 @@
         "button": {
           "label": "Abrir WhatsApp - Lotacao",
           "url": "/fale-conosco",
-          "external": true
+          "external": false
         }
       }
     ],
@@ -1035,7 +1110,7 @@
         "button": {
           "label": "Abrir WhatsApp",
           "url": "/fale-conosco",
-          "external": true
+          "external": false
         },
         "buttonColor": "#22c55e",
         "active": true,
@@ -1051,7 +1126,7 @@
         "description": "Ligue para 0800 591 4557 e fale direto com o atendimento.",
         "button": {
           "label": "Ligar agora",
-          "url": "tel:+551408005914557",
+          "url": "tel:08005914557",
           "external": true
         },
         "buttonColor": "#0f172a",
@@ -1244,7 +1319,7 @@
               "id": "resources-phone",
               "order": 5,
               "label": "0800 591 4557",
-              "url": "tel:+551408005914557",
+              "url": "tel:08005914557",
               "external": true
             }
           ]

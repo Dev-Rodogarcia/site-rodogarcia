@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CaretLeft, CaretRight, EnvelopeSimple, MagnifyingGlass, Pulse } from "@phosphor-icons/react";
 import {
   DeveloperCard,
@@ -51,16 +51,16 @@ export default function LeadsPage() {
   const [page, setPage] = useState(1);
   const requestPath = `${api.admin.leads}?page=${page}&pageSize=${LEADS_PER_PAGE}&q=${encodeURIComponent(appliedFilters.query)}&source=${encodeURIComponent(appliedFilters.source)}`;
 
-  const { data, loading, error, refresh } = useAdminResource<{ leads: Lead[]; total: number; page: number; pageSize: number }>({
+  const { data, loading, error, refresh } = useAdminResource<{ leads: Lead[]; total: number; page: number; pageSize: number; sourceTotals: Record<string, number> }>({
     key: adminResourceKeys.leads(`${appliedFilters.query}:${appliedFilters.source}:${page}`),
     fetcher: async (request) => {
-      const response = await request<{ leads?: Lead[]; total?: number; page?: number; pageSize?: number }>(requestPath);
+      const response = await request<{ leads?: Lead[]; total?: number; page?: number; pageSize?: number; sourceTotals?: Record<string, number> }>(requestPath);
       if (!response.success) {
         return { success: false, error: response.error ?? "Falha ao carregar leads." };
       }
       return {
         success: true,
-        data: { leads: response.data?.leads ?? [], total: response.data?.total ?? 0, page: response.data?.page ?? 1, pageSize: response.data?.pageSize ?? LEADS_PER_PAGE },
+        data: { leads: response.data?.leads ?? [], total: response.data?.total ?? 0, page: response.data?.page ?? 1, pageSize: response.data?.pageSize ?? LEADS_PER_PAGE, sourceTotals: response.data?.sourceTotals ?? {} },
       };
     },
   });
@@ -68,12 +68,7 @@ export default function LeadsPage() {
   const leads = data?.leads ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / LEADS_PER_PAGE));
-  const sourceSummary = useMemo(() => {
-    return leads.reduce<Record<string, number>>((acc, lead) => {
-      acc[lead.source || "sem-origem"] = (acc[lead.source || "sem-origem"] ?? 0) + 1;
-      return acc;
-    }, {});
-  }, [leads]);
+  const sourceSummary = data?.sourceTotals ?? {};
 
   function applyFilters() {
     setAppliedFilters({ query, source });

@@ -37,6 +37,9 @@ export const userRepository = {
       ) ?? null
     );
   },
+  findAnyByEmail(email: string): UserRecord | null {
+    return readUsersFile().users.find((user) => user.email === email) ?? null;
+  },
   findById(id: string): UserRecord | null {
     return readUsersFile().users.find((user) => user.id === id) ?? null;
   },

@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   MapPinLine,
   Trophy,
   LightbulbFilament,
 } from "@phosphor-icons/react/dist/ssr";
-import { PageContainer, PageSection, PageShell, SectionHeader } from "@/components/internal/PageContent";
+import { PageContainer, PageSection, PageShell, SectionHeader, SemanticLink } from "@/components/internal/PageContent";
 import { AboutHero } from "@/components/internal/AboutHero";
 import { ValuesSection } from "@/components/internal/ValuesSection";
 import { ComplianceSection } from "@/components/internal/ComplianceSection";
@@ -205,12 +204,12 @@ export default async function SobrePage() {
           <ValuesSection />
 
           <div className="mt-8 flex justify-center">
-            <Link
+            <SemanticLink
               href={site.business}
               className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] px-6 text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--foreground)] shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,transform] duration-200 hover:border-[var(--primary)]/20 hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 active:scale-[0.99]"
             >
               Quero ser parceiro
-            </Link>
+            </SemanticLink>
           </div>
         </PageContainer>
       </PageSection>
@@ -237,8 +236,9 @@ export default async function SobrePage() {
             </p>
 
             <div className="mt-10 grid w-full grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-center sm:gap-5">
-              <Link
+              <SemanticLink
                 href={aboutPage.finalCta.buttons[0]?.url || site.quote}
+                external={aboutPage.finalCta.buttons[0]?.external}
                 className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-[15px] font-extrabold tracking-tight text-white shadow-[0_12px_32px_rgba(2,132,199,0.25)] transition-all duration-200 hover:-translate-y-1 hover:bg-[var(--primary)]/90 hover:shadow-[0_20px_48px_rgba(2,132,199,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 sm:w-auto sm:min-w-[320px] sm:px-10"
               >
                 <span className="flex min-w-0 items-center gap-3">
@@ -253,14 +253,15 @@ export default async function SobrePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </span>
-              </Link>
+              </SemanticLink>
 
-              <Link
+              <SemanticLink
                 href={aboutPage.finalCta.buttons[1]?.url || site.contact}
+                external={aboutPage.finalCta.buttons[1]?.external}
                 className="inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-slate-900 px-4 text-[15px] font-bold tracking-tight text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] transition-all duration-200 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-900/30 sm:w-auto sm:min-w-[240px] sm:px-10"
               >
                 <span className="min-w-0 truncate">{aboutPage.finalCta.buttons[1]?.label || "Falar com atendimento"}</span>
-              </Link>
+              </SemanticLink>
             </div>
           </div>
         </PageContainer>

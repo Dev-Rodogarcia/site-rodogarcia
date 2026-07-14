@@ -18,7 +18,15 @@ export const updateConsentSettingsController: RequestHandler = asyncHandler((req
 
 export const recordCookieConsentController: RequestHandler = asyncHandler((req, res) => {
   const consent = recordCookieConsent(req);
-  res.status(201).json({ message: "Consentimento registrado.", consent });
+  res.status(201).json({
+    message: "Consentimento registrado.",
+    consent: {
+      id: consent.id,
+      createdAt: consent.createdAt,
+      status: consent.status,
+      version: consent.version,
+    },
+  });
 });
 
 export const listCookieConsentsController: RequestHandler = asyncHandler((req, res) => {

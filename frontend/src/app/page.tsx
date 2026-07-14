@@ -73,44 +73,16 @@ const EMPTY_HOME_PAGE: HomePageContent = {
   },
   socialProof: { title: "", feedbacks: [] },
   quickActions: [
-    { id: "qa-taxas", order: 1, label: "Taxas", href: "", icon: "FilePdf", type: "download", enabled: true, downloadFile: "" },
+    { id: "qa-taxas", order: 1, label: "Taxas", href: "", icon: "FilePdf", type: "download", enabled: false, downloadFile: "" },
     { id: "qa-cotacao", order: 2, label: "Cotação", href: site.quote, icon: "Calculator", type: "link", enabled: true },
     { id: "qa-rastreamento", order: 3, label: "Rastreamento", href: external.tracking, icon: "MagnifyingGlass", type: "external", enabled: true },
     { id: "qa-coleta", order: 4, label: "Solicitar Coleta", href: site.contact, icon: "Truck", type: "link", enabled: true },
     { id: "qa-cidades", order: 5, label: "Cidades", href: "#mapa-regional", icon: "MapPin", type: "modal", enabled: true },
-    { id: "qa-whatsapp", order: 6, label: "WhatsApp", href: external.whatsappCommercial, icon: "WhatsappLogo", type: "external", enabled: true },
+    { id: "qa-whatsapp", order: 6, label: "WhatsApp", href: site.contact, icon: "WhatsappLogo", type: "link", enabled: true },
     { id: "qa-telefone", order: 7, label: "Telefone", href: external.phoneHref, icon: "Phone", type: "external", enabled: true },
     { id: "qa-email", order: 8, label: "E-mail", href: external.commercialEmail, icon: "Envelope", type: "external", enabled: true },
   ],
 };
-
-function withRequiredRatesAction(actions: NonNullable<HomePageContent["quickActions"]>) {
-  const ratesFallback = EMPTY_HOME_PAGE.quickActions?.find((action) => action.id === "qa-taxas");
-  if (!ratesFallback) return actions;
-  const ratesIndex = actions.findIndex((action) => {
-    const label = action.label
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-    return action.id === "qa-taxas" || label.includes("taxas");
-  });
-  if (ratesIndex >= 0) {
-    return actions.map((action, index) =>
-      index === ratesIndex
-        ? {
-            ...action,
-            type: "download" as const,
-            enabled: true,
-            order: action.order ?? index + 1,
-          }
-        : action
-    );
-  }
-  return [ratesFallback, ...actions].map((action, index) => ({
-    ...action,
-    order: action.order ?? index + 1,
-  }));
-}
 
 const CERTS = [
   {
@@ -179,11 +151,7 @@ export default async function HomePage() {
     <div>
       <HeroCarousel slides={homePage.hero.slides} />
       <QuickActionsSection
-        actions={withRequiredRatesAction(
-          homePage.quickActions && homePage.quickActions.length > 0
-            ? homePage.quickActions
-            : (EMPTY_HOME_PAGE.quickActions ?? [])
-        )}
+        actions={homePage.quickActions ?? []}
       />
       <PostHeroInteractiveShowcase section={homePage.section1} />
 

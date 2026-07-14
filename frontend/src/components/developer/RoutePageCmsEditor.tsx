@@ -159,6 +159,7 @@ function ButtonFields({
           </div>
           <DeveloperField label="Texto" required tooltip="Texto exibido no botão. Exemplo: Solicitar cotação.">
             <input
+              required
               value={button.label ?? ""}
               onChange={(event) => {
                 const next = [...buttons];
@@ -172,6 +173,7 @@ function ButtonFields({
           </DeveloperField>
           <DeveloperField label="Link" required tooltip="Use rota interna, URL externa, mailto: ou tel:.">
             <input
+              required
               value={button.url ?? ""}
               onChange={(event) => {
                 const next = [...buttons];
@@ -206,6 +208,7 @@ function TextInput({
     <DeveloperField label={label} required tooltip={tooltip}>
       {textarea ? (
         <textarea
+          required
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value)}
           maxLength={maxLength}
@@ -214,6 +217,7 @@ function TextInput({
         />
       ) : (
         <input
+          required
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value)}
           maxLength={maxLength}
@@ -237,6 +241,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
   const [quoteDirectChannelsOpenIndex, setQuoteDirectChannelsOpenIndex] = useState<number | null>(null);
   const [quoteOtherChannelsOpenIndex, setQuoteOtherChannelsOpenIndex] = useState<number | null>(null);
   const [activeAboutSection, setActiveAboutSection] = useState<AboutSectionKey>("hero");
+  const [previewRevision, setPreviewRevision] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -295,6 +300,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
       return;
     }
     setPage(response.data?.page ?? page);
+    setPreviewRevision((revision) => revision + 1);
     setStatus({ tone: "success", text: "Bloco salvo com sucesso." });
   }
 
@@ -342,7 +348,11 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
       {loading ? <div className="mt-5"><DeveloperMessage tone="info">Carregando...</DeveloperMessage></div> : null}
       {status ? <div className="mt-5"><DeveloperMessage tone={status.tone}>{status.text}</DeveloperMessage></div> : null}
       <div className="mt-5">
-        <DeveloperResponsivePreview href={meta.publicHref} title={`Preview ${meta.title.replace(/\.$/, "")}`} />
+        <DeveloperResponsivePreview
+          href={meta.publicHref}
+          title={`Preview ${meta.title.replace(/\.$/, "")}`}
+          revision={previewRevision}
+        />
       </div>
 
       <div className="mt-5 grid gap-5">
@@ -443,7 +453,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   <div className="grid gap-4 xl:grid-cols-[250px_minmax(0,1fr)] xl:items-start">
                     <DeveloperMediaPreview value={page.cultureImage.src} previewAlt={page.cultureImage.alt} mediaType="image" compact />
                   <div className="space-y-4">
-                    <DeveloperMediaField label="Imagem" mediaType="image" value={page.cultureImage.src} onChange={(src) => update((draft) => { draft.cultureImage.src = src; })} previewAlt={page.cultureImage.alt} showPreview={false} />
+                    <DeveloperMediaField label="Imagem" mediaType="image" required value={page.cultureImage.src} onChange={(src) => update((draft) => { draft.cultureImage.src = src; })} previewAlt={page.cultureImage.alt} showPreview={false} />
                     <TextInput label="Texto alternativo" value={page.cultureImage.alt} maxLength={160} onChange={(value) => update((draft) => { draft.cultureImage.alt = value; })} />
                   </div>
                   </div>
@@ -507,11 +517,12 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
           <div className={priorityPanelClassName}>
             <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">Mídia principal <span className="text-[var(--primary)]">*</span></p>
             <div className="grid gap-4 xl:grid-cols-[minmax(220px,0.62fr)_minmax(0,1.9fr)] xl:items-start">
-              <DeveloperMediaPreview value={current.hero.media.src} previewAlt={current.hero.media.alt} mediaType="all" compact />
+              <DeveloperMediaPreview value={current.hero.media.src} previewAlt={current.hero.media.alt} mediaType="image" compact />
               <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
                 <DeveloperMediaField
                   label="Arquivo selecionado"
-                  mediaType="all"
+                  mediaType="image"
+                  required
                   value={current.hero.media.src}
                   onChange={(src) => update((draft) => { draft.hero.media.src = src; })}
                   previewAlt={current.hero.media.alt}
@@ -549,7 +560,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
             <div className="grid gap-4 xl:grid-cols-[minmax(220px,0.62fr)_minmax(0,1.9fr)] xl:items-start">
               <DeveloperMediaPreview value={current.compliance.image.src} previewAlt={current.compliance.image.alt} mediaType="image" compact />
               <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
-                <DeveloperMediaField label="Arquivo selecionado" mediaType="image" value={current.compliance.image.src} onChange={(src) => update((draft) => { draft.compliance.image.src = src; })} previewAlt={current.compliance.image.alt} showPreview={false} equalControlWidths />
+                <DeveloperMediaField label="Arquivo selecionado" mediaType="image" required value={current.compliance.image.src} onChange={(src) => update((draft) => { draft.compliance.image.src = src; })} previewAlt={current.compliance.image.alt} showPreview={false} equalControlWidths />
                 <TextInput label="Texto alternativo" value={current.compliance.image.alt} maxLength={160} onChange={(value) => update((draft) => { draft.compliance.image.alt = value; })} />
               </div>
             </div>
@@ -773,6 +784,15 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   <TextInput label="Link candidatura" value={item.applyUrl} maxLength={600} onChange={(value) => update((draft) => { draft.jobs[index].applyUrl = value; })} />
                   <TextInput label="Descrição curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.jobs[index].description = value; })} />
                 </div>
+                <label className="inline-flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]">
+                  <input
+                    type="checkbox"
+                    checked={item.active !== false}
+                    onChange={(event) => update((draft) => { draft.jobs[index].active = event.target.checked; })}
+                    className="h-4 w-4 accent-[var(--primary)]"
+                  />
+                  Vaga publicada
+                </label>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" className={developerGhostButtonClassName} onClick={() => moveArrayItem("jobs", index, -1)}><SortAscending size={16} weight="bold" />Subir</button>
                   <button type="button" className={developerGhostButtonClassName} onClick={() => moveArrayItem("jobs", index, 1)}><SortAscending size={16} weight="bold" className="rotate-180" />Descer</button>
@@ -841,6 +861,15 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   <DeveloperColorField label="Cor do botão" value={item.buttonColor} className="md:col-span-2" onChange={(value) => update((draft) => { draft.otherChannels[index].buttonColor = value; })} />
                 </div>
                 <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.otherChannels[index].button = buttons[0]; })} />
+                <label className="inline-flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]">
+                  <input
+                    type="checkbox"
+                    checked={item.active !== false}
+                    onChange={(event) => update((draft) => { draft.otherChannels[index].active = event.target.checked; })}
+                    className="h-4 w-4 accent-[var(--primary)]"
+                  />
+                  Canal publicado
+                </label>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" className={developerGhostButtonClassName} onClick={() => moveArrayItem("otherChannels", index, -1)}><SortAscending size={16} weight="bold" />Subir</button>
                   <button type="button" className={developerGhostButtonClassName} onClick={() => moveArrayItem("otherChannels", index, 1)}><SortAscending size={16} weight="bold" className="rotate-180" />Descer</button>

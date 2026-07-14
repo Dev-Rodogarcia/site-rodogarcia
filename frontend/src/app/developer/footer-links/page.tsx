@@ -70,6 +70,41 @@ const FOOTER_STEPS = [
   },
 ] as const;
 
+const SOCIAL_ICON_OPTIONS = [
+  ["InstagramLogo", "Instagram"],
+  ["LinkedinLogo", "LinkedIn"],
+  ["FacebookLogo", "Facebook"],
+  ["WhatsappLogo", "WhatsApp"],
+] as const;
+
+const HELP_ICON_OPTIONS = [
+  ["Package", "Pacote"],
+  ["ChatCircleDots", "Conversa"],
+  ["ShieldCheck", "Privacidade"],
+] as const;
+
+function IconSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: readonly (readonly [string, string])[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <DeveloperField label={label} required>
+      <select value={value} onChange={(event) => onChange(event.target.value)} className={developerInputClassName}>
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>{optionLabel}</option>
+        ))}
+      </select>
+    </DeveloperField>
+  );
+}
+
 const panelClassName =
   "rounded-[22px] border border-[var(--border)]/80 bg-slate-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] sm:p-5";
 const priorityPanelClassName =
@@ -132,6 +167,7 @@ function TextInput({
     <DeveloperField label={label} required={required}>
       {textarea ? (
         <textarea
+          required={required}
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value)}
           maxLength={maxLength}
@@ -140,6 +176,7 @@ function TextInput({
         />
       ) : (
         <input
+          required={required}
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value)}
           maxLength={maxLength}
@@ -164,7 +201,7 @@ function ButtonFields({
     <div className={cn(mutedPanelClassName, "grid gap-5 md:grid-cols-2")}>
       <TextInput label={`${label} - texto`} value={button.label} maxLength={60} onChange={(value) => onChange({ ...button, label: value })} />
       <DeveloperField label={`${label} - link`} required>
-        <input value={button.url} onChange={(event) => onChange({ ...button, url: event.target.value })} className={developerInputClassName} />
+        <input required value={button.url} onChange={(event) => onChange({ ...button, url: event.target.value })} className={developerInputClassName} />
       </DeveloperField>
     </div>
   );
@@ -192,7 +229,7 @@ function LinkItemFields({
       <div className={cn("grid gap-4", extra ? "lg:grid-cols-3" : "md:grid-cols-2")}>
         <TextInput label="Texto" value={item.label} maxLength={60} onChange={(value) => onChange({ ...item, label: value })} />
         <DeveloperField label="Link" required>
-          <input value={item.url} onChange={(event) => onChange({ ...item, url: event.target.value })} className={developerInputClassName} />
+          <input required value={item.url} onChange={(event) => onChange({ ...item, url: event.target.value })} className={developerInputClassName} />
         </DeveloperField>
         {extra}
       </div>
@@ -681,7 +718,7 @@ function FooterGlobalEditor({
               onMoveDown={() => onChange({ ...footer, socialLinks: moveItem(footer.socialLinks, index, 1) })}
               onRemove={() => onChange({ ...footer, socialLinks: footer.socialLinks.filter((_, itemIndex) => itemIndex !== index) })}
               extra={
-                <TextInput label="Ícone" value={link.icon} maxLength={40} onChange={(value) => {
+                <IconSelect label="Ícone" value={link.icon} options={SOCIAL_ICON_OPTIONS} onChange={(value) => {
                   const socialLinks = [...footer.socialLinks];
                   socialLinks[index] = { ...link, icon: value };
                   onChange({ ...footer, socialLinks });
@@ -739,7 +776,7 @@ function FooterSocialEditor({
                   onMoveDown={() => onChange({ ...footer, socialLinks: moveItem(footer.socialLinks, index, 1) })}
                   onRemove={() => onChange({ ...footer, socialLinks: footer.socialLinks.filter((_, itemIndex) => itemIndex !== index) })}
                   extra={
-                    <TextInput label="Ícone" value={link.icon} maxLength={40} onChange={(value) => {
+                    <IconSelect label="Ícone" value={link.icon} options={SOCIAL_ICON_OPTIONS} onChange={(value) => {
                       const socialLinks = [...footer.socialLinks];
                       socialLinks[index] = { ...link, icon: value };
                       onChange({ ...footer, socialLinks });
@@ -869,7 +906,7 @@ function PrivacyEditor({
     <EditorShell embedded={embedded}>
       <DeveloperSectionHeading eyebrow="Privacidade" title="Página /privacidade" />
       <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
-        <HeroFields hero={privacy.hero} onChange={(hero) => onChange({ ...privacy, hero: { ...privacy.hero, ...hero } })} button={privacy.hero.button} onButtonChange={(button) => onChange({ ...privacy, hero: { ...privacy.hero, button } })} />
+        <HeroFields hero={privacy.hero} onChange={(hero) => onChange({ ...privacy, hero: { ...privacy.hero, ...hero } })} button={privacy.hero.button} buttonLabel="Botão de acesso aos termos" onButtonChange={(button) => onChange({ ...privacy, hero: { ...privacy.hero, button } })} />
         <SectionHeaderFields section={privacy.dataSection} onChange={(dataSection) => onChange({ ...privacy, dataSection: { ...privacy.dataSection, ...dataSection } })} />
         <TextBlockEditor blocks={privacy.dataSection.blocks} max={5} onChange={(blocks) => onChange({ ...privacy, dataSection: { ...privacy.dataSection, blocks } })} />
         <FinalCtaFields finalCta={privacy.finalCta} onChange={(finalCta) => onChange({ ...privacy, finalCta })} />
@@ -883,6 +920,7 @@ function HeroFields({
   hero,
   onChange,
   button,
+  buttonLabel = "Botão do hero",
   onButtonChange,
   buttons,
   onButtonsChange,
@@ -890,6 +928,7 @@ function HeroFields({
   hero: { eyebrow: string; titleHighlight: string; titleRest: string; description: string };
   onChange: (hero: { eyebrow: string; titleHighlight: string; titleRest: string; description: string }) => void;
   button?: PageButton;
+  buttonLabel?: string;
   onButtonChange?: (button: PageButton) => void;
   buttons?: boolean;
   onButtonsChange?: (buttons: PageButton[]) => void;
@@ -903,7 +942,7 @@ function HeroFields({
         <TextInput label="Título complementar" value={hero.titleRest} maxLength={90} onChange={(value) => onChange({ ...hero, titleRest: value })} />
         <TextInput label="Descrição" value={hero.description} maxLength={260} textarea onChange={(value) => onChange({ ...hero, description: value })} />
       </div>
-      {button && onButtonChange ? <ButtonFields button={button} label="Botão do hero" onChange={onButtonChange} /> : null}
+      {button && onButtonChange ? <ButtonFields button={button} label={buttonLabel} onChange={onButtonChange} /> : null}
       {buttons && onButtonsChange ? (
         <div className="grid gap-5 lg:grid-cols-2">
           {heroButtons.slice(0, 2).map((item, index) => (
@@ -984,7 +1023,7 @@ function ActionCardFields({
     <div className={cn(panelClassName, "space-y-5")}>
       <DeveloperSectionHeading title={label} />
       <div className="grid gap-5 md:grid-cols-3">
-        <TextInput label="Ícone" value={action.icon} maxLength={40} onChange={(value) => onChange({ ...action, icon: value })} />
+        <IconSelect label="Ícone" value={action.icon} options={HELP_ICON_OPTIONS} onChange={(value) => onChange({ ...action, icon: value })} />
         <TextInput label="Título" value={action.title} maxLength={180} onChange={(value) => onChange({ ...action, title: value })} />
         <TextInput label="Descrição" value={action.description} maxLength={260} textarea onChange={(value) => onChange({ ...action, description: value })} />
       </div>

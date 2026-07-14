@@ -119,13 +119,12 @@ export function createPublicTrackingEvent(req: Request) {
   });
 }
 
-export function listTrackingEvents(filters: Record<string, unknown> = {}) {
+function getFilteredTrackingEvents(filters: Record<string, unknown> = {}) {
   const eventFilter = sanitizeText(filters.event ?? filters.type, 60).toLowerCase();
   const pageFilter = sanitizePath(filters.page);
   const sourceFilter = sanitizeText(filters.source, 80).toLowerCase();
   const from = Date.parse(String(filters.from ?? ""));
   const to = Date.parse(String(filters.to ?? ""));
-  const limit = Math.min(Math.max(Number(filters.limit) || 180, 1), 1000);
 
   const ownEvents = trackingEventRepository.read();
 
@@ -154,12 +153,16 @@ export function listTrackingEvents(filters: Record<string, unknown> = {}) {
       if (Number.isFinite(to) && event.timestamp > to) return false;
       return true;
     })
-    .sort((a, b) => Number(b.timestamp) - Number(a.timestamp))
-    .slice(0, limit);
+    .sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+}
+
+export function listTrackingEvents(filters: Record<string, unknown> = {}) {
+  const limit = Math.min(Math.max(Number(filters.limit) || 180, 1), 1000);
+  return getFilteredTrackingEvents(filters).slice(0, limit);
 }
 
 export function getTrackingSummary(filters: Record<string, unknown> = {}) {
-  const events = listTrackingEvents({ ...filters, limit: 1000 });
+  const events = getFilteredTrackingEvents(filters);
   const byType = events.reduce<Record<string, number>>((acc, event) => {
     acc[event.event] = (acc[event.event] ?? 0) + 1;
     return acc;
