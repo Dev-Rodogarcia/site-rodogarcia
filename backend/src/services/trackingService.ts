@@ -55,7 +55,6 @@ export function recordTrackingEvent(input: {
   pagePath?: unknown;
   source?: unknown;
   sessionId?: unknown;
-  userId?: unknown;
   element?: unknown;
   value?: unknown;
   category?: unknown;
@@ -77,7 +76,6 @@ export function recordTrackingEvent(input: {
     page: sanitizePath(input.page ?? input.pagePath) || "/",
     source: sanitizeText(input.source, 80),
     sessionId: sanitizeText(input.sessionId, 80),
-    userId: sanitizeText(input.userId, 80),
     element: sanitizeText(input.element, 120),
     value: sanitizeText(input.value, 180),
     category: sanitizeText(input.category, 60),
@@ -104,7 +102,21 @@ export function createPublicTrackingEvent(req: Request) {
     throw new HttpError(429, "Limite de eventos excedido.");
   }
   registerHit("tracking", ip, windowMs);
-  return recordTrackingEvent({ ...(req.body ?? {}), req });
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  return recordTrackingEvent({
+    event: body.event,
+    page: body.page,
+    pagePath: body.pagePath,
+    source: body.source,
+    sessionId: body.sessionId,
+    element: body.element,
+    value: body.value,
+    category: body.category,
+    consent: body.consent,
+    device: body.device,
+    metadata: body.metadata,
+    req,
+  });
 }
 
 export function listTrackingEvents(filters: Record<string, unknown> = {}) {
@@ -118,16 +130,20 @@ export function listTrackingEvents(filters: Record<string, unknown> = {}) {
   const ownEvents = trackingEventRepository.read();
 
   return ownEvents
-    .map((event) => ({
-      ...event,
-      event: sanitizeText(event.event ?? event.type, 60).toLowerCase(),
-      type: sanitizeText(event.type ?? event.event, 60).toLowerCase(),
-      page: sanitizePath(event.page ?? event.pagePath) || "/",
-      source: sanitizeText(event.source, 80),
-      sessionId: sanitizeText(event.sessionId, 80),
-      timestamp: normalizeEventTime(event),
-      createdAt: new Date(normalizeEventTime(event)).toISOString(),
-    }))
+    .map((storedEvent) => {
+      const { userId: _userId, ...event } = storedEvent;
+      const timestamp = normalizeEventTime(event);
+      return {
+        ...event,
+        event: sanitizeText(event.event ?? event.type, 60).toLowerCase(),
+        type: sanitizeText(event.type ?? event.event, 60).toLowerCase(),
+        page: sanitizePath(event.page ?? event.pagePath) || "/",
+        source: sanitizeText(event.source, 80),
+        sessionId: sanitizeText(event.sessionId, 80),
+        timestamp,
+        createdAt: new Date(timestamp).toISOString(),
+      };
+    })
     .filter((event) => {
       if (eventFilter && event.event !== eventFilter) return false;
       if (pageFilter && event.page !== pageFilter) return false;

@@ -3,8 +3,37 @@ import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { seo, site } from "@/lib/routes";
 import { PageShell, PageContainer, PageSection, SectionHeader } from "@/components/internal/PageContent";
 import { ShieldCheck, LockKey, PaperPlaneRight } from "@phosphor-icons/react/dist/ssr";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FORM_URL = "https://forms.office.com/r/XwCZGct8QK";
+
+const FAQ_ITEMS = [
+  {
+    question: "Posso fazer um relato de forma anônima?",
+    answer:
+      "Sim. Você pode relatar os fatos sem se identificar. A confidencialidade é preservada durante todo o tratamento da manifestação.",
+  },
+  {
+    question: "Que situações podem ser comunicadas?",
+    answer:
+      "O canal recebe relatos de desvios de conduta, situações que mereçam atenção, sugestões de melhoria e outras comunicações relevantes.",
+  },
+  {
+    question: "Quem analisa a manifestação?",
+    answer:
+      "A equipe responsável por compliance recebe e avalia cada relato com imparcialidade, considerando o contexto informado.",
+  },
+  {
+    question: "Há proteção contra retaliação?",
+    answer:
+      "Sim. A Rodogarcia trata os relatos com sigilo e não admite qualquer forma de retaliação a quem utiliza o canal de boa-fé.",
+  },
+];
 
 const fallbackMetadata: Metadata = {
   title: "Sua Voz",
@@ -90,11 +119,14 @@ export default function SuaVozPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-6 rounded-[24px] border border-[var(--border)] bg-[var(--color-surface-2)] p-6 sm:p-8">
+            <aside className="flex flex-col gap-6 rounded-[24px] border border-[var(--border)] bg-[var(--color-surface-2)] p-6 sm:p-8">
               <div>
                 <h3 className="font-semibold tracking-[-0.02em] text-[var(--foreground)]">Acessar Formulário</h3>
                 <p className="mt-2 text-sm leading-6 text-[var(--color-muted-raw)]">
                   Utilize o formulário oficial e seguro da Microsoft para enviar o seu relato. É rápido, simples e pode ser feito pelo celular.
+                </p>
+                <p className="mt-4 border-t border-[var(--border)] pt-4 text-xs leading-5 text-[var(--color-muted-raw)]">
+                  Ao enviar, descreva a situação com o máximo de contexto que puder compartilhar.
                 </p>
               </div>
               <a
@@ -106,7 +138,7 @@ export default function SuaVozPage() {
                 Preencher relato
                 <PaperPlaneRight size={16} weight="bold" className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
-            </div>
+            </aside>
           </div>
         </PageContainer>
       </PageSection>
@@ -115,7 +147,7 @@ export default function SuaVozPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
 
-        <PageContainer className="relative">
+        <PageContainer className="relative lg:px-10">
           <SectionHeader
             eyebrow="Processo"
             title="Como funciona?"
@@ -124,7 +156,7 @@ export default function SuaVozPage() {
             align="center"
           />
 
-          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {[
               {
                 step: "1",
@@ -150,6 +182,40 @@ export default function SuaVozPage() {
                 <p className="mt-2 text-sm leading-6 text-white/60">{s.desc}</p>
               </div>
             ))}
+          </div>
+        </PageContainer>
+      </section>
+
+      <section
+        className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fbff_0%,#f2f6fb_100%)] py-14 sm:py-16 lg:py-20"
+        aria-labelledby="sua-voz-faq-title"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(29,78,216,0.07),transparent_20%),radial-gradient(circle_at_82%_18%,rgba(6,182,212,0.06),transparent_18%)]" />
+        <PageContainer className="relative">
+          <div className="mx-auto max-w-[980px]">
+            <SectionHeader
+              eyebrow="Dúvidas frequentes"
+              title="Perguntas sobre o canal Sua Voz"
+              description="Encontre orientações rápidas antes de enviar a sua manifestação."
+              align="center"
+            />
+
+            <Accordion className="mt-8 flex w-full flex-col">
+              {FAQ_ITEMS.map((item, index) => (
+                <AccordionItem
+                  key={item.question}
+                  value={`sua-voz-faq-${index}`}
+                  className="border-b border-[var(--border)] last:border-b-0"
+                >
+                  <AccordionTrigger className="py-6 text-left text-base font-semibold tracking-[-0.02em] text-[var(--foreground)] hover:text-[var(--primary)] hover:no-underline">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="max-w-[62ch] pb-6 pr-8 text-sm leading-7 text-[var(--color-muted-raw)]">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
         </PageContainer>
       </section>

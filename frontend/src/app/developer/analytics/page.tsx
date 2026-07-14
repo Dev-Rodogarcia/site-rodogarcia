@@ -43,7 +43,6 @@ interface StatsResponse {
     element?: string;
     timestamp: number;
     sessionId?: string;
-    userId?: string;
   }>;
   stats: {
     generatedAt?: string;
@@ -73,7 +72,6 @@ interface StatsResponse {
       event: string;
       page: string;
       timestamp: number;
-      userId?: string;
       sessionId?: string;
     }>;
   };
@@ -611,7 +609,7 @@ export default function AnalyticsPage() {
                                   {formatDateTime(event.timestamp)}
                                 </td>
                                 <td className="py-3 text-[var(--color-muted-raw)]">
-                                  {event.sessionId || event.userId || "-"}
+                                  {event.sessionId || "-"}
                                 </td>
                               </tr>
                             ))}

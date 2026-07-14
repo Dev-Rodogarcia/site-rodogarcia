@@ -21,13 +21,16 @@ import {
   developerPrimaryButtonClassName,
   developerSecondaryButtonClassName,
 } from "@/components/developer/ui";
-import { api, site } from "@/lib/routes";
+import { api, site, type AppPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 type PageKey = "about" | "business" | "contact" | "careers" | "quote";
 type AnyRecord = Record<string, any>;
 
-const PAGE_META: Record<PageKey, { title: string; eyebrow: string; publicHref: string; description: string }> = {
+const PAGE_META: Record<
+  PageKey,
+  { title: string; eyebrow: string; publicHref: AppPath; description: string }
+> = {
   about: {
     eyebrow: "Página Sobre",
     title: "Página Sobre.",

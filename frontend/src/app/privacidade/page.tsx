@@ -71,7 +71,7 @@ export default async function PrivacidadePage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
+            <aside className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
               <ShieldCheck size={24} weight="duotone" className="text-[var(--primary)]" />
               <h3 className="font-semibold tracking-[-0.02em] text-[var(--foreground)]">
                 LGPD e transparência
@@ -80,10 +80,10 @@ export default async function PrivacidadePage() {
                 As informações são usadas para atendimento institucional e comercial, respeitando finalidade, necessidade e segurança.
               </p>
               <ActionLink
-                action={toPageAction(privacy.hero.button, "secondary")}
+                action={toPageAction(privacy.hero.button)}
                 className="mt-2 w-full"
               />
-            </div>
+            </aside>
           </div>
         </PageContainer>
       </PageSection>

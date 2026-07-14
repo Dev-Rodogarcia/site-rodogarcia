@@ -185,11 +185,20 @@ export default function ImprensaPage() {
       <PageSection>
         <PageContainer>
           <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
-            <SectionHeader
-              eyebrow="Contato institucional"
-              title="Um canal organizado para pautas, entrevistas e informações oficiais."
-              description="Pedidos de imprensa são melhor atendidos quando chegam com contexto, prazo e objetivo da pauta. Assim o time consegue direcionar a solicitação com mais precisão."
-            />
+            <div>
+              <SectionHeader
+                eyebrow="Contato institucional"
+                title="Um canal organizado para pautas, entrevistas e informações oficiais."
+                description="Pedidos de imprensa são melhor atendidos quando chegam com contexto, prazo e objetivo da pauta. Assim o time consegue direcionar a solicitação com mais precisão."
+              />
+
+              <div className="mt-8 flex max-w-[34rem] items-start gap-3 border-t border-[var(--border)] pt-5">
+                <Clock size={18} weight="duotone" className="mt-0.5 shrink-0 text-[var(--primary)]" />
+                <p className="text-sm leading-6 text-[var(--color-muted-raw)]">
+                  Retorno organizado em dias úteis, conforme o tema e a necessidade da pauta.
+                </p>
+              </div>
+            </div>
 
             <div className="rounded-[30px] border border-[var(--border)] bg-white/78 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-8">
               <div className="grid gap-5 sm:grid-cols-3">

@@ -112,6 +112,18 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 - Preserve rate limits existentes para login, leads, popup e analytics.
 - Nunca exponha segredos, hash de senha, sessão, IP bruto ou arquivos privados em logs, respostas públicas ou páginas estáticas.
 
+### Exposição de Dados e Dependências
+
+- Nunca coloque senhas, tokens, API keys privadas, segredos JWT, credenciais SMTP/OAuth, URLs internas sensíveis ou dados administrativos em variáveis `NEXT_PUBLIC_*`; toda variável com esse prefixo é pública por definição.
+- Não use a propriedade `env` de `frontend/next.config.js` para informações privadas. Novas variáveis de ambiente devem ser documentadas em `.env.example` e no `states.md`, marcadas explicitamente como públicas ou privadas.
+- Client Components não podem importar código exclusivo de servidor, repositórios, services, módulos de segurança, arquivos de configuração de ambiente, SDKs administrativos ou módulos Node.js.
+- Autorização no frontend é apenas UX: toda Server Action, Route Handler e endpoint deve validar autenticação e autorização no servidor, sem confiar em IDs, roles ou permissões vindos do cliente.
+- Respostas HTTP, props de Client Components e dados de hidratação devem expor somente os campos necessários; nunca retornar objetos completos de usuário, sessão ou entidades privadas quando um DTO mínimo for suficiente.
+- Nunca registrar tokens, cookies, senhas, hashes, segredos, IPs brutos ou dados pessoais desnecessários em logs, erros, analytics ou auditoria.
+- Nenhum arquivo sensível pode ficar em `frontend/public/`; certificados, dumps, logs, credenciais, backups e storage privado devem permanecer ignorados pelo Git.
+- Em alterações que afetem segurança, dados, ambiente ou dependências, verificar bundle/HTML/respostas HTTP, executar typecheck, testes e builds aplicáveis e rodar o hardening ponta a ponta quando o escopo incluir backend ou headers.
+- Vulnerabilidades de dependências devem ser avaliadas e corrigidas por atualizações compatíveis; não introduza upgrades major sem análise explícita de compatibilidade.
+
 ## LGPD, Analytics e Leads
 
 - O banner de consentimento grava decisão no `localStorage`, permite reabrir preferências e remove cookies opcionais conhecidos quando analytics/marketing são negados.

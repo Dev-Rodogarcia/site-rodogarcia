@@ -22,6 +22,7 @@
 - Cache leve de recursos administrativos fica em `useAdminResource`; coleções CRUD ordenáveis usam `useAdminCollection`.
 - Backend Express é montado em `createApp`, com Helmet, CORS restrito, JSON limit `8mb`, cookie parser, `/uploads` estático com `nosniff`, router `/api` e `/health`.
 - O frontend aplica headers globais em `frontend/next.config.js`, incluindo CSP, `Referrer-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e HSTS somente em produção.
+- O preview responsivo do CMS abre somente rotas públicas listadas com `?preview=cms`; nessa combinação, CSP e `X-Frame-Options` permitem frame apenas pela mesma origem. Rotas administrativas, de autenticação, APIs e o acesso público comum permanecem com bloqueio total de framing.
 - Controllers são finos; services concentram regra de negócio; repositories encapsulam JSON; `security` guarda sessão, auth, CSRF, origin e rate limit; `validators` guarda validação de borda; `utils` guarda helpers puros.
 - `readJsonFile` retorna default apenas para arquivo ausente; corrupção, permissão e I/O falham fechados com cópia de preservação para JSON inválido. `writeJsonFile` escreve em arquivo temporário e renomeia para reduzir risco de arquivo truncado.
 - Conteúdo público canônico versionado fica em `backend/storage/content.json` e `backend/storage/site-texts.json`.
@@ -94,6 +95,17 @@
 - Checklist técnico complementar em `docs/checklist-tecnico.md`.
 - Checklist de segurança do CMS em `docs/seguranca-admin-node.md`.
 
+## Auditoria de Segurança e Exposição
+
+- Auditoria aplicada em 2026-07-14 ao frontend Next.js, backend Express, rotas, Client Components, configuração, storage versionado, arquivos públicos, histórico Git, bundles, respostas HTTP, CI e dependências.
+- Variáveis públicas permitidas: `NEXT_PUBLIC_BACKEND_URL` e `NEXT_PUBLIC_BACKEND_PROXY_URL`, ambas exclusivamente para endereço público/proxy do backend e sem credenciais. Não há propriedade `env` em `frontend/next.config.js`.
+- Não foram encontradas assinaturas de credenciais no worktree ou no histórico Git; `.env` e variações, storage privado, uploads, logs, builds, backups e caches permanecem ignorados. Nenhum arquivo sensível foi encontrado em `frontend/public`.
+- Client Components não importam módulos de servidor; não há Server Actions ou App Route Handlers no código atual. Os bundles de produção não contêm `SESSION_SECRET`, `JWT_SECRET`, `ADMIN_SETUP_CODE`, hashes de senha, URL interna local ou source maps públicos.
+- Endpoints administrativos e operacionais sensíveis respondem `401` sem sessão; endpoints públicos verificados retornam DTOs públicos mínimos. CORS não concede acesso a origem não confiável, e a configuração pública de analytics expõe apenas identificadores GA4/Clarity, nunca Sentry ou segredos.
+- Correção aplicada: tracking e analytics públicos não aceitam, persistem nem retornam `userId` enviado pelo cliente; identificadores de sessão pseudônimos continuam sendo a única chave de agregação pública. Registros legados com esse campo são omitidos nas respostas administrativas.
+- Correção aplicada: dependências de desenvolvimento do backend atualizadas de forma compatível para `tsx` 4.23.1 e `vitest` 4.1.10, corrigindo os alertas de Vite/esbuild no lockfile.
+- Validações da auditoria: `npm audit --omit=dev --audit-level=high` no backend e frontend sem vulnerabilidades; auditoria completa do frontend sem vulnerabilidades; backend typecheck, testes e build; frontend typecheck e build; teste de hardening em portas isoladas; validação HTTP de autenticação, DTO de sessão, analytics público e CORS.
+
 ## Protocolo de Planejamento e Execução
 
 - Antes de qualquer mudança, ler `AGENTS.md` e este `states.md`.
@@ -110,6 +122,14 @@ Nenhuma pendência acionável registrada.
 
 ## Atualização recente
 
+- Removido o arquivo acidental `ss` da raiz, que continha somente um despejo de configuração local do Git e não era consumido pelo projeto; caches de build regeneráveis podem permanecer ignorados pelo Git.
 - O rodapé `SiteFooter` voltou a ser Server Component e recebe o conteúdo público pela API no servidor, preservando o fallback canônico; o fragmento interativo de ícones sociais permanece isolado em Client Component.
 - `CookieSettingsButton` é um Client Component isolado no rodapé; ele abre as preferências por evento para o `ConsentBanner` sem reintroduzir o botão flutuante.
 - O contêiner do rodapé compartilha o grid horizontal do cabeçalho: `max-w-[1440px] px-5 sm:px-8 lg:px-10`.
+- Na página `/sua-voz`, os cards da seção "Como funciona?" ocupam todo o `PageContainer` e usam o mesmo recuo lateral desktop do rodapé (`lg:px-10`), mantendo o fechamento visual alinhado ao grid global.
+- Na seção de contato institucional de `/imprensa`, a coluna de introdução inclui uma nota compacta sobre retorno em dias úteis para equilibrar visualmente a altura do painel de contato, sem criar uma nova chamada concorrente.
+- Na página `/sua-voz`, o card de acesso ao formulário alinha seu topo ao bloco de propósito e sua base aos destaques de anonimato e sigilo no desktop; uma FAQ própria, em seção clara com accordion, separa o processo escuro do rodapé.
+- Nas introduções de `/privacidade` e `/termos-de-uso`, os cartões informativos alinham pelo topo ao resumo rápido; em termos, uma nota de uso responsável ocupa o fechamento da coluna de texto e acompanha visualmente a chamada para a política de privacidade.
+- As chamadas dos cartões de resumo em `/privacidade` e `/termos-de-uso` usam a variante primária azul, consistente com a ação de formulário em `/sua-voz`.
+- O preview responsivo do CMS usa o marcador `preview=cms`, que aciona headers permissivos somente para a mesma origem nas rotas públicas suportadas e elimina o bloqueio CSP do iframe sem reduzir a proteção das rotas administrativas.
+- A auditoria de segurança removeu `userId` da telemetria pública, mantendo somente identificadores de sessão pseudônimos e ocultando o campo de registros legados nas respostas administrativas; dependências de desenvolvimento do backend foram atualizadas para versões sem alertas conhecidos.

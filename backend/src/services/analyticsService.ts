@@ -75,13 +75,14 @@ type AnalyticsEvent = {
   element: string;
   value: string;
   sessionId: string;
-  userId?: string;
   timestamp: number;
   createdAt: string;
 };
 
-function readEvents(): AnalyticsEvent[] {
-  return trackingEventRepository.read() as AnalyticsEvent[];
+type StoredAnalyticsEvent = AnalyticsEvent & { userId?: unknown };
+
+function readEvents(): StoredAnalyticsEvent[] {
+  return trackingEventRepository.read() as StoredAnalyticsEvent[];
 }
 
 export function readAnalyticsConfig() {
@@ -138,7 +139,6 @@ export function createAnalyticsEvent(req: Request) {
     page: body.page,
     source: sanitizeText(body.source, 80) || "site",
     sessionId: body.sessionId,
-    userId: body.userId,
     element: body.element,
     value: body.value,
     category: body.category,
@@ -182,16 +182,18 @@ export function getAnalyticsStats(days: number) {
   const now = Date.now();
   const from = now - safeDays * 24 * 60 * 60 * 1000;
   const events = readEvents()
-    .map((item, index) => ({
-      ...item,
-      id: String(item.id ?? `analytics-${index + 1}`),
-      event: getEventName(item),
-      type: getEventName(item),
-      page: sanitizePath(item.page) || "/",
-      sessionId: sanitizeText(item.sessionId, 64),
-      userId: sanitizeText(item.userId, 64),
-      timestamp: getEventTime(item),
-    }))
+    .map((item, index) => {
+      const { userId: _userId, ...event } = item;
+      return {
+        ...event,
+        id: String(event.id ?? `analytics-${index + 1}`),
+        event: getEventName(event),
+        type: getEventName(event),
+        page: sanitizePath(event.page) || "/",
+        sessionId: sanitizeText(event.sessionId, 64),
+        timestamp: getEventTime(event),
+      };
+    })
     .filter((event) => event.timestamp >= from)
     .sort((a, b) => b.timestamp - a.timestamp);
 
@@ -202,7 +204,7 @@ export function getAnalyticsStats(days: number) {
 
   const eventsBySession = new Map<string, typeof events>();
   for (const event of events) {
-    const key = event.sessionId || event.userId || `anonymous-${event.id}`;
+    const key = event.sessionId || `anonymous-${event.id}`;
     const list = eventsBySession.get(key) ?? [];
     list.push(event);
     eventsBySession.set(key, list);
@@ -262,7 +264,6 @@ export function getAnalyticsStats(days: number) {
     type: event.type,
     page: event.page,
     sessionId: event.sessionId,
-    userId: event.userId,
     timestamp: event.timestamp,
     createdAt: new Date(event.timestamp).toISOString(),
   }));

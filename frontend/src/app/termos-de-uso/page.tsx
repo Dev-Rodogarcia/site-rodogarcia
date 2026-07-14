@@ -69,19 +69,27 @@ export default async function TermosDeUsoPage() {
               <p className="mt-6 text-sm leading-7 text-[var(--color-muted-raw)]">
                 {terms.summary.body}
               </p>
+              <div className="mt-6 border-t border-[var(--border)] pt-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
+                  Uso responsável
+                </p>
+                <p className="mt-2 max-w-[64ch] text-sm leading-6 text-[var(--color-muted-raw)]">
+                  As informações publicadas podem ser atualizadas para acompanhar serviços, canais oficiais e regras aplicáveis.
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
+            <aside className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] p-6">
               <ShieldCheck size={24} weight="duotone" className="text-[var(--primary)]" />
               <h3 className="font-semibold tracking-[-0.02em] text-[var(--foreground)]">Privacidade e dados</h3>
               <p className="text-sm leading-7 text-[var(--color-muted-raw)]">
                 O tratamento de dados pessoais é detalhado em nossa página de privacidade, alinhado à LGPD.
               </p>
               <ActionLink
-                action={toPageAction(terms.summary.button, "secondary")}
+                action={toPageAction(terms.summary.button)}
                 className="mt-2 w-full"
               />
-            </div>
+            </aside>
           </div>
         </PageContainer>
       </PageSection>

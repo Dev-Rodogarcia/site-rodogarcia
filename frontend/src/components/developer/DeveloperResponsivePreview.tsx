@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DeviceMobile, Desktop, Rectangle } from "@phosphor-icons/react";
+import type { AppPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import {
   DeveloperCard,
@@ -15,18 +16,23 @@ const VIEWPORTS = [
   { key: "mobile", label: "Mobile", width: 390, height: 780, icon: DeviceMobile },
 ] as const;
 
+const CMS_PREVIEW_QUERY = "cms";
+
 export function DeveloperResponsivePreview({
   href,
   title = "Preview real",
 }: {
-  href: string;
+  href: AppPath;
   title?: string;
 }) {
   const [viewportKey, setViewportKey] = useState<(typeof VIEWPORTS)[number]["key"]>("desktop");
   const [zoom, setZoom] = useState(0.72);
   const viewport = VIEWPORTS.find((item) => item.key === viewportKey) ?? VIEWPORTS[0];
   const src = useMemo(() => {
-    const params = new URLSearchParams({ preview: "cms", viewport: viewport.key });
+    const params = new URLSearchParams({
+      preview: CMS_PREVIEW_QUERY,
+      viewport: viewport.key,
+    });
     return `${href}${href.includes("?") ? "&" : "?"}${params.toString()}`;
   }, [href, viewport.key]);
 
