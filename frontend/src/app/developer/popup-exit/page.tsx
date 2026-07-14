@@ -16,6 +16,7 @@ import {
 } from "@/hooks/useAdminResource";
 import { useCarouselPagination } from "@/hooks/useCarouselPagination";
 import { api } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 import { DeveloperImageField } from "@/components/developer/DeveloperImageField";
 import {
   DeveloperCard,
@@ -117,6 +118,12 @@ const DEFAULT_CONFIG: PopupConfig = {
     sheetTitle: "Atendimento rápido",
   },
 };
+
+const popupPrimaryPanelClassName =
+  "rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,rgba(219,234,254,0.82)_0%,rgba(239,246,255,0.82)_54%,rgba(248,251,255,0.94)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(29,78,216,0.08)] ring-1 ring-[var(--primary)]/7 sm:p-5";
+
+const popupSupportPanelClassName =
+  "rounded-[22px] border border-slate-300/85 bg-slate-100/90 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-5";
 
 interface PopupResourceData {
   config: PopupConfig;
@@ -310,14 +317,15 @@ export default function PopupExitPage() {
       <div className="mt-8 flex flex-col gap-6">
 
         {/* Card 1 — Status */}
-          <DeveloperCard>
-            <DeveloperSectionHeading
-              eyebrow="Status"
-              title="Ativação do popup"
-              description="Ligue ou desligue o popup de saída sem apagar as configurações salvas."
-              tooltip="Controla a publicação do popup no site. Exemplo: desligue temporariamente sem perder textos e imagens."
-            />
-            <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
+          <DeveloperCard className="p-4 sm:px-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
+                  Status
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[var(--foreground)]">Ativação do popup</p>
+              </div>
+              <label className="flex min-h-10 items-center gap-3 rounded-xl border border-[var(--primary)]/16 bg-[var(--primary)]/6 px-3 py-2 text-sm font-medium text-[var(--foreground)]">
               <input
                 type="checkbox"
                 checked={config.enabled}
@@ -326,6 +334,7 @@ export default function PopupExitPage() {
               />
               Popup ativo
             </label>
+            </div>
           </DeveloperCard>
 
           {/* Card 2 — Textos */}
@@ -335,8 +344,17 @@ export default function PopupExitPage() {
               title="Textos do popup"
               description="Título, descrição, botão de envio, fechar e mensagem de confirmação."
             />
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-5">
+              <div className={cn(popupPrimaryPanelClassName, "space-y-5")}>
+                <div>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    Mensagem principal
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">
+                    Conteúdo apresentado antes do formulário de contato.
+                  </p>
+                </div>
+                <div className="grid gap-5 lg:grid-cols-2">
                 <DeveloperField label="Título" required>
                   <input
                     value={config.title}
@@ -353,19 +371,19 @@ export default function PopupExitPage() {
                     className={developerInputClassName}
                   />
                 </DeveloperField>
+                  <DeveloperField label="Descrição" required className="lg:col-span-2">
+                    <textarea
+                      rows={3}
+                      value={config.description}
+                      onChange={(event) => setValue("description", event.target.value)}
+                      maxLength={220}
+                      className={`${developerInputClassName} resize-none`}
+                    />
+                  </DeveloperField>
+                </div>
               </div>
 
-              <DeveloperField label="Descrição" required>
-                <textarea
-                  rows={3}
-                  value={config.description}
-                  onChange={(event) => setValue("description", event.target.value)}
-                  maxLength={220}
-                  className={`${developerInputClassName} resize-none`}
-                />
-              </DeveloperField>
-
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className={cn(popupSupportPanelClassName, "grid gap-5 lg:grid-cols-3")}>
                 <DeveloperField label="Texto de fechar">
                   <input
                     value={config.closeText}
@@ -382,8 +400,6 @@ export default function PopupExitPage() {
                     className={developerInputClassName}
                   />
                 </DeveloperField>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
                 <DeveloperField label="Badge">
                   <input
                     value={config.badgeText ?? ""}
@@ -392,16 +408,26 @@ export default function PopupExitPage() {
                     className={developerInputClassName}
                   />
                 </DeveloperField>
+              </div>
+
+              <div className={popupPrimaryPanelClassName}>
+                <div className="mb-5">
+                  <p className="text-sm font-semibold text-[var(--foreground)]">Imagem padrão</p>
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">
+                    Imagem usada quando não houver uma versão específica para desktop ou celular.
+                  </p>
+                </div>
                 <DeveloperImageField
-                  label="Imagem padrão"
+                  label="Arquivo da imagem"
                   value={config.image ?? ""}
+                  showPreview={false}
                   onChange={(image) => setValue("image", image)}
                 />
               </div>
             </div>
           </DeveloperCard>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
             <DeveloperCard>
               <DeveloperSectionHeading
                 eyebrow="Desktop"
@@ -437,6 +463,7 @@ export default function PopupExitPage() {
                 <DeveloperImageField
                   label="Imagem desktop"
                   value={config.desktop?.image ?? ""}
+                  showPreview={false}
                   onChange={(image) =>
                     setConfig((current) => ({
                       ...current,
@@ -454,7 +481,7 @@ export default function PopupExitPage() {
                 description="Usa texto, imagem e folha inferior adaptados."
                 tooltip="Configuração exclusiva do popup em celulares, com layout próprio em formato de folha inferior."
               />
-              <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <DeveloperField label="Título mobile">
                   <input
                     value={config.mobile?.title ?? ""}
@@ -467,7 +494,7 @@ export default function PopupExitPage() {
                     className={developerInputClassName}
                   />
                 </DeveloperField>
-                <DeveloperField label="Descrição mobile">
+                <DeveloperField label="Descrição mobile" className="sm:col-span-2">
                   <textarea
                     rows={3}
                     value={config.mobile?.description ?? ""}
@@ -480,7 +507,7 @@ export default function PopupExitPage() {
                     className={`${developerInputClassName} resize-none`}
                   />
                 </DeveloperField>
-                <DeveloperField label="Título da folha mobile">
+                <DeveloperField label="Título da folha mobile" className="sm:col-start-2 sm:row-start-1">
                   <input
                     value={config.mobile?.sheetTitle ?? ""}
                     onChange={(event) =>
@@ -495,6 +522,8 @@ export default function PopupExitPage() {
                 <DeveloperImageField
                   label="Imagem mobile"
                   value={config.mobile?.image ?? ""}
+                  showPreview={false}
+                  className="sm:col-span-2"
                   onChange={(image) =>
                     setConfig((current) => ({
                       ...current,
@@ -664,7 +693,7 @@ export default function PopupExitPage() {
               tooltip="Compare popup exibido vs enviado para medir conversão. Exemplo: 100 exibidos e 8 enviados = 8%."
             />
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { label: "Popup exibido", value: analytics?.totals.popup_shown ?? 0, icon: Pulse },
                 { label: "Popup enviado", value: analytics?.totals.popup_submitted ?? 0, icon: CursorClick },
@@ -673,44 +702,46 @@ export default function PopupExitPage() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-[var(--border)] bg-white/72 px-4 py-4"
+                  className="flex min-h-[88px] items-center gap-3 rounded-[20px] border border-[var(--border)] bg-white/72 px-4 py-3"
                 >
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
-                    <item.icon size={18} weight="duotone" />
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                    <item.icon size={17} weight="duotone" />
                   </span>
-                  <p className="mt-4 text-3xl font-bold tracking-[-0.05em] text-[var(--foreground)]">
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-                    {item.label}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold leading-none tracking-[-0.05em] text-[var(--foreground)]">
+                      {item.value}
+                    </p>
+                    <p className="mt-2 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+                      {item.label}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-5 rounded-[24px] border border-[var(--border)] bg-white/72 px-4 py-4">
+            <div className="mt-4 rounded-[20px] border border-[var(--border)] bg-white/72 px-4 py-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
                 Top páginas do popup
               </p>
-              <div className="mt-3 overflow-hidden">
+              <div className="mt-2 overflow-hidden">
                 <div
                   className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${topPagesPage * 100}%)` }}
                 >
                   {topPagesPages.map((page, index) => (
-                    <div key={index} className="w-full shrink-0 space-y-2">
+                    <div key={index} className="grid w-full shrink-0 gap-2 sm:grid-cols-2">
                       {page.length > 0 ? (
                         page.map((item) => (
                           <div
                             key={item.pagePath}
-                            className="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-3 text-sm"
+                            className="flex min-h-10 items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm"
                           >
                             <span className="truncate text-[var(--foreground)]">{item.pagePath}</span>
                             <strong className="text-[var(--primary)]">{item.total}</strong>
                           </div>
                         ))
                       ) : (
-                        <p className="text-sm text-[var(--color-muted-raw)]">
+                        <p className="text-sm text-[var(--color-muted-raw)] sm:col-span-2">
                           Sem eventos suficientes no período atual.
                         </p>
                       )}
@@ -723,6 +754,7 @@ export default function PopupExitPage() {
                 totalPages={topPagesTotalPages}
                 onNext={nextTopPagesPage}
                 onPrev={prevTopPagesPage}
+                compact
               />
             </div>
           </DeveloperCard>
@@ -731,7 +763,7 @@ export default function PopupExitPage() {
         <div className="grid gap-6 lg:grid-cols-2">
 
           {/* Card — Leads */}
-          <DeveloperCard>
+          <DeveloperCard className="flex h-full flex-col">
             <DeveloperSectionHeading
               eyebrow="Leads recentes"
               title="Últimos contatos capturados"
@@ -775,16 +807,20 @@ export default function PopupExitPage() {
                 ))}
               </div>
             </div>
-            <DeveloperCarouselPagination
-              currentPage={leadsPage}
-              totalPages={leadsTotalPages}
-              onNext={nextLeadsPage}
-              onPrev={prevLeadsPage}
-            />
+            <div className="mt-auto">
+              <DeveloperCarouselPagination
+                currentPage={leadsPage}
+                totalPages={leadsTotalPages}
+                onNext={nextLeadsPage}
+                onPrev={prevLeadsPage}
+                compact
+                alwaysVisible
+              />
+            </div>
           </DeveloperCard>
 
           {/* Card — Eventos */}
-          <DeveloperCard>
+          <DeveloperCard className="flex h-full flex-col">
             <DeveloperSectionHeading
               eyebrow="Eventos recentes"
               title="Auditoria rápida"
@@ -827,12 +863,15 @@ export default function PopupExitPage() {
                 ))}
               </div>
             </div>
-            <DeveloperCarouselPagination
-              currentPage={eventsPage}
-              totalPages={eventsTotalPages}
-              onNext={nextEventsPage}
-              onPrev={prevEventsPage}
-            />
+            <div className="mt-auto">
+              <DeveloperCarouselPagination
+                currentPage={eventsPage}
+                totalPages={eventsTotalPages}
+                onNext={nextEventsPage}
+                onPrev={prevEventsPage}
+                compact
+              />
+            </div>
           </DeveloperCard>
         </div>
 

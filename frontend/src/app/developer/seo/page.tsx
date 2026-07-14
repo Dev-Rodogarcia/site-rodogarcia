@@ -150,8 +150,8 @@ export default function SeoPage() {
         </div>
       ) : null}
 
-      <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(320px,0.85fr)_minmax(0,1.15fr)]">
-        <DeveloperCard>
+      <section className="mt-5 grid items-start gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <DeveloperCard className="self-start p-4 xl:sticky xl:top-5">
           <DeveloperSectionHeading
             eyebrow="Rotas"
             title="Páginas publicadas"
@@ -167,10 +167,10 @@ export default function SeoPage() {
                   type="button"
                   onClick={() => setSelectedPath(page.path)}
                   className={cn(
-                    "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-2 text-left transition",
+                    "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[14px] border px-3.5 py-3 text-left transition-all duration-200",
                     selectedPath === page.path
-                      ? "border-[var(--primary)] bg-[var(--primary)]/8"
-                      : "border-[var(--border)] bg-white/76 hover:bg-white"
+                      ? "border-[var(--primary)]/45 bg-[linear-gradient(135deg,rgba(219,234,254,0.82),rgba(255,255,255,0.94))] shadow-[0_8px_18px_rgba(29,78,216,0.1)]"
+                      : "border-slate-200 bg-slate-50/72 hover:border-[var(--primary)]/24 hover:bg-white"
                   )}
                 >
                   <span className="min-w-0">
@@ -197,13 +197,16 @@ export default function SeoPage() {
           </div>
         </DeveloperCard>
 
-        <DeveloperCard>
+        <DeveloperCard className="p-5 sm:p-6">
           <DeveloperSectionHeading
             eyebrow="Editor"
             title={form.label || form.path}
             description="As validações ajudam a manter os snippets objetivos."
+            action={<span className={cn("rounded-full px-3 py-1.5 text-xs font-bold", scoreSeo(form) >= 80 ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700")}>Score {scoreSeo(form)}%</span>}
           />
 
+          <section className="rounded-[20px] border border-[#bfdbfe] bg-[linear-gradient(135deg,rgba(239,246,255,0.9),rgba(255,255,255,0.96))] p-4 sm:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">Busca orgânica</p><p className="mt-1 text-sm text-[var(--color-muted-raw)]">Título e descrição exibidos nos resultados de busca.</p></div><span className="text-xs font-semibold text-[var(--color-muted-raw)]">{form.title.length}/90</span></div>
           <div className="grid gap-4 lg:grid-cols-2">
             <DeveloperField
               label="Título SEO"
@@ -242,9 +245,12 @@ export default function SeoPage() {
               />
             </DeveloperField>
           </div>
+          </section>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <label className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white/76 px-3 py-2 text-sm font-medium">
+          <section className="mt-5 rounded-[20px] border border-slate-200 bg-slate-50/78 p-4 sm:p-5">
+            <div className="mb-4"><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">Diretivas</p><p className="mt-1 text-sm text-[var(--color-muted-raw)]">Defina rota principal e regras de rastreamento dos buscadores.</p></div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <label className="flex min-h-12 items-center gap-2 rounded-xl border border-white bg-white px-3 py-2 text-sm font-medium shadow-[0_4px_10px_rgba(15,23,42,0.025)]">
               <input
                 type="checkbox"
                 checked={form.index}
@@ -256,7 +262,7 @@ export default function SeoPage() {
                 <DeveloperTooltip content="Quando ativo, permite que buscadores exibam esta página. Desative para páginas internas ou temporárias." />
               </span>
             </label>
-            <label className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white/76 px-3 py-2 text-sm font-medium">
+            <label className="flex min-h-12 items-center gap-2 rounded-xl border border-white bg-white px-3 py-2 text-sm font-medium shadow-[0_4px_10px_rgba(15,23,42,0.025)]">
               <input
                 type="checkbox"
                 checked={form.follow}
@@ -279,42 +285,33 @@ export default function SeoPage() {
               />
             </DeveloperField>
           </div>
+          </section>
 
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            <DeveloperField
-              label="OG Title"
-              tooltip="Título usado em previews de redes sociais. Ex.: Conheça a Rodogarcia."
-            >
-              <input
-                value={form.ogTitle}
-                onChange={(event) => setValue("ogTitle", event.target.value)}
-                className={developerInputClassName}
-              />
-            </DeveloperField>
+          <section className="mt-5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.035)] sm:p-5">
+            <div className="mb-4"><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">Compartilhamento</p><p className="mt-1 text-sm text-[var(--color-muted-raw)]">Card exibido ao compartilhar esta página em redes sociais e mensageiros.</p></div>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)] lg:items-start">
+            <div className="space-y-4">
+              <DeveloperField label="OG Title" tooltip="Título usado em previews de redes sociais. Ex.: Conheça a Rodogarcia.">
+                <input value={form.ogTitle} onChange={(event) => setValue("ogTitle", event.target.value)} className={developerInputClassName} />
+              </DeveloperField>
+              <DeveloperField label="OG Description" tooltip="Descrição usada no card de redes sociais. Ex.: resumo curto da página para WhatsApp e LinkedIn.">
+                <textarea rows={2} value={form.ogDescription} onChange={(event) => setValue("ogDescription", event.target.value)} className={`${developerInputClassName} resize-none`} />
+              </DeveloperField>
+            </div>
             <DeveloperImageField
               label="OG Image"
               hint="Imagem usada quando a página é compartilhada."
               tooltip="Imagem do preview social. Ex.: /uploads/capa-servicos.webp."
               value={form.ogImage}
               onChange={(value) => setValue("ogImage", value)}
+              showPreview={false}
             />
           </div>
+          </section>
 
-          <div className="mt-4">
-            <DeveloperField
-              label="OG Description"
-              tooltip="Descrição usada no card de redes sociais. Ex.: resumo curto da página para WhatsApp e LinkedIn."
-            >
-              <textarea
-                rows={2}
-                value={form.ogDescription}
-                onChange={(event) => setValue("ogDescription", event.target.value)}
-                className={`${developerInputClassName} resize-none`}
-              />
-            </DeveloperField>
-          </div>
-
-          <div className="mt-4">
+          <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.72fr)]">
+          <div className="rounded-[20px] border border-slate-200 bg-slate-50/78 p-4 sm:p-5">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">Avançado</p>
             <DeveloperField
               label="Meta tags extras"
               hint="Uma por linha no formato nome=valor."
@@ -330,7 +327,8 @@ export default function SeoPage() {
             </DeveloperField>
           </div>
 
-          <div className="mt-5 rounded-lg border border-[var(--border)] bg-slate-950 p-4 text-white">
+          <div className="rounded-[20px] border border-slate-900 bg-slate-950 p-4 text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)]">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-300">Preview do compartilhamento</p>
             <div className="flex items-start gap-3">
               <MagnifyingGlass size={18} weight="bold" className="mt-1 text-sky-300" />
               <div className="min-w-0">
@@ -342,8 +340,11 @@ export default function SeoPage() {
               </div>
             </div>
           </div>
+          </section>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <div className="sticky bottom-4 z-10 mt-5 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/95 p-3 shadow-[0_12px_28px_rgba(15,23,42,0.1)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+            <p className="px-1 text-sm text-[var(--color-muted-raw)]">Revise o preview e salve as alterações desta rota.</p>
+            <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleSave}
@@ -361,6 +362,7 @@ export default function SeoPage() {
               <Pulse size={16} weight="bold" />
               Atualizar dados
             </button>
+            </div>
           </div>
         </DeveloperCard>
       </section>

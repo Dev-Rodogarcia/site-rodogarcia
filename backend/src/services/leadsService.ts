@@ -109,7 +109,11 @@ export function listUnifiedLeads(filters: Record<string, unknown> = {}) {
   const status = sanitizeText(filters.status, 40).toLowerCase();
   const from = Date.parse(String(filters.from ?? ""));
   const to = Date.parse(String(filters.to ?? ""));
-  const limit = Math.min(Math.max(Number(filters.limit) || 200, 1), 1000);
+  const page = Math.max(1, Math.round(Number(filters.page) || 1));
+  const pageSize = Math.min(
+    Math.max(Math.round(Number(filters.pageSize ?? filters.limit) || 50), 1),
+    100
+  );
 
   const central = leadRepository.read().map((lead) => normalizeLegacyLead(lead, "cms"));
   const popup = popupLeadRepository
@@ -127,7 +131,7 @@ export function listUnifiedLeads(filters: Record<string, unknown> = {}) {
     unique.set(lead.id, lead);
   }
 
-  return [...unique.values()]
+  const filtered = [...unique.values()]
     .filter((lead) => {
       const createdAt = Date.parse(String(lead.createdAt ?? ""));
       const haystack = [
@@ -147,6 +151,13 @@ export function listUnifiedLeads(filters: Record<string, unknown> = {}) {
       if (Number.isFinite(to) && createdAt > to) return false;
       return true;
     })
-    .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
-    .slice(0, limit);
+    .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+  const start = (page - 1) * pageSize;
+
+  return {
+    leads: filtered.slice(start, start + pageSize),
+    total: filtered.length,
+    page,
+    pageSize,
+  };
 }

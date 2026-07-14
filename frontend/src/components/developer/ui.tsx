@@ -54,10 +54,8 @@ export function DeveloperHero({
   actions,
 }: DeveloperHeroProps) {
   return (
-    <section className="relative overflow-hidden rounded-lg border border-[var(--border)] bg-white/90 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.045)] backdrop-blur-xl sm:px-5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/20 to-transparent" />
-
-      <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+    <section className="relative overflow-hidden rounded-[22px] border border-[var(--border)] bg-white/92 px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-xl sm:px-6 sm:py-6">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="max-w-[860px]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
             {eyebrow}
@@ -73,11 +71,11 @@ export function DeveloperHero({
         </div>
 
         {stats.length > 0 || actions ? (
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+          <div className="flex flex-wrap gap-2.5 sm:justify-end">
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
+                className="min-w-[108px] rounded-[16px] border border-[var(--border)]/90 bg-slate-50/82 px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.045)]"
               >
                 <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
                   {stat.label}
@@ -208,13 +206,17 @@ export function DeveloperColorField({
 
   return (
     <DeveloperField label={label} required={required} hint={hint} className={className}>
-      <div className="grid gap-3 sm:grid-cols-[92px_minmax(0,1fr)] sm:items-center">
-        <input
-          type="color"
-          value={color}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-full cursor-pointer rounded-xl border border-[var(--border)] bg-white p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition-all focus:border-[var(--primary)]/35 focus:ring-4 focus:ring-[var(--primary)]/10"
-        />
+      <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)] sm:items-center">
+        <div className="relative h-10 cursor-pointer overflow-hidden rounded-xl border border-[var(--border)] bg-white p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition-all focus-within:border-[var(--primary)]/35 focus-within:ring-4 focus-within:ring-[var(--primary)]/10">
+          <span className="pointer-events-none absolute inset-1 rounded-lg" style={{ backgroundColor: color }} />
+          <input
+            type="color"
+            value={color}
+            onChange={(event) => onChange(event.target.value)}
+            aria-label={`Selecionar ${label}`}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          />
+        </div>
         <div className="flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)]/80 bg-slate-50/80 px-3 text-xs font-semibold text-[var(--color-muted-raw)]">
           <span
             className="h-4 w-4 shrink-0 rounded-full border border-slate-950/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]"
@@ -368,23 +370,34 @@ export function DeveloperCarouselPagination({
   totalPages,
   onNext,
   onPrev,
+  compact = false,
+  alwaysVisible = false,
 }: {
   currentPage: number;
   totalPages: number;
   onNext: () => void;
   onPrev: () => void;
+  compact?: boolean;
+  alwaysVisible?: boolean;
 }) {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1 && !alwaysVisible) return null;
 
   return (
-    <div className="mt-8 flex items-center justify-between border-t border-[var(--border)]/80 pt-6">
+    <div
+      className={cn(
+        "flex items-center justify-between border-t border-[var(--border)]/80",
+        compact ? "mt-3 pt-3" : "mt-8 pt-6"
+      )}
+    >
       <button
         type="button"
         onClick={onPrev}
         disabled={currentPage === 0}
         className={cn(
           developerSecondaryButtonClassName,
-          "min-w-[110px] rounded-full border-[var(--border)]/90 bg-white/78 px-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]"
+          compact
+            ? "min-h-9 rounded-xl border-[var(--border)]/90 bg-white/78 px-3 text-xs"
+            : "min-w-[110px] rounded-full border-[var(--border)]/90 bg-white/78 px-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]"
         )}
       >
         <CaretLeft size={16} weight="bold" />
@@ -397,7 +410,11 @@ export function DeveloperCarouselPagination({
             key={index}
             className={cn(
               "h-2 w-2 rounded-full transition-all duration-500",
-              currentPage === index ? "w-6 bg-[var(--primary)]" : "bg-[var(--border)]"
+              currentPage === index
+                ? compact
+                  ? "w-4 bg-[var(--primary)]"
+                  : "w-6 bg-[var(--primary)]"
+                : "bg-[var(--border)]"
             )}
           />
         ))}
@@ -409,7 +426,9 @@ export function DeveloperCarouselPagination({
         disabled={currentPage === totalPages - 1}
         className={cn(
           developerSecondaryButtonClassName,
-          "min-w-[110px] rounded-full border-[var(--border)]/90 bg-white/78 px-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)] flex-row-reverse"
+          compact
+            ? "min-h-9 rounded-xl border-[var(--border)]/90 bg-white/78 px-3 text-xs flex-row-reverse"
+            : "min-w-[110px] rounded-full border-[var(--border)]/90 bg-white/78 px-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)] flex-row-reverse"
         )}
       >
         <CaretRight size={16} weight="bold" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { EnvelopeSimple, MagnifyingGlass, Pulse } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, EnvelopeSimple, MagnifyingGlass, Pulse } from "@phosphor-icons/react";
 import {
   DeveloperCard,
   DeveloperField,
@@ -15,6 +15,9 @@ import {
 } from "@/components/developer/ui";
 import { adminResourceKeys, useAdminResource } from "@/hooks/useAdminResource";
 import { api } from "@/lib/routes";
+import { cn } from "@/lib/utils";
+
+const LEADS_PER_PAGE = 10;
 
 interface Lead {
   id: string;
@@ -44,24 +47,27 @@ function formatDateTime(value?: string) {
 export default function LeadsPage() {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState("");
-  const [appliedKey, setAppliedKey] = useState("");
-  const requestPath = `${api.admin.leads}?limit=300&q=${encodeURIComponent(query)}&source=${encodeURIComponent(source)}`;
+  const [appliedFilters, setAppliedFilters] = useState({ query: "", source: "" });
+  const [page, setPage] = useState(1);
+  const requestPath = `${api.admin.leads}?page=${page}&pageSize=${LEADS_PER_PAGE}&q=${encodeURIComponent(appliedFilters.query)}&source=${encodeURIComponent(appliedFilters.source)}`;
 
-  const { data, loading, error, refresh } = useAdminResource<{ leads: Lead[]; total: number }>({
-    key: adminResourceKeys.leads(appliedKey),
+  const { data, loading, error, refresh } = useAdminResource<{ leads: Lead[]; total: number; page: number; pageSize: number }>({
+    key: adminResourceKeys.leads(`${appliedFilters.query}:${appliedFilters.source}:${page}`),
     fetcher: async (request) => {
-      const response = await request<{ leads?: Lead[]; total?: number }>(requestPath);
+      const response = await request<{ leads?: Lead[]; total?: number; page?: number; pageSize?: number }>(requestPath);
       if (!response.success) {
         return { success: false, error: response.error ?? "Falha ao carregar leads." };
       }
       return {
         success: true,
-        data: { leads: response.data?.leads ?? [], total: response.data?.total ?? 0 },
+        data: { leads: response.data?.leads ?? [], total: response.data?.total ?? 0, page: response.data?.page ?? 1, pageSize: response.data?.pageSize ?? LEADS_PER_PAGE },
       };
     },
   });
 
   const leads = data?.leads ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / LEADS_PER_PAGE));
   const sourceSummary = useMemo(() => {
     return leads.reduce<Record<string, number>>((acc, lead) => {
       acc[lead.source || "sem-origem"] = (acc[lead.source || "sem-origem"] ?? 0) + 1;
@@ -70,7 +76,8 @@ export default function LeadsPage() {
   }, [leads]);
 
   function applyFilters() {
-    setAppliedKey(`${query}:${source}:${Date.now()}`);
+    setAppliedFilters({ query, source });
+    setPage(1);
   }
 
   return (
@@ -80,7 +87,7 @@ export default function LeadsPage() {
         title="Base central de contatos capturados."
         description="Popup, contato e cotação aparecem em uma lista única, com busca e origem."
         stats={[
-          { label: "Total visível", value: leads.length },
+          { label: "Total", value: total },
           { label: "Popup", value: sourceSummary["exit-intent-popup"] ?? sourceSummary["exit-intent"] ?? 0 },
           { label: "Formulários", value: (sourceSummary["contact-form"] ?? 0) + (sourceSummary["quote-form"] ?? 0) },
         ]}
@@ -95,36 +102,27 @@ export default function LeadsPage() {
           title="Pesquisa rápida"
           description="Filtre por nome, e-mail, telefone, página ou origem."
           tooltip="Busca na base unificada de leads. Exemplo: filtrar por popup ou por um e-mail específico."
+          action={
+            <div className="grid w-full gap-3 sm:grid-cols-[minmax(220px,1fr)_180px_auto] sm:items-end xl:w-auto">
+              <DeveloperField label="Buscar">
+                <input value={query} onChange={(event) => setQuery(event.target.value)} className={developerInputClassName} placeholder="nome, e-mail, telefone..." />
+              </DeveloperField>
+              <DeveloperField label="Origem" tooltip="Canal que gerou o lead. Exemplo: popup, contact-form ou quote-form.">
+                <input value={source} onChange={(event) => setSource(event.target.value)} className={developerInputClassName} placeholder="popup, quote..." />
+              </DeveloperField>
+              <div className="flex gap-2 sm:pb-0.5">
+                <button type="button" onClick={applyFilters} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                  <MagnifyingGlass size={15} weight="bold" />
+                  Filtrar
+                </button>
+                <button type="button" onClick={() => void refresh()} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                  <Pulse size={15} weight="bold" />
+                  Atualizar
+                </button>
+              </div>
+            </div>
+          }
         />
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto_auto]">
-          <DeveloperField label="Buscar">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className={developerInputClassName}
-              placeholder="nome, e-mail, telefone..."
-            />
-          </DeveloperField>
-          <DeveloperField
-            label="Origem"
-            tooltip="Canal que gerou o lead. Exemplo: popup, contact-form ou quote-form."
-          >
-            <input
-              value={source}
-              onChange={(event) => setSource(event.target.value)}
-              className={developerInputClassName}
-              placeholder="popup, quote..."
-            />
-          </DeveloperField>
-          <button type="button" onClick={applyFilters} className={developerSecondaryButtonClassName}>
-            <MagnifyingGlass size={16} weight="bold" />
-            Filtrar
-          </button>
-          <button type="button" onClick={() => void refresh()} className={developerSecondaryButtonClassName}>
-            <Pulse size={16} weight="bold" />
-            Atualizar métricas
-          </button>
-        </div>
       </DeveloperCard>
 
       <DeveloperCard className="mt-5">
@@ -177,6 +175,16 @@ export default function LeadsPage() {
         {!loading && leads.length === 0 ? (
           <div className="mt-4">
             <DeveloperMessage tone="info">Nenhum lead encontrado para os filtros atuais.</DeveloperMessage>
+          </div>
+        ) : null}
+        {total > 0 ? (
+          <div className="mt-4 flex flex-col gap-3 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[var(--color-muted-raw)]">Exibindo {((page - 1) * LEADS_PER_PAGE) + 1}–{Math.min(page * LEADS_PER_PAGE, total)} de {total} leads.</p>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}><CaretLeft size={15} weight="bold" />Anterior</button>
+              <span className="min-w-16 text-center text-xs font-semibold text-[var(--color-muted-raw)]">Página {page} de {totalPages}</span>
+              <button type="button" onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={page === totalPages} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>Próxima<CaretRight size={15} weight="bold" /></button>
+            </div>
           </div>
         ) : null}
       </DeveloperCard>

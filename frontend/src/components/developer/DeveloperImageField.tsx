@@ -11,6 +11,7 @@ interface DeveloperImageFieldProps {
   tooltip?: string;
   previewAlt?: string;
   className?: string;
+  showPreview?: boolean;
 }
 
 export function DeveloperImageField(props: DeveloperImageFieldProps) {

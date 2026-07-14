@@ -348,15 +348,8 @@ export default function DeveloperDashboardPage() {
   const quickLinks = adminNavigationGroups.flatMap((group) =>
     group.items.filter((item) => item.key !== "dashboard")
   );
-  const topPages = data?.analytics.topPages ?? [];
+  const topPages = (data?.analytics.topPages ?? []).slice(0, 8);
   const popupTopPages = summary?.popupTopPages ?? [];
-  const {
-    pages: topPagesPages,
-    currentPage: topPagesPage,
-    totalPages: topPagesTotalPages,
-    nextPage: nextTopPagesPage,
-    prevPage: prevTopPagesPage,
-  } = useCarouselPagination(topPages, 5);
   const {
     pages: popupTopPagesPages,
     currentPage: popupTopPagesPage,
@@ -524,57 +517,40 @@ export default function DeveloperDashboardPage() {
           </section>
 
           <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-            <DeveloperCard>
+            <DeveloperCard className="flex h-full flex-col">
               <DeveloperSectionHeading
                 eyebrow="Rotas mais acessadas"
                 title="Top páginas do site"
                 description="As páginas abaixo receberam mais visualizações no período atual."
               />
 
-              <div className="overflow-hidden">
-                <div
-                  className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
-                  style={{ transform: `translateX(-${topPagesPage * 100}%)` }}
-                >
-                  {topPagesPages.map((page, index) => (
-                    <div key={index} className="w-full shrink-0 space-y-4">
-                      {page.length > 0 ? (
-                        page.map((item) => {
-                          const maxViews = Math.max(...data.analytics.topPages.map((p) => p.views), 1);
-                          const pct = Math.round((item.views / maxViews) * 100);
+              <div className="flex flex-1 flex-col justify-between pt-4">
+                {topPages.length > 0 ? (
+                  topPages.map((item) => {
+                    const maxViews = Math.max(...data.analytics.topPages.map((page) => page.views), 1);
+                    const pct = Math.round((item.views / maxViews) * 100);
 
-                          return (
-                            <div key={item.page}>
-                              <div className="flex items-center gap-3">
-                                <span className="flex-1 truncate text-sm font-medium text-[var(--foreground)]">
-                                  {item.page}
-                                </span>
-                                <span className="text-sm font-semibold text-[var(--primary)]">
-                                  {item.views}
-                                </span>
-                              </div>
-                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-surface-2)]">
-                                <div
-                                  className="h-2 rounded-full bg-[linear-gradient(90deg,#1d4ed8_0%,#06b6d4_100%)]"
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <DeveloperMessage tone="info">Nenhuma página registrada ainda.</DeveloperMessage>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    return (
+                      <div key={item.page}>
+                        <div className="flex items-center gap-3">
+                          <span className="flex-1 truncate text-sm font-medium text-[var(--foreground)]">
+                            {item.page}
+                          </span>
+                          <span className="text-sm font-semibold text-[var(--primary)]">{item.views}</span>
+                        </div>
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-surface-2)]">
+                          <div
+                            className="h-2 rounded-full bg-[linear-gradient(90deg,#1d4ed8_0%,#06b6d4_100%)]"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <DeveloperMessage tone="info">Nenhuma página registrada ainda.</DeveloperMessage>
+                )}
               </div>
-              <DeveloperCarouselPagination
-                currentPage={topPagesPage}
-                totalPages={topPagesTotalPages}
-                onNext={nextTopPagesPage}
-                onPrev={prevTopPagesPage}
-              />
             </DeveloperCard>
 
             <DeveloperCard>

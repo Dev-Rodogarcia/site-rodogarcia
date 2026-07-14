@@ -17,6 +17,7 @@ import {
 } from "@/hooks/useAdminResource";
 import { useCarouselPagination } from "@/hooks/useCarouselPagination";
 import { api } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 import {
   DeveloperCard,
   DeveloperField,
@@ -272,6 +273,13 @@ export default function AnalyticsPage() {
       (conversions?.downloads ?? 0) +
       (conversions?.leads ?? 0) +
       (conversions?.popupOpen ?? 0));
+  const conversionEntries = [
+    { label: "Formulários", value: conversions?.forms ?? 0 },
+    { label: "Downloads", value: conversions?.downloads ?? 0 },
+    { label: "Leads", value: conversions?.leads ?? 0 },
+    { label: "Popup exibido", value: conversions?.popupOpen ?? 0 },
+    { label: "Total", value: totalConversions },
+  ];
 
   useEffect(() => {
     if (!resourceData) return;
@@ -325,6 +333,13 @@ export default function AnalyticsPage() {
     nextPage: nextEventsTablePage,
     prevPage: prevEventsTablePage,
   } = useCarouselPagination(filteredEventsTable, 5);
+  const {
+    pages: conversionPages,
+    currentPage: conversionPage,
+    totalPages: conversionTotalPages,
+    nextPage: nextConversionPage,
+    prevPage: prevConversionPage,
+  } = useCarouselPagination(conversionEntries, 5);
 
   async function handleSave() {
     setSaving(true);
@@ -379,8 +394,8 @@ export default function AnalyticsPage() {
           },
         ]}
         actions={
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="rounded-[22px] border border-white/80 bg-white/78 px-4 py-3 shadow-[0_16px_34px_rgba(15,23,42,0.05)]">
+          <div className="flex items-stretch gap-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 shadow-[0_6px_14px_rgba(15,23,42,0.03)]">
               <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
                 Período (dias)
               </span>
@@ -390,12 +405,12 @@ export default function AnalyticsPage() {
                 max={120}
                 value={daysInput}
                 onChange={(event) => setDaysInput(Number(event.target.value) || 30)}
-                className="mt-2 h-10 w-24 rounded-xl border border-[var(--border)] bg-white px-3 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--primary)]/30"
+                className="mt-1.5 h-8 w-20 rounded-lg border border-[var(--border)] bg-white px-2.5 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--primary)]/30"
               />
             </div>
-            <button type="button" onClick={handleRefresh} className={developerSecondaryButtonClassName}>
-              <Pulse size={16} weight="bold" />
-              Atualizar métricas
+            <button type="button" onClick={handleRefresh} className={cn(developerSecondaryButtonClassName, "min-h-[76px] px-4 py-2 text-xs")}>
+              <Pulse size={15} weight="bold" />
+              Atualizar
             </button>
           </div>
         }
@@ -421,7 +436,7 @@ export default function AnalyticsPage() {
 
       {stats ? (
         <>
-          <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
               { label: "Page views", value: stats.totalPageViews, icon: ChartBar },
               { label: "Sessões únicas", value: stats.uniqueSessions, icon: GlobeHemisphereWest },
@@ -436,22 +451,20 @@ export default function AnalyticsPage() {
                 icon: Lightning,
               },
             ].map((item) => (
-              <DeveloperCard key={item.label}>
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
-                  <item.icon size={22} weight="duotone" />
+              <DeveloperCard key={item.label} className="flex items-center gap-3 p-4 sm:p-4">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                  <item.icon size={18} weight="duotone" />
                 </span>
-                <div className="mt-5 text-4xl font-bold tracking-[-0.06em] text-[var(--foreground)]">
-                  {item.value}
-                </div>
-                <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-                  {item.label}
+                <div className="min-w-0">
+                  <div className="text-2xl font-bold leading-none tracking-[-0.05em] text-[var(--foreground)]">{item.value}</div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">{item.label}</div>
                 </div>
               </DeveloperCard>
             ))}
           </section>
 
-          <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <DeveloperCard>
+          <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <DeveloperCard className="flex h-full flex-col p-5 sm:p-6">
               <DeveloperSectionHeading
                 eyebrow="Páginas"
                 title="Top páginas do período"
@@ -459,7 +472,7 @@ export default function AnalyticsPage() {
                 tooltip="Eventos por página mostra quais rotas receberam mais visualizações no período. Exemplo: /servicos com 120 views."
               />
 
-              <div className="overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <div
                   className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${topPagesPage * 100}%)` }}
@@ -493,15 +506,10 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               </div>
-              <DeveloperCarouselPagination
-                currentPage={topPagesPage}
-                totalPages={topPagesTotalPages}
-                onNext={nextTopPagesPage}
-                onPrev={prevTopPagesPage}
-              />
+              <div className="mt-auto"><DeveloperCarouselPagination currentPage={topPagesPage} totalPages={topPagesTotalPages} onNext={nextTopPagesPage} onPrev={prevTopPagesPage} compact /></div>
             </DeveloperCard>
 
-            <DeveloperCard>
+            <DeveloperCard className="flex h-full flex-col p-5 sm:p-6">
               <DeveloperSectionHeading
                 eyebrow="Eventos"
                 title="Contagem por tipo"
@@ -509,7 +517,7 @@ export default function AnalyticsPage() {
                 tooltip="Volume por evento soma quantas vezes cada ação aconteceu. Exemplo: page_view, popup_submit ou cta_click."
               />
 
-              <div className="overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <div
                   className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${eventEntriesPage * 100}%)` }}
@@ -535,17 +543,12 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               </div>
-              <DeveloperCarouselPagination
-                currentPage={eventEntriesPage}
-                totalPages={eventEntriesTotalPages}
-                onNext={nextEventEntriesPage}
-                onPrev={prevEventEntriesPage}
-              />
+              <div className="mt-auto"><DeveloperCarouselPagination currentPage={eventEntriesPage} totalPages={eventEntriesTotalPages} onNext={nextEventEntriesPage} onPrev={prevEventEntriesPage} compact /></div>
             </DeveloperCard>
           </section>
 
-          <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-            <DeveloperCard>
+          <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+            <DeveloperCard className="flex h-full flex-col p-5 sm:p-6">
               <DeveloperSectionHeading
                 eyebrow="Auditoria"
                 title="Eventos recentes"
@@ -578,7 +581,7 @@ export default function AnalyticsPage() {
                 </DeveloperField>
               </div>
 
-              <div className="overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <div
                   className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${eventsTablePage * 100}%)` }}
@@ -620,15 +623,10 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               </div>
-              <DeveloperCarouselPagination
-                currentPage={eventsTablePage}
-                totalPages={eventsTableTotalPages}
-                onNext={nextEventsTablePage}
-                onPrev={prevEventsTablePage}
-              />
+              <div className="mt-auto"><DeveloperCarouselPagination currentPage={eventsTablePage} totalPages={eventsTableTotalPages} onNext={nextEventsTablePage} onPrev={prevEventsTablePage} compact /></div>
             </DeveloperCard>
 
-            <DeveloperCard>
+            <DeveloperCard className="flex h-full flex-col p-5 sm:p-6">
               <DeveloperSectionHeading
                 eyebrow="Conversões"
                 title="Resumo de resultados"
@@ -636,32 +634,23 @@ export default function AnalyticsPage() {
                 tooltip="Conversão é uma ação de valor. Exemplo: formulário enviado, lead criado ou popup enviado."
               />
 
-              <div className="space-y-3">
-                {[
-                  { label: "Formulários", value: stats.stats.conversions.forms },
-                  { label: "Downloads", value: stats.stats.conversions.downloads },
-                  { label: "Leads", value: stats.stats.conversions.leads },
-                  { label: "Popup exibido", value: stats.stats.conversions.popupOpen },
-                  { label: "Total", value: totalConversions },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--border)] bg-white/72 px-4 py-4"
-                  >
-                    <span className="text-sm font-medium text-[var(--foreground)]">
-                      {item.label}
-                    </span>
-                    <strong className="text-[var(--primary)]">{item.value}</strong>
-                  </div>
-                ))}
+              <div className="flex flex-1 overflow-hidden">
+                <div className="flex w-full transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]" style={{ transform: `translateX(-${conversionPage * 100}%)` }}>
+                  {conversionPages.map((conversionItems, index) => (
+                    <div key={index} className="flex w-full shrink-0 flex-col justify-between gap-3">
+                      {conversionItems.map((item) => <div key={item.label} className="flex items-center justify-between gap-3 rounded-[18px] border border-[var(--border)] bg-slate-50/80 px-4 py-3"><span className="text-sm font-medium text-[var(--foreground)]">{item.label}</span><strong className="text-[var(--primary)]">{item.value}</strong></div>)}
+                    </div>
+                  ))}
+                </div>
               </div>
+              <div className="mt-auto"><DeveloperCarouselPagination currentPage={conversionPage} totalPages={conversionTotalPages} onNext={nextConversionPage} onPrev={prevConversionPage} compact /></div>
             </DeveloperCard>
           </section>
         </>
       ) : null}
 
       <section className="mt-6">
-        <DeveloperCard>
+        <DeveloperCard className="p-5 sm:p-6">
           <DeveloperSectionHeading
             eyebrow="Configuração"
             title="Consentimento e integrações principais"
@@ -669,8 +658,8 @@ export default function AnalyticsPage() {
             tooltip="Essas opções controlam coleta, consentimento e provedores externos usados pelo analytics."
           />
 
-          <div className="space-y-8">
-            <div>
+          <div className="space-y-5">
+            <div className="rounded-[20px] border border-[#bfdbfe] bg-[linear-gradient(135deg,rgba(239,246,255,0.9),rgba(255,255,255,0.95))] p-4 sm:p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
                 Base e consentimento
               </p>
@@ -708,7 +697,7 @@ export default function AnalyticsPage() {
                 ].map((item) => (
                   <label
                     key={item.key}
-                    className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]"
+                    className="flex min-h-12 items-center gap-3 rounded-xl border border-white bg-white/92 px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[0_5px_12px_rgba(29,78,216,0.04)]"
                   >
                     <input
                       type="checkbox"
@@ -722,7 +711,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 rounded-[20px] border border-slate-200 bg-slate-50/72 p-4 sm:grid-cols-2 sm:p-5">
               <DeveloperField
                 label="Heartbeat da sessão (segundos)"
                 tooltip="Intervalo para registrar que a sessão continua ativa. Exemplo: 30 segundos gera leituras regulares de permanência."
@@ -770,10 +759,7 @@ export default function AnalyticsPage() {
                   fieldLabel: "DSN",
                 },
               ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4"
-                >
+                <div key={item.label} className={cn("rounded-[20px] border p-4 shadow-[0_6px_16px_rgba(15,23,42,0.035)]", form[item.enabledKey] ? "border-[#93c5fd] bg-[#eff6ff]" : "border-slate-200 bg-slate-50/82")}>
                   <label className="flex items-center gap-3 text-sm font-medium text-[var(--foreground)]">
                     <input
                       type="checkbox"
@@ -801,8 +787,8 @@ export default function AnalyticsPage() {
               ))}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
+            <div className="grid gap-4 rounded-[20px] border border-slate-200 bg-slate-50/72 p-4 sm:grid-cols-2 sm:p-5">
+              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-white bg-white/92 px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[0_5px_12px_rgba(15,23,42,0.04)]">
                 <input
                   type="checkbox"
                   checked={form.enableSearchConsole}

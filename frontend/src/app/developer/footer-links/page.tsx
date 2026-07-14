@@ -2,7 +2,16 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowSquareOut, ArrowUp, CheckCircle, Plus, Trash } from "@phosphor-icons/react";
+import {
+  ArrowDown,
+  ArrowSquareOut,
+  ArrowUp,
+  CaretLeft,
+  CaretRight,
+  CheckCircle,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { api, site } from "@/lib/routes";
 import { DEFAULT_FOOTER_LINKS } from "@/lib/footerLinksDefaults";
@@ -34,12 +43,41 @@ import {
   developerSecondaryButtonClassName,
 } from "@/components/developer/ui";
 import { DeveloperCmsAccordion } from "@/components/developer/DeveloperCmsAccordion";
+import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import { cn } from "@/lib/utils";
 
 type SectionKey = "footer" | "terms" | "help" | "privacy";
+type FooterStepKey = "institutional" | "footer" | "social";
+
+const FOOTER_STEPS = [
+  {
+    key: "institutional",
+    step: "Etapa 1",
+    title: "Páginas institucionais",
+    description: "Termos de Uso, Central de Ajuda e Privacidade.",
+  },
+  {
+    key: "footer",
+    step: "Etapa 2",
+    title: "Links gerais do footer",
+    description: "Chamadas, colunas, links inferiores e horários.",
+  },
+  {
+    key: "social",
+    step: "Etapa 3",
+    title: "Redes sociais",
+    description: "Links externos e a identificação dos canais sociais.",
+  },
+] as const;
 
 const panelClassName =
   "rounded-[22px] border border-[var(--border)]/80 bg-slate-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] sm:p-5";
+const priorityPanelClassName =
+  "rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,rgba(219,234,254,0.82)_0%,rgba(239,246,255,0.8)_54%,rgba(248,251,255,0.9)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_10px_24px_rgba(29,78,216,0.08)] ring-1 ring-[var(--primary)]/7 sm:p-5";
+const mutedPanelClassName =
+  "rounded-[22px] border border-slate-300/85 bg-slate-100/90 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-5";
+const ctaPanelClassName =
+  "rounded-[22px] border border-[var(--primary)]/22 bg-[linear-gradient(135deg,rgba(219,234,254,0.66)_0%,rgba(255,255,255,0.94)_72%)] p-4 shadow-[0_12px_28px_rgba(29,78,216,0.1)] sm:p-5";
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
@@ -123,7 +161,7 @@ function ButtonFields({
   label?: string;
 }) {
   return (
-    <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+    <div className={cn(mutedPanelClassName, "grid gap-5 md:grid-cols-2")}>
       <TextInput label={`${label} - texto`} value={button.label} maxLength={60} onChange={(value) => onChange({ ...button, label: value })} />
       <DeveloperField label={`${label} - link`} required>
         <input value={button.url} onChange={(event) => onChange({ ...button, url: event.target.value })} className={developerInputClassName} />
@@ -139,6 +177,7 @@ function LinkItemFields({
   onMoveDown,
   onRemove,
   extra,
+  nested = false,
 }: {
   item: FooterLinkItem | FooterSocialLink;
   onChange: (item: FooterLinkItem | FooterSocialLink) => void;
@@ -146,10 +185,11 @@ function LinkItemFields({
   onMoveDown: () => void;
   onRemove: () => void;
   extra?: ReactNode;
+  nested?: boolean;
 }) {
   return (
-    <div className={cn(panelClassName, "space-y-4")}>
-      <div className="grid gap-4 md:grid-cols-2">
+    <div className={cn(nested ? panelClassName : mutedPanelClassName, "space-y-4")}>
+      <div className={cn("grid gap-4", extra ? "lg:grid-cols-3" : "md:grid-cols-2")}>
         <TextInput label="Texto" value={item.label} maxLength={60} onChange={(value) => onChange({ ...item, label: value })} />
         <DeveloperField label="Link" required>
           <input value={item.url} onChange={(event) => onChange({ ...item, url: event.target.value })} className={developerInputClassName} />
@@ -225,6 +265,8 @@ export default function FooterLinksCmsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<SectionKey | "">("");
   const [status, setStatus] = useState<{ tone: "success" | "error" | "info"; text: string } | null>(null);
+  const [activeStep, setActiveStep] = useState<FooterStepKey>("institutional");
+  const [previewRevision, setPreviewRevision] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -257,6 +299,18 @@ export default function FooterLinksCmsPage() {
     ],
     [content]
   );
+  const activeStepIndex = Math.max(0, FOOTER_STEPS.findIndex((step) => step.key === activeStep));
+  const activeStepInfo = FOOTER_STEPS[activeStepIndex] ?? FOOTER_STEPS[0];
+
+  function selectStep(step: FooterStepKey) {
+    setActiveStep(step);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function moveStep(direction: -1 | 1) {
+    const nextStep = FOOTER_STEPS[activeStepIndex + direction];
+    if (nextStep) selectStep(nextStep.key);
+  }
 
   function update(mutator: (draft: FooterLinksContent) => void) {
     setContent((current) => {
@@ -282,6 +336,7 @@ export default function FooterLinksCmsPage() {
       return;
     }
     setContent(response.data?.footerLinks ?? content);
+    setPreviewRevision((current) => current + 1);
     setStatus({ tone: "success", text: "FOOTER LINKS salvo com sucesso." });
   }
 
@@ -303,25 +358,107 @@ export default function FooterLinksCmsPage() {
       {loading ? <div className="mt-5"><DeveloperMessage tone="info">Carregando...</DeveloperMessage></div> : null}
       {status ? <div className="mt-5"><DeveloperMessage tone={status.tone}>{status.text}</DeveloperMessage></div> : null}
 
+      <div className="mt-5">
+        <DeveloperResponsivePreview
+          href={site.home}
+          title="Preview do rodapé"
+          anchor="contato"
+          revision={previewRevision}
+        />
+      </div>
+
+      <section className="mt-5 rounded-[24px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.9)_0%,rgba(239,246,255,0.86)_54%,rgba(224,242,254,0.78)_100%)] p-4 shadow-[0_12px_28px_rgba(29,78,216,0.08)] sm:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
+              Edição por etapas
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-[-0.025em] text-[var(--foreground)]">
+              {activeStepInfo.title}
+            </h2>
+            <p className="mt-1 max-w-[68ch] text-sm leading-5 text-[var(--color-muted-raw)]">
+              {activeStepInfo.description}
+            </p>
+          </div>
+          <div className="inline-flex w-fit items-center rounded-full border border-[var(--primary)]/14 bg-white/72 p-1 shadow-[0_8px_20px_rgba(29,78,216,0.07)]">
+            <button
+              type="button"
+              onClick={() => moveStep(-1)}
+              disabled={activeStepIndex === 0}
+              className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-white hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CaretLeft size={16} weight="bold" />
+              Anterior
+            </button>
+            <button
+              type="button"
+              onClick={() => moveStep(1)}
+              disabled={activeStepIndex === FOOTER_STEPS.length - 1}
+              className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-white hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Próximo
+              <CaretRight size={16} weight="bold" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          {FOOTER_STEPS.map((step, index) => {
+            const isActive = step.key === activeStep;
+            return (
+              <button
+                key={step.key}
+                type="button"
+                onClick={() => selectStep(step.key)}
+                aria-current={isActive ? "step" : undefined}
+                className={cn(
+                  "group relative flex min-h-[118px] flex-col items-start overflow-hidden rounded-[18px] border px-3 py-3 text-left transition-all duration-300",
+                  isActive
+                    ? "border-[var(--primary)]/38 bg-[linear-gradient(145deg,rgba(255,255,255,0.96)_0%,rgba(219,234,254,0.92)_100%)] text-[var(--foreground)] shadow-[0_14px_34px_rgba(29,78,216,0.14)]"
+                    : "border-slate-200/90 bg-white text-[var(--foreground)] shadow-[0_8px_18px_rgba(15,23,42,0.03)] hover:-translate-y-0.5 hover:border-[var(--primary)]/30 hover:shadow-[0_12px_24px_rgba(15,23,42,0.07)]"
+                )}
+              >
+                <span className="flex h-7 items-center gap-2">
+                  <span className={cn("flex h-7 w-7 items-center justify-center rounded-full border text-[11px] font-bold", isActive ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-[0_4px_10px_rgba(29,78,216,0.2)]" : "border-[var(--primary)]/14 bg-[var(--primary)]/7 text-[var(--primary)]")}>
+                    {index + 1}
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
+                    {step.step}
+                  </span>
+                </span>
+                <span className="mt-2 block min-h-5 text-sm font-semibold">{step.title}</span>
+                <span className="mt-1 block text-xs leading-4 text-[var(--color-muted-raw)]">{step.description}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       <div className="mt-5 grid gap-5">
-        <InstitutionalPagesStep
-          content={content}
-          onChange={(mutator) => update(mutator)}
-          onSave={saveSection}
-          saving={saving}
-        />
-        <FooterGlobalEditor
-          footer={content.footer}
-          onChange={(footer) => update((draft) => { draft.footer = footer; })}
-          onSave={() => saveSection("footer", content.footer)}
-          saving={saving === "footer"}
-        />
-        <FooterSocialEditor
-          footer={content.footer}
-          onChange={(footer) => update((draft) => { draft.footer = footer; })}
-          onSave={() => saveSection("footer", content.footer)}
-          saving={saving === "footer"}
-        />
+        {activeStep === "institutional" ? (
+          <InstitutionalPagesStep
+            content={content}
+            onChange={(mutator) => update(mutator)}
+            onSave={saveSection}
+            saving={saving}
+          />
+        ) : null}
+        {activeStep === "footer" ? (
+          <FooterGlobalEditor
+            footer={content.footer}
+            onChange={(footer) => update((draft) => { draft.footer = footer; })}
+            onSave={() => saveSection("footer", content.footer)}
+            saving={saving === "footer"}
+          />
+        ) : null}
+        {activeStep === "social" ? (
+          <FooterSocialEditor
+            footer={content.footer}
+            onChange={(footer) => update((draft) => { draft.footer = footer; })}
+            onSave={() => saveSection("footer", content.footer)}
+            saving={saving === "footer"}
+          />
+        ) : null}
       </div>
     </DeveloperPage>
   );
@@ -346,7 +483,7 @@ function InstitutionalPagesStep({
   ];
 
   return (
-    <DeveloperCard className="p-5 sm:p-6">
+    <DeveloperCard className="p-4 sm:p-5">
       <DeveloperSectionHeading
         eyebrow="Etapa 1"
         title="Páginas institucionais"
@@ -358,6 +495,8 @@ function InstitutionalPagesStep({
         onOpenChange={setOpenIndex}
         getEyebrow={(item) => item.eyebrow}
         getTitle={(item) => item.title}
+        variant="services"
+        compact
         renderItem={(item) => {
           if (item.key === "terms") {
             return (
@@ -409,11 +548,6 @@ function FooterGlobalEditor({
   onSave: () => void;
   saving: boolean;
 }) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const items = [
-    { key: "general", eyebrow: "Links gerais", title: "Chamadas, colunas, links institucionais e horários" },
-  ];
-
   function updateColumn(index: number, column: FooterLinkColumn) {
     const columns = [...footer.columns];
     columns[index] = column;
@@ -422,17 +556,10 @@ function FooterGlobalEditor({
 
   return (
     <DeveloperCard className="p-5 sm:p-6">
-      <DeveloperSectionHeading eyebrow="Etapa 2" title="Links gerais do footer" description="Chamadas, Sua Voz, links institucionais e horários ficam agrupados em acordeão." />
+      <DeveloperSectionHeading eyebrow="Etapa 2" title="Links gerais do footer" description="Chamadas, Sua Voz, links institucionais e horários." />
       <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
-        <DeveloperCmsAccordion
-          items={items}
-          openIndex={openIndex}
-          onOpenChange={setOpenIndex}
-          getEyebrow={(item) => item.eyebrow}
-          getTitle={(item) => item.title}
-          renderItem={() => (
-            <div className="space-y-5">
-        <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+        <div className="space-y-5">
+        <div className={cn(priorityPanelClassName, "grid gap-5 md:grid-cols-2")}>
           <TextInput label="Descrição" value={footer.description} maxLength={260} textarea onChange={(value) => onChange({ ...footer, description: value })} />
           <TextInput label="Texto de copyright" value={footer.copyrightText} maxLength={160} onChange={(value) => onChange({ ...footer, copyrightText: value })} />
           <TextInput label="Texto de localização" value={footer.locationText} maxLength={120} onChange={(value) => onChange({ ...footer, locationText: value })} />
@@ -456,7 +583,7 @@ function FooterGlobalEditor({
           }
         />
         {footer.columns.map((column, columnIndex) => (
-          <div key={column.id} className={cn(panelClassName, "space-y-4")}>
+          <div key={column.id} className={cn(priorityPanelClassName, "space-y-4")}>
             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
               <TextInput label="Título da coluna" value={column.title} maxLength={80} onChange={(value) => updateColumn(columnIndex, { ...column, title: value })} />
               <div className="flex flex-wrap gap-2">
@@ -473,6 +600,7 @@ function FooterGlobalEditor({
               <LinkItemFields
                 key={link.id}
                 item={link}
+                nested
                 onChange={(item) => {
                   const links = [...column.links];
                   links[linkIndex] = item as FooterLinkItem;
@@ -510,7 +638,7 @@ function FooterGlobalEditor({
           />
         ))}
 
-        <div className={cn(panelClassName, "space-y-4")}>
+        <div className={cn(mutedPanelClassName, "space-y-4")}>
           <TextInput label="Título dos horários" value={footer.serviceHoursTitle} maxLength={80} onChange={(value) => onChange({ ...footer, serviceHoursTitle: value })} />
           {footer.serviceHours.map((hour, index) => (
             <div key={index} className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
@@ -563,9 +691,7 @@ function FooterGlobalEditor({
           ))}
         </div>
         ) : null}
-            </div>
-          )}
-        />
+        </div>
 
         <SaveButton saving={saving}>Salvar links gerais</SaveButton>
       </form>
@@ -584,11 +710,6 @@ function FooterSocialEditor({
   onSave: () => void;
   saving: boolean;
 }) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const items = [
-    { key: "social", eyebrow: "Redes sociais", title: "Instagram, LinkedIn, Facebook e links externos" },
-  ];
-
   return (
     <DeveloperCard className="p-5 sm:p-6">
       <DeveloperSectionHeading
@@ -597,19 +718,14 @@ function FooterSocialEditor({
         description="Controle os links externos do footer em uma área própria."
       />
       <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
-        <DeveloperCmsAccordion
-          items={items}
-          openIndex={openIndex}
-          onOpenChange={setOpenIndex}
-          getEyebrow={(item) => item.eyebrow}
-          getTitle={(item) => item.title}
-          renderItem={() => (
-            <div className={cn(panelClassName, "space-y-4")}>
+        <div className={cn(priorityPanelClassName, "space-y-4")}>
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
               <TextInput label="Título das redes sociais" value={footer.socialTitle} maxLength={80} onChange={(value) => onChange({ ...footer, socialTitle: value })} />
               <button type="button" onClick={() => onChange({ ...footer, socialLinks: [...footer.socialLinks, { id: createId("social-link"), order: footer.socialLinks.length + 1, icon: "InstagramLogo", label: "", url: "#" }] })} className={developerSecondaryButtonClassName}>
                 <Plus size={16} weight="bold" />
                 Nova rede
               </button>
+          </div>
               {footer.socialLinks.map((link, index) => (
                 <LinkItemFields
                   key={link.id}
@@ -631,9 +747,7 @@ function FooterSocialEditor({
                   }
                 />
               ))}
-            </div>
-          )}
-        />
+        </div>
         <SaveButton saving={saving}>Salvar redes sociais</SaveButton>
       </form>
     </DeveloperCard>
@@ -666,7 +780,7 @@ function TermsEditor({
       <DeveloperSectionHeading eyebrow="Termos de Uso" title="Página /termos-de-uso" />
       <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
         <HeroFields hero={terms.hero} onChange={(hero) => onChange({ ...terms, hero })} />
-        <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+        <div className={cn(ctaPanelClassName, "grid gap-5 md:grid-cols-2")}>
           <TextInput label="Eyebrow do resumo" value={terms.summary.eyebrow} maxLength={80} onChange={(value) => onChange({ ...terms, summary: { ...terms.summary, eyebrow: value } })} />
           <TextInput label="Título do resumo" value={terms.summary.title} maxLength={180} onChange={(value) => onChange({ ...terms, summary: { ...terms.summary, title: value } })} />
           <TextInput label="Descrição do resumo" value={terms.summary.description} maxLength={260} textarea onChange={(value) => onChange({ ...terms, summary: { ...terms.summary, description: value } })} />
@@ -713,7 +827,7 @@ function HelpEditor({
             }}
           />
         ))}
-        <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+        <div className={cn(mutedPanelClassName, "grid gap-5 md:grid-cols-2")}>
           <TextInput label="Telefone" value={help.contactCard.phone} maxLength={80} onChange={(value) => onChange({ ...help, contactCard: { ...help.contactCard, phone: value } })} />
           <TextInput label="Horário" value={help.contactCard.hours} maxLength={180} onChange={(value) => onChange({ ...help, contactCard: { ...help.contactCard, hours: value } })} />
           {help.contactCard.channelDescriptions.slice(0, 3).map((description, index) => (
@@ -726,7 +840,7 @@ function HelpEditor({
         </div>
         <SectionHeaderFields section={help.faq} onChange={(faq) => onChange({ ...help, faq: { ...help.faq, ...faq } })} />
         <FaqEditor items={help.faq.items} onChange={(items) => onChange({ ...help, faq: { ...help.faq, items } })} />
-        <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+        <div className={cn(ctaPanelClassName, "grid gap-5 md:grid-cols-2")}>
           <TextInput label="Eyebrow do suporte final" value={help.finalSupport.eyebrow} maxLength={80} onChange={(value) => onChange({ ...help, finalSupport: { ...help.finalSupport, eyebrow: value } })} />
           <TextInput label="Título do suporte final" value={help.finalSupport.title} maxLength={180} onChange={(value) => onChange({ ...help, finalSupport: { ...help.finalSupport, title: value } })} />
           <TextInput label="Descrição do suporte final" value={help.finalSupport.description} maxLength={260} textarea onChange={(value) => onChange({ ...help, finalSupport: { ...help.finalSupport, description: value } })} />
@@ -783,7 +897,7 @@ function HeroFields({
   const heroButtons = "buttons" in hero ? (hero as { buttons?: PageButton[] }).buttons ?? [] : [];
   return (
     <div className="space-y-5">
-      <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+      <div className={cn(priorityPanelClassName, "grid gap-5 md:grid-cols-2")}>
         <TextInput label="Eyebrow" value={hero.eyebrow} maxLength={80} onChange={(value) => onChange({ ...hero, eyebrow: value })} />
         <TextInput label="Título em destaque" value={hero.titleHighlight} maxLength={90} onChange={(value) => onChange({ ...hero, titleHighlight: value })} />
         <TextInput label="Título complementar" value={hero.titleRest} maxLength={90} onChange={(value) => onChange({ ...hero, titleRest: value })} />
@@ -818,7 +932,7 @@ function SectionHeaderFields({
   onChange: (section: { eyebrow: string; title: string; description: string }) => void;
 }) {
   return (
-    <div className={cn(panelClassName, "grid gap-5 md:grid-cols-3")}>
+    <div className={cn(mutedPanelClassName, "grid gap-5 md:grid-cols-3")}>
       <TextInput label="Eyebrow" value={section.eyebrow} maxLength={80} onChange={(value) => onChange({ ...section, eyebrow: value })} />
       <TextInput label="Título" value={section.title} maxLength={220} onChange={(value) => onChange({ ...section, title: value })} />
       <TextInput label="Descrição" value={section.description} maxLength={280} textarea onChange={(value) => onChange({ ...section, description: value })} />
@@ -835,7 +949,7 @@ function FinalCtaFields({
 }) {
   return (
     <div className="space-y-5">
-      <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+      <div className={cn(ctaPanelClassName, "grid gap-5 md:grid-cols-2")}>
         <TextInput label="Título CTA final" value={finalCta.title} maxLength={180} onChange={(value) => onChange({ ...finalCta, title: value })} />
         <TextInput label="Descrição CTA final" value={finalCta.description} maxLength={320} textarea onChange={(value) => onChange({ ...finalCta, description: value })} />
       </div>

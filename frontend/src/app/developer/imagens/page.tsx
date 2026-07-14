@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  CaretLeft,
+  CaretRight,
   ImagesSquare,
   MagicWand,
   UploadSimple,
@@ -141,7 +143,7 @@ export default function ImagensPage() {
     },
   });
   const images = data?.images ?? [];
-  const { pages, currentPage, totalPages, nextPage, prevPage } = useCarouselPagination(images, 6);
+  const { pages, currentPage, totalPages, nextPage, prevPage } = useCarouselPagination(images, 12);
   const slotEntries = useMemo(() => Object.entries(MEDIA_SLOT_LABELS), []);
   const {
     pages: slotPages,
@@ -149,7 +151,7 @@ export default function ImagensPage() {
     totalPages: slotTotalPages,
     nextPage: nextSlotPage,
     prevPage: prevSlotPage,
-  } = useCarouselPagination(slotEntries, 10);
+  } = useCarouselPagination(slotEntries, 8);
 
   const summary = useMemo(
     () => ({
@@ -497,20 +499,20 @@ export default function ImagensPage() {
               tooltip="Slots conectam uma imagem da biblioteca a uma área do site. Exemplo: Popup - Mobile usa a imagem no popup de celular."
             />
 
-            <div className="rounded-[18px] border border-[var(--border)] bg-slate-50/70 p-3">
+            <div className="rounded-[22px] border border-[var(--border)] bg-slate-50/70 p-4 sm:p-5">
               <div className="overflow-hidden">
                 <div
                   className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${slotPage * 100}%)` }}
                 >
                   {slotPages.map((page, pageIndex) => (
-                    <div key={pageIndex} className="w-full shrink-0 space-y-2">
+                    <div key={pageIndex} className="w-full shrink-0 space-y-3">
                       {page.map(([slotKey, label]) => (
                         <div
                           key={slotKey}
-                          className="grid gap-2 rounded-xl border border-slate-200/80 bg-white/82 p-2.5 lg:grid-cols-[minmax(160px,220px)_minmax(0,1fr)] lg:items-center"
+                          className="grid gap-3 rounded-2xl border border-slate-200/80 bg-white/82 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] lg:grid-cols-[minmax(190px,0.9fr)_minmax(0,1.1fr)] lg:items-center"
                         >
-                          <span className="truncate text-xs font-semibold text-[var(--foreground)]" title={label}>
+                          <span className="truncate px-1 text-xs font-semibold text-[var(--foreground)]" title={label}>
                             {label}
                           </span>
                           <select
@@ -518,7 +520,7 @@ export default function ImagensPage() {
                             onChange={(event) =>
                               setSlots((current) => ({ ...current, [slotKey]: event.target.value }))
                             }
-                            className={`${developerInputClassName} min-h-9 py-2 text-xs`}
+                            className={`${developerInputClassName} min-h-11 px-3 py-2 text-xs`}
                           >
                             <option value="">Usar fallback do site</option>
                             {images
@@ -539,40 +541,66 @@ export default function ImagensPage() {
                 </div>
               </div>
 
-              <DeveloperCarouselPagination
-                currentPage={slotPage}
-                totalPages={slotTotalPages}
-                onNext={nextSlotPage}
-                onPrev={prevSlotPage}
-              />
+              <div className="mt-5 flex flex-col gap-3 border-t border-[var(--border)]/80 pt-4 lg:flex-row lg:items-center lg:justify-between">
+                {slotTotalPages > 1 ? (
+                  <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white/78 p-1.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] lg:min-w-[312px]">
+                    <button
+                      type="button"
+                      onClick={prevSlotPage}
+                      disabled={slotPage === 0}
+                      className={`${developerSecondaryButtonClassName} min-h-9 rounded-xl px-3 py-2 text-xs`}
+                    >
+                      <CaretLeft size={15} weight="bold" />
+                      Voltar
+                    </button>
+                    <div className="flex items-center gap-1.5" aria-label={`Página ${slotPage + 1} de ${slotTotalPages}`}>
+                      {Array.from({ length: slotTotalPages }).map((_, index) => (
+                        <span
+                          key={index}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${slotPage === index ? "w-5 bg-[var(--primary)]" : "w-1.5 bg-[var(--border)]"}`}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={nextSlotPage}
+                      disabled={slotPage === slotTotalPages - 1}
+                      className={`${developerSecondaryButtonClassName} min-h-9 rounded-xl px-3 py-2 text-xs`}
+                    >
+                      Próximo
+                      <CaretRight size={15} weight="bold" />
+                    </button>
+                  </div>
+                ) : <span />}
 
-              <button
-                type="button"
-                onClick={handleSaveSlots}
-                disabled={savingSlots}
-                className={developerPrimaryButtonClassName}
-              >
-                <MagicWand size={16} weight="bold" />
-                {savingSlots ? "Salvando..." : "Salvar configuração"}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSaveSlots}
+                  disabled={savingSlots}
+                  className={`${developerPrimaryButtonClassName} min-h-11 justify-center px-5 lg:self-auto`}
+                >
+                  <MagicWand size={16} weight="bold" />
+                  {savingSlots ? "Salvando..." : "Salvar configuração"}
+                </button>
+              </div>
             </div>
           </div>
         </DeveloperCard>
 
-        <DeveloperCard>
+        <DeveloperCard className="flex flex-col">
           <DeveloperSectionHeading
             eyebrow="Biblioteca"
             title="Imagens encontradas no projeto"
             description="Lista priorizando assets em uso para facilitar manutenção do CMS."
           />
 
-          <div className="overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
               style={{ transform: `translateX(-${currentPage * 100}%)` }}
             >
               {pages.map((page, index) => (
-                <div key={index} className="w-full shrink-0 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+                <div key={index} className="h-full w-full shrink-0 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
                   {page.map((image) => {
                     const itemType = image.mediaType ?? mediaTypeFromUrl(image.url);
                     return (

@@ -425,3 +425,27 @@
   background: rgba(226, 232, 240, 0.5);
   background-clip: padding-box;
 }
+
+/* Mantém a tipografia dos menus nativos coerente com os campos do CMS. */
+[data-admin-shell="true"] select {
+  color-scheme: light;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+[data-admin-shell="true"] select option,
+[data-admin-shell="true"] select optgroup {
+  background: #ffffff;
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+[data-admin-shell="true"] select option {
+  padding: 0.625rem 0.75rem;
+}

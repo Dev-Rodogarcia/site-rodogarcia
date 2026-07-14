@@ -117,7 +117,7 @@ function SidebarScrollArea({
       </nav>
 
       {canScrollUp ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-start justify-center bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-transparent pt-2 backdrop-blur-[2px]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-16 items-start justify-center bg-[linear-gradient(to_bottom,rgba(2,6,23,0.98)_0%,rgba(2,6,23,0.9)_30%,rgba(2,6,23,0.5)_66%,rgba(2,6,23,0)_100%)] pt-2">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)]">
             <CaretUp size={expanded ? 14 : 12} weight="bold" />
           </span>
@@ -125,7 +125,7 @@ function SidebarScrollArea({
       ) : null}
 
       {canScrollDown ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-14 items-end justify-center bg-gradient-to-t from-slate-950/95 via-slate-950/80 to-transparent pb-2 backdrop-blur-[2px]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-16 items-end justify-center bg-[linear-gradient(to_top,rgba(2,6,23,0.98)_0%,rgba(2,6,23,0.9)_30%,rgba(2,6,23,0.5)_66%,rgba(2,6,23,0)_100%)] pb-2">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)]">
             <CaretDown size={expanded ? 14 : 12} weight="bold" />
           </span>

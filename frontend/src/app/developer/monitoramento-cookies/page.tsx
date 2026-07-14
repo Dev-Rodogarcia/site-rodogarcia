@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Cookie, MagnifyingGlass, Pulse } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, Cookie, MagnifyingGlass, Pulse } from "@phosphor-icons/react";
 import {
   DeveloperCard,
   DeveloperField,
@@ -14,6 +14,9 @@ import {
 } from "@/components/developer/ui";
 import { adminResourceKeys, useAdminResource } from "@/hooks/useAdminResource";
 import { api } from "@/lib/routes";
+import { cn } from "@/lib/utils";
+
+const CONSENTS_PER_PAGE = 10;
 
 interface CookieConsentLog {
   at: string;
@@ -60,11 +63,12 @@ function formatDateTime(value?: string) {
 export default function CookieMonitoringPage() {
   const [status, setStatus] = useState("");
   const [device, setDevice] = useState("");
-  const [appliedKey, setAppliedKey] = useState("");
-  const requestPath = `${api.admin.cookieConsents}?limit=100&status=${encodeURIComponent(status)}&device=${encodeURIComponent(device)}`;
+  const [appliedFilters, setAppliedFilters] = useState({ status: "", device: "" });
+  const [page, setPage] = useState(1);
+  const requestPath = `${api.admin.cookieConsents}?page=${page}&pageSize=${CONSENTS_PER_PAGE}&status=${encodeURIComponent(appliedFilters.status)}&device=${encodeURIComponent(appliedFilters.device)}`;
 
   const { data, loading, error, refresh } = useAdminResource<CookieConsentResponse>({
-    key: adminResourceKeys.cookieConsents(appliedKey),
+    key: adminResourceKeys.cookieConsents(`${appliedFilters.status}:${appliedFilters.device}:${page}`),
     fetcher: async (request) => {
       const response = await request<CookieConsentResponse>(requestPath);
       if (!response.success) {
@@ -75,12 +79,14 @@ export default function CookieMonitoringPage() {
       }
       return {
         success: true,
-        data: response.data ?? { consents: [], total: 0, page: 1, pageSize: 100 },
+        data: response.data ?? { consents: [], total: 0, page: 1, pageSize: CONSENTS_PER_PAGE },
       };
     },
   });
 
   const consents = data?.consents ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / CONSENTS_PER_PAGE));
   const summary = useMemo(() => {
     return consents.reduce(
       (acc, item) => {
@@ -93,7 +99,8 @@ export default function CookieMonitoringPage() {
   }, [consents]);
 
   function applyFilters() {
-    setAppliedKey(`${status}:${device}:${Date.now()}`);
+    setAppliedFilters({ status, device });
+    setPage(1);
   }
 
   return (
@@ -103,56 +110,52 @@ export default function CookieMonitoringPage() {
         title="Monitoramento de Cookies e Consentimento"
         description="Registros anonimizados de aceite, recusa, preferências e revogação."
         stats={[
-          { label: "Total visível", value: summary.total },
-          { label: "Aceitos", value: summary.accepted ?? 0 },
-          { label: "Recusados", value: summary.rejected ?? 0 },
+          { label: "Total", value: total },
+          { label: "Aceitos na página", value: summary.accepted ?? 0 },
+          { label: "Recusados na página", value: summary.rejected ?? 0 },
         ]}
       />
 
       {loading ? <DeveloperMessage tone="info">Carregando consentimentos...</DeveloperMessage> : null}
       {error ? <DeveloperMessage tone="error">{error}</DeveloperMessage> : null}
 
-      <DeveloperCard className="mt-5">
+      <DeveloperCard className="mt-5 p-4 sm:p-5">
         <DeveloperSectionHeading
           eyebrow="Filtros"
           title="Consulta de consentimentos"
           description="Filtre por status e tipo de dispositivo sem expor IP completo."
+          action={
+            <div className="grid w-full gap-3 sm:grid-cols-[minmax(150px,180px)_minmax(150px,180px)_auto] sm:items-end xl:w-auto">
+              <DeveloperField label="Status">
+                <select value={status} onChange={(event) => setStatus(event.target.value)} className={developerInputClassName}>
+                  <option value="">Todos</option>
+                  <option value="accepted">Aceito</option>
+                  <option value="rejected">Recusado</option>
+                  <option value="custom">Parcial</option>
+                  <option value="revoked">Revogado</option>
+                </select>
+              </DeveloperField>
+              <DeveloperField label="Dispositivo">
+                <select value={device} onChange={(event) => setDevice(event.target.value)} className={developerInputClassName}>
+                  <option value="">Todos</option>
+                  <option value="desktop">Desktop</option>
+                  <option value="mobile">Mobile</option>
+                  <option value="tablet">Tablet</option>
+                </select>
+              </DeveloperField>
+              <div className="flex gap-2 sm:pb-0.5">
+                <button type="button" onClick={applyFilters} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                  <MagnifyingGlass size={15} weight="bold" />
+                  Filtrar
+                </button>
+                <button type="button" onClick={() => void refresh()} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                  <Pulse size={15} weight="bold" />
+                  Atualizar
+                </button>
+              </div>
+            </div>
+          }
         />
-        <div className="grid gap-3 md:grid-cols-[220px_220px_auto_auto]">
-          <DeveloperField label="Status">
-            <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-              className={developerInputClassName}
-            >
-              <option value="">Todos</option>
-              <option value="accepted">Aceito</option>
-              <option value="rejected">Recusado</option>
-              <option value="custom">Parcial</option>
-              <option value="revoked">Revogado</option>
-            </select>
-          </DeveloperField>
-          <DeveloperField label="Dispositivo">
-            <select
-              value={device}
-              onChange={(event) => setDevice(event.target.value)}
-              className={developerInputClassName}
-            >
-              <option value="">Todos</option>
-              <option value="desktop">Desktop</option>
-              <option value="mobile">Mobile</option>
-              <option value="tablet">Tablet</option>
-            </select>
-          </DeveloperField>
-          <button type="button" onClick={applyFilters} className={developerSecondaryButtonClassName}>
-            <MagnifyingGlass size={16} weight="bold" />
-            Filtrar
-          </button>
-          <button type="button" onClick={() => void refresh()} className={developerSecondaryButtonClassName}>
-            <Pulse size={16} weight="bold" />
-            Atualizar
-          </button>
-        </div>
       </DeveloperCard>
 
       <DeveloperCard className="mt-5">
@@ -210,6 +213,24 @@ export default function CookieMonitoringPage() {
         {!loading && consents.length === 0 ? (
           <div className="mt-4">
             <DeveloperMessage tone="info">Nenhum consentimento encontrado.</DeveloperMessage>
+          </div>
+        ) : null}
+        {totalPages > 1 ? (
+          <div className="mt-4 flex flex-col gap-3 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[var(--color-muted-raw)]">
+              Exibindo {((page - 1) * CONSENTS_PER_PAGE) + 1}–{Math.min(page * CONSENTS_PER_PAGE, total)} de {total} consentimentos.
+            </p>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                <CaretLeft size={15} weight="bold" />
+                Anterior
+              </button>
+              <span className="min-w-16 text-center text-xs font-semibold text-[var(--color-muted-raw)]">Página {page} de {totalPages}</span>
+              <button type="button" onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={page === totalPages} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                Próxima
+                <CaretRight size={15} weight="bold" />
+              </button>
+            </div>
           </div>
         ) : null}
       </DeveloperCard>

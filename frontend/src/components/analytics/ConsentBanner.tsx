@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const CONSENT_KEY = "rg_analytics_consent";
+const CATEGORIES_PER_PAGE = 3;
 export const OPEN_CONSENT_PREFERENCES_EVENT = "rg:open-consent-preferences";
 
 export interface ConsentCategory {
@@ -126,6 +127,7 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [preferencesPage, setPreferencesPage] = useState(0);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const titleId = useId();
   const descriptionId = useId();
@@ -147,6 +149,17 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       Object.fromEntries(settings.categories.map((category) => [category.key, category.required])),
     [settings.categories]
   );
+  const isConsentPreview =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("consent-preview");
+  const preferencesPageCount = Math.max(1, Math.ceil(settings.categories.length / CATEGORIES_PER_PAGE));
+  const visibleCategories = settings.categories.slice(
+    preferencesPage * CATEGORIES_PER_PAGE,
+    (preferencesPage + 1) * CATEGORIES_PER_PAGE
+  );
+  const mobilePositionClass =
+    settings.mobile?.position === "center-modal"
+      ? "max-sm:bottom-auto max-sm:top-1/2 max-sm:-translate-y-1/2"
+      : "";
 
   useFocusTrap({
     active: visible && settings.enabled,
@@ -168,11 +181,17 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     const shouldReopenForVersion =
       settings.behavior?.reopenOnVersionChange !== false &&
       stored?.version !== settings.version;
-    if (!stored || shouldReopenForVersion) {
+    if (isConsentPreview || !stored || shouldReopenForVersion) {
       setClosing(false);
       setVisible(true);
     }
-  }, [defaultCategories, settings.behavior?.reopenOnVersionChange, settings.enabled, settings.version]);
+  }, [
+    defaultCategories,
+    isConsentPreview,
+    settings.behavior?.reopenOnVersionChange,
+    settings.enabled,
+    settings.version,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -186,6 +205,7 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       const stored = getStoredConsent();
       setClosing(false);
       setPreferencesOpen(true);
+      setPreferencesPage(0);
       setSelected(stored?.categories ?? defaultCategories);
       setVisible(true);
     }
@@ -208,6 +228,11 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
     }
     onConsent(value);
     window.dispatchEvent(new CustomEvent("rg:consent-updated", { detail: value }));
+    if (isConsentPreview) {
+      setPreferencesOpen(false);
+      setPreferencesPage(0);
+      return;
+    }
     setClosing(true);
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
     const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -236,13 +261,25 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
       tabIndex={-1}
-      className={[
-        "fixed inset-x-3 bottom-4 z-[9998] mx-auto max-w-[720px] overflow-hidden rounded-[22px]",
-        "border border-[var(--border)] bg-[var(--color-surface)] p-4 shadow-[0_18px_46px_rgba(2,6,23,0.14)] backdrop-blur-md",
-        "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:p-5",
-        closing ? "translate-y-3 scale-[0.98] opacity-0" : "translate-y-0 scale-100 opacity-100",
-      ].join(" ")}
+      className={
+        preferencesOpen
+          ? "fixed inset-0 z-[9998] grid place-items-center bg-slate-950/40 p-3 backdrop-blur-sm"
+          : [
+              "fixed inset-x-3 bottom-4 z-[9998] mx-auto max-w-[720px] overflow-hidden rounded-[22px]",
+              "border border-[var(--border)] bg-[var(--color-surface)] p-4 shadow-[0_18px_46px_rgba(2,6,23,0.14)] backdrop-blur-md",
+              "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:p-5",
+              mobilePositionClass,
+              closing ? "translate-y-3 scale-[0.98] opacity-0" : "translate-y-0 scale-100 opacity-100",
+            ].join(" ")
+      }
     >
+      <div
+        className={
+          preferencesOpen
+            ? "w-full max-w-[680px] overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--color-surface)] p-4 shadow-[0_24px_70px_rgba(2,6,23,0.3)] sm:p-5"
+            : "contents"
+        }
+      >
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <p id={titleId} className="text-sm font-extrabold tracking-[-0.01em] text-[var(--foreground)] sm:text-base">
@@ -255,8 +292,9 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
       </div>
 
       {preferencesOpen ? (
-        <div className="relative mt-4 grid gap-2.5">
-          {settings.categories.map((category) => (
+        <div className="relative mt-4">
+          <div className="grid gap-2.5">
+          {visibleCategories.map((category) => (
             <label
               key={category.key}
               className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)] px-3.5 py-3 text-sm transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-strong)]"
@@ -281,6 +319,22 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
               </span>
             </label>
           ))}
+          </div>
+          {preferencesPageCount > 1 ? (
+            <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
+              <p className="text-xs font-semibold text-[var(--color-muted-raw)]">
+                Categorias {preferencesPage * CATEGORIES_PER_PAGE + 1}-{Math.min((preferencesPage + 1) * CATEGORIES_PER_PAGE, settings.categories.length)} de {settings.categories.length}
+              </p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setPreferencesPage((page) => Math.max(0, page - 1))} disabled={preferencesPage === 0} className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-bold disabled:opacity-40">
+                  Anterior
+                </button>
+                <button type="button" onClick={() => setPreferencesPage((page) => Math.min(preferencesPageCount - 1, page + 1))} disabled={preferencesPage === preferencesPageCount - 1} className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-bold disabled:opacity-40">
+                  Próxima
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -307,13 +361,19 @@ export default function ConsentBanner({ settings, onConsent }: ConsentBannerProp
         </button>
         <button
           type="button"
-          onClick={() =>
-            preferencesOpen ? decide("custom", selected) : setPreferencesOpen(true)
-          }
+          onClick={() => {
+            if (preferencesOpen) {
+              decide("custom", selected);
+              return;
+            }
+            setPreferencesPage(0);
+            setPreferencesOpen(true);
+          }}
           className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-5 py-2.5 text-xs font-bold text-[var(--color-foreground-soft)] transition-colors duration-200 hover:border-[var(--primary)]/24 hover:bg-[var(--color-primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 sm:order-2"
         >
           {preferencesOpen ? settings.saveLabel : settings.preferencesLabel}
         </button>
+      </div>
       </div>
     </div>
   );

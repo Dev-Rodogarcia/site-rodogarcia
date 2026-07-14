@@ -506,18 +506,23 @@ function CountHint({
 }
 
 const homeFormGroupClassName =
-  "rounded-[22px] border border-[var(--border)]/80 bg-slate-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] sm:p-5";
+  "rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_48%,#f8fbff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_28px_rgba(29,78,216,0.1)] ring-1 ring-[var(--primary)]/8 sm:p-5";
 
 const homeNestedPanelClassName =
-  "rounded-[20px] border border-slate-200/80 bg-white/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]";
+  "rounded-[20px] border border-[var(--primary)]/12 bg-white/84 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_6px_16px_rgba(29,78,216,0.025)]";
+
+const homeHighlightPanelClassName =
+  "rounded-[20px] border border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_56%,#f8fbff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_10px_24px_rgba(29,78,216,0.09)] ring-1 ring-[var(--primary)]/7";
+
+const homeCtaPanelClassName =
+  "rounded-[20px] border border-[var(--primary)]/18 bg-white p-4 shadow-[0_8px_18px_rgba(29,78,216,0.05)]";
 
 function homeEditableCardClassName(active = true) {
   return cn(
-    "relative overflow-hidden rounded-[24px] border p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-colors sm:p-5",
-    "before:absolute before:inset-x-0 before:top-0 before:h-1",
+    "overflow-hidden rounded-[24px] border p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-colors sm:p-5",
     active
-      ? "border-[var(--primary)]/24 bg-slate-50/86 before:bg-[var(--primary)]"
-      : "border-slate-200/90 bg-slate-50/58 before:bg-slate-300/80"
+      ? "border-[var(--primary)]/26 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(239,246,255,0.86)_100%)]"
+      : "border-slate-200/90 bg-slate-50/68"
   );
 }
 
@@ -538,7 +543,7 @@ function HomeItemHeader({
     <div className="mb-5 flex flex-col gap-3 border-b border-slate-200/70 pb-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+          <span className="rounded-full border border-[var(--primary)]/14 bg-[var(--primary)]/7 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
             {label}
           </span>
           {typeof active === "boolean" ? <DeveloperStatusPill active={active} /> : null}
@@ -579,17 +584,16 @@ function HomeAccordionCard({
       className={cn(
         "overflow-hidden rounded-[24px] border transition-all duration-300",
         open
-          ? "border-[var(--primary)]/24 bg-slate-50/86 shadow-[0_14px_34px_rgba(15,23,42,0.07)]"
-          : "border-slate-200/90 bg-slate-50/58 shadow-[0_8px_20px_rgba(15,23,42,0.035)]"
+          ? "border-[var(--primary)]/34 bg-white shadow-[0_16px_36px_rgba(29,78,216,0.12)] ring-4 ring-[var(--primary)]/8"
+          : "border-slate-200/90 bg-white shadow-[0_8px_20px_rgba(15,23,42,0.035)] hover:border-[var(--primary)]/18"
       )}
     >
       <div
         className={cn(
-          "h-1 transition-colors duration-300",
-          open ? "bg-[var(--primary)]" : "bg-slate-300/80"
+          "flex flex-col gap-3 px-4 py-4 transition-colors sm:px-5 lg:flex-row lg:items-start lg:justify-between",
+          open ? "bg-[var(--primary)]/6" : ""
         )}
-      />
-      <div className="flex flex-col gap-3 px-4 py-4 sm:px-5 lg:flex-row lg:items-start lg:justify-between">
+      >
         <button
           type="button"
           onClick={onToggle}
@@ -597,7 +601,7 @@ function HomeAccordionCard({
           aria-expanded={open}
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+            <span className="rounded-full border border-[var(--primary)]/14 bg-[var(--primary)]/7 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
               {label}
             </span>
             {typeof active === "boolean" ? <DeveloperStatusPill active={active} /> : null}
@@ -631,7 +635,7 @@ function HomeAccordionCard({
         )}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="border-t border-slate-200/70 p-4 sm:p-5">{children}</div>
+          <div className="border-t border-[var(--primary)]/14 bg-white p-4 sm:p-5">{children}</div>
         </div>
       </div>
     </article>
@@ -643,16 +647,25 @@ function HomeMediaEditor({
   media,
   onChange,
   required,
+  emphasis = false,
 }: {
   label: string;
   media: HomeMedia;
   onChange: (media: HomeMedia) => void;
   required?: boolean;
+  emphasis?: boolean;
 }) {
   const current = { ...EMPTY_MEDIA, ...media };
   const MediaIcon = current.type === "video" ? VideoCamera : ImageSquare;
   return (
-    <div className="rounded-[22px] border border-[var(--primary)]/14 bg-white/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] sm:p-5">
+    <div
+      className={cn(
+        "rounded-[22px] border p-4 sm:p-5",
+        emphasis
+          ? "border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_52%,#f8fbff_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_26px_rgba(29,78,216,0.1)] ring-1 ring-[var(--primary)]/7"
+          : "border-[var(--primary)]/14 bg-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
+      )}
+    >
       <div className="mb-5 flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--primary)]/16 bg-[var(--primary)]/8 text-[var(--primary)]">
           <MediaIcon size={20} weight="bold" />
@@ -1071,7 +1084,7 @@ export default function DeveloperHomePage() {
         <DeveloperResponsivePreview href={site.home} title="Preview Home" />
       </div>
 
-      <section className="mt-5 rounded-[26px] border border-[var(--border)] bg-white/88 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.06)] backdrop-blur sm:p-6">
+      <section className="mt-5 rounded-[26px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.9)_0%,rgba(239,246,255,0.86)_54%,rgba(224,242,254,0.78)_100%)] p-5 shadow-[0_16px_38px_rgba(29,78,216,0.08)] backdrop-blur sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
@@ -1084,14 +1097,13 @@ export default function DeveloperHomePage() {
               {activeStepInfo.description}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="inline-flex w-fit items-center rounded-full border border-[var(--primary)]/14 bg-white/72 p-1 shadow-[0_8px_20px_rgba(29,78,216,0.07)]">
             <button
               type="button"
               onClick={() => moveStep(-1)}
               disabled={activeStepIndex === 0}
               className={cn(
-                developerSecondaryButtonClassName,
-                "rounded-full px-5 disabled:cursor-not-allowed disabled:opacity-45"
+                "inline-flex min-h-9 items-center justify-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-white hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
               )}
             >
               <CaretLeft size={16} weight="bold" />
@@ -1102,8 +1114,7 @@ export default function DeveloperHomePage() {
               onClick={() => moveStep(1)}
               disabled={activeStepIndex === HOME_STEPS.length - 1}
               className={cn(
-                developerSecondaryButtonClassName,
-                "rounded-full px-5 disabled:cursor-not-allowed disabled:opacity-45"
+                "inline-flex min-h-9 items-center justify-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-white hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
               )}
             >
               Proximo
@@ -1122,20 +1133,19 @@ export default function DeveloperHomePage() {
                 onClick={() => selectStep(step.key)}
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "group relative overflow-hidden rounded-[20px] border px-4 py-4 text-left transition-all duration-300",
-                  "before:absolute before:inset-x-0 before:top-0 before:h-1 before:transition-colors",
+                  "group relative flex min-h-[158px] flex-col items-start overflow-hidden rounded-[20px] border px-4 py-4 text-left transition-all duration-300",
                   active
-                    ? "border-[var(--primary)]/34 bg-white text-[var(--foreground)] shadow-[0_14px_34px_rgba(29,78,216,0.13)] before:bg-[var(--primary)]"
-                    : "border-slate-200/86 bg-slate-50/72 text-[var(--foreground)] shadow-[0_8px_18px_rgba(15,23,42,0.025)] before:bg-transparent hover:border-[var(--primary)]/24 hover:bg-white hover:shadow-[0_12px_24px_rgba(15,23,42,0.055)]"
+                    ? "border-[var(--primary)]/38 bg-[linear-gradient(145deg,rgba(255,255,255,0.96)_0%,rgba(219,234,254,0.92)_100%)] text-[var(--foreground)] shadow-[0_14px_34px_rgba(29,78,216,0.14)]"
+                    : "border-slate-200/90 bg-white text-[var(--foreground)] shadow-[0_8px_18px_rgba(15,23,42,0.03)] hover:-translate-y-0.5 hover:border-[var(--primary)]/30 hover:shadow-[0_12px_24px_rgba(15,23,42,0.07)]"
                 )}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex h-7 items-center gap-2">
                   <span
                     className={cn(
                       "flex h-7 w-7 items-center justify-center rounded-full border text-[11px] font-bold",
                       active
-                        ? "border-[var(--primary)]/22 bg-[var(--primary)]/10 text-[var(--primary)]"
-                        : "border-slate-200 bg-white text-[var(--color-muted-raw)]"
+                        ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-[0_4px_10px_rgba(29,78,216,0.2)]"
+                        : "border-[var(--primary)]/14 bg-[var(--primary)]/7 text-[var(--primary)]"
                     )}
                   >
                     {index + 1}
@@ -1144,7 +1154,7 @@ export default function DeveloperHomePage() {
                     {step.step}
                   </span>
                 </span>
-                <span className="mt-3 block text-sm font-semibold">{step.title}</span>
+                <span className="mt-3 block min-h-5 text-sm font-semibold">{step.title}</span>
                 <span className="mt-1 block text-xs leading-5 text-[var(--color-muted-raw)]">
                   {step.description}
                 </span>
@@ -1213,8 +1223,8 @@ export default function DeveloperHomePage() {
                   </>
                 }
               >
-                <div className={cn(homeNestedPanelClassName, "grid gap-5 lg:grid-cols-3")}>
-                  <DeveloperField label="Modo de exibicao" required>
+                <div className={cn(homeHighlightPanelClassName, "grid gap-5 lg:grid-cols-3")}>
+                  <DeveloperField label="Modo de exibicao" required hint="Define os elementos exibidos no slide do hero.">
                     <select value={slide.mode} onChange={(event) => updateHeroSlide(index, { mode: event.target.value as HomeHeroMode })} className={developerInputClassName}>
                       <option value="text-media-buttons">Texto + mídia + botões</option>
                       <option value="text-media">Texto + mídia sem botões</option>
@@ -1225,13 +1235,15 @@ export default function DeveloperHomePage() {
                     <input value={slide.title} onChange={(event) => updateHeroSlide(index, { title: event.target.value })} maxLength={120} className={developerInputClassName} />
                     <CountHint value={slide.title} maxLength={120} />
                   </DeveloperField>
-                  <label className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
-                    <input type="checkbox" checked={slide.active !== false} onChange={(event) => updateHeroSlide(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
-                    Slide ativo
-                  </label>
+                  <DeveloperField label="Status do slide" hint="Desative para ocultar este slide no carrossel.">
+                    <span className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
+                      <input type="checkbox" checked={slide.active !== false} onChange={(event) => updateHeroSlide(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
+                      Slide ativo
+                    </span>
+                  </DeveloperField>
                 </div>
                 {slide.mode !== "media-only" ? (
-                  <div className={cn(homeNestedPanelClassName, "mt-4")}>
+                  <div className={cn(homeCtaPanelClassName, "mt-4")}>
                     <DeveloperField label="Descrição" required hint="Onde aparece: parágrafo abaixo do título. Máximo esperado: 3 linhas.">
                       <textarea value={slide.description} onChange={(event) => updateHeroSlide(index, { description: event.target.value })} maxLength={420} rows={3} className={`${developerInputClassName} resize-none`} />
                       <CountHint value={slide.description} maxLength={420} />
@@ -1239,7 +1251,7 @@ export default function DeveloperHomePage() {
                   </div>
                 ) : null}
                 <div className="mt-4">
-                  <HomeMediaEditor label="Mídia do hero" media={slide.media} required onChange={(media) => updateHeroSlide(index, { media })} />
+                  <HomeMediaEditor label="Mídia do hero" media={slide.media} required emphasis onChange={(media) => updateHeroSlide(index, { media })} />
                 </div>
                 {slide.mode === "text-media-buttons" ? (
                   <div className="mt-5 grid gap-5 md:grid-cols-2">
@@ -1251,7 +1263,7 @@ export default function DeveloperHomePage() {
                         updateHeroSlide(index, { buttons });
                       };
                       return (
-                        <div key={buttonIndex} className={homeNestedPanelClassName}>
+                        <div key={buttonIndex} className={homeCtaPanelClassName}>
                           <DeveloperSectionHeading title={`Botao ${buttonIndex + 1}`} description="Texto e link do CTA exibido sobre o hero." />
                           <div className="grid gap-5 sm:grid-cols-2">
                             <DeveloperField label="Texto">
@@ -1360,7 +1372,7 @@ export default function DeveloperHomePage() {
                     </>
                   }
                 >
-                  <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-2 xl:grid-cols-4")}>
+                  <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-3")}>
                     <DeveloperField label="Texto do botão" required>
                       <input
                         value={action.label}
@@ -1399,18 +1411,9 @@ export default function DeveloperHomePage() {
                         ))}
                       </select>
                     </DeveloperField>
-                    <label className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
-                      <input
-                        type="checkbox"
-                        checked={action.enabled !== false}
-                        onChange={(event) => updateQuickAction(index, { enabled: event.target.checked })}
-                        className="h-4 w-4 accent-[var(--primary)]"
-                      />
-                      Atalho ativo
-                    </label>
                   </div>
 
-                  <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-2")}>
+                  <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-3")}>
                     <DeveloperField label={action.type === "modal" ? "Âncora" : "Link"} required={action.type !== "download"}>
                       <input
                         value={action.href}
@@ -1430,6 +1433,17 @@ export default function DeveloperHomePage() {
                         className={developerInputClassName}
                         placeholder="/uploads/taxas.pdf"
                       />
+                    </DeveloperField>
+                    <DeveloperField label="Visibilidade" hint="Desative para ocultar este atalho no site.">
+                      <span className="inline-flex min-h-10 w-fit items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
+                        <input
+                          type="checkbox"
+                          checked={action.enabled !== false}
+                          onChange={(event) => updateQuickAction(index, { enabled: event.target.checked })}
+                          className="h-4 w-4 accent-[var(--primary)]"
+                        />
+                        Atalho ativo
+                      </span>
                     </DeveloperField>
                   </div>
 
@@ -1477,7 +1491,7 @@ export default function DeveloperHomePage() {
                 open={openSection1Item === index}
                 onToggle={() => setOpenSection1Item(openSection1Item === index ? null : index)}
               >
-                <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-2")}>
+                <div className={cn(homeHighlightPanelClassName, "grid gap-5 md:grid-cols-2")}>
                   <DeveloperField label="Título curto" required hint="Limite forte: máximo 3 a 5 palavras.">
                     <input value={item.title} onChange={(event) => updateSection1Item(index, { title: event.target.value })} maxLength={60} className={developerInputClassName} />
                     <CountHint value={item.title} maxWords={5} maxLength={60} />
@@ -1488,7 +1502,7 @@ export default function DeveloperHomePage() {
                   </DeveloperField>
                 </div>
                 <div className="mt-4">
-                  <HomeMediaEditor label={`Mídia do item ${index + 1}`} media={item.media} required onChange={(media) => updateSection1Item(index, { media })} />
+                  <HomeMediaEditor label={`Mídia do item ${index + 1}`} media={item.media} required emphasis onChange={(media) => updateSection1Item(index, { media })} />
                 </div>
               </HomeAccordionCard>
             ))}
@@ -1539,7 +1553,7 @@ export default function DeveloperHomePage() {
                   </>
                 }
               >
-                <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-2")}>
+                <div className={cn(homeHighlightPanelClassName, "grid gap-5 md:grid-cols-2")}>
                   <DeveloperField label="Título" required hint="Máximo esperado: 3 linhas.">
                     <input value={item.title} onChange={(event) => updateSection2Item(index, { title: event.target.value })} maxLength={120} className={developerInputClassName} />
                     <CountHint value={item.title} maxLength={120} />
@@ -1553,7 +1567,7 @@ export default function DeveloperHomePage() {
                   <input type="checkbox" checked={item.active !== false} onChange={(event) => updateSection2Item(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
                   Item ativo
                 </label>
-                <HomeMediaEditor label={`Mídia do item ${index + 1}`} media={item.media} required onChange={(media) => updateSection2Item(index, { media })} />
+                <HomeMediaEditor label={`Mídia do item ${index + 1}`} media={item.media} required emphasis onChange={(media) => updateSection2Item(index, { media })} />
               </HomeAccordionCard>
             ))}
             <SaveButton saving={saving === "section2"}>Salvar Seção 2</SaveButton>
@@ -1612,7 +1626,7 @@ export default function DeveloperHomePage() {
                   </>
                 }
               >
-                <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-3")}>
+                <div className={cn(homeHighlightPanelClassName, "grid gap-5 md:grid-cols-3")}>
                   <DeveloperField label="Badge pequeno" required>
                     <input value={card.badge} onChange={(event) => updateSection3Card(index, { badge: event.target.value })} maxLength={60} className={developerInputClassName} />
                   </DeveloperField>
@@ -1624,7 +1638,7 @@ export default function DeveloperHomePage() {
                     <input value={card.ctaLabel} onChange={(event) => updateSection3Card(index, { ctaLabel: event.target.value })} maxLength={40} className={developerInputClassName} />
                   </DeveloperField>
                 </div>
-                <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-2")}>
+                <div className={cn(homeCtaPanelClassName, "mt-4 grid gap-5 md:grid-cols-2")}>
                   <DeveloperField label="Descrição do card" required hint="Máximo esperado: 5 linhas.">
                     <textarea value={card.description} onChange={(event) => updateSection3Card(index, { description: event.target.value })} maxLength={320} rows={4} className={`${developerInputClassName} resize-none`} />
                     <CountHint value={card.description} maxLength={320} />
@@ -1634,7 +1648,7 @@ export default function DeveloperHomePage() {
                   </DeveloperField>
                 </div>
                 <div className="mt-4">
-                  <HomeMediaEditor label={`Mídia do card ${index + 1}`} media={card.media} required onChange={(media) => updateSection3Card(index, { media })} />
+                  <HomeMediaEditor label={`Mídia do card ${index + 1}`} media={card.media} required emphasis onChange={(media) => updateSection3Card(index, { media })} />
                 </div>
               </HomeAccordionCard>
             ))}
@@ -1670,21 +1684,30 @@ export default function DeveloperHomePage() {
             ) : null}
 
             {home.regionalPresence.units.length > 0 ? (
-              <div className="overflow-x-auto pb-1">
-                <div className="flex min-w-max gap-2">
+              <div className="overflow-x-auto rounded-[20px] border border-[var(--primary)]/14 bg-[var(--primary)]/4 p-2">
+                <div className="flex min-w-max gap-2" aria-label="Selecionar unidade para editar">
                   {home.regionalPresence.units.map((unit, index) => (
                     <button
                       key={unit.id}
                       type="button"
                       onClick={() => setActiveRegionalUnit(index)}
+                      aria-pressed={activeRegionalUnit === index}
                       className={cn(
-                        "rounded-full border px-4 py-2 text-xs font-bold transition-all",
+                        "inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold transition-all",
                         activeRegionalUnit === index
-                          ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-[0_10px_22px_rgba(29,78,216,0.18)]"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-[var(--primary)]/30 hover:text-[var(--primary)]"
+                          ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-[0_8px_18px_rgba(29,78,216,0.2)]"
+                          : "border-white bg-white text-slate-600 shadow-[0_3px_8px_rgba(15,23,42,0.035)] hover:border-[var(--primary)]/30 hover:text-[var(--primary)]"
                       )}
                     >
-                      Unidade {index + 1}
+                      <span
+                        className={cn(
+                          "flex h-5 w-5 items-center justify-center rounded-full text-[10px]",
+                          activeRegionalUnit === index ? "bg-white/18 text-white" : "bg-[var(--primary)]/8 text-[var(--primary)]"
+                        )}
+                      >
+                        {index + 1}
+                      </span>
+                      Unidade
                     </button>
                   ))}
                 </div>
@@ -1704,7 +1727,7 @@ export default function DeveloperHomePage() {
                         <button
                           type="button"
                           onClick={() => setHome((current) => ({ ...current, regionalPresence: { units: moveItem(current.regionalPresence.units, index, -1) } }))}
-                          className={developerGhostButtonClassName}
+                          className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-[var(--primary)]/22 hover:text-[var(--primary)]"
                         >
                           <ArrowUp size={16} weight="bold" />
                           Subir
@@ -1712,12 +1735,16 @@ export default function DeveloperHomePage() {
                         <button
                           type="button"
                           onClick={() => setHome((current) => ({ ...current, regionalPresence: { units: moveItem(current.regionalPresence.units, index, 1) } }))}
-                          className={developerGhostButtonClassName}
+                          className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-[var(--primary)]/22 hover:text-[var(--primary)]"
                         >
                           <ArrowDown size={16} weight="bold" />
                           Descer
                         </button>
-                        <button type="button" onClick={() => removeRegionalUnit(index)} className={developerDangerButtonClassName}>
+                        <button
+                          type="button"
+                          onClick={() => removeRegionalUnit(index)}
+                          className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                        >
                           <Trash size={16} weight="bold" />
                           Remover
                         </button>
@@ -1935,7 +1962,7 @@ export default function DeveloperHomePage() {
                   </>
                 }
               >
-                <div className={cn(homeNestedPanelClassName, "grid gap-5 md:grid-cols-4")}>
+                <div className={cn(homeCtaPanelClassName, "grid gap-5 md:grid-cols-4")}>
                   <DeveloperField label="Nome" required hint="Normalmente, nome da empresa.">
                     <input value={feedback.name} onChange={(event) => updateFeedback(index, { name: event.target.value })} maxLength={80} className={developerInputClassName} />
                   </DeveloperField>
@@ -1949,17 +1976,29 @@ export default function DeveloperHomePage() {
                     <input type="number" min={1} max={5} value={feedback.rating} onChange={(event) => updateFeedback(index, { rating: Math.min(5, Math.max(1, Number(event.target.value) || 1)) })} className={developerInputClassName} />
                   </DeveloperField>
                 </div>
-                <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5")}>
+                <div className={cn(homeHighlightPanelClassName, "mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] lg:items-start")}>
                   <DeveloperField label="Depoimento" required>
-                    <textarea value={feedback.testimonial} onChange={(event) => updateFeedback(index, { testimonial: event.target.value })} maxLength={800} rows={5} className={`${developerInputClassName} resize-none`} />
+                    <textarea value={feedback.testimonial} onChange={(event) => updateFeedback(index, { testimonial: event.target.value })} maxLength={800} rows={10} className={`${developerInputClassName} min-h-64 resize-none`} />
                     <CountHint value={feedback.testimonial} maxLength={800} />
                   </DeveloperField>
-                  <DeveloperMediaField label="Foto ou logo" required mediaType="image" value={feedback.photo} onChange={(photo) => updateFeedback(index, { photo })} previewAlt={feedback.name} />
+                  <div className="space-y-4">
+                    <DeveloperMediaField
+                      label="Foto ou logo"
+                      required
+                      mediaType="image"
+                      value={feedback.photo}
+                      onChange={(photo) => updateFeedback(index, { photo })}
+                      previewAlt={feedback.name}
+                      stackControls
+                      afterControls={
+                        <label className="inline-flex min-h-10 min-w-40 items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
+                          <input type="checkbox" checked={feedback.active !== false} onChange={(event) => updateFeedback(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
+                          Feedback ativo
+                        </label>
+                      }
+                    />
+                  </div>
                 </div>
-                <label className="mt-4 flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
-                  <input type="checkbox" checked={feedback.active !== false} onChange={(event) => updateFeedback(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
-                  Feedback ativo
-                </label>
               </HomeAccordionCard>
             ))}
             <SaveButton saving={saving === "socialProof"}>Salvar Prova Social</SaveButton>

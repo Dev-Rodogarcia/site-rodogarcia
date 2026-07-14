@@ -15,6 +15,7 @@ import {
 } from "@/components/developer/ui";
 import { adminResourceKeys, useAdminResource } from "@/hooks/useAdminResource";
 import { api } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 
 interface TrackingEvent {
   id: string;
@@ -52,7 +53,7 @@ export default function TrackingPage() {
   const [pageFilter, setPageFilter] = useState("");
   const [appliedKey, setAppliedKey] = useState("");
   const [eventsPage, setEventsPage] = useState(1);
-  const EVENTS_PER_PAGE = 8;
+  const EVENTS_PER_PAGE = 14;
   const eventPath = `${api.admin.trackingEvents}?limit=250&event=${encodeURIComponent(eventFilter)}&page=${encodeURIComponent(pageFilter)}`;
   const auditPath = `${api.admin.auditLog}?limit=120`;
 
@@ -110,36 +111,30 @@ export default function TrackingPage() {
       {error ? <DeveloperMessage tone="error">{error}</DeveloperMessage> : null}
 
       <DeveloperCard className="mt-5">
-        <DeveloperSectionHeading eyebrow="Filtros" title="Consulta de eventos" />
-        <div className="grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto_auto]">
-          <DeveloperField label="Tipo">
-            <input
-              value={eventFilter}
-              onChange={(event) => setEventFilter(event.target.value)}
-              className={developerInputClassName}
-              placeholder="page_view, popup..."
-            />
-          </DeveloperField>
-          <DeveloperField
-            label="Página"
-            tooltip="Rota onde o evento foi capturado. Exemplos: /sobre, /contato, /servicos."
-          >
-            <input
-              value={pageFilter}
-              onChange={(event) => setPageFilter(event.target.value)}
-              className={developerInputClassName}
-              placeholder="/servicos"
-            />
-          </DeveloperField>
-          <button type="button" onClick={applyFilters} className={developerSecondaryButtonClassName}>
-            <ListMagnifyingGlass size={16} weight="bold" />
-            Filtrar
-          </button>
-          <button type="button" onClick={() => void refresh()} className={developerSecondaryButtonClassName}>
-            <Pulse size={16} weight="bold" />
-            Atualizar métricas
-          </button>
-        </div>
+        <DeveloperSectionHeading
+          eyebrow="Filtros"
+          title="Consulta de eventos"
+          action={
+            <div className="grid w-full gap-3 sm:grid-cols-[180px_minmax(220px,1fr)_auto] sm:items-end xl:w-auto">
+              <DeveloperField label="Tipo">
+                <input value={eventFilter} onChange={(event) => setEventFilter(event.target.value)} className={developerInputClassName} placeholder="page_view, popup..." />
+              </DeveloperField>
+              <DeveloperField label="Página" tooltip="Rota onde o evento foi capturado. Exemplos: /sobre, /contato, /servicos.">
+                <input value={pageFilter} onChange={(event) => setPageFilter(event.target.value)} className={developerInputClassName} placeholder="/servicos" />
+              </DeveloperField>
+              <div className="flex gap-2 sm:pb-0.5">
+                <button type="button" onClick={applyFilters} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                  <ListMagnifyingGlass size={15} weight="bold" />
+                  Filtrar
+                </button>
+                <button type="button" onClick={() => void refresh()} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>
+                  <Pulse size={15} weight="bold" />
+                  Atualizar
+                </button>
+              </div>
+            </div>
+          }
+        />
       </DeveloperCard>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">

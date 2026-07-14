@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle, Cookie, Pulse } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
+import { CaretLeft, CaretRight, CheckCircle, Pulse } from "@phosphor-icons/react";
+import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import {
   DeveloperCard,
   DeveloperField,
@@ -10,17 +11,14 @@ import {
   DeveloperPage,
   DeveloperSectionHeading,
   DeveloperTooltip,
-  developerInputClassName,
   developerPrimaryButtonClassName,
   developerSecondaryButtonClassName,
+  developerInputClassName,
 } from "@/components/developer/ui";
 import { useApiRequest } from "@/hooks/useApiRequest";
-import {
-  adminResourceKeys,
-  invalidateAdminResource,
-  useAdminResource,
-} from "@/hooks/useAdminResource";
-import { api } from "@/lib/routes";
+import { adminResourceKeys, invalidateAdminResource, useAdminResource } from "@/hooks/useAdminResource";
+import { api, site } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 
 interface ConsentCategory {
   key: string;
@@ -50,6 +48,8 @@ interface ConsentSettings {
   categories: ConsentCategory[];
 }
 
+const CATEGORIES_PER_PAGE = 4;
+
 const DEFAULT_SETTINGS: ConsentSettings = {
   enabled: true,
   version: 1,
@@ -60,15 +60,33 @@ const DEFAULT_SETTINGS: ConsentSettings = {
   preferencesLabel: "Preferências",
   saveLabel: "Salvar preferências",
   style: "floating",
-  behavior: {
-    requireExplicitChoice: true,
-    blockAnalyticsUntilConsent: true,
-    reopenOnVersionChange: true,
-  },
+  behavior: { requireExplicitChoice: true, blockAnalyticsUntilConsent: true, reopenOnVersionChange: true },
   desktop: { position: "bottom-right", compact: true },
   mobile: { position: "bottom-sheet", compact: false },
   categories: [],
 };
+
+function ToggleField({
+  label,
+  checked,
+  onChange,
+  tooltip,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  tooltip?: string;
+}) {
+  return (
+    <label className="flex min-h-12 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-[var(--foreground)] shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-4 w-4 accent-[var(--primary)]" />
+      <span className="inline-flex items-center gap-1.5">
+        {label}
+        {tooltip ? <DeveloperTooltip content={tooltip} /> : null}
+      </span>
+    </label>
+  );
+}
 
 export default function CookiesPage() {
   const { apiRequest } = useApiRequest();
@@ -76,15 +94,15 @@ export default function CookiesPage() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "success" | "error">("");
   const [message, setMessage] = useState("");
+  const [categoryPage, setCategoryPage] = useState(0);
 
   const { data, loading, error, refresh } = useAdminResource<ConsentSettings>({
     key: adminResourceKeys.consent,
     fetcher: async (request) => {
       const response = await request<{ settings?: ConsentSettings }>(api.admin.consentSettings);
-      if (!response.success) {
-        return { success: false, error: response.error ?? "Falha ao carregar cookies." };
-      }
-      return { success: true, data: { ...DEFAULT_SETTINGS, ...response.data?.settings } };
+      return response.success
+        ? { success: true, data: { ...DEFAULT_SETTINGS, ...response.data?.settings } }
+        : { success: false, error: response.error ?? "Falha ao carregar cookies." };
     },
   });
 
@@ -92,14 +110,20 @@ export default function CookiesPage() {
     if (data) setForm({ ...DEFAULT_SETTINGS, ...data });
   }, [data]);
 
+  const categoryPageCount = Math.max(1, Math.ceil(form.categories.length / CATEGORIES_PER_PAGE));
+  const visibleCategories = useMemo(
+    () => form.categories.slice(categoryPage * CATEGORIES_PER_PAGE, (categoryPage + 1) * CATEGORIES_PER_PAGE),
+    [categoryPage, form.categories]
+  );
+
+  useEffect(() => {
+    setCategoryPage((current) => Math.min(current, categoryPageCount - 1));
+  }, [categoryPageCount]);
+
   async function handleSave() {
     setSaving(true);
     setStatus("");
-    setMessage("");
-    const response = await apiRequest(api.admin.consentSettings, {
-      method: "POST",
-      body: JSON.stringify(form),
-    });
+    const response = await apiRequest(api.admin.consentSettings, { method: "POST", body: JSON.stringify(form) });
     setSaving(false);
     if (!response.success) {
       setStatus("error");
@@ -115,9 +139,7 @@ export default function CookiesPage() {
   function updateCategory(index: number, patch: Partial<ConsentCategory>) {
     setForm((current) => ({
       ...current,
-      categories: current.categories.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...patch } : item
-      ),
+      categories: current.categories.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
     }));
   }
 
@@ -125,8 +147,8 @@ export default function CookiesPage() {
     <DeveloperPage>
       <DeveloperHero
         eyebrow="LGPD / Cookies"
-        title="Consentimento com controle desktop e mobile."
-        description="Configure textos, labels, categorias e comportamento do banner usado no site público."
+        title="Consentimento claro em todos os dispositivos."
+        description="Configure o banner, as regras de coleta e as categorias que o visitante controla."
         stats={[
           { label: "Categorias", value: form.categories.length },
           { label: "Versão", value: form.version },
@@ -134,295 +156,83 @@ export default function CookiesPage() {
         ]}
       />
 
-      {loading ? <DeveloperMessage tone="info">Carregando configuração...</DeveloperMessage> : null}
-      {error ? <DeveloperMessage tone="error">{error}</DeveloperMessage> : null}
-      {status ? (
-        <div className="mt-4">
-          <DeveloperMessage tone={status === "success" ? "success" : "error"}>{message}</DeveloperMessage>
-        </div>
-      ) : null}
+      {loading ? <div className="mt-5"><DeveloperMessage tone="info">Carregando configuração...</DeveloperMessage></div> : null}
+      {error ? <div className="mt-5"><DeveloperMessage tone="error">{error}</DeveloperMessage></div> : null}
+      {status ? <div className="mt-5"><DeveloperMessage tone={status === "success" ? "success" : "error"}>{message}</DeveloperMessage></div> : null}
 
-      <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <DeveloperCard>
-          <DeveloperSectionHeading
-            eyebrow="Conteúdo"
-            title="Banner e comportamento"
-            description="O texto principal e os botões aparecem no desktop e no mobile."
-            tooltip="Configura o banner público de consentimento. Exemplo: texto, botões, categorias e quando reabrir."
-          />
+      <div className="mt-5">
+        <DeveloperResponsivePreview href={site.home} title="Preview do consentimento" showConsent />
+      </div>
+
+      <div className="mt-5 grid gap-5">
+        <DeveloperCard className="border-[#bfdbfe] bg-[linear-gradient(135deg,rgba(239,246,255,0.94),rgba(255,255,255,0.96))] p-5 sm:p-6">
+          <DeveloperSectionHeading eyebrow="Banner público" title="Mensagem e ações principais" description="Estes textos aparecem antes de qualquer escolha do visitante." />
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_180px]">
+            <DeveloperField label="Título" required>
+              <input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} className={developerInputClassName} />
+            </DeveloperField>
+            <DeveloperField label="Versão" required tooltip="Aumente ao mudar o texto, as categorias ou o comportamento do consentimento.">
+              <input type="number" min={1} value={form.version} onChange={(event) => setForm((current) => ({ ...current, version: Number(event.target.value) || 1 }))} className={developerInputClassName} />
+            </DeveloperField>
+          </div>
+          <div className="mt-4"><DeveloperField label="Descrição" required><textarea rows={3} value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className={`${developerInputClassName} resize-none`} /></DeveloperField></div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["acceptAllLabel", "Aceitar todos"],
+              ["rejectLabel", "Recusar opcionais"],
+              ["preferencesLabel", "Abrir preferências"],
+              ["saveLabel", "Salvar preferências"],
+            ].map(([key, label]) => <DeveloperField key={key} label={label}><input value={String(form[key as keyof ConsentSettings] ?? "")} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} className={developerInputClassName} /></DeveloperField>)}
+          </div>
+        </DeveloperCard>
+
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)]">
+          <DeveloperCard className="p-5 sm:p-6">
+            <DeveloperSectionHeading eyebrow="Regras de exibição" title="Quando e onde o banner aparece" description="As escolhas abaixo preservam o bloqueio de recursos opcionais até o consentimento." />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ToggleField label="Banner ativo" checked={form.enabled} onChange={(enabled) => setForm((current) => ({ ...current, enabled }))} tooltip="Liga ou desliga o banner no site público." />
+              <ToggleField label="Exigir escolha" checked={form.behavior.requireExplicitChoice} onChange={(requireExplicitChoice) => setForm((current) => ({ ...current, behavior: { ...current.behavior, requireExplicitChoice } }))} tooltip="Mantém o banner até o visitante tomar uma decisão." />
+              <ToggleField label="Bloquear analytics" checked={form.behavior.blockAnalyticsUntilConsent} onChange={(blockAnalyticsUntilConsent) => setForm((current) => ({ ...current, behavior: { ...current.behavior, blockAnalyticsUntilConsent } }))} tooltip="Impede analytics antes do aceite compatível." />
+              <ToggleField label="Reabrir por versão" checked={form.behavior.reopenOnVersionChange} onChange={(reopenOnVersionChange) => setForm((current) => ({ ...current, behavior: { ...current.behavior, reopenOnVersionChange } }))} tooltip="Exibe o banner novamente após atualizar a versão." />
+            </div>
+          </DeveloperCard>
+          <DeveloperCard className="p-5 sm:p-6">
+            <DeveloperSectionHeading eyebrow="Posicionamento" title="Desktop e mobile" description="O preview acima mostra os três breakpoints reais." />
+            <div className="grid gap-4">
+              <DeveloperField label="Posição no desktop"><select value={form.desktop.position} onChange={(event) => setForm((current) => ({ ...current, desktop: { ...current.desktop, position: event.target.value } }))} className={developerInputClassName}><option value="bottom-right">Canto inferior direito</option><option value="bottom-left">Canto inferior esquerdo</option><option value="bottom-full">Faixa inferior</option></select></DeveloperField>
+              <DeveloperField label="Posição no mobile"><select value={form.mobile.position} onChange={(event) => setForm((current) => ({ ...current, mobile: { ...current.mobile, position: event.target.value } }))} className={developerInputClassName}><option value="bottom-sheet">Painel inferior</option><option value="center-modal">Modal central</option></select></DeveloperField>
+            </div>
+          </DeveloperCard>
+        </section>
+
+        <DeveloperCard className="p-5 sm:p-6">
+          <DeveloperSectionHeading eyebrow="Categorias" title="Tipos de cookies" description="O botão de preferências abre estas categorias em uma janela paginada no site público." action={
+            <span className="rounded-full border border-[var(--primary)]/15 bg-[var(--primary)]/6 px-3 py-1.5 text-xs font-bold text-[var(--primary)]">{form.categories.length} cadastradas</span>
+          } />
           <div className="grid gap-4 lg:grid-cols-2">
-            <DeveloperField label="Título">
-              <input
-                value={form.title}
-                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                className={developerInputClassName}
-              />
-            </DeveloperField>
-            <DeveloperField
-              label="Versão"
-              tooltip="Número da política atual. Aumente quando mudar texto, categorias ou comportamento. Exemplo: de 1 para 2."
-            >
-              <input
-                type="number"
-                min={1}
-                value={form.version}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, version: Number(event.target.value) || 1 }))
-                }
-                className={developerInputClassName}
-              />
-            </DeveloperField>
-          </div>
-          <div className="mt-4">
-            <DeveloperField
-              label="Descrição"
-              tooltip="Texto principal exibido no banner. Exemplo: explique cookies necessários e opcionais em uma frase curta."
-            >
-              <textarea
-                rows={3}
-                value={form.description}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, description: event.target.value }))
-                }
-                className={`${developerInputClassName} resize-none`}
-              />
-            </DeveloperField>
-          </div>
-          <div className="mt-4 grid gap-4 lg:grid-cols-4">
-            {[
-              ["acceptAllLabel", "Aceitar"],
-              ["rejectLabel", "Recusar"],
-              ["preferencesLabel", "Preferências"],
-              ["saveLabel", "Salvar"],
-            ].map(([key, label]) => (
-              <DeveloperField key={key} label={label}>
-                <input
-                  value={String(form[key as keyof ConsentSettings] ?? "")}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, [key]: event.target.value }))
-                  }
-                  className={developerInputClassName}
-                />
-              </DeveloperField>
-            ))}
-          </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                key: "enabled",
-                label: "Banner ativo",
-                tooltip: "Liga ou desliga o banner no site público. Exemplo: mantenha ativo para coletar consentimento.",
-              },
-              {
-                key: "requireExplicitChoice",
-                label: "Exigir escolha",
-                tooltip: "Obrigar o visitante a aceitar, recusar ou personalizar antes de considerar o consentimento resolvido.",
-              },
-              {
-                key: "blockAnalyticsUntilConsent",
-                label: "Bloquear analytics",
-                tooltip: "Impede eventos de analytics até o aceite da categoria correspondente.",
-              },
-              {
-                key: "reopenOnVersionChange",
-                label: "Reabrir por versão",
-                tooltip: "Mostra o banner novamente quando a versão da política aumentar.",
-              },
-            ].map((item) => {
-              const checked =
-                item.key === "enabled"
-                  ? form.enabled
-                  : Boolean(form.behavior[item.key as keyof ConsentSettings["behavior"]]);
+            {visibleCategories.map((category, visibleIndex) => {
+              const index = categoryPage * CATEGORIES_PER_PAGE + visibleIndex;
               return (
-                <label
-                  key={item.key}
-                  className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white/76 px-3 py-2 text-sm font-medium"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(event) =>
-                      item.key === "enabled"
-                        ? setForm((current) => ({ ...current, enabled: event.target.checked }))
-                        : setForm((current) => ({
-                            ...current,
-                            behavior: { ...current.behavior, [item.key]: event.target.checked },
-                          }))
-                    }
-                    className="h-4 w-4 accent-[var(--primary)]"
-                  />
-                  <span className="inline-flex items-center gap-1.5">
-                    {item.label}
-                    <DeveloperTooltip content={item.tooltip} />
-                  </span>
-                </label>
+                <article key={`${category.key}-${index}`} className="rounded-[18px] border border-slate-200 bg-slate-50/80 p-4 shadow-[0_5px_14px_rgba(15,23,42,0.025)]">
+                  <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary)]">Categoria {index + 1}</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <DeveloperField label="Nome"><input value={category.label} onChange={(event) => updateCategory(index, { label: event.target.value })} className={developerInputClassName} /></DeveloperField>
+                    <DeveloperField label="Chave" tooltip="Identificador técnico da categoria."><input value={category.key} onChange={(event) => updateCategory(index, { key: event.target.value })} className={developerInputClassName} /></DeveloperField>
+                  </div>
+                  <div className="mt-4"><DeveloperField label="Descrição"><textarea rows={2} value={category.description} onChange={(event) => updateCategory(index, { description: event.target.value })} className={`${developerInputClassName} resize-none`} /></DeveloperField></div>
+                  <div className="mt-4 flex flex-wrap gap-3"><ToggleField label="Obrigatória" checked={category.required} onChange={(required) => updateCategory(index, { required })} tooltip="Categorias obrigatórias permanecem ativas." /><ToggleField label="Ativa por padrão" checked={category.enabledByDefault} onChange={(enabledByDefault) => updateCategory(index, { enabledByDefault })} tooltip="Pré-seleciona uma categoria opcional." /></div>
+                </article>
               );
             })}
           </div>
-
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            <DeveloperField
-              label="Posição no desktop"
-              tooltip="Define onde o banner aparece em telas grandes. Exemplo: bottom-right para canto inferior direito."
-            >
-              <select
-                value={form.desktop.position}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    desktop: { ...current.desktop, position: event.target.value },
-                  }))
-                }
-                className={developerInputClassName}
-              >
-                <option value="bottom-right">bottom-right</option>
-                <option value="bottom-left">bottom-left</option>
-                <option value="bottom-full">bottom-full</option>
-              </select>
-            </DeveloperField>
-            <DeveloperField
-              label="Posição no mobile"
-              tooltip="Define a experiência em celulares. Exemplo: bottom-sheet abre como painel inferior."
-            >
-              <select
-                value={form.mobile.position}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    mobile: { ...current.mobile, position: event.target.value },
-                  }))
-                }
-                className={developerInputClassName}
-              >
-                <option value="bottom-sheet">bottom-sheet</option>
-                <option value="center-modal">center-modal</option>
-              </select>
-            </DeveloperField>
-          </div>
-
-          <div className="mt-5">
-            <DeveloperSectionHeading
-              eyebrow="Categorias"
-              title="Tipos de cookies"
-              tooltip="Categorias controlam quais recursos podem rodar após o aceite. Exemplo: necessário, analytics e marketing."
-            />
-            <div className="grid gap-3 lg:grid-cols-2">
-              {form.categories.map((category, index) => (
-                <div key={category.key} className="rounded-lg border border-[var(--border)] bg-white/76 p-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <DeveloperField label="Label">
-                      <input
-                        value={category.label}
-                        onChange={(event) => updateCategory(index, { label: event.target.value })}
-                        className={developerInputClassName}
-                      />
-                    </DeveloperField>
-                    <DeveloperField
-                      label="Chave"
-                      tooltip="Identificador técnico da categoria. Exemplo: analytics, marketing ou necessary."
-                    >
-                      <input
-                        value={category.key}
-                        onChange={(event) => updateCategory(index, { key: event.target.value })}
-                        className={developerInputClassName}
-                      />
-                    </DeveloperField>
-                  </div>
-                  <div className="mt-3">
-                    <DeveloperField
-                      label="Descrição"
-                      tooltip="Explica o objetivo da categoria para o visitante. Exemplo: medir acessos e melhorar páginas."
-                    >
-                      <input
-                        value={category.description}
-                        onChange={(event) => updateCategory(index, { description: event.target.value })}
-                        className={developerInputClassName}
-                      />
-                    </DeveloperField>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={category.required}
-                        onChange={(event) => updateCategory(index, { required: event.target.checked })}
-                        className="h-4 w-4 accent-[var(--primary)]"
-                      />
-                      <span className="inline-flex items-center gap-1.5">
-                        Obrigatório
-                        <DeveloperTooltip content="Categoria obrigatória não pode ser desligada. Exemplo: cookies necessários para segurança." />
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={category.enabledByDefault}
-                        onChange={(event) =>
-                          updateCategory(index, { enabledByDefault: event.target.checked })
-                        }
-                        className="h-4 w-4 accent-[var(--primary)]"
-                      />
-                      <span className="inline-flex items-center gap-1.5">
-                        Ativo por padrão
-                        <DeveloperTooltip content="Define se a categoria opcional vem pré-selecionada antes da escolha do visitante." />
-                      </span>
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className={developerPrimaryButtonClassName}
-            >
-              <CheckCircle size={18} weight="bold" />
-              {saving ? "Salvando..." : "Salvar configuração"}
-            </button>
-            <button type="button" onClick={() => void refresh()} className={developerSecondaryButtonClassName}>
-              <Pulse size={16} weight="bold" />
-              Atualizar métricas
-            </button>
-          </div>
+          {categoryPageCount > 1 ? <div className="mt-5 flex flex-col gap-3 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-[var(--color-muted-raw)]">Exibindo categorias {categoryPage * CATEGORIES_PER_PAGE + 1}–{Math.min((categoryPage + 1) * CATEGORIES_PER_PAGE, form.categories.length)} de {form.categories.length}.</p><div className="flex gap-2"><button type="button" onClick={() => setCategoryPage((page) => Math.max(0, page - 1))} disabled={categoryPage === 0} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}><CaretLeft size={15} weight="bold" />Anterior</button><button type="button" onClick={() => setCategoryPage((page) => Math.min(categoryPageCount - 1, page + 1))} disabled={categoryPage === categoryPageCount - 1} className={cn(developerSecondaryButtonClassName, "min-h-9 px-3 py-1.5 text-xs")}>Próxima<CaretRight size={15} weight="bold" /></button></div></div> : null}
         </DeveloperCard>
 
-        <DeveloperCard>
-          <DeveloperSectionHeading eyebrow="Preview" title="Desktop e mobile" />
-          <div className="rounded-lg border border-[var(--border)] bg-slate-950 p-4 text-white">
-            <Cookie size={24} weight="duotone" className="text-sky-300" />
-            <h3 className="mt-3 text-lg font-semibold">{form.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-300">{form.description}</p>
-            <div className="mt-4 grid gap-2">
-              {form.categories.map((category) => (
-                <div key={category.key} className="rounded-lg bg-white/8 px-3 py-2">
-                  <p className="text-sm font-semibold">{category.label}</p>
-                  <p className="text-xs leading-5 text-slate-400">{category.description}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-lg bg-sky-500 px-3 py-2 text-xs font-bold">
-                {form.acceptAllLabel}
-              </span>
-              <span className="rounded-lg border border-white/20 px-3 py-2 text-xs font-bold">
-                {form.rejectLabel}
-              </span>
-            </div>
-          </div>
-          <div className="mt-4 rounded-lg border border-[var(--border)] bg-white/76 p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-              Mobile
-            </p>
-            <p className="mt-2 text-sm text-[var(--color-muted-raw)]">
-              Renderiza como {form.mobile.position}, com botões empilhados e categorias em lista.
-            </p>
-          </div>
-        </DeveloperCard>
-      </section>
+        <div className="sticky bottom-4 z-10 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/95 p-3 shadow-[0_14px_34px_rgba(15,23,42,0.12)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+          <p className="px-1 text-sm text-[var(--color-muted-raw)]">Salve para atualizar o banner público e o preview real.</p>
+          <div className="flex flex-wrap gap-2"><button type="button" onClick={handleSave} disabled={saving} className={developerPrimaryButtonClassName}><CheckCircle size={18} weight="bold" />{saving ? "Salvando..." : "Salvar configuração"}</button><button type="button" onClick={() => void refresh()} className={developerSecondaryButtonClassName}><Pulse size={16} weight="bold" />Atualizar</button></div>
+        </div>
+      </div>
     </DeveloperPage>
   );
 }

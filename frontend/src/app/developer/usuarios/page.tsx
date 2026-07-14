@@ -12,6 +12,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useApiRequest } from "@/hooks/useApiRequest";
+import { useCarouselPagination } from "@/hooks/useCarouselPagination";
 import {
   adminResourceKeys,
   invalidateAdminResource,
@@ -22,7 +23,7 @@ import {
   DeveloperCard,
   DeveloperField,
   DeveloperHero,
-  DeveloperListViewport,
+  DeveloperCarouselPagination,
   DeveloperMessage,
   DeveloperPage,
   DeveloperSectionHeading,
@@ -65,6 +66,8 @@ const EMPTY_FORM: UserFormState = {
   confirmPassword: "",
   role: "admin",
 };
+
+const USERS_PER_PAGE = 4;
 
 function formatDate(value?: string) {
   if (!value) return "-";
@@ -142,6 +145,13 @@ export default function UsuariosPage() {
   const adminCount = users.filter((user) => user.role === "admin" && user.active).length;
   const activeCount = users.filter((user) => user.active).length;
   const canManageUsers = Boolean(currentUser?.isSupreme || currentUser?.protected);
+  const {
+    pages: userPages,
+    currentPage: usersPage,
+    totalPages: usersTotalPages,
+    nextPage: nextUsersPage,
+    prevPage: prevUsersPage,
+  } = useCarouselPagination(users, USERS_PER_PAGE);
 
   function resetForm() {
     setForm(EMPTY_FORM);
@@ -295,8 +305,8 @@ export default function UsuariosPage() {
         </div>
       ) : null}
 
-      <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(340px,480px)_minmax(0,1fr)]">
-        <DeveloperCard>
+      <section className="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(340px,440px)_minmax(0,1fr)]">
+        <DeveloperCard className="p-5 xl:sticky xl:top-5">
           <DeveloperSectionHeading
             eyebrow="Novo acesso"
             title="Criar usuário"
@@ -312,7 +322,7 @@ export default function UsuariosPage() {
             </div>
           ) : null}
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <DeveloperField label="Nome" required>
               <input
                 value={form.name}
@@ -359,7 +369,7 @@ export default function UsuariosPage() {
                 ].map((option) => (
                   <label
                     key={option.value}
-                    className="flex min-h-[92px] items-start gap-3 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm"
+                    className="flex min-h-[78px] items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/78 px-3.5 py-3 text-sm"
                   >
                     <input
                       type="radio"
@@ -415,7 +425,7 @@ export default function UsuariosPage() {
               </DeveloperField>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] bg-white/72 p-4">
+            <div className="rounded-[18px] border border-slate-200 bg-slate-50/78 p-3.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
                 Requisitos da senha
               </p>
@@ -464,7 +474,7 @@ export default function UsuariosPage() {
           </form>
         </DeveloperCard>
 
-        <DeveloperCard>
+        <DeveloperCard className="self-start p-5 sm:p-6">
           <DeveloperSectionHeading
             eyebrow="Acessos cadastrados"
             title="Usuários do painel"
@@ -472,19 +482,19 @@ export default function UsuariosPage() {
             tooltip="Lista de usuários internos autorizados no CMS, com status e função de acesso."
           />
 
-          <DeveloperListViewport className="max-h-none space-y-4 overflow-visible pr-0">
+          <div className="space-y-3">
             {users.length > 0 ? (
-              users.map((user) => {
+              (userPages[usersPage] ?? []).map((user) => {
                 const editingThis = editingId === user.id;
                 const locked = Boolean(user.protected || !canManageUsers);
                 return (
                 <article
                   key={user.id}
-                  className="rounded-2xl border border-[var(--border)] bg-white/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
+                  className="rounded-[18px] border border-slate-200 bg-slate-50/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 gap-3">
-                      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
                         {user.role === "admin" ? (
                           <ShieldCheck size={22} weight="duotone" />
                         ) : (
@@ -492,13 +502,13 @@ export default function UsuariosPage() {
                         )}
                       </span>
                       <div className="min-w-0">
-                        <h3 className="truncate text-lg font-semibold tracking-[-0.03em] text-[var(--foreground)]">
+                        <h3 className="truncate text-base font-semibold tracking-[-0.02em] text-[var(--foreground)]">
                           {user.name || "Usuário sem nome"}
                         </h3>
                         <p className="mt-1 truncate text-sm text-[var(--color-muted-raw)]">
                           {user.email}
                         </p>
-                        <p className="mt-2 text-xs text-[var(--color-muted-raw)]">
+                        <p className="mt-1 text-xs text-[var(--color-muted-raw)]">
                           Criado em {formatDate(user.createdAt)}
                         </p>
                       </div>
@@ -522,7 +532,7 @@ export default function UsuariosPage() {
                   </div>
 
                   {editingThis ? (
-                    <div className="mt-4 grid gap-3 rounded-xl border border-slate-200 bg-white/82 p-3 lg:grid-cols-2">
+                  <div className="mt-3 grid gap-3 rounded-xl border border-slate-200 bg-white/82 p-3 lg:grid-cols-2">
                       <DeveloperField label="Nome">
                         <input
                           value={String(editing.name ?? "")}
@@ -562,7 +572,7 @@ export default function UsuariosPage() {
                     </div>
                   ) : null}
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {editingThis ? (
                       <>
                         <button
@@ -619,9 +629,20 @@ export default function UsuariosPage() {
                 Nenhum usuário encontrado no storage atual.
               </DeveloperMessage>
             )}
-          </DeveloperListViewport>
+          </div>
 
-          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white/72 p-4">
+          {users.length > 0 ? (
+            <DeveloperCarouselPagination
+              currentPage={usersPage}
+              totalPages={usersTotalPages}
+              onNext={nextUsersPage}
+              onPrev={prevUsersPage}
+              compact
+              alwaysVisible
+            />
+          ) : null}
+
+          <div className="mt-4 rounded-[18px] border border-[#bfdbfe] bg-[#eff6ff]/72 p-4">
             <div className="flex items-start gap-3">
               <UsersThree
                 size={22}
