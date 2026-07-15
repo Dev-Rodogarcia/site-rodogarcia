@@ -62,6 +62,7 @@
 - Sitemap e robots são gerados por `frontend/src/app/sitemap.ts` e `frontend/src/app/robots.ts` a partir de `routes.ts`.
 - Backups completos do storage local são criados por `node scripts/backup-storage.js` em `backups/storage-<data>/`; restores usam `node scripts/restore-storage.js --backup ... --confirm-restore`, preservando o storage anterior em `backups/pre-restore-<data>/storage`.
 - O runbook de backup/restore fica em `docs/backup-restore-json.md`; backups devem ser tratados como sensíveis e copiados para local externo protegido.
+- Em 2026-07-15, o storage de produção `C:\Rodogarcia\storage-prod` foi inicializado com os JSONs públicos canônicos `content.json`, `site-texts.json`, `media-library.json`, `consent-settings.json` e `popup-config.json`; o backup anterior está em `backups/pre-public-content-migration-2026-07-15`. Dados privados e operacionais não foram migrados.
 
 ## Segurança e Regras de Negócio Consolidadas
 
