@@ -6,10 +6,10 @@ O Rodogarcia nao e uma SPA estatica: o frontend Next.js renderiza Server Compone
 
 | Componente | Bind local | Funcao |
 | --- | --- | --- |
-| Next.js standalone (`frontend/dist-prod/server.js`) | `127.0.0.1:5010` | Site publico, CMS, headers e proxy interno de API/uploads |
-| Express (`node dist/server.js`) | `127.0.0.1:4010` | API, autenticacao, JSON e uploads |
+| Next.js standalone (`frontend/dist-prod/server.js`) | `127.0.0.1:6060` | Site publico, CMS, headers e proxy interno de API/uploads |
+| Express (`node dist/server.js`) | `127.0.0.1:6050` | API, autenticacao, JSON e uploads |
 
-Use `iniciar-prod.bat` para validar, compilar e abrir esses processos. Ele fixa `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=4010` e `BACKEND_INTERNAL_URL=http://127.0.0.1:4010`.
+Use `iniciar-prod.bat` para validar, compilar e abrir esses processos. Ele fixa `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=6050` e `BACKEND_INTERNAL_URL=http://127.0.0.1:6050`.
 
 O desenvolvimento usa o par isolado `127.0.0.1:5011` e `127.0.0.1:4011` por `iniciar-dev.bat`. Esse script limpa proxies de producao e usa o storage local do repositório.
 
@@ -33,11 +33,13 @@ O arquivo do `cloudflared` pertence à infraestrutura, não ao repositório. O c
 
 ```yaml
 ingress:
-  - hostname: www.seudominio.com.br
-    service: http://127.0.0.1:5010
+  - hostname: site.rodogarcia.com.br
+    service: http://127.0.0.1:6060
+  - hostname: sitebackend.rodogarcia.com.br
+    service: http://127.0.0.1:6050
 ```
 
-Se houver hostname separado de API, ele pode apontar para `http://127.0.0.1:4010`; mantenha `CORS_ORIGINS` estrito e use apenas HTTPS público. O fluxo normal do site continua por `/api` e `/uploads` no hostname do frontend, que o Next reencaminha internamente.
+Mantenha `FRONTEND_ORIGIN` e `CORS_ORIGINS` em `https://site.rodogarcia.com.br`; use `https://sitebackend.rodogarcia.com.br` somente em `NEXT_PUBLIC_BACKEND_URL`. O fluxo normal do site continua por `/api` e `/uploads` no hostname do frontend, que o Next reencaminha internamente.
 
 No Cloudflare, não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis. Cache longo deve cobrir somente assets com hash. Bloqueie caminhos de desenvolvimento que não fazem parte do Next de produção, como `/src/*`, `/node_modules/*`, `/@vite/*`, `/@react-refresh/*` e `/@fs/*`.
 

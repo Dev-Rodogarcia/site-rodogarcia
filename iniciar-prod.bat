@@ -25,12 +25,12 @@ if errorlevel 1 exit /b 1
 rem Os dois processos de producao ficam privados; o tunnel/reverse proxy e a unica borda publica.
 set "NODE_ENV=production"
 set "HOST=127.0.0.1"
-set "PORT=4010"
-set "BACKEND_INTERNAL_URL=http://127.0.0.1:4010"
+set "PORT=6050"
+set "BACKEND_INTERNAL_URL=http://127.0.0.1:6050"
 set "BACKEND_PROXY_URL="
 set "NEXT_PUBLIC_BACKEND_PROXY_URL="
-set "SECURITY_TEST_BACKEND_PORT="
-set "SECURITY_TEST_FRONTEND_PORT="
+set "SECURITY_TEST_BACKEND_PORT=6050"
+set "SECURITY_TEST_FRONTEND_PORT=6060"
 
 echo [Rodogarcia PROD] Ambiente: %ENV_FILE%
 
@@ -54,8 +54,11 @@ echo [Rodogarcia PROD] Validando e compilando backend...
 pushd backend
 call npm run typecheck
 if errorlevel 1 exit /b 1
+rem A suite importa services que carregam env.ts; teste nao deve herdar o hardening do boot PROD.
+set "NODE_ENV=test"
 call npm test
 if errorlevel 1 exit /b 1
+set "NODE_ENV=production"
 call npm run build
 if errorlevel 1 exit /b 1
 node --input-type=module --eval "import('./dist/config/env.js')"
@@ -68,9 +71,9 @@ call npm run typecheck
 if errorlevel 1 exit /b 1
 popd
 
-echo [Rodogarcia PROD] Encerrando processos nas portas 4010 e 5010...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(4010,5010); Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $ports -contains $_.LocalPort } | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { try { Stop-Process -Id $_ -Force -ErrorAction Stop } catch {} }" >nul 2>&1
-timeout /t 1 /nobreak >nul
+echo [Rodogarcia PROD] Encerrando processos nas portas 6050 e 6060...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(6050,6060); Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $ports -contains $_.LocalPort } | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { try { Stop-Process -Id $_ -Force -ErrorAction Stop } catch {} }" >nul 2>&1
+powershell -NoProfile -Command "Start-Sleep -Seconds 1" >nul
 
 echo [Rodogarcia PROD] Recriando artefato standalone em frontend\dist-prod...
 pushd frontend
@@ -84,11 +87,10 @@ if errorlevel 1 exit /b 1
 
 echo [Rodogarcia PROD] Abrindo backend e frontend compilados em janelas separadas...
 start "Rodogarcia Backend PROD" cmd /k "cd /d ""%~dp0backend"" && npm run start"
-start "Rodogarcia Frontend PROD" cmd /k "cd /d ""%~dp0frontend"" && set ""PORT=5010"" && set ""HOSTNAME=127.0.0.1"" && npm run start:prod"
+start "Rodogarcia Frontend PROD" /D "%~dp0frontend" cmd /k "set PORT=6060&&set HOSTNAME=127.0.0.1&&npm run start:prod"
 
 echo.
-echo [Rodogarcia PROD] Backend privado:  http://127.0.0.1:4010
-echo [Rodogarcia PROD] Frontend privado: http://127.0.0.1:5010
-echo [Rodogarcia PROD] Publique somente atraves do tunnel ou reverse proxy HTTPS.
+echo [Rodogarcia PROD] Backend Cloudflare:  https://sitebackend.rodogarcia.com.br ^> http://127.0.0.1:6050
+echo [Rodogarcia PROD] Frontend Cloudflare: https://site.rodogarcia.com.br ^> http://127.0.0.1:6060
 
 endlocal

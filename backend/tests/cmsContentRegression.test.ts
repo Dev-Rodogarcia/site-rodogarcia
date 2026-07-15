@@ -62,6 +62,21 @@ describe("CMS content regressions", () => {
     expect(sanitizeQuotePage({ otherChannels: [] }).otherChannels).toEqual([]);
   });
 
+  it("falls back safely when legacy page content references invalid media", async () => {
+    const env = isolatedBackend();
+    createPublicAsset(env.publicDir, "caminhoneiro1.png");
+    createPublicAsset(env.publicDir, "certificados/certificado-sassmaq.png");
+    const { sanitizeAboutPage } = await import("../src/services/pageContent.js");
+
+    const page = sanitizeAboutPage({
+      hero: {
+        media: { src: "https://invalid.example/image.png", alt: "Imagem antiga" },
+      },
+    });
+
+    expect(page.hero.media.src).toBe("/caminhoneiro1.png");
+  });
+
   it("preserves nested footer lists but rejects an empty required footer field", async () => {
     isolatedBackend();
     const {

@@ -15,7 +15,10 @@ import type {
 } from "../types/content.js";
 import { generateId } from "../utils/ids.js";
 import { sanitizeHexColor, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
-import { sanitizeInternalImageUrl } from "./mediaValidationService.js";
+import {
+  isKnownLibraryMedia,
+  normalizeInternalMediaUrl,
+} from "./mediaValidationService.js";
 
 export const PAGE_KEYS = ["about", "business", "contact", "careers", "quote"] as const;
 export type CmsPageKey = (typeof PAGE_KEYS)[number];
@@ -75,7 +78,8 @@ function withOrder<T extends { order?: number }>(items: T[]) {
 }
 
 function publicAssetUrl(value: unknown) {
-  const url = sanitizeInternalImageUrl(value, "Imagem da página");
+  const url = normalizeInternalMediaUrl(value);
+  if (!url || !isKnownLibraryMedia(url, "image")) return "";
   return url.startsWith("/public/") ? url.slice("/public".length) || "/" : url;
 }
 
@@ -708,7 +712,7 @@ function legacyMediaSlot(
   key: string,
   fallback = ""
 ) {
-  return sanitizeInternalImageUrl(source?.[key], `Slot ${key}`) || fallback;
+  return publicAssetUrl(source?.[key]) || fallback;
 }
 
 function aboutPageFromLegacy(

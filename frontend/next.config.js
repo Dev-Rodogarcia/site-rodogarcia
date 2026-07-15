@@ -1,10 +1,10 @@
 const normalizeBackendUrl = (url) => url.replace(/\/+$/, "");
 
 const backendUrl = normalizeBackendUrl(
-  process.env.BACKEND_PROXY_URL ??
+    process.env.BACKEND_PROXY_URL ??
     process.env.BACKEND_INTERNAL_URL ??
     process.env.NEXT_PUBLIC_BACKEND_URL ??
-    "http://127.0.0.1:4010"
+    "http://127.0.0.1:6050"
 );
 
 const isProduction = process.env.NODE_ENV === "production";
