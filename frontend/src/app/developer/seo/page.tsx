@@ -52,7 +52,7 @@ const EMPTY_PAGE: SeoPageSettings = {
   slug: "/",
   ogTitle: "",
   ogDescription: "",
-  ogImage: "/foto5.png",
+  ogImage: "/foto5.webp",
 };
 
 function scoreSeo(page: SeoPageSettings) {

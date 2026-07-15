@@ -33,32 +33,32 @@ const CERTIFICATIONS: CertificationItem[] = [
   {
     title: "SASSMAQ",
     description: "Segurança, saúde e meio ambiente em processos sensíveis.",
-    image: "/certificados/certificado-sassmaq.png",
+    image: "/certificados/certificado-sassmaq.webp",
   },
   {
     title: "EcoVadis",
     description: "Maturidade em sustentabilidade e responsabilidade corporativa.",
-    image: "/certificados/ecovadis.png",
+    image: "/certificados/ecovadis.webp",
   },
   {
     title: "Licença PF",
     description: "Autorização para operações que exigem controles adicionais.",
-    image: "/certificados/pf.png",
+    image: "/certificados/pf.webp",
   },
   {
     title: "Polícia Civil SP",
     description: "Habilitação estadual alinhada a operações com governança ampliada.",
-    image: "/certificados/pc-sp.png",
+    image: "/certificados/pc-sp.webp",
   },
   {
     title: "Exército Brasileiro",
     description: "Autorização conectada a rotinas com requisitos extras de controle.",
-    image: "/certificados/exercito-br.png",
+    image: "/certificados/exercito-br.webp",
   },
   {
     title: "IBAMA",
     description: "Conformidade e controle rigoroso em operações com impacto e regulamentação ambiental.",
-    image: "/certificados/ibama.png",
+    image: "/certificados/ibama.webp",
   },
 ];
 

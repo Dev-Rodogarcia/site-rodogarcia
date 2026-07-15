@@ -253,14 +253,9 @@ export function DeveloperHelp({
   return <DeveloperTooltip content={summaryOverride ? { ...content, summary: summaryOverride } : content} />;
 }
 
-function getPlainTooltipExample(content: string) {
-  const exampleMatch = content.match(/exemplo:\s*(.+?)(?:\.|$)/i);
-  return exampleMatch?.[1] ?? "Aplique esta configuração e confira o resultado na área indicada desta tela.";
-}
-
 function getTooltipText(content: string | CmsHelpContent) {
   if (typeof content === "string") return content;
-  return `${content.title}. Resumo: ${content.summary}. Exemplo real: ${content.example}. ${content.details.map((detail) => `${detail.label}: ${detail.value}`).join(" ")}`;
+  return `${content.title}. Resumo: ${content.summary}. ${content.details.map((detail) => `${detail.label}: ${detail.value}`).join(" ")}`;
 }
 
 export function DeveloperTooltip({ content }: { content: string | CmsHelpContent }) {
@@ -337,26 +332,16 @@ export function DeveloperTooltip({ content }: { content: string | CmsHelpContent
       }}
     >
       {typeof content === "string" ? (
-        <>
-          <span className="mb-3 block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
-            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
-            <span className="block font-medium leading-5 text-slate-100">{content}</span>
-          </span>
-          <span className="block rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2.5">
-            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">Exemplo real</span>
-            <span className="block font-medium leading-5 text-slate-100">{getPlainTooltipExample(content)}</span>
-          </span>
-        </>
+        <span className="block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
+          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
+          <span className="block font-medium leading-5 text-slate-100">{content}</span>
+        </span>
       ) : (
         <>
           <span className="mb-2 block text-sm font-bold text-white">{content.title}</span>
           <span className="mb-3 block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
             <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
             <span className="block font-medium leading-5 text-slate-100">{content.summary}</span>
-          </span>
-          <span className="mb-3 block rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2.5">
-            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">Exemplo real</span>
-            <span className="block font-medium leading-5 text-slate-100">{content.example}</span>
           </span>
           <span className="grid gap-x-4 gap-y-2.5 sm:grid-cols-[112px_minmax(0,1fr)]">
             {content.details.map((detail) => (

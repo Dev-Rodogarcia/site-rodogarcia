@@ -43,14 +43,14 @@ const fallbackMetadata: Metadata = {
     description:
       "Operações B2B com cobertura nacional, compliance e implantação por etapas.",
     url: seo.absoluteUrl(site.business),
-    images: [{ url: seo.absoluteUrl("/foto4.png") }],
+    images: [{ url: seo.absoluteUrl("/foto4.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Para Empresas | Rodogarcia Transportes",
     description:
       "Conheça a camada B2B da Rodogarcia para operações corporativas de maior escala.",
-    images: [seo.absoluteUrl("/foto4.png")],
+    images: [seo.absoluteUrl("/foto4.webp")],
   },
   robots: {
     index: true,
@@ -151,15 +151,15 @@ type PartnerLogo = {
 };
 
 const FALLBACK_PARTNERS: PartnerLogo[] = [
-  { name: "Tigre", category: "Construcao Civil", image: "/feedbacks/tigre.jpg" },
-  { name: "PPG", category: "Industria de Tintas", image: "/feedbacks/PPG.jpg" },
-  { name: "Danfoss", category: "Tecnologia / Engenharia", image: "/feedbacks/danfoss.png" },
-  { name: "Corbion", category: "Ingredientes / Quimica", image: "/feedbacks/corbion-brasil.png" },
-  { name: "Capricche", category: "Industria Alimenticia", image: "/feedbacks/capricche.jpg" },
-  { name: "Frigelar", category: "Refrigeracao / Varejo", image: "/feedbacks/frigelar.jpg" },
-  { name: "HB Fuller", category: "Adesivos / Quimica", image: "/feedbacks/hbfuller.png" },
+  { name: "Tigre", category: "Construcao Civil", image: "/feedbacks/tigre.webp" },
+  { name: "PPG", category: "Industria de Tintas", image: "/feedbacks/PPG.webp" },
+  { name: "Danfoss", category: "Tecnologia / Engenharia", image: "/feedbacks/danfoss.webp" },
+  { name: "Corbion", category: "Ingredientes / Quimica", image: "/feedbacks/corbion-brasil.webp" },
+  { name: "Capricche", category: "Industria Alimenticia", image: "/feedbacks/capricche.webp" },
+  { name: "Frigelar", category: "Refrigeracao / Varejo", image: "/feedbacks/frigelar.webp" },
+  { name: "HB Fuller", category: "Adesivos / Quimica", image: "/feedbacks/hbfuller.webp" },
   { name: "Hidrodomi", category: "Operacoes", image: "/feedbacks/hidrodomi.gif" },
-  { name: "Kemira", category: "Industria Quimica", image: "/feedbacks/kemira.jpg" },
+  { name: "Kemira", category: "Industria Quimica", image: "/feedbacks/kemira.webp" },
 ];
 
 function normalizePartners(feedbacks: HomeFeedback[]): PartnerLogo[] {

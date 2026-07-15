@@ -38,14 +38,14 @@ const fallbackMetadata: Metadata = {
     description:
       "Veja as vagas em destaque e como a Rodogarcia organiza sua frente de recrutamento.",
     url: seo.absoluteUrl(site.careers),
-    images: [{ url: seo.absoluteUrl("/caminhoneiro1.png") }],
+    images: [{ url: seo.absoluteUrl("/caminhoneiro1.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Carreiras | Rodogarcia Transportes",
     description:
       "Trabalhe em uma operação nacional orientada por consistência, crescimento e excelência.",
-    images: [seo.absoluteUrl("/caminhoneiro1.png")],
+    images: [seo.absoluteUrl("/caminhoneiro1.webp")],
   },
   robots: {
     index: true,
@@ -156,7 +156,7 @@ const FALLBACK_CAREERS_PAGE: CareersPageContent = {
     ],
   },
   cultureImage: {
-    src: "/caminhoneiro1.png",
+    src: "/caminhoneiro1.webp",
     alt: "Time Rodogarcia em operação",
   },
   jobs: STATIC_JOBS.map((job, index) => ({

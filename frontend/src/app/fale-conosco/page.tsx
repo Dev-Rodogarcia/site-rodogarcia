@@ -37,14 +37,14 @@ const fallbackMetadata: Metadata = {
     description:
       "Telefone, e-mail, WhatsApp e dados oficiais da Rodogarcia em um fluxo direto de atendimento.",
     url: seo.absoluteUrl(site.contact),
-    images: [{ url: seo.absoluteUrl("/foto1.png") }],
+    images: [{ url: seo.absoluteUrl("/foto1.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Fale Conosco | Rodogarcia Transportes",
     description:
       "Entre em contato com a Rodogarcia pelo canal mais adequado para sua necessidade.",
-    images: [seo.absoluteUrl("/foto1.png")],
+    images: [seo.absoluteUrl("/foto1.webp")],
   },
   robots: {
     index: true,

@@ -33,14 +33,14 @@ const fallbackMetadata: Metadata = {
     description:
       "Abra sua solicitação comercial pelo canal certo, com a mesma clareza visual da Home.",
     url: seo.absoluteUrl(site.quote),
-    images: [{ url: seo.absoluteUrl("/foto1.png") }],
+    images: [{ url: seo.absoluteUrl("/foto1.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Cotação | Rodogarcia Transportes",
     description:
       "Página de cotação com WhatsApp direto e formulário integrado ao fluxo comercial.",
-    images: [seo.absoluteUrl("/foto1.png")],
+    images: [seo.absoluteUrl("/foto1.webp")],
   },
   robots: {
     index: true,

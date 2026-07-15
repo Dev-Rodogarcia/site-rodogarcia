@@ -170,7 +170,7 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
   "global.field.arquivo": {
     details: [
       { label: "O que controla", value: "O arquivo de imagem ou vídeo usado por este bloco." },
-      { label: "De onde vem", value: "Da Biblioteca de mídia do CMS ou de um upload validado." },
+      { label: "De onde vem", value: "Da Biblioteca de mídia do CMS ou de um upload validado. Imagens enviadas em PNG, JPG, AVIF ou WebP são gravadas como WebP otimizado; vídeos permanecem no formato de vídeo." },
       { label: "Onde aparece", value: "Na área visual do bloco que está aberto em {publicDestination}." },
       { label: "Após salvar", value: "A mídia anterior é substituída somente nessa área de {publicDestination}." },
     ],
@@ -178,7 +178,7 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
   "global.field.arquivo-selecionado": {
     details: [
       { label: "O que controla", value: "O arquivo de imagem ou vídeo já escolhido para este bloco." },
-      { label: "De onde vem", value: "Da Biblioteca de mídia interna ou de um upload feito pelo CMS." },
+      { label: "De onde vem", value: "Da Biblioteca de mídia interna ou de um upload feito pelo CMS. Imagens novas são convertidas para WebP otimizado antes de entrarem na Biblioteca." },
       { label: "Onde aparece", value: "No espaço visual ligado a este formulário em {publicDestination}." },
       { label: "Após salvar", value: "Troca somente a mídia deste bloco de {publicDestination}; os demais blocos continuam iguais." },
       { label: "Proteção", value: "O CMS aceita apenas referências internas de mídia que passaram pela validação.", technical: true },

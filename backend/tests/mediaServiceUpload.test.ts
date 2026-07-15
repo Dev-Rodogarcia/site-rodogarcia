@@ -1,8 +1,13 @@
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 import path from "node:path";
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { createIsolatedBackendEnv } from "./testEnv.js";
+
+const require = createRequire(import.meta.url);
+const ffmpegStaticPath = require("ffmpeg-static") as string | null;
 
 describe("mediaService upload processing", () => {
   it("converts uploaded PNG to WebP variants and records metadata", async () => {
@@ -29,7 +34,7 @@ describe("mediaService upload processing", () => {
     expect(record.thumbnailUrl.endsWith("-thumb.webp")).toBe(true);
     expect(record.mediumUrl.endsWith("-medium.webp")).toBe(true);
     expect(record.largeUrl.endsWith("-large.webp")).toBe(true);
-    expect(record.originalUrl.endsWith(".png")).toBe(true);
+    expect(record.originalUrl).toBeUndefined();
     expect(record.optimizedSize).toBeGreaterThan(0);
 
     for (const url of [record.url, record.thumbnailUrl, record.mediumUrl, record.largeUrl]) {
@@ -38,6 +43,10 @@ describe("mediaService upload processing", () => {
       const metadata = await sharp(filePath).metadata();
       expect(metadata.format).toBe("webp");
     }
+
+    expect(
+      fs.readdirSync(env.uploadsDir).some((fileName) => fileName.endsWith(".png"))
+    ).toBe(false);
   });
 
   it("rejects MIME spoofing before writing media", async () => {
@@ -52,4 +61,46 @@ describe("mediaService upload processing", () => {
       })
     ).rejects.toThrow("não corresponde");
   });
+
+  it.skipIf(!ffmpegStaticPath || spawnSync(ffmpegStaticPath, ["-version"], { stdio: "ignore" }).status !== 0)(
+    "converts uploaded MP4 to WebM without retaining the source file",
+    async () => {
+      const env = createIsolatedBackendEnv();
+      const { saveAdminMediaFromBuffer } = await import("../src/services/mediaService.js");
+      const sourcePath = path.join(env.root, "source.mp4");
+      const created = spawnSync(
+        ffmpegStaticPath!,
+        [
+          "-y",
+          "-f",
+          "lavfi",
+          "-i",
+          "color=c=blue:s=32x24:d=0.2",
+          "-f",
+          "lavfi",
+          "-i",
+          "anullsrc=r=48000:cl=stereo",
+          "-shortest",
+          "-c:v",
+          "libx264",
+          "-c:a",
+          "aac",
+          sourcePath,
+        ],
+        { stdio: "ignore" }
+      );
+      expect(created.status).toBe(0);
+
+      const record = await saveAdminMediaFromBuffer({
+        fileName: "operacao.mp4",
+        mimeType: "video/mp4",
+        buffer: fs.readFileSync(sourcePath),
+      });
+
+      expect(record.url.endsWith(".webm")).toBe(true);
+      expect(record.format).toBe("webm");
+      expect(fs.existsSync(path.join(env.uploadsDir, record.url.replace(/^\/uploads\//, "")))).toBe(true);
+      expect(fs.readdirSync(env.uploadsDir).some((fileName) => fileName.endsWith(".mp4"))).toBe(false);
+    }
+  );
 });

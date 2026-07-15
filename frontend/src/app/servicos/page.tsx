@@ -26,14 +26,14 @@ const fallbackMetadata: Metadata = {
     description:
       "Conheça a estrutura de serviços da Rodogarcia com foco em distribuição, operação indoor e cargas especiais.",
     url: seo.absoluteUrl(site.services),
-    images: [{ url: seo.absoluteUrl("/Gemini_Generated_Image_h09yu8h09yu8h09y.png") }],
+    images: [{ url: seo.absoluteUrl("/Gemini_Generated_Image_h09yu8h09yu8h09y.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Serviços | Rodogarcia Transportes",
     description:
       "Módulos de serviço organizados para leitura rápida, com operação premium e rastreio oficial.",
-    images: [seo.absoluteUrl("/Gemini_Generated_Image_h09yu8h09yu8h09y.png")],
+    images: [seo.absoluteUrl("/Gemini_Generated_Image_h09yu8h09yu8h09y.webp")],
   },
   robots: {
     index: true,

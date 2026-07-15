@@ -164,7 +164,7 @@ export const external = {
 export const seo = {
   baseUrl: BASE_URL,
   siteName: SITE_NAME,
-  defaultOgImage: "/foto5.png",
+  defaultOgImage: "/foto5.webp",
   sitemapPath: "/sitemap.xml",
   disallow: ["/developer/", "/auth/", "/api/"] as const,
   absoluteUrl(path: string) {

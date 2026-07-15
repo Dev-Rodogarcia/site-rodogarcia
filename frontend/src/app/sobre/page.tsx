@@ -29,14 +29,14 @@ const fallbackMetadata: Metadata = {
     description:
       "História, cultura, cobertura e disciplina operacional para crescer com consistência.",
     url: seo.absoluteUrl(site.about),
-    images: [{ url: seo.absoluteUrl("/caminhoneiro1.png") }],
+    images: [{ url: seo.absoluteUrl("/caminhoneiro1.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sobre a Rodogarcia | Logística com visão de longo prazo",
     description:
       "Veja como a Rodogarcia combina experiência operacional, capilaridade e consistência.",
-    images: [seo.absoluteUrl("/caminhoneiro1.png")],
+    images: [seo.absoluteUrl("/caminhoneiro1.webp")],
   },
   robots: {
     index: true,
@@ -83,14 +83,14 @@ const FALLBACK_ABOUT_PAGE: AboutPageContent = {
     title: "Mais de 35 anos conectando o Brasil",
     description:
       "Desde 1989, transformando a logística com excelência, tecnologia e compromisso com cada entrega.",
-    media: { src: "/caminhoneiro1.png", alt: "Operação Rodogarcia em movimento" },
+    media: { src: "/caminhoneiro1.webp", alt: "Operação Rodogarcia em movimento" },
     buttons: [
       { label: "Solicitar cotação", url: site.quote },
       { label: "Conhecer serviços", url: site.services },
     ],
   },
   compliance: {
-    image: { src: "/certificados/certificado-sassmaq.png", alt: "Certificado SASSMAQ" },
+    image: { src: "/certificados/certificado-sassmaq.webp", alt: "Certificado SASSMAQ" },
     title: "Governanca e Compliance",
     description:
       "Certificações, licenças e controles sustentam operações com mais segurança, rastreabilidade e previsibilidade.",

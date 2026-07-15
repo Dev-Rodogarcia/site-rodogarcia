@@ -1,6 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import dotenv from "dotenv";
+
+const require = createRequire(import.meta.url);
+const ffmpegStaticPath = require("ffmpeg-static") as string | null;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -117,6 +121,7 @@ export const env = {
   uploadsDir: path.resolve(
     process.env.UPLOADS_DIR ?? path.join(backendRoot, "storage", "uploads")
   ),
+  ffmpegPath: process.env.FFMPEG_PATH?.trim() || ffmpegStaticPath || "",
   frontendOrigin,
   allowedOrigins: new Set([
     frontendOrigin,

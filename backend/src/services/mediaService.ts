@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
 import path from "node:path";
+import { spawn, type ChildProcess } from "node:child_process";
 import sharp from "sharp";
 import type { Request } from "express";
 import { env } from "../config/env.js";
@@ -177,6 +178,49 @@ function mediaTypeFromUrl(url: string): "image" | "video" {
   return VIDEO_EXTENSIONS.has(path.extname(url).toLowerCase()) ? "video" : "image";
 }
 
+async function transcodeVideoToWebm(inputPath: string, outputPath: string) {
+  if (!env.ffmpegPath) {
+    throw new HttpError(503, "Conversão de vídeo indisponível nesta plataforma.");
+  }
+  await new Promise<void>((resolve, reject) => {
+    const child: ChildProcess = spawn(
+      env.ffmpegPath,
+      [
+        "-y",
+        "-i",
+        inputPath,
+        "-map",
+        "0:v:0",
+        "-map",
+        "0:a?",
+        "-c:v",
+        "libvpx-vp9",
+        "-crf",
+        "32",
+        "-b:v",
+        "0",
+        "-row-mt",
+        "1",
+        "-deadline",
+        "good",
+        "-c:a",
+        "libopus",
+        "-b:a",
+        "96k",
+        outputPath,
+      ],
+      { windowsHide: true, stdio: "ignore" }
+    );
+    child.once("error", () =>
+      reject(new HttpError(503, "Conversão de vídeo indisponível. Configure o FFmpeg no servidor."))
+    );
+    child.once("close", (code: number | null) => {
+      if (code === 0) resolve();
+      else reject(new HttpError(422, "Não foi possível converter este vídeo para WebM."));
+    });
+  });
+}
+
 function safeFileBaseName(fileName: string) {
   return (
     sanitizeText(path.parse(fileName).name, 80)
@@ -331,18 +375,15 @@ export async function saveAdminImageFromBuffer({
 
   fs.mkdirSync(env.uploadsDir, { recursive: true });
   const base = `${safeFileBaseName(fileName)}-${crypto.randomUUID()}`;
-  const originalName = `${base}${MIME_TO_EXTENSION[mimeType]}`;
   const optimizedName = `${base}.webp`;
   const thumbnailName = `${base}-thumb.webp`;
   const mediumName = `${base}-medium.webp`;
   const largeName = `${base}-large.webp`;
-  const originalPath = path.join(env.uploadsDir, originalName);
   const optimizedPath = path.join(env.uploadsDir, optimizedName);
   const thumbnailPath = path.join(env.uploadsDir, thumbnailName);
   const mediumPath = path.join(env.uploadsDir, mediumName);
   const largePath = path.join(env.uploadsDir, largeName);
 
-  fs.writeFileSync(originalPath, buffer);
   const pipeline = sharp(buffer, { failOn: "none" }).rotate();
   const metadata = await pipeline.metadata();
   await sharp(buffer, { failOn: "none" })
@@ -371,7 +412,6 @@ export async function saveAdminImageFromBuffer({
     name: path.basename(fileName),
     url: `/uploads/${optimizedName}`,
     mediaType: "image",
-    originalUrl: `/uploads/${originalName}`,
     optimizedUrl: `/uploads/${optimizedName}`,
     thumbnailUrl: `/uploads/${thumbnailName}`,
     mediumUrl: `/uploads/${mediumName}`,
@@ -431,20 +471,30 @@ export async function saveAdminMediaFromBuffer({
   }
 
   fs.mkdirSync(env.uploadsDir, { recursive: true });
-  const fileExtension = MIME_TO_EXTENSION[mimeType]!;
-  const storedName = `${safeFileBaseName(fileName)}-${crypto.randomUUID()}${fileExtension}`;
+  const base = `${safeFileBaseName(fileName)}-${crypto.randomUUID()}`;
+  const inputPath = path.join(env.uploadsDir, `${base}${MIME_TO_EXTENSION[mimeType]!}`);
+  const temporaryOutputPath = path.join(env.uploadsDir, `${base}.tmp.webm`);
+  const storedName = `${base}.webm`;
   const storedPath = path.join(env.uploadsDir, storedName);
-  fs.writeFileSync(storedPath, buffer);
+  fs.writeFileSync(inputPath, buffer);
+  try {
+    await transcodeVideoToWebm(inputPath, temporaryOutputPath);
+    fs.renameSync(temporaryOutputPath, storedPath);
+  } finally {
+    fs.rmSync(inputPath, { force: true });
+    fs.rmSync(temporaryOutputPath, { force: true });
+  }
 
   const record = {
     id: generateId("media"),
     name: path.basename(fileName),
     url: `/uploads/${storedName}`,
     mediaType: "video",
-    format: fileExtension.replace(".", ""),
+    format: "webm",
     originalFormat: mimeType,
-    size: buffer.length,
+    size: fs.statSync(storedPath).size,
     originalSize: buffer.length,
+    optimizedSize: fs.statSync(storedPath).size,
     uploadedAt: new Date().toISOString(),
   };
   writeMediaLibrary([record, ...readMediaLibrary()].slice(0, 5000));
