@@ -6,6 +6,7 @@ import {
   CaretRight,
   ImagesSquare,
   MagicWand,
+  Trash,
   UploadSimple,
 } from "@phosphor-icons/react";
 import { useApiRequest } from "@/hooks/useApiRequest";
@@ -26,6 +27,7 @@ import {
   DeveloperSectionHeading,
   developerSplitLayoutClassName,
   developerInputClassName,
+  developerDangerButtonClassName,
   developerPrimaryButtonClassName,
   developerSecondaryButtonClassName,
 } from "@/components/developer/ui";
@@ -92,6 +94,7 @@ export default function ImagensPage() {
   const [uploading, setUploading] = useState(false);
   const [replacing, setReplacing] = useState(false);
   const [savingSlots, setSavingSlots] = useState(false);
+  const [deletingUrl, setDeletingUrl] = useState("");
   const [status, setStatus] = useState<"" | "success" | "error" | "info">("");
   const [message, setMessage] = useState("");
   const { data, loading, error, refresh } = useAdminResource<{
@@ -260,6 +263,31 @@ export default function ImagensPage() {
 
     setStatus("success");
     setMessage("Referências atualizadas com sucesso.");
+    invalidateAdminResource([adminResourceKeys.images, adminResourceKeys.mediaManager, adminResourceKeys.dashboard]);
+    await refresh();
+  }
+
+  async function handleDelete(image: AdminImageRecord) {
+    const confirmation = image.references > 0
+      ? `Esta mídia está em uso em ${image.references} área(s) do site. Ao excluir, essas áreas usarão o fallback disponível. Deseja continuar?`
+      : `Excluir permanentemente o arquivo ${image.name}?`;
+    if (!window.confirm(confirmation)) return;
+
+    setDeletingUrl(image.url);
+    const response = await apiRequest(api.admin.images, {
+      method: "DELETE",
+      body: JSON.stringify({ url: image.url, confirmInUse: true }),
+    });
+    setDeletingUrl("");
+
+    if (!response.success) {
+      setStatus("error");
+      setMessage(response.error ?? "Não foi possível excluir a mídia.");
+      return;
+    }
+
+    setStatus("success");
+    setMessage(image.references > 0 ? "Mídia excluída e referências removidas." : "Mídia excluída com sucesso.");
     invalidateAdminResource([adminResourceKeys.images, adminResourceKeys.mediaManager, adminResourceKeys.dashboard]);
     await refresh();
   }
@@ -579,7 +607,8 @@ export default function ImagensPage() {
           <DeveloperSectionHeading
             eyebrow="Biblioteca"
             title="Imagens encontradas no projeto"
-            description="Lista priorizando assets em uso para facilitar manutenção do CMS."
+            description="Lista da mídia mais recente para a mais antiga, facilitando encontrar os últimos uploads."
+            tooltip="Arquivos enviados pelo CMS podem ser excluídos. Se estiverem em uso, a confirmação remove as referências e o site usa os fallbacks configurados; arquivos versionados do projeto não podem ser apagados por esta tela."
           />
 
           <div className="flex-1 overflow-hidden">
@@ -665,6 +694,21 @@ export default function ImagensPage() {
                             <ImagesSquare size={16} weight="bold" />
                             Usar como destino
                           </button>
+                          {image.source === "upload" ? (
+                            <button
+                              type="button"
+                              onClick={() => void handleDelete(image)}
+                              disabled={deletingUrl === image.url}
+                              className={`${developerDangerButtonClassName} min-h-10 rounded-xl px-3 py-2 text-xs`}
+                            >
+                              <Trash size={16} weight="bold" />
+                              {deletingUrl === image.url ? "Excluindo..." : "Excluir arquivo"}
+                            </button>
+                          ) : (
+                            <p className="px-1 text-[11px] leading-5 text-[var(--color-muted-raw)]">
+                              Arquivo do projeto: não pode ser excluído pelo CMS.
+                            </p>
+                          )}
                         </div>
                       </div>
                     </article>

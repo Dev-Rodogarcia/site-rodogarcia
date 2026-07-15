@@ -27,6 +27,7 @@ const DEFAULT_ROUTES = [
 
 const DEFAULT_DESCRIPTION =
   "Rodogarcia Transportes: soluções logísticas nacionais com segurança, previsibilidade e rastreabilidade.";
+const DEFAULT_OG_IMAGE = "/foto5.webp";
 
 export interface SeoPageSettings {
   path: string;
@@ -57,7 +58,7 @@ function defaultPages(): SeoPageSettings[] {
     slug: route.path === "/" ? "/" : route.path.replace(/^\//, ""),
     ogTitle: route.title,
     ogDescription: DEFAULT_DESCRIPTION,
-    ogImage: "/foto5.png",
+    ogImage: DEFAULT_OG_IMAGE,
   }));
 }
 
@@ -79,7 +80,24 @@ function sanitizeCanonical(value: unknown, fallback: string) {
     : fallback;
 }
 
-function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettings): SeoPageSettings {
+function normalizeOgImage(
+  value: unknown,
+  fallback: string,
+  strictMedia: boolean
+) {
+  try {
+    return sanitizeInternalImageUrl(value, "SEO: imagem social") || fallback;
+  } catch (error) {
+    if (strictMedia) throw error;
+    return fallback;
+  }
+}
+
+function normalizePage(
+  input: Partial<SeoPageSettings>,
+  fallback?: SeoPageSettings,
+  strictMedia = false
+): SeoPageSettings {
   const path = sanitizePath(input.path) || fallback?.path || "/";
   const title = sanitizeText(input.title, 90) || fallback?.title || "Rodogarcia Transportes";
   const description = sanitizeText(input.description, 180) || fallback?.description || DEFAULT_DESCRIPTION;
@@ -96,7 +114,7 @@ function normalizePage(input: Partial<SeoPageSettings>, fallback?: SeoPageSettin
     slug: path === "/" ? "/" : path.replace(/^\//, ""),
     ogTitle: sanitizeText(input.ogTitle, 95) || title,
     ogDescription: sanitizeText(input.ogDescription, 220) || description,
-    ogImage: sanitizeInternalImageUrl(input.ogImage, "SEO: imagem social") || fallback?.ogImage || "/foto5.png",
+    ogImage: normalizeOgImage(input.ogImage, fallback?.ogImage || DEFAULT_OG_IMAGE, strictMedia),
     updatedAt: input.updatedAt,
   };
 }
@@ -129,7 +147,11 @@ export function updateSeoPage(req: Request | undefined, body: Record<string, unk
   }
   const settings = readSeoSettings();
   const current = settings.pages.find((page) => page.path === path);
-  const nextPage = normalizePage({ ...current, ...body, updatedAt: new Date().toISOString() }, current);
+  const nextPage = normalizePage(
+    { ...current, ...body, updatedAt: new Date().toISOString() },
+    current,
+    true
+  );
   if (nextPage.title.length < 8) throw new HttpError(422, "Título SEO muito curto.");
   if (nextPage.description.length < 40) throw new HttpError(422, "Descrição SEO muito curta.");
 

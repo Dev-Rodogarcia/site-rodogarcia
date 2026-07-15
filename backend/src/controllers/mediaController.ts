@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import {
+  deleteAdminMedia,
   listAdminImages,
   readMediaSlots,
   replaceAdminImageReferences,
@@ -31,6 +32,20 @@ export const uploadImageController: RequestHandler = asyncHandler((req, res) => 
       image,
       images: listAdminImages(),
     });
+  });
+});
+
+export const deleteImageController: RequestHandler = asyncHandler((req, res) => {
+  const body = req.body ?? {};
+  const result = deleteAdminMedia(
+    String(body.url ?? ""),
+    body.confirmInUse === true,
+    req
+  );
+  res.json({
+    message: "Mídia excluída com sucesso.",
+    ...result,
+    images: listAdminImages(),
   });
 });
 

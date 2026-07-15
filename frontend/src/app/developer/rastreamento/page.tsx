@@ -62,7 +62,7 @@ export default function TrackingPage() {
   const [appliedKey, setAppliedKey] = useState("");
   const [eventsPage, setEventsPage] = useState(1);
   const [auditPage, setAuditPage] = useState(1);
-  const EVENTS_PER_PAGE = 18;
+  const EVENTS_PER_PAGE = 20;
   const AUDIT_ITEMS_PER_PAGE = 4;
   const eventPath = `${api.admin.trackingEvents}?limit=250&event=${encodeURIComponent(eventFilter)}&page=${encodeURIComponent(pageFilter)}`;
   const auditPath = `${api.admin.auditLog}?limit=120`;
@@ -151,7 +151,7 @@ export default function TrackingPage() {
       </DeveloperCard>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <DeveloperCard>
+        <DeveloperCard className="flex h-full flex-col">
           <DeveloperSectionHeading
             eyebrow="Eventos"
             title="Registros recentes"
@@ -195,7 +195,7 @@ export default function TrackingPage() {
             </table>
           </div>
           {totalEventPages > 1 && (
-            <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-4">
+            <div className="mt-auto flex items-center justify-between border-t border-[var(--border)] pt-4">
               <span className="text-xs text-[var(--color-muted-raw)]">
                 Página {eventsPage} de {totalEventPages}
               </span>

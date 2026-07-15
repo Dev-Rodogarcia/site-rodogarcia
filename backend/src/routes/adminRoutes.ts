@@ -38,6 +38,7 @@ import {
 } from "../controllers/cmsController.js";
 import { listUnifiedLeadsController } from "../controllers/leadsController.js";
 import {
+  deleteImageController,
   getMediaSlotsController,
   listImagesController,
   replaceImageReferenceController,
@@ -180,6 +181,13 @@ adminRouter.post(
     { name: "media", maxCount: 1 },
   ]),
   uploadImageController
+);
+adminRouter.delete(
+  "/images",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  deleteImageController
 );
 adminRouter.post(
   "/images/replace-reference",

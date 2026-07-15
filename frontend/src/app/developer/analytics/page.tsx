@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import {
   DeveloperCard,
   DeveloperField,
+  DeveloperHelp,
   DeveloperHero,
   DeveloperCarouselPagination,
   DeveloperMessage,
@@ -421,7 +422,6 @@ export default function AnalyticsPage() {
                 eyebrow="Páginas"
                 title="Top páginas do período"
                 description={`Atualizado em ${formatDateTime(stats.stats.generatedAt ?? Date.now())}.`}
-                tooltip="Eventos por página mostra quais rotas receberam mais visualizações no período. Exemplo: /servicos com 120 views."
               />
 
               <div className="flex-1 overflow-hidden">
@@ -466,7 +466,6 @@ export default function AnalyticsPage() {
                 eyebrow="Eventos"
                 title="Contagem por tipo"
                 description="Resumo dos eventos recebidos pelo analytics."
-                tooltip="Volume por evento soma quantas vezes cada ação aconteceu. Exemplo: page_view, popup_submit ou cta_click."
               />
 
               <div className="flex-1 overflow-hidden">
@@ -505,13 +504,12 @@ export default function AnalyticsPage() {
                 eyebrow="Auditoria"
                 title="Eventos recentes"
                 description="Últimos registros recebidos pelo endpoint de analytics."
-                tooltip="Registros recentes combinam eventos normalizados e legados. Exemplo: page_view em /contato com sessão anon-123."
               />
 
               <div className="mb-4 grid gap-3 sm:grid-cols-2">
                 <DeveloperField
                   label="Filtrar tipo"
-                  tooltip="Filtra pelo nome do evento. Exemplo: page_view, cta_click ou popup_submit."
+                  helpKey="filtrar-tipo"
                 >
                   <input
                     value={eventFilter}
@@ -522,7 +520,7 @@ export default function AnalyticsPage() {
                 </DeveloperField>
                 <DeveloperField
                   label="Filtrar página"
-                  tooltip="Filtra pela rota da página onde o evento aconteceu. Exemplo: /servicos."
+                  helpKey="filtrar-pagina"
                 >
                   <input
                     value={pageFilter}
@@ -544,13 +542,13 @@ export default function AnalyticsPage() {
                         <table className="min-w-full text-left text-sm">
                           <thead>
                             <tr className="border-b border-[var(--border)] text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-                              <th className="pb-3 pr-4 font-semibold">Evento</th>
-                              <th className="pb-3 pr-4 font-semibold">Página</th>
-                              <th className="pb-3 pr-4 font-semibold">Data</th>
+                              <th className="pb-3 pr-4 font-semibold"><span className="inline-flex items-center gap-1.5">Evento <DeveloperHelp label="Evento" templateKey="evento" /></span></th>
+                              <th className="pb-3 pr-4 font-semibold"><span className="inline-flex items-center gap-1.5">Página <DeveloperHelp label="Página" templateKey="pagina" /></span></th>
+                              <th className="pb-3 pr-4 font-semibold"><span className="inline-flex items-center gap-1.5">Data <DeveloperHelp label="Data" templateKey="data" /></span></th>
                               <th className="pb-3 font-semibold">
                                 <span className="inline-flex items-center gap-1.5">
                                   Sessão
-                                  <DeveloperTooltip content="Sessão identifica uma visita anônima durante a navegação. Exemplo: session_abc123." />
+                                  <DeveloperHelp label="Sessão" templateKey="sessao" />
                                 </span>
                               </th>
                             </tr>
@@ -583,7 +581,6 @@ export default function AnalyticsPage() {
                 eyebrow="Conversões"
                 title="Resumo de resultados"
                 description="Formulários, downloads, popup e taxa geral do período."
-                tooltip="Conversão é uma ação de valor. Exemplo: formulário enviado, lead criado ou popup enviado."
               />
 
               <div className="flex flex-1 overflow-hidden">
@@ -624,10 +621,11 @@ export default function AnalyticsPage() {
                     className="h-4 w-4 accent-[var(--primary)]"
                   />
                   Eventos internos ativos
+                  <DeveloperHelp label="Eventos internos ativos" templateKey="eventos-internos-ativos" />
                 </label>
                 <DeveloperField
                   label="Marcos de scroll (%)"
-                  tooltip="Percentuais em que o sistema registra profundidade de leitura. Exemplo: 25,50,75,100."
+                  helpKey="marcos-de-scroll"
                 >
                   <input
                     value={form.scrollMilestones}
@@ -645,12 +643,16 @@ export default function AnalyticsPage() {
                   fieldKey: "ga4MeasurementId" as const,
                   label: "GA4",
                   fieldLabel: "Measurement ID",
+                  enabledHelpKey: "ga4",
+                  fieldHelpKey: "measurement-id",
                 },
                 {
                   enabledKey: "clarityEnabled" as const,
                   fieldKey: "clarityProjectId" as const,
                   label: "Clarity",
                   fieldLabel: "Project ID",
+                  enabledHelpKey: "clarity",
+                  fieldHelpKey: "project-id",
                 },
               ].map((item) => (
                 <div key={item.label} className={cn("rounded-[20px] border p-4 shadow-[0_6px_16px_rgba(15,23,42,0.035)]", form[item.enabledKey] ? "border-[#93c5fd] bg-[#eff6ff]" : "border-slate-200 bg-slate-50/82")}>
@@ -664,10 +666,11 @@ export default function AnalyticsPage() {
                       className="h-4 w-4 accent-[var(--primary)]"
                     />
                     {item.label}
+                    <DeveloperHelp label={item.label} templateKey={item.enabledHelpKey} />
                   </label>
 
                   <div className="mt-4">
-                    <DeveloperField label={item.fieldLabel}>
+                    <DeveloperField label={item.fieldLabel} helpKey={item.fieldHelpKey}>
                       <input
                         value={form[item.fieldKey]}
                         onChange={(event) =>
@@ -688,10 +691,12 @@ export default function AnalyticsPage() {
               <button type="button" onClick={handleSave} disabled={saving} className={developerPrimaryButtonClassName}>
                 <CheckCircle size={18} weight="bold" />
                 {saving ? "Salvando..." : "Salvar configuração"}
+                <DeveloperHelp label="Salvar configuração" templateKey="salvar-configuracao" />
               </button>
               <button type="button" onClick={handleRefresh} className={developerSecondaryButtonClassName}>
                 <CursorClick size={16} weight="bold" />
                 Atualizar métricas
+                <DeveloperHelp label="Atualizar métricas" templateKey="atualizar-metricas" />
               </button>
             </div>
 

@@ -133,7 +133,7 @@ describe("CMS content regressions", () => {
 
   it("derives SEO slug from the canonical route and keeps multiline meta tags", async () => {
     const env = isolatedBackend();
-    createPublicAsset(env.publicDir, "foto5.png");
+    createPublicAsset(env.publicDir, "foto5.webp");
 
     const { getPublicSeoPage, updateSeoPage } = await import("../src/services/seoService.js");
     const result = updateSeoPage(undefined, {

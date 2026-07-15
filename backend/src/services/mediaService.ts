@@ -267,6 +267,34 @@ function libraryRecordByUrl() {
   return new Map(entries);
 }
 
+function uploadedUrlsForRecord(record: Record<string, unknown> | undefined, fallbackUrl: string) {
+  const urls = new Set<string>();
+  for (const value of [
+    fallbackUrl,
+    record?.url,
+    record?.optimizedUrl,
+    record?.originalUrl,
+    record?.thumbnailUrl,
+    record?.mediumUrl,
+    record?.largeUrl,
+    record?.posterUrl,
+  ]) {
+    const url = sanitizePath(value);
+    if (url.startsWith("/uploads/")) urls.add(url);
+  }
+  return [...urls];
+}
+
+function uploadFilePath(url: string) {
+  const relativePath = url.replace(/^\/uploads\//, "");
+  const resolvedRoot = path.resolve(env.uploadsDir);
+  const filePath = path.resolve(resolvedRoot, relativePath);
+  if (filePath === resolvedRoot || !filePath.startsWith(`${resolvedRoot}${path.sep}`)) {
+    throw new HttpError(422, "Arquivo de mídia inválido.");
+  }
+  return filePath;
+}
+
 export function listAdminImages(): AdminImageRecord[] {
   const references = getReferences();
   const libraryByUrl = libraryRecordByUrl();
@@ -342,12 +370,16 @@ export function listAdminImages(): AdminImageRecord[] {
         source: referenceCount > 0 ? "content" : "library",
         mediaType: mediaTypeFromUrl(normalized),
         format: path.extname(relativePath).replace(".", ""),
+        uploadedAt: stats.mtime.toISOString(),
       } satisfies AdminImageRecord;
     });
 
   return [...uploadedRecords, ...uploadFiles, ...libraryFiles].sort((a, b) => {
-    if (a.usedInContent !== b.usedInContent) return a.usedInContent ? -1 : 1;
-    if (a.source !== b.source) return a.source.localeCompare(b.source);
+    const uploadedAtDifference =
+      Date.parse(b.uploadedAt ?? "") - Date.parse(a.uploadedAt ?? "");
+    if (Number.isFinite(uploadedAtDifference) && uploadedAtDifference !== 0) {
+      return uploadedAtDifference;
+    }
     return a.name.localeCompare(b.name);
   });
 }
@@ -542,6 +574,66 @@ export function replaceAdminImageReferences(fromUrlRaw: string, toUrlRaw: string
     metadata: { toUrl },
   });
   return { fromUrl, toUrl };
+}
+
+export function deleteAdminMedia(
+  urlRaw: string,
+  confirmInUse: boolean,
+  req?: Request
+) {
+  const url = assertInternalMediaUrl(urlRaw, { kind: "all", required: true, label: "Mídia" });
+  if (!url.startsWith("/uploads/")) {
+    throw new HttpError(422, "Somente arquivos enviados pela Biblioteca podem ser excluídos.");
+  }
+
+  const record = libraryRecordByUrl().get(url);
+  const urls = uploadedUrlsForRecord(record, url);
+  const references = getReferences();
+  const referenceCount = urls.reduce((total, mediaUrl) => total + (references.get(mediaUrl) ?? 0), 0);
+  if (referenceCount > 0 && !confirmInUse) {
+    throw new HttpError(
+      409,
+      `Esta mídia está em uso em ${referenceCount} referência(s). Confirme a exclusão para removê-la e usar os fallbacks do site.`
+    );
+  }
+
+  const filePaths = urls.map(uploadFilePath).filter((filePath) => fs.existsSync(filePath));
+  if (filePaths.length === 0) throw new HttpError(404, "Arquivo de mídia não encontrado.");
+
+  writeJsonFilesTransaction(
+    [
+      { filePath: storagePaths.content, data: urls.reduce((data, mediaUrl) => replaceReferences(data, mediaUrl, ""), readContentData()) },
+      { filePath: storagePaths.siteTexts, data: urls.reduce((data, mediaUrl) => replaceReferences(data, mediaUrl, ""), readSiteTextsData()) },
+      { filePath: storagePaths.mediaSlots, data: urls.reduce((data, mediaUrl) => replaceReferences(data, mediaUrl, ""), readMediaSlots()) },
+      {
+        filePath: storagePaths.popupConfig,
+        data: urls.reduce(
+          (data, mediaUrl) => replaceReferences(data, mediaUrl, ""),
+          popupConfigRepository.read<Record<string, unknown>>({})
+        ),
+      },
+      {
+        filePath: storagePaths.seoSettings,
+        data: urls.reduce(
+          (data, mediaUrl) => replaceReferences(data, mediaUrl, ""),
+          seoSettingsRepository.read<Record<string, unknown>>({})
+        ),
+      },
+    ],
+    storagePaths.mediaReplaceTransaction
+  );
+
+  writeMediaLibrary(
+    readMediaLibrary().filter((item) => !urls.some((mediaUrl) => uploadedUrlsForRecord(item, "").includes(mediaUrl)))
+  );
+  filePaths.forEach((filePath) => fs.rmSync(filePath, { force: true }));
+  recordAuditAction({
+    req,
+    action: "media.delete",
+    target: url,
+    metadata: { referenceCount: String(referenceCount), removedFiles: String(filePaths.length) },
+  });
+  return { url, referenceCount, removedFiles: filePaths.length };
 }
 
 export function readMediaSlots() {

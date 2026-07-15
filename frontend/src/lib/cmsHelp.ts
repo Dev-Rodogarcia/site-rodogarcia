@@ -231,6 +231,160 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Após salvar", value: "As mudanças afetam somente essa parte; elas não alteram as demais seções." },
     ],
   },
+  "analytics.field.eventos-internos-ativos": {
+    title: "Eventos internos ativos",
+    summary: "Liga ou desliga a coleta de eventos feita pelo próprio site. Quando desligado, o site para de registrar as ações de navegação nesta área.",
+    details: [
+      { label: "O que registra", value: "Interações como páginas visitadas, cliques, tempo de navegação e marcos de rolagem." },
+      { label: "Quando desligar", value: "Use somente se quiser pausar a coleta interna de métricas. Os registros já existentes não são apagados." },
+      { label: "Após salvar", value: "A próxima navegação deixa de gerar eventos internos enquanto esta opção estiver desativada." },
+    ],
+  },
+  "analytics.field.marcos-de-scroll": {
+    title: "Marcos de scroll (%)",
+    summary: "Define em quais pontos da rolagem da página o site registra que o visitante chegou.",
+    details: [
+      { label: "Como preencher", value: "Informe porcentagens separadas por vírgula, como 25,50,75,100." },
+      { label: "O que significa", value: "Com 25,50,75,100, o site registra quando a pessoa alcança 25%, 50%, 75% e 100% da página." },
+      { label: "Limite", value: "São aceitos somente números maiores que 0 e até 100; valores repetidos são mantidos uma única vez.", technical: true },
+      { label: "Após salvar", value: "Os próximos eventos de rolagem usam os novos pontos definidos." },
+    ],
+  },
+  "analytics.field.ga4": {
+    title: "GA4",
+    summary: "Ativa o envio das métricas do site para o Google Analytics 4.",
+    details: [
+      { label: "O que faz", value: "Compartilha os eventos e métricas coletados com a propriedade configurada no Google Analytics." },
+      { label: "Para funcionar", value: "Informe um Measurement ID válido antes de ativar esta opção." },
+      { label: "Após salvar", value: "O provedor passa a carregar somente quando houver o consentimento de Analytics permitido pelo visitante." },
+    ],
+  },
+  "analytics.field.measurement-id": {
+    title: "Measurement ID",
+    summary: "É o código da sua propriedade do Google Analytics 4; ele diz para qual conta as métricas devem ser enviadas.",
+    details: [
+      { label: "Formato", value: "Use o identificador exibido no Google Analytics, por exemplo G-ABC123XYZ.", technical: true },
+      { label: "Onde encontrar", value: "No fluxo de dados da propriedade GA4 que receberá as métricas do site." },
+      { label: "Validação", value: "O CMS só permite ativar o GA4 com um identificador no formato aceito pelo Google.", technical: true },
+    ],
+  },
+  "analytics.field.clarity": {
+    title: "Clarity",
+    summary: "Ativa o envio de dados para o Microsoft Clarity, usado para entender como os visitantes navegam pelo site.",
+    details: [
+      { label: "O que permite analisar", value: "Mapas de calor, cliques e gravações de sessões disponibilizados pelo Microsoft Clarity." },
+      { label: "Para funcionar", value: "Informe o Project ID do projeto criado no Microsoft Clarity antes de ativar esta opção." },
+      { label: "Após salvar", value: "O Clarity passa a carregar somente quando houver o consentimento de Analytics permitido pelo visitante." },
+    ],
+  },
+  "analytics.field.project-id": {
+    title: "Project ID",
+    summary: "É o código que identifica o seu projeto no Microsoft Clarity e recebe os dados de navegação do site.",
+    details: [
+      { label: "Onde encontrar", value: "Nas configurações do projeto criado no painel do Microsoft Clarity." },
+      { label: "Formato", value: "Use somente letras e números, com 6 a 80 caracteres.", technical: true },
+      { label: "Validação", value: "O CMS não permite ativar o Clarity com um código fora desse formato.", technical: true },
+    ],
+  },
+  "analytics.field.salvar-configuracao": {
+    title: "Salvar configuração",
+    summary: "Grava as alterações feitas nos eventos internos, GA4 e Clarity.",
+    details: [
+      { label: "O que salva", value: "Os estados de ativação, os marcos de scroll e os códigos dos provedores externos." },
+      { label: "Antes de salvar", value: "Se GA4 ou Clarity estiverem ativos, informe os respectivos identificadores em um formato válido." },
+      { label: "Resultado", value: "As novas configurações passam a valer para as próximas visitas e eventos do site." },
+    ],
+  },
+  "analytics.field.atualizar-metricas": {
+    title: "Atualizar métricas",
+    summary: "Busca novamente os dados de Analytics para atualizar os números exibidos nesta tela.",
+    details: [
+      { label: "O que atualiza", value: "Estatísticas, eventos, páginas mais acessadas, conversões e dados de heatmap do período selecionado." },
+      { label: "O que não faz", value: "Não altera as configurações nem apaga registros; apenas recarrega os números mostrados." },
+    ],
+  },
+  "analytics.section.top-paginas-do-periodo": {
+    title: "Top páginas do período",
+    summary: "Mostra quais páginas receberam mais visitas durante o período selecionado. Quanto maior o número, mais acessada foi a página.",
+    details: [
+      { label: "Como ler", value: "A rota / é a página inicial; /servicos é a página de serviços; /sobre é a página institucional." },
+      { label: "Período", value: "Use o seletor de dias no topo da tela e Atualizar para consultar outro intervalo." },
+    ],
+  },
+  "analytics.section.contagem-por-tipo": {
+    title: "Contagem por tipo",
+    summary: "Mostra quantas vezes cada tipo de ação aconteceu no site durante o período selecionado.",
+    details: [
+      { label: "page_view", value: "Uma página foi aberta." },
+      { label: "time_on_page", value: "O tempo de permanência em uma página foi registrado." },
+      { label: "session_end", value: "Uma visita terminou." },
+      { label: "scroll", value: "A pessoa chegou a algum marco de rolagem configurado." },
+      { label: "click", value: "Houve um clique monitorado." },
+    ],
+  },
+  "analytics.section.eventos-recentes": {
+    title: "Eventos recentes",
+    summary: "Mostra os últimos eventos que o site recebeu dos visitantes.",
+    details: [
+      { label: "O que você vê", value: "O que aconteceu, em qual página, quando e a visita anônima associada ao evento." },
+      { label: "Exemplos", value: "page_view abre uma página; click registra um clique; scroll registra rolagem; time_on_page registra tempo; session_end marca o fim da visita." },
+    ],
+  },
+  "analytics.field.filtrar-tipo": {
+    title: "Filtrar tipo",
+    summary: "Mostra somente os eventos do tipo informado.",
+    details: [
+      { label: "Como usar", value: "Digite, por exemplo, page_view para ver páginas abertas ou click para ver cliques." },
+      { label: "Resultado", value: "A tabela é filtrada na hora; apagar o texto volta a mostrar todos os tipos." },
+    ],
+  },
+  "analytics.field.filtrar-pagina": {
+    title: "Filtrar página",
+    summary: "Mostra somente os eventos ocorridos na página informada.",
+    details: [
+      { label: "Como usar", value: "Digite uma rota como /servicos para consultar apenas os eventos dessa página." },
+      { label: "Resultado", value: "A tabela é filtrada na hora; apagar o texto volta a mostrar todas as páginas." },
+    ],
+  },
+  "analytics.field.evento": {
+    title: "Evento",
+    summary: "Mostra o que aconteceu durante a navegação do visitante.",
+    details: [
+      { label: "Tipos comuns", value: "page_view significa abertura de página; click, um clique; scroll, uma rolagem; time_on_page, tempo na página; session_end, fim da visita." },
+    ],
+  },
+  "analytics.field.pagina": {
+    title: "Página",
+    summary: "Mostra em qual página do site o evento aconteceu.",
+    details: [
+      { label: "Formato", value: "É a rota do site, como /, /servicos ou /sobre." },
+    ],
+  },
+  "analytics.field.data": {
+    title: "Data",
+    summary: "Mostra quando o evento foi registrado pelo site.",
+    details: [
+      { label: "Formato", value: "A tabela exibe dia, mês, ano, hora e minuto no horário local." },
+    ],
+  },
+  "analytics.field.sessao": {
+    title: "Sessão",
+    summary: "Identifica uma visita anônima durante a navegação; não identifica a pessoa visitante.",
+    details: [
+      { label: "Para que serve", value: "Agrupa os eventos feitos na mesma visita para ajudar a entender a sequência de navegação." },
+    ],
+  },
+  "analytics.section.resumo-de-resultados": {
+    title: "Resumo de resultados",
+    summary: "Mostra as ações importantes concluídas pelos visitantes no período selecionado.",
+    details: [
+      { label: "Formulários concluídos", value: "Quantidade de formulários enviados." },
+      { label: "Downloads", value: "Quantidade de arquivos baixados." },
+      { label: "Leads", value: "Quantidade de contatos que se tornaram possíveis clientes." },
+      { label: "Envios do popup", value: "Quantidade de formulários enviados pelo popup." },
+      { label: "Total", value: "Soma de todas as conversões mostradas nesta área." },
+    ],
+  },
   "fale-conosco.section.botao-whatsapp": {
     title: "Botão WhatsApp do hero",
     summary: "Aqui você configura o botão de WhatsApp que fica no topo da página Fale Conosco. Você escolhe o texto e o destino do clique; depois de salvar, esse botão é atualizado no site.",

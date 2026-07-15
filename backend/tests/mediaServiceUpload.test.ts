@@ -62,6 +62,43 @@ describe("mediaService upload processing", () => {
     ).rejects.toThrow("não corresponde");
   });
 
+  it("requires confirmation before deleting media in use and clears its references", async () => {
+    const env = createIsolatedBackendEnv();
+    fs.cpSync(path.resolve("..", "frontend", "public"), env.publicDir, { recursive: true });
+    fs.copyFileSync(path.resolve("storage", "content.json"), path.join(env.storageRoot, "content.json"));
+    fs.copyFileSync(path.resolve("storage", "site-texts.json"), path.join(env.storageRoot, "site-texts.json"));
+    const { saveAdminImageFromBuffer, deleteAdminMedia, listAdminImages } = await import(
+      "../src/services/mediaService.js"
+    );
+    const buffer = await sharp({
+      create: {
+        width: 32,
+        height: 24,
+        channels: 3,
+        background: { r: 20, g: 80, b: 160 },
+      },
+    })
+      .png()
+      .toBuffer();
+    const record = await saveAdminImageFromBuffer({
+      fileName: "imagem-em-uso.png",
+      mimeType: "image/png",
+      buffer,
+    });
+    fs.writeFileSync(
+      path.join(env.storageRoot, "media-slots.json"),
+      JSON.stringify({ "home.cert.iso": record.url })
+    );
+
+    expect(() => deleteAdminMedia(record.url, false)).toThrow("Confirme a exclusão");
+
+    const deleted = deleteAdminMedia(record.url, true);
+    expect(deleted.referenceCount).toBe(1);
+    expect(fs.existsSync(path.join(env.uploadsDir, record.url.replace(/^\/uploads\//, "")))).toBe(false);
+    expect(listAdminImages().some((item) => item.url === record.url)).toBe(false);
+    expect(fs.readFileSync(path.join(env.storageRoot, "media-slots.json"), "utf8")).not.toContain(record.url);
+  });
+
   it.skipIf(!ffmpegStaticPath || spawnSync(ffmpegStaticPath, ["-version"], { stdio: "ignore" }).status !== 0)(
     "converts uploaded MP4 to WebM without retaining the source file",
     async () => {
