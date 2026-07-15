@@ -45,9 +45,9 @@ cmd /c iniciar-dev.bat
 
 URLs padrao:
 
-- Frontend: `http://127.0.0.1:5011`
-- Backend: `http://127.0.0.1:4011`
-- CMS: `http://127.0.0.1:5011/auth/entrar`
+- Frontend: `http://127.0.0.1:5012`
+- Backend: `http://127.0.0.1:4012`
+- CMS: `http://127.0.0.1:5012/auth/entrar`
 
 ## Producao local e tunnel
 

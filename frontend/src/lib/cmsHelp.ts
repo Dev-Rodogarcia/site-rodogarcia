@@ -108,6 +108,26 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
 };
 
 const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
+  "usuarios.section.criar-usuario": {
+    title: "Criar usuário",
+    summary: "Aqui você cria um acesso ao CMS e define uma senha temporária. A pessoa precisará criar a própria senha no primeiro login antes de acessar o painel.",
+    details: [
+      { label: "Quem pode criar", value: "O usuário supremo pode criar sempre. Um administrador comum só pode criar quando o supremo tiver marcado a permissão “Criar usuários” no menu de três pontos da conta." },
+      { label: "Onde aparece", value: "O acesso é usado na tela /auth/entrar e, após a troca de senha, no painel /developer." },
+      { label: "Senha temporária", value: "A senha definida aqui serve apenas para o primeiro login. O painel bloqueia o uso até que a pessoa informe uma nova senha forte.", technical: true },
+      { label: "Após salvar", value: "A nova conta fica ativa e passa a exigir a troca da senha no próximo login." },
+    ],
+  },
+  "usuarios.section.permissoes-de-usuarios": {
+    title: "Permissões de usuários",
+    summary: "Aqui o administrador supremo escolhe o que cada administrador comum pode fazer com outras contas. A alteração vale no painel assim que for salva.",
+    details: [
+      { label: "Onde ajustar", value: "Use os três pontos no card de cada administrador em /developer/usuarios." },
+      { label: "Criar usuários", value: "Permite cadastrar novas contas com senha temporária; a pessoa criada ainda precisa trocar essa senha no primeiro acesso." },
+      { label: "Excluir usuários", value: "Permite excluir contas que não sejam a conta suprema. A própria pessoa também não pode excluir a si mesma." },
+      { label: "Proteção", value: "Somente o usuário supremo pode conceder, remover ou editar essas permissões; administradores com uma permissão não conseguem distribuir permissões para outras pessoas.", technical: true },
+    ],
+  },
   "dashboard.metric.itens-editaveis": {
     title: "Itens editáveis",
     details: [

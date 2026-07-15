@@ -14,12 +14,16 @@ import type {
 
 const normalizeBackendUrl = (url: string) => url.replace(/\/+$/, "");
 
+const firstConfiguredBackendUrl = (...values: Array<string | undefined>): string =>
+  values.find((value) => value?.trim())?.trim() ?? "http://127.0.0.1:6050";
+
 const API_BASE_URL = normalizeBackendUrl(
-  process.env.BACKEND_PROXY_URL ??
-    process.env.NEXT_PUBLIC_BACKEND_PROXY_URL ??
-    process.env.BACKEND_INTERNAL_URL ??
-    process.env.NEXT_PUBLIC_BACKEND_URL ??
-    "http://127.0.0.1:6050"
+  firstConfiguredBackendUrl(
+    process.env.BACKEND_PROXY_URL,
+    process.env.NEXT_PUBLIC_BACKEND_PROXY_URL,
+    process.env.BACKEND_INTERNAL_URL,
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  )
 );
 
 export interface PublicContentResponse {

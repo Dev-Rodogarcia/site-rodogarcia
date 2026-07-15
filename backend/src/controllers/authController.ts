@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import { userRepository } from "../repositories/userRepository.js";
 import {
   createInitialUser,
+  changeOwnPassword,
   hasAnyUser,
   login,
   publicUser,
@@ -17,6 +18,11 @@ export const loginController: RequestHandler = asyncHandler((req, res) => {
     user: publicUser(user),
     csrfToken: session.csrfToken,
   });
+});
+
+export const changePasswordController: RequestHandler = asyncHandler((req, res) => {
+  const updated = changeOwnPassword(req.auth!.user, req.body ?? {});
+  res.json({ message: "Senha alterada com sucesso.", user: publicUser(updated) });
 });
 
 export const logoutController: RequestHandler = asyncHandler((req, res) => {

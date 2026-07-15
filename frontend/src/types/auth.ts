@@ -4,7 +4,11 @@ export interface User {
   name?: string;
   role: "admin" | "user";
   createdAt: string;
+  passwordChangeRequired?: boolean;
+  permissions?: UserPermission[];
 }
+
+export type UserPermission = "createUsers" | "deleteUsers";
 
 export interface Session {
   id: string;
@@ -17,7 +21,7 @@ export interface Session {
 export interface AuthSession {
   authenticated: boolean;
   csrfToken: string;
-  user?: Pick<User, "id" | "email" | "name" | "role">;
+  user?: Pick<User, "id" | "email" | "name" | "role" | "passwordChangeRequired" | "permissions">;
   expiresAt?: number;
   setupRequired?: boolean;
 }
@@ -38,6 +42,6 @@ export interface RegisterRequest {
 export interface AuthResponse {
   success: boolean;
   message?: string;
-  user?: Pick<User, "id" | "email" | "name" | "role">;
+  user?: Pick<User, "id" | "email" | "name" | "role" | "passwordChangeRequired" | "permissions">;
   csrfToken?: string;
 }

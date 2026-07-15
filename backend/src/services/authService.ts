@@ -1,7 +1,7 @@
 import type { Request } from "express";
 import { env } from "../config/env.js";
 import { userRepository } from "../repositories/userRepository.js";
-import type { UserRecord } from "../types/auth.js";
+import { USER_PERMISSIONS, type UserPermission, type UserRecord } from "../types/auth.js";
 import { generateId } from "../utils/ids.js";
 import { sanitizeEmail, sanitizeText } from "../utils/sanitize.js";
 import {
@@ -27,7 +27,13 @@ export function publicUser(user: UserRecord) {
     role: user.role,
     isSupreme: isSupremeUser(user),
     isOwner: user.isOwner === true,
+    passwordChangeRequired: isPasswordChangeRequired(user),
+    permissions: user.permissions ?? [],
   };
+}
+
+export function isPasswordChangeRequired(user: UserRecord | null | undefined) {
+  return Boolean(user && user.isOwner !== true && user.mustChangePassword !== false);
 }
 
 export function isSupremeUser(user: UserRecord | null | undefined) {
@@ -47,6 +53,15 @@ interface CreateUserParams {
   password?: unknown;
   confirmPassword?: unknown;
   role?: unknown;
+  permissions?: unknown;
+}
+
+function parseUserPermissions(value: unknown): UserPermission[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.some((permission) => typeof permission !== "string" || !USER_PERMISSIONS.includes(permission as UserPermission))) {
+    throw new HttpError(422, "Permissões de usuário inválidas.");
+  }
+  return [...new Set(value as UserPermission[])];
 }
 
 function parseUserRole(value: unknown, required: boolean): UserRole | undefined {
@@ -93,6 +108,24 @@ function parseUserEmail(value: unknown, required: boolean): string | undefined {
 function assertSupremeActor(actor: UserRecord | null | undefined) {
   if (!isSupremeUser(actor)) {
     throw new HttpError(403, "Somente o usuário supremo pode gerenciar acessos.");
+  }
+}
+
+export function hasUserPermission(
+  user: UserRecord | null | undefined,
+  permission: UserPermission
+) {
+  return Boolean(
+    user &&
+      user.role === "admin" &&
+      user.active !== false &&
+      (isSupremeUser(user) || user.permissions?.includes(permission))
+  );
+}
+
+function assertUserPermission(actor: UserRecord | null | undefined, permission: UserPermission) {
+  if (!hasUserPermission(actor, permission)) {
+    throw new HttpError(403, "Você não tem permissão para gerenciar usuários desta forma.");
   }
 }
 
@@ -153,19 +186,18 @@ export function login(req: Request) {
 
 function createUserRecord(
   params: CreateUserParams,
-  actor: UserRecord | undefined,
   isInitialOwner: boolean
 ) {
-  if (userRepository.hasAny()) {
-    assertSupremeActor(actor);
-  }
-
   const name = parseUserName(params.name, true)!;
   const email = parseUserEmail(params.email, true)!;
   const password = typeof params.password === "string" ? params.password : "";
   const confirmPassword =
     typeof params.confirmPassword === "string" ? params.confirmPassword : password;
   const role = parseUserRole(params.role, true)!;
+  const permissions = parseUserPermissions(params.permissions) ?? [];
+  if (role !== "admin" && permissions.length > 0) {
+    throw new HttpError(422, "Permissões de usuários exigem perfil de administrador.");
+  }
 
   if (!password) {
     throw new HttpError(422, "Preencha nome, e-mail e senha corretamente.");
@@ -191,13 +223,16 @@ function createUserRecord(
     role,
     active: true,
     isOwner: isInitialOwner,
+    mustChangePassword: isInitialOwner ? false : true,
+    permissions: isInitialOwner ? [] : permissions,
     createdAt: nowIso,
     passwordHash: hashPassword(password),
   });
 }
 
 export function createUser(params: CreateUserParams, actor?: UserRecord) {
-  return createUserRecord(params, actor, false);
+  if (userRepository.hasAny()) assertUserPermission(actor, "createUsers");
+  return createUserRecord(params, false);
 }
 
 export function updateUser(
@@ -209,6 +244,7 @@ export function updateUser(
     active?: unknown;
     password?: unknown;
     confirmPassword?: unknown;
+    permissions?: unknown;
   },
   actor: UserRecord
 ) {
@@ -218,6 +254,7 @@ export function updateUser(
   if (!target) throw new HttpError(404, "Usuário não encontrado.");
   const requestedRole = parseUserRole(params.role, false);
   const requestedActive = parseUserActive(params.active);
+  const requestedPermissions = parseUserPermissions(params.permissions);
   if (isSupremeUser(target)) {
     if (
       (requestedRole !== undefined && requestedRole !== "admin") ||
@@ -240,6 +277,14 @@ export function updateUser(
   }
   if (requestedRole !== undefined) patch.role = requestedRole;
   if (requestedActive !== undefined) patch.active = requestedActive;
+  if (requestedPermissions !== undefined) {
+    if (requestedRole === "user" || (requestedRole === undefined && target.role !== "admin")) {
+      throw new HttpError(422, "Permissões de usuários exigem perfil de administrador.");
+    }
+    patch.permissions = requestedPermissions;
+  } else if (requestedRole === "user") {
+    patch.permissions = [];
+  }
 
   if (params.password !== undefined && typeof params.password !== "string") {
     throw new HttpError(422, "A senha deve ser uma string.");
@@ -256,6 +301,8 @@ export function updateUser(
       throw new HttpError(422, passwordErrors[0] ?? "Senha invalida.");
     }
     patch.passwordHash = hashPassword(password);
+    // A password defined by the account owner is temporary until its holder replaces it.
+    patch.mustChangePassword = isSupremeUser(target) ? false : true;
   }
 
   const updated = userRepository.update(target.id, patch);
@@ -270,8 +317,38 @@ export function updateUser(
   return updated;
 }
 
+export function changeOwnPassword(
+  user: UserRecord,
+  params: { currentPassword?: unknown; password?: unknown; confirmPassword?: unknown }
+) {
+  const currentPassword = typeof params.currentPassword === "string" ? params.currentPassword : "";
+  const password = typeof params.password === "string" ? params.password : "";
+  const confirmPassword = typeof params.confirmPassword === "string" ? params.confirmPassword : "";
+
+  if (!currentPassword || !password || !confirmPassword) {
+    throw new HttpError(422, "Preencha a senha atual e a nova senha.");
+  }
+  if (!verifyPassword(currentPassword, user.passwordHash)) {
+    throw new HttpError(422, "A senha atual está incorreta.");
+  }
+  if (password !== confirmPassword) {
+    throw new HttpError(422, "As senhas não coincidem.");
+  }
+  const passwordErrors = validatePasswordStrength(password);
+  if (passwordErrors.length > 0) {
+    throw new HttpError(422, passwordErrors[0] ?? "Senha invalida.");
+  }
+
+  const updated = userRepository.update(user.id, {
+    passwordHash: hashPassword(password),
+    mustChangePassword: false,
+  });
+  if (!updated) throw new HttpError(404, "Usuário não encontrado.");
+  return updated;
+}
+
 export function deleteUser(id: unknown, actor: UserRecord) {
-  assertSupremeActor(actor);
+  assertUserPermission(actor, "deleteUsers");
   const userId = sanitizeText(id, 120);
   const target = userRepository.findById(userId);
   if (!target) throw new HttpError(404, "Usuário não encontrado.");
@@ -303,7 +380,6 @@ export function createInitialUser(params: {
 
   return createUserRecord(
     { ...params, role: "admin" },
-    undefined,
     true
   );
 }

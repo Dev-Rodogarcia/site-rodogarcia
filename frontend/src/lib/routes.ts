@@ -47,6 +47,7 @@ export const site = {
 
 export const auth = {
   login: "/auth/entrar",
+  changePassword: "/auth/trocar-senha",
   prefix: "/auth/",
 } as const;
 
@@ -79,6 +80,7 @@ export const api = {
     logout: "/api/auth/logout",
     register: "/api/auth/register",
     session: "/api/auth/session",
+    changePassword: "/api/auth/change-password",
   },
   admin: {
     content: "/api/admin/content",

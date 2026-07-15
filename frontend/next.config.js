@@ -1,10 +1,16 @@
 const normalizeBackendUrl = (url) => url.replace(/\/+$/, "");
 
+const firstConfiguredBackendUrl = (...values) =>
+  values.find((value) => typeof value === "string" && value.trim())?.trim() ||
+  "http://127.0.0.1:6050";
+
 const backendUrl = normalizeBackendUrl(
-    process.env.BACKEND_PROXY_URL ??
-    process.env.BACKEND_INTERNAL_URL ??
-    process.env.NEXT_PUBLIC_BACKEND_URL ??
-    "http://127.0.0.1:6050"
+  firstConfiguredBackendUrl(
+    process.env.BACKEND_PROXY_URL,
+    process.env.NEXT_PUBLIC_BACKEND_PROXY_URL,
+    process.env.BACKEND_INTERNAL_URL,
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  )
 );
 
 const isProduction = process.env.NODE_ENV === "production";

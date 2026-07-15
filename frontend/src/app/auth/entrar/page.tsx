@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSession } from "@/hooks/useSession";
-import { admin, api, site } from "@/lib/routes";
+import { admin, api, auth, site } from "@/lib/routes";
 
 const schema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -67,6 +67,11 @@ function LoginForm() {
         return;
       }
 
+      if (data.user?.passwordChangeRequired) {
+        window.location.href = auth.changePassword;
+        return;
+      }
+
       // Usa reload completo para garantir que layouts e hooks leiam o cookie HTTP-only atualizado.
       window.location.href = nextPath;
     } catch {
@@ -80,9 +85,9 @@ function LoginForm() {
   useEffect(() => {
     // So redireciona apos o fetch de sessao confirmar o cookie HTTP-only.
     if (!loading && session?.authenticated) {
-      window.location.href = nextPath;
+      window.location.href = session.user?.passwordChangeRequired ? auth.changePassword : nextPath;
     }
-  }, [nextPath, session?.authenticated, loading]);
+  }, [nextPath, session?.authenticated, session?.user?.passwordChangeRequired, loading]);
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--background)] px-4 py-10 sm:px-6">

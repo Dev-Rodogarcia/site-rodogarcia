@@ -20,10 +20,12 @@ export default function DeveloperAuthGate({
       router.replace(
         `${auth.login}?area=staff&next=${encodeURIComponent(pathname || "/developer")}`
       );
+    } else if (session.user.passwordChangeRequired) {
+      router.replace(auth.changePassword);
     }
-  }, [loading, pathname, router, session?.authenticated, session?.user?.role]);
+  }, [loading, pathname, router, session?.authenticated, session?.user?.passwordChangeRequired, session?.user?.role]);
 
-  if (loading || !session?.authenticated || session.user?.role !== "admin") {
+  if (loading || !session?.authenticated || session.user?.role !== "admin" || session.user.passwordChangeRequired) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-[var(--background)] px-6 text-sm font-semibold text-[var(--color-muted-raw)]">
         Carregando acesso interno...

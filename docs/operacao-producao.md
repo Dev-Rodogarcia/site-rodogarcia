@@ -9,9 +9,9 @@ O Rodogarcia nao e uma SPA estatica: o frontend Next.js renderiza Server Compone
 | Next.js standalone (`frontend/dist-prod/server.js`) | `127.0.0.1:6060` | Site publico, CMS, headers e proxy interno de API/uploads |
 | Express (`node dist/server.js`) | `127.0.0.1:6050` | API, autenticacao, JSON e uploads |
 
-Use `iniciar-prod.bat` para validar, compilar e abrir esses processos. Ele fixa `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=6050` e `BACKEND_INTERNAL_URL=http://127.0.0.1:6050`.
+Use `iniciar-prod.bat` para validar, compilar e iniciar esses processos pelo PM2. Ele fixa `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=6050` e `BACKEND_INTERNAL_URL=http://127.0.0.1:6050`.
 
-O desenvolvimento usa o par isolado `127.0.0.1:5011` e `127.0.0.1:4011` por `iniciar-dev.bat`. Esse script limpa proxies de producao e usa o storage local do repositório.
+O desenvolvimento usa o par isolado `127.0.0.1:5012` e `127.0.0.1:4012` por `iniciar-dev.bat`. Esse script limpa proxies de producao e usa o storage local do repositório.
 
 ## Ambiente
 
@@ -25,7 +25,13 @@ Na VM, crie `.env.production.local` a partir de `.env.production.example`. O arq
 
 O boot do backend rejeita automaticamente segredos fracos, placeholders e origens locais ou não HTTPS em produção. O script também faz essa verificação antes de iniciar serviços.
 
-Antes da primeira publicação, restaure ou copie para o volume os JSONs e uploads autorizados. Use `node scripts/backup-storage.js` antes de migrações e siga `docs/backup-restore-json.md` para restores; não copie storage privado por canais públicos.
+## PM2
+
+O `ecosystem.config.js` versionado inicia `rodogarcia-backend-prod` e `rodogarcia-frontend-prod`, com reinício automático, logs ignorados em `logs/` e bind apenas local nas portas `6050` e `6060`. Ele lê `.env.production.local` no start (ou o caminho relativo informado em `RODOGARCIA_ENV_FILE`), sem versionar segredos no ecosystem.
+
+Instale o PM2 uma única vez na VM com `npm install -g pm2`. Depois de cada publicação, execute `iniciar-prod.bat`; ele recria o artefato, executa o hardening, aplica `pm2 startOrReload ecosystem.config.js --env production --update-env` e salva a lista de processos. O ecosystem também define esse mesmo ambiente como padrão, portanto `pm2 restart ecosystem.config.js --update-env` mantém as portas `6050` e `6060`. Para consultar, use `pm2 status`; para acompanhar logs, use `pm2 logs rodogarcia-backend-prod` ou `pm2 logs rodogarcia-frontend-prod`.
+
+Antes da primeira publicação, restaure ou copie para o volume os JSONs e uploads autorizados. O `iniciar-prod.bat` executa `node scripts/sync-production-uploads.js --env-file .env.production.local --apply` antes de interromper processos: ele cria `UPLOADS_DIR`, copia somente uploads ausentes da origem local (ou de `PRODUCTION_UPLOADS_SEED_DIR`) e falha se um JSON público referenciar mídia inexistente. Ele nunca sobrescreve nem remove arquivos já persistidos. Use `node scripts/backup-storage.js` antes de migrações e siga `docs/backup-restore-json.md` para restores; não copie storage privado por canais públicos.
 
 ## Cloudflare Tunnel
 

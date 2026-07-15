@@ -161,4 +161,116 @@ describe("authService", () => {
     expect(attemptedOwner.isOwner).toBe(false);
     expect(isSupremeUser(attemptedOwner)).toBe(false);
   });
+
+  it("requires legacy and new non-owner accounts to change their temporary password", async () => {
+    createIsolatedBackendEnv();
+    process.env.ADMIN_SETUP_CODE = "codigo-setup-seguro-123";
+    const { changeOwnPassword, createInitialUser, createUser, isPasswordChangeRequired } = await import(
+      "../src/services/authService.js"
+    );
+
+    const owner = createInitialUser({
+      name: "Owner",
+      email: "owner@rodogarcia.com.br",
+      password: VALID_PASSWORD,
+      confirmPassword: VALID_PASSWORD,
+      setupCode: process.env.ADMIN_SETUP_CODE,
+    });
+    const operator = createUser(
+      {
+        name: "Operador",
+        email: "operador@rodogarcia.com.br",
+        password: VALID_PASSWORD,
+        confirmPassword: VALID_PASSWORD,
+        role: "admin",
+      },
+      owner
+    );
+
+    expect(isPasswordChangeRequired(owner)).toBe(false);
+    expect(isPasswordChangeRequired(operator)).toBe(true);
+    expect(isPasswordChangeRequired({ ...operator, mustChangePassword: undefined })).toBe(true);
+
+    const updated = changeOwnPassword(operator, {
+      currentPassword: VALID_PASSWORD,
+      password: "NovaSenhaTeste123",
+      confirmPassword: "NovaSenhaTeste123",
+    });
+    expect(isPasswordChangeRequired(updated)).toBe(false);
+  });
+
+  it("allows only the owner to grant delegated user creation and deletion", async () => {
+    createIsolatedBackendEnv();
+    process.env.ADMIN_SETUP_CODE = "codigo-setup-seguro-123";
+    const { createInitialUser, createUser, deleteUser, updateUser } = await import(
+      "../src/services/authService.js"
+    );
+
+    const owner = createInitialUser({
+      name: "Owner",
+      email: "owner@rodogarcia.com.br",
+      password: VALID_PASSWORD,
+      confirmPassword: VALID_PASSWORD,
+      setupCode: process.env.ADMIN_SETUP_CODE,
+    });
+    const delegatedAdmin = createUser(
+      {
+        name: "Admin Delegado",
+        email: "delegado@rodogarcia.com.br",
+        password: VALID_PASSWORD,
+        confirmPassword: VALID_PASSWORD,
+        role: "admin",
+      },
+      owner
+    );
+
+    expect(() =>
+      createUser(
+        {
+          name: "Sem Permissão",
+          email: "sem-permissao@rodogarcia.com.br",
+          password: VALID_PASSWORD,
+          confirmPassword: VALID_PASSWORD,
+          role: "admin",
+        },
+        delegatedAdmin
+      )
+    ).toThrow("não tem permissão");
+    expect(() => updateUser(delegatedAdmin.id, { permissions: ["createUsers"] }, delegatedAdmin)).toThrow(
+      "Somente o usuário supremo"
+    );
+    const removableUser = createUser(
+      {
+        name: "Conta Removível",
+        email: "removivel@rodogarcia.com.br",
+        password: VALID_PASSWORD,
+        confirmPassword: VALID_PASSWORD,
+        role: "admin",
+      },
+      owner
+    );
+    expect(() => deleteUser(removableUser.id, delegatedAdmin)).toThrow("não tem permissão");
+
+    const granted = updateUser(
+      delegatedAdmin.id,
+      { permissions: ["createUsers", "deleteUsers"] },
+      owner
+    );
+    expect(granted.permissions).toEqual(["createUsers", "deleteUsers"]);
+
+    const createdByDelegate = createUser(
+      {
+        name: "Criado pelo Delegado",
+        email: "criado@rodogarcia.com.br",
+        password: VALID_PASSWORD,
+        confirmPassword: VALID_PASSWORD,
+        role: "admin",
+      },
+      granted
+    );
+    expect(createdByDelegate.mustChangePassword).toBe(true);
+    expect(() => deleteUser(owner.id, granted)).toThrow("supremo não pode ser excluído");
+    deleteUser(createdByDelegate.id, granted);
+    deleteUser(removableUser.id, granted);
+  });
 });

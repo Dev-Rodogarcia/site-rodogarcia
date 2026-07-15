@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle,
+  DotsThreeVertical,
   IdentificationBadge,
   PencilSimple,
   ShieldCheck,
@@ -27,7 +28,6 @@ import {
   DeveloperMessage,
   DeveloperPage,
   DeveloperSectionHeading,
-  DeveloperStatusPill,
   developerInputClassName,
   developerDangerButtonClassName,
   developerGhostButtonClassName,
@@ -44,6 +44,8 @@ interface AdminUser {
   active: boolean;
   protected?: boolean;
   isSupreme?: boolean;
+  passwordChangeRequired?: boolean;
+  permissions?: ("createUsers" | "deleteUsers")[];
 }
 
 interface UsersResponse {
@@ -99,6 +101,7 @@ export default function UsuariosPage() {
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [editingId, setEditingId] = useState("");
   const [editing, setEditing] = useState<Partial<AdminUser>>({});
+  const [permissionsMenuId, setPermissionsMenuId] = useState("");
   const [saving, setSaving] = useState(false);
   const [mutatingId, setMutatingId] = useState("");
   const [status, setStatus] = useState<"" | "success" | "error">("");
@@ -145,7 +148,9 @@ export default function UsuariosPage() {
   );
   const adminCount = users.filter((user) => user.role === "admin" && user.active).length;
   const activeCount = users.filter((user) => user.active).length;
-  const canManageUsers = Boolean(currentUser?.isSupreme || currentUser?.protected);
+  const isSupreme = Boolean(currentUser?.isSupreme || currentUser?.protected);
+  const canCreateUsers = isSupreme || Boolean(currentUser?.permissions?.includes("createUsers"));
+  const canDeleteUsers = isSupreme || Boolean(currentUser?.permissions?.includes("deleteUsers"));
   const {
     pages: userPages,
     currentPage: usersPage,
@@ -163,9 +168,9 @@ export default function UsuariosPage() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
-    if (!canManageUsers) {
+    if (!canCreateUsers) {
       setStatus("error");
-      setStatusMessage("Somente o usuário supremo pode criar ou alterar acessos.");
+      setStatusMessage("Sua conta não tem permissão para criar usuários.");
       return;
     }
 
@@ -281,12 +286,35 @@ export default function UsuariosPage() {
     await loadUsers();
   }
 
+  async function updatePermissions(user: AdminUser, permission: "createUsers" | "deleteUsers", enabled: boolean) {
+    const permissions = new Set(user.permissions ?? []);
+    if (enabled) permissions.add(permission);
+    else permissions.delete(permission);
+    setMutatingId(user.id);
+    const response = await apiRequest<UsersResponse>(`${api.admin.users}/${user.id}`, {
+      method: "PUT",
+      body: JSON.stringify({ permissions: [...permissions] }),
+    });
+    setMutatingId("");
+    if (!response.success) {
+      setStatus("error");
+      setStatusMessage(response.error ?? "Falha ao atualizar permissões.");
+      return;
+    }
+    setUsers(response.data?.users ?? users);
+    setStatus("success");
+    setStatusMessage("Permissões atualizadas com sucesso.");
+    invalidateAdminResource([adminResourceKeys.users]);
+    await refresh();
+    await loadUsers();
+  }
+
   return (
     <DeveloperPage>
       <DeveloperHero
         eyebrow="Segurança - Usuários"
         title="Criação de usuários do CMS."
-        description="Cadastre novos acessos internos sem usar a tela pública de setup inicial. A gestão exige a conta suprema ativa e token CSRF."
+        description="Cadastre acessos internos e, como usuário supremo, defina quem pode criar ou excluir outras contas."
         stats={[
           { label: "Usuários", value: users.length },
           { label: "Admins ativos", value: adminCount },
@@ -311,14 +339,14 @@ export default function UsuariosPage() {
           <DeveloperSectionHeading
             eyebrow="Novo acesso"
             title="Criar usuário"
-            description="Use uma senha forte. O novo usuário poderá acessar o painel conforme o papel definido abaixo."
+            description="Defina uma senha temporária forte. No primeiro acesso, o novo usuário precisará criar a própria senha antes de entrar no painel."
             tooltip="Usuário interno é uma conta criada para operar o CMS. Exemplo: admin@empresa.com.br."
           />
 
-          {!canManageUsers ? (
+          {!canCreateUsers ? (
             <div className="mb-5">
               <DeveloperMessage tone="info">
-                Sua conta pode visualizar os acessos. Criação, edição e exclusão ficam restritas ao usuário supremo.
+                Sua conta pode visualizar os acessos, mas não tem permissão para criar usuários.
               </DeveloperMessage>
             </div>
           ) : null}
@@ -462,7 +490,7 @@ export default function UsuariosPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
-                disabled={saving || !canManageUsers}
+                disabled={saving || !canCreateUsers}
                 className={developerPrimaryButtonClassName}
               >
                 <UserCirclePlus size={18} weight="bold" />
@@ -493,7 +521,8 @@ export default function UsuariosPage() {
             {users.length > 0 ? (
               (userPages[usersPage] ?? []).map((user) => {
                 const editingThis = editingId === user.id;
-                const locked = Boolean(user.protected || !canManageUsers);
+                const locked = Boolean(user.protected || !isSupreme);
+                const canConfigurePermissions = isSupreme && !user.protected && user.role === "admin";
                 return (
                 <article
                   key={user.id}
@@ -521,20 +550,70 @@ export default function UsuariosPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                       {user.protected ? (
                         <span className="rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">
                           Supremo
                         </span>
                       ) : null}
-                      <DeveloperStatusPill
-                        active={user.active}
-                        activeLabel="Ativo"
-                        inactiveLabel="Inativo"
-                      />
-                      <span className="rounded-full bg-[var(--primary)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
+                      <span
+                        className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-[11px] font-bold uppercase tracking-[0.14em] ${
+                          user.active
+                            ? "border-emerald-500/15 bg-emerald-500/10 text-emerald-700"
+                            : "border-slate-200 bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${user.active ? "bg-emerald-500" : "bg-slate-400"}`} />
+                        {user.active ? "Ativo" : "Inativo"}
+                      </span>
+                      <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[var(--primary)]/10 bg-[var(--primary)]/[0.08] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+                        {user.role === "admin" ? <ShieldCheck size={13} weight="fill" /> : <IdentificationBadge size={13} weight="fill" />}
                         {user.role === "admin" ? "Admin" : "Usuário"}
                       </span>
+                      {canConfigurePermissions ? (
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setPermissionsMenuId((current) => current === user.id ? "" : user.id)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-[0_4px_10px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-[var(--primary)]/25 hover:bg-[var(--primary)]/[0.06] hover:text-[var(--primary)] focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/10"
+                            aria-label={`Gerenciar permissões de ${user.name || user.email}`}
+                            title="Gerenciar permissões"
+                          >
+                            <DotsThreeVertical size={18} weight="bold" />
+                          </button>
+                          {permissionsMenuId === user.id ? (
+                            <div className="absolute right-0 z-20 mt-3 w-[min(23rem,calc(100vw-3rem))] rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_20px_45px_rgba(15,23,42,0.16)] ring-1 ring-slate-950/[0.03] sm:p-5">
+                              <div className="flex items-start gap-3">
+                                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                                  <ShieldCheck size={20} weight="duotone" />
+                                </span>
+                                <div>
+                                  <p className="text-sm font-bold text-[var(--foreground)]">Permissões de usuários</p>
+                                  <p className="mt-1 text-xs leading-5 text-[var(--color-muted-raw)]">Defina o que este administrador pode fazer com outras contas.</p>
+                                </div>
+                              </div>
+                              <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+                              {([
+                                ["createUsers", "Criar usuários"],
+                                ["deleteUsers", "Excluir usuários"],
+                              ] as const).map(([permission, label]) => (
+                                <label key={permission} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--primary)]/20 hover:bg-[var(--primary)]/[0.045]">
+                                  <input
+                                    type="checkbox"
+                                    checked={user.permissions?.includes(permission) ?? false}
+                                    disabled={mutatingId === user.id}
+                                    onChange={(event) => void updatePermissions(user, permission, event.target.checked)}
+                                    className="h-4 w-4 accent-[var(--primary)]"
+                                  />
+                                  {label}
+                                </label>
+                              ))}
+                              </div>
+                              <p className="mt-4 text-xs leading-5 text-[var(--color-muted-raw)]">Somente o administrador supremo pode alterar essas permissões.</p>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 
@@ -622,13 +701,13 @@ export default function UsuariosPage() {
                         <button
                           type="button"
                           onClick={() => void removeUser(user)}
-                          disabled={locked || mutatingId === user.id}
+                          disabled={user.protected || !canDeleteUsers || mutatingId === user.id}
                           className={developerDangerButtonClassName}
                           title={
                             user.protected
                               ? "O usuário supremo não pode ser excluído."
-                              : locked
-                                ? "Exclusão restrita ao usuário supremo."
+                              : !canDeleteUsers
+                                ? "Sua conta não tem permissão para excluir usuários."
                                 : "Excluir usuário"
                           }
                         >

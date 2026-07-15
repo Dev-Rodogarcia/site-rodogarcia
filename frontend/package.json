@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 5011",
-    "dev:local": "next dev --hostname 127.0.0.1 --port 5011",
+    "dev": "next dev --hostname 127.0.0.1 --port 5012",
+    "dev:local": "next dev --hostname 127.0.0.1 --port 5012",
     "build": "next build",
     "build:prod": "npm run build && node scripts/prepare-prod-artifact.mjs",
     "vercel-build": "next build",

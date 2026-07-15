@@ -22,17 +22,25 @@ if not exist "%ENV_FILE%" (
 call "%~dp0scripts\load-root-env.bat" "%ENV_FILE%"
 if errorlevel 1 exit /b 1
 
+where pm2 >nul 2>&1
+if errorlevel 1 (
+  echo [Rodogarcia PROD] PM2 nao encontrado. Instale com: npm install -g pm2
+  exit /b 1
+)
+
 rem Os dois processos de producao ficam privados; o tunnel/reverse proxy e a unica borda publica.
 set "NODE_ENV=production"
 set "HOST=127.0.0.1"
 set "PORT=6050"
 set "BACKEND_INTERNAL_URL=http://127.0.0.1:6050"
-set "BACKEND_PROXY_URL="
-set "NEXT_PUBLIC_BACKEND_PROXY_URL="
 set "SECURITY_TEST_BACKEND_PORT=6050"
 set "SECURITY_TEST_FRONTEND_PORT=6060"
 
 echo [Rodogarcia PROD] Ambiente: %ENV_FILE%
+
+echo [Rodogarcia PROD] Sincronizando e validando uploads no volume persistente...
+node scripts\sync-production-uploads.js --env-file "%ENV_FILE%" --apply
+if errorlevel 1 exit /b 1
 
 if not exist "backend\node_modules" (
   echo [Rodogarcia PROD] Instalando dependencias do backend a partir do lockfile...
@@ -71,7 +79,9 @@ call npm run typecheck
 if errorlevel 1 exit /b 1
 popd
 
-echo [Rodogarcia PROD] Encerrando processos nas portas 6050 e 6060...
+echo [Rodogarcia PROD] Parando processos PM2 anteriores e liberando as portas 6050 e 6060...
+call pm2 delete rodogarcia-backend-prod >nul 2>&1
+call pm2 delete rodogarcia-frontend-prod >nul 2>&1
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(6050,6060); Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $ports -contains $_.LocalPort } | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { try { Stop-Process -Id $_ -Force -ErrorAction Stop } catch {} }" >nul 2>&1
 powershell -NoProfile -Command "Start-Sleep -Seconds 1" >nul
 
@@ -85,12 +95,16 @@ echo [Rodogarcia PROD] Executando hardening ponta a ponta...
 node scripts\tests\test-security-hardening.js
 if errorlevel 1 exit /b 1
 
-echo [Rodogarcia PROD] Abrindo backend e frontend compilados em janelas separadas...
-start "Rodogarcia Backend PROD" cmd /k "cd /d ""%~dp0backend"" && npm run start"
-start "Rodogarcia Frontend PROD" /D "%~dp0frontend" cmd /k "set PORT=6060&&set HOSTNAME=127.0.0.1&&npm run start:prod"
+echo [Rodogarcia PROD] Iniciando backend e frontend com PM2...
+if not exist "logs" mkdir "logs"
+call pm2 startOrReload ecosystem.config.js --env production --update-env
+if errorlevel 1 exit /b 1
+call pm2 save
+if errorlevel 1 exit /b 1
 
 echo.
 echo [Rodogarcia PROD] Backend Cloudflare:  https://sitebackend.rodogarcia.com.br ^> http://127.0.0.1:6050
 echo [Rodogarcia PROD] Frontend Cloudflare: https://site.rodogarcia.com.br ^> http://127.0.0.1:6060
+echo [Rodogarcia PROD] Status: pm2 status rodogarcia-backend-prod rodogarcia-frontend-prod
 
 endlocal
