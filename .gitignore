@@ -75,6 +75,7 @@ backend/storage/uploads/**
 
 # Build
 .next/
+frontend/dist-prod/
 .turbo/
 .cache/
 .vite/

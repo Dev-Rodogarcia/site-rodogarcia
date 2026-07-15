@@ -118,6 +118,9 @@ const cmsPreviewQuery = [{ type: "query", key: "preview", value: "cms" }];
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  output: "standalone",
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {

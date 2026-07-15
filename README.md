@@ -9,7 +9,8 @@ Monorepo separado em dois projetos independentes:
 
 A raiz fica reservada para arquivos globais:
 
-- `.env` e `.env.example`: configuracao local do monorepo.
+- `.env.development.local` e `.env.production.local`: configuracoes locais ignoradas pelo Git.
+- `.env.development.example`, `.env.production.example` e `.env.example`: modelos de ambiente.
 - `docs/`: documentacao tecnica curta.
 - `scripts/`: testes e automacoes globais.
 - `frontend/` e `backend/`: projetos isolados.
@@ -28,29 +29,42 @@ cd ..\frontend
 cmd /c npm install
 ```
 
-Configure o ambiente:
+Configure o ambiente de desenvolvimento:
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item .env.development.example .env.development.local
 ```
 
 Suba os dois servidores:
 
 ```powershell
-cd backend
-cmd /c npm run dev
-
-cd ..\frontend
-cmd /c npm run dev
+cmd /c iniciar-dev.bat
 ```
 
-Tambem e possivel usar `iniciar.bat` a partir da raiz. Ele encerra processos antigos nas portas padrao e abre backend e frontend em janelas separadas.
+`iniciar-dev.bat` encerra somente processos DEV e abre backend e frontend em janelas separadas.
 
 URLs padrao:
 
-- Frontend: `http://127.0.0.1:5010`
-- Backend: `http://127.0.0.1:4010`
-- CMS: `http://127.0.0.1:5010/auth/entrar`
+- Frontend: `http://127.0.0.1:5011`
+- Backend: `http://127.0.0.1:4011`
+- CMS: `http://127.0.0.1:5011/auth/entrar`
+
+## Producao local e tunnel
+
+O site nao pode ser exportado como HTML estatico: ele usa Server Components, rewrites para a API e CMS. Em producao, `iniciar-prod.bat` recompila e recria `frontend/dist-prod` com o servidor Next standalone, os assets estaticos e `build-info.json`; o Express permanece em processo separado.
+
+Copie `.env.production.example` para `.env.production.local`, preencha segredos, origens HTTPS e o volume persistente. Em seguida, execute:
+
+```powershell
+cmd /c iniciar-prod.bat
+```
+
+O script valida ambiente, typecheck, testes, builds e hardening antes de iniciar os processos privados a partir do artefato atualizado:
+
+- Frontend Next: `127.0.0.1:5010`
+- Backend Express: `127.0.0.1:4010`
+
+Publique-os somente por Cloudflare Tunnel ou reverse proxy HTTPS. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
 
 ## Estrutura
 
@@ -65,7 +79,7 @@ URLs padrao:
 
 O storage inicial continua em JSON, agora dentro de `backend/storage`.
 Arquivos privados ficam em `backend/storage/private`.
-O backend carrega `.env` da raiz como fonte local padrao.
+O backend ainda carrega `.env` da raiz por compatibilidade. Os inicializadores carregam primeiro `.env.development.local` ou `.env.production.local`, cujos valores prevalecem no processo iniciado.
 
 Arquivos novos de operacao:
 
@@ -145,3 +159,4 @@ Antes de publicar, confirme:
 - `UPLOADS_DIR` persistente e servido apenas como arquivo estatico com `nosniff`.
 - Nenhum script de analytics configurado sem banner de consentimento ativo.
 - Backups dos JSON privados antes de migracoes ou deploys grandes.
+- Execucao via `iniciar-prod.bat` ou gerenciador de processos equivalente, sempre com frontend e backend ligados apenas em `127.0.0.1`.

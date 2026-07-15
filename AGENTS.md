@@ -21,8 +21,8 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 
 ## Bloqueios de Execução e Segurança Operacional
 
-- Não execute `iniciar.bat` sem pedido explícito do usuário. Esse script encerra processos nas portas padrão e abre janelas externas.
-- Não derrube, reinicie, libere ou mate processos nas portas `4010` (backend) e `5010` (frontend) sem pedido explícito.
+- Não execute `iniciar-dev.bat` ou `iniciar-prod.bat` sem pedido explícito do usuário. Esses scripts encerram processos e abrem janelas externas.
+- Não derrube, reinicie, libere ou mate processos nas portas `4010`/`5010` (produção) ou `4011`/`5011` (desenvolvimento) sem pedido explícito.
 - Prefira `npm run dev`, `npm run typecheck`, `npm run build` e `npm test` dentro de `backend/` ou `frontend/` conforme o escopo.
 - Não edite `.env`, `.env.*` reais, credenciais, chaves, arquivos privados de storage, backups ou uploads de produção sem solicitação explícita.
 - Não versionar dados sensíveis: `backend/storage/private/**`, `backend/storage/uploads/**`, JSONs operacionais privados, logs, builds e caches devem permanecer fora do Git.

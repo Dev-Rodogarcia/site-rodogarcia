@@ -6,9 +6,9 @@
 - Frontend: Next.js App Router, React 19, TypeScript, Tailwind CSS v4, shadcn/base-nova, Radix UI, Base UI, Phosphor Icons, lucide-react, Framer Motion, Recharts, React Hook Form e Zod.
 - Backend: Node.js, Express 5, TypeScript ESM, Helmet, CORS, cookie-parser, multer, Sharp, Zod, bcryptjs, jsonwebtoken, dotenv e Vitest.
 - Persistência atual: arquivos JSON locais em `backend/storage`, com privados em `backend/storage/private` e uploads em `backend/storage/uploads`.
-- Ambiente local padrão: backend em `127.0.0.1:4010`, frontend em `127.0.0.1:5010`, CMS em `/auth/entrar` e painel em `/developer`.
-- Configuração local centralizada na raiz por `.env` e `.env.example`; o backend carrega `.env` da raiz em `backend/src/config/env.ts`.
-- Operação Windows com comandos npm por projeto e script opcional `iniciar.bat`.
+- Ambiente DEV: backend em `127.0.0.1:4011`, frontend em `127.0.0.1:5011`, CMS em `/auth/entrar` e painel em `/developer`. Ambiente PROD: backend privado em `127.0.0.1:4010` e frontend Next privado em `127.0.0.1:5010`.
+- Configuração local usa `.env.development.local` ou `.env.production.local`, a partir de seus respectivos exemplos; `.env` e `.env.example` permanecem como compatibilidade. O backend ainda carrega `.env` da raiz, mas os inicializadores injetam primeiro o arquivo do modo escolhido.
+- Operação Windows separada por `iniciar-dev.bat` e `iniciar-prod.bat`; não existe mais inicializador genérico.
 
 ## Arquitetura e Padrões
 
@@ -22,6 +22,7 @@
 - Cache leve de recursos administrativos fica em `useAdminResource`; coleções CRUD ordenáveis usam `useAdminCollection`.
 - Backend Express é montado em `createApp`, com Helmet, CORS restrito, JSON limit `2mb` para JSON e uploads multipart separados, cookie parser, `/uploads` estático com `nosniff`, router `/api` e `/health`.
 - O frontend aplica headers globais em `frontend/next.config.js`, incluindo CSP, `Referrer-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e HSTS somente em produção.
+- O frontend de produção usa o artefato standalone `frontend/dist-prod`, recriado por `npm run build:prod` a cada inicialização de produção. A pasta reúne servidor Next, `.next/static`, `public` e `build-info.json`; Server Components, headers, rewrites de API/uploads e CMS impedem exportação estática segura apenas com HTML/JS. O Next remove `X-Powered-By` e mantém source maps de navegador desabilitados.
 - O preview responsivo do CMS abre somente rotas públicas listadas com `?preview=cms`; nessa combinação, CSP e `X-Frame-Options` permitem frame apenas pela mesma origem. Rotas administrativas, de autenticação, APIs e o acesso público comum permanecem com bloqueio total de framing.
 - Controllers são finos; services concentram regra de negócio; repositories encapsulam JSON; `security` guarda sessão, auth, CSRF, origin e rate limit; `validators` guarda validação de borda; `utils` guarda helpers puros.
 - `readJsonFile` retorna default apenas para arquivo ausente; corrupção, permissão e I/O falham fechados com cópia de preservação para JSON inválido. `writeJsonFile` escreve em arquivo temporário e renomeia para reduzir risco de arquivo truncado.
@@ -48,6 +49,7 @@
 - Fluxo público: Server Component Next.js -> `fetchPublicContent`/`serverFetch` -> rewrite `/api` do Next -> backend Express -> services -> repositories JSON -> DTO público sanitizado -> componentes React.
 - Fluxo CMS: usuário admin -> `/auth/entrar` -> cookie `sid` HttpOnly -> `SessionProvider` consulta `/api/auth/session` -> `DeveloperAuthGate` protege `/developer` -> hooks admin chamam `/api/admin/**` com CSRF.
 - Rewrites do Next encaminham `/api/:path*` e `/uploads/:path*` para `BACKEND_INTERNAL_URL`, `BACKEND_PROXY_URL` ou `NEXT_PUBLIC_BACKEND_URL`.
+- Em produção, `iniciar-prod.bat` fixa o backend interno em `127.0.0.1:4010`; o hostname público deve alcançar o Next por Cloudflare Tunnel ou reverse proxy HTTPS. O fluxo normal usa `/api` e `/uploads` no domínio do site, sem expor o repositório, `.env` ou storage.
 - Endpoints públicos principais: `/api/public/content`, `/api/public/seo`, `/api/public/media-slots`, `/api/consent-settings`, `/api/consent-events`, `/api/tracking/event`, `/api/contact`, `/api/quote`, `/api/popup-config`, `/api/popup-events` e `/api/leads`.
 - Endpoints de auth: `/api/auth/session`, `/api/auth/me`, `/api/auth/setup`, `/api/auth/login`, `/api/auth/logout` e `/api/auth/register`.
 - Endpoints admin: conteúdo, home, serviços, páginas CMS, footer links, textos do site, imagens, media slots, SEO, consent settings, cookie consents, leads, tracking events, audit log, usuários e entidades como `units`.
@@ -79,7 +81,7 @@
 - Ao alterar schema de conteúdo, atualizar tipos backend/frontend, sanitizadores, normalizadores públicos, telas CMS, defaults/migração de leitura, testes e este estado.
 - Ao criar ou renomear rota pública, atualizar `routes.ts`, redirects/rewrites em `next.config.js` quando necessário, sitemap, robots, navegação, footer e SEO CMS.
 - O build do Next executa a checagem TypeScript; o CI também roda typecheck, testes, builds e hardening ponta a ponta antes da entrega.
-- `iniciar.bat` encerra processos nas portas padrão antes de iniciar servidores; não deve ser executado automaticamente por IA sem pedido explícito.
+- `iniciar-dev.bat` encerra apenas `4011`/`5011` e bloqueia proxies/URLs de backend produtivos. `iniciar-prod.bat` valida backend e typecheck frontend, encerra `4010`/`5010`, recria `frontend/dist-prod`, executa hardening contra esse artefato e então inicia a nova versão. Nenhum desses scripts deve ser executado automaticamente por IA sem pedido explícito.
 
 ## Verificação Operacional
 
@@ -121,6 +123,10 @@
 Nenhuma pendência acionável registrada.
 
 ## Atualização recente
+
+- O inicializador genérico `iniciar.bat` foi removido: `iniciar-dev.bat` (4011/5011) e `iniciar-prod.bat` (4010/5010 privados) são os únicos fluxos. O PROD recria `frontend/dist-prod` com standalone Next, assets estáticos, `public` e `build-info.json`, e o inicia por `node dist-prod/server.js`.
+- `docs/cloudflare-urls.md` concentra os campos das URLs públicas que serão recebidas, com o mapeamento para `.env.production.local`; `docs/operacao-producao.md` documenta o artefato, storage e Cloudflare Tunnel. O hardening usa storage e proxy temporários e valida o próprio `dist-prod`, sem herdar ou tocar storage/proxy configurados no ambiente chamador.
+- O arquivo local ignorado `.env.production.local` é preenchido a partir do modelo de produção antes da primeira inicialização PROD; ele deve receber URLs Cloudflare, segredos fortes e caminhos persistentes reais, nunca os placeholders versionados.
 
 - Relatório consolidado da auditoria CMS foi registrado em `docs/auditoria-integracao-cms.md`: 387 contratos rastreados, 30 controles aposentados e os 357 contratos ativos funcionais após o fechamento das pendências técnicas.
 - A suíte de regressão do CMS passou a ter 9 arquivos e 30 testes, cobrindo conteúdo, SEO, LGPD, popup, mídia, leads, URLs, arrays vazios, IDs de providers, transação de mídia e isolamento dos storages.

@@ -122,6 +122,7 @@ function startServers(storeDir) {
     FRONTEND_ORIGIN: FRONTEND_URL,
     ADMIN_SETUP_CODE: SETUP_CODE,
     SESSION_SECRET: "test-session-secret-with-more-than-32-characters",
+    STORAGE_ROOT: storeDir,
     CONTENT_STORE_PATH: contentStorePath,
     SITE_TEXTS_STORE_PATH: siteTextsStorePath,
     USERS_STORE_PATH: path.join(storeDir, "users.json"),
@@ -140,6 +141,10 @@ function startServers(storeDir) {
   const frontendEnv = {
     ...process.env,
     NODE_ENV: "production",
+    PORT: String(FRONTEND_PORT),
+    HOSTNAME: HOST,
+    BACKEND_PROXY_URL: "",
+    NEXT_PUBLIC_BACKEND_PROXY_URL: "",
     BACKEND_INTERNAL_URL: BACKEND_URL,
     NEXT_PUBLIC_BACKEND_URL: BACKEND_URL,
   };
@@ -148,8 +153,7 @@ function startServers(storeDir) {
     backend: startProcess({ cwd: BACKEND_DIR, script: "start", env: backendEnv }),
     frontend: startProcess({
       cwd: FRONTEND_DIR,
-      script: "start",
-      args: ["--hostname", HOST, "--port", String(FRONTEND_PORT)],
+      script: "start:prod",
       env: frontendEnv,
     }),
   };
