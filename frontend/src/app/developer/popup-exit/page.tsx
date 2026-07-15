@@ -15,9 +15,10 @@ import {
   useAdminResource,
 } from "@/hooks/useAdminResource";
 import { useCarouselPagination } from "@/hooks/useCarouselPagination";
-import { api } from "@/lib/routes";
+import { api, site } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { DeveloperImageField } from "@/components/developer/DeveloperImageField";
+import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import {
   DeveloperCard,
   DeveloperField,
@@ -151,6 +152,7 @@ export default function PopupExitPage() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "success" | "error">("");
   const [statusMessage, setStatusMessage] = useState("");
+  const [previewRevision, setPreviewRevision] = useState(0);
   const {
     data: resourceData,
     loading,
@@ -271,6 +273,7 @@ export default function PopupExitPage() {
     invalidateAdminResource([adminResourceKeys.popup, adminResourceKeys.dashboard]);
     setStatus("success");
     setStatusMessage("Configuração do popup salva com sucesso.");
+    setPreviewRevision((revision) => revision + 1);
     await refresh();
   }
 
@@ -318,6 +321,15 @@ export default function PopupExitPage() {
           <DeveloperMessage tone="error">{error}</DeveloperMessage>
         </div>
       ) : null}
+
+      <div className="mt-6">
+        <DeveloperResponsivePreview
+          href={site.home}
+          title="Preview do popup de saída"
+          showExitPopup
+          revision={previewRevision}
+        />
+      </div>
 
       <div className="mt-8 flex flex-col gap-6">
 

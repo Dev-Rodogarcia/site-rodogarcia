@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, type HTMLAttributes, type ReactNode } from "react";
+import { useState, useRef, useEffect, useId, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import { CaretDown, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { getCmsHelp, type CmsHelpContent, type CmsHelpKind } from "@/lib/cmsHelp";
 import { cn } from "@/lib/utils";
 
 export const developerPageClassName =
@@ -60,9 +62,12 @@ export function DeveloperHero({
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
             {eyebrow}
           </p>
-          <h1 className="mt-2 text-[clamp(1.45rem,2vw,2.1rem)] font-bold leading-[1.04] tracking-[-0.03em] text-[var(--foreground)]">
-            {title}
-          </h1>
+          <div className="mt-2 flex items-center gap-2">
+            <h1 className="text-[clamp(1.45rem,2vw,2.1rem)] font-bold leading-[1.04] tracking-[-0.03em] text-[var(--foreground)]">
+              {title}
+            </h1>
+            <DeveloperHelp label={title} kind="page" />
+          </div>
           {description ? (
             <p className="mt-2 max-w-[68ch] text-sm leading-6 text-[var(--color-muted-raw)]">
               {description}
@@ -146,7 +151,7 @@ export function DeveloperSectionHeading({
           <h2 className="text-base font-semibold tracking-[-0.015em] text-[var(--foreground)] sm:text-lg">
             {title}
           </h2>
-          {tooltip ? <DeveloperTooltip content={tooltip} /> : null}
+          <DeveloperHelp label={title} kind="section" summaryOverride={tooltip} />
         </div>
         {description ? (
           <p className="mt-1 max-w-[78ch] text-sm leading-6 text-[var(--color-muted-raw)]">{description}</p>
@@ -164,6 +169,7 @@ export function DeveloperField({
   children,
   className,
   tooltip,
+  helpKey,
 }: {
   label: string;
   hint?: string;
@@ -171,6 +177,7 @@ export function DeveloperField({
   children: ReactNode;
   className?: string;
   tooltip?: string;
+  helpKey?: string;
 }) {
   return (
     <label className={cn("block", className)}>
@@ -179,7 +186,7 @@ export function DeveloperField({
           {label}
           {required ? <span className="ml-1 text-[var(--primary)]">*</span> : null}
         </span>
-        {tooltip ? <DeveloperTooltip content={tooltip} /> : null}
+        <DeveloperHelp label={label} templateKey={helpKey} summaryOverride={tooltip} />
       </span>
       {children}
       {hint ? <span className="mt-2 block text-xs leading-6 text-[var(--color-muted-raw)]">{hint}</span> : null}
@@ -229,11 +236,39 @@ export function DeveloperColorField({
   );
 }
 
-export function DeveloperTooltip({ content }: { content: string }) {
+export function DeveloperHelp({
+  label,
+  kind = "field",
+  templateKey,
+  summaryOverride,
+}: {
+  label: string;
+  kind?: CmsHelpKind;
+  templateKey?: string;
+  summaryOverride?: string;
+}) {
+  const pathname = usePathname();
+  const content = getCmsHelp(pathname, label, kind, templateKey);
+
+  return <DeveloperTooltip content={summaryOverride ? { ...content, summary: summaryOverride } : content} />;
+}
+
+function getPlainTooltipExample(content: string) {
+  const exampleMatch = content.match(/exemplo:\s*(.+?)(?:\.|$)/i);
+  return exampleMatch?.[1] ?? "Aplique esta configuração e confira o resultado na área indicada desta tela.";
+}
+
+function getTooltipText(content: string | CmsHelpContent) {
+  if (typeof content === "string") return content;
+  return `${content.title}. Resumo: ${content.summary}. Exemplo real: ${content.example}. ${content.details.map((detail) => `${detail.label}: ${detail.value}`).join(" ")}`;
+}
+
+export function DeveloperTooltip({ content }: { content: string | CmsHelpContent }) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
+  const tooltipId = useId();
 
   useEffect(() => {
     setMounted(true);
@@ -242,8 +277,8 @@ export function DeveloperTooltip({ content }: { content: string }) {
   function computeCoords() {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
-    const tooltipW = 260;
-    const tooltipH = 72; // estimativa
+    const tooltipW = Math.min(520, window.innerWidth - 24);
+    const tooltipH = typeof content === "string" ? 88 : Math.min(640, 208 + content.details.length * 52);
     const gap = 8;
 
     let left = rect.right + gap;
@@ -258,7 +293,10 @@ export function DeveloperTooltip({ content }: { content: string }) {
       top = rect.bottom - tooltipH;
     }
 
-    setCoords({ top, left });
+    setCoords({
+      top: Math.max(12, Math.min(top, window.innerHeight - tooltipH - 12)),
+      left: Math.max(12, Math.min(left, window.innerWidth - tooltipW - 12)),
+    });
   }
 
   function handleMouseEnter() {
@@ -271,18 +309,67 @@ export function DeveloperTooltip({ content }: { content: string }) {
     setVisible(true);
   }
 
+  function handleKeyDown(event: KeyboardEvent<HTMLSpanElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    if (!visible) computeCoords();
+    setVisible((current) => !current);
+  }
+
+  function handleClick(event: MouseEvent<HTMLSpanElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!visible) computeCoords();
+    setVisible((current) => !current);
+  }
+
   const tooltip = (
     <span
+      id={tooltipId}
       role="tooltip"
-      className="pointer-events-none fixed w-[260px] rounded-lg border border-slate-200 bg-slate-950 px-3 py-2 text-xs font-medium leading-5 text-white shadow-xl transition-opacity duration-150"
+      className="pointer-events-none fixed rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-xs text-white shadow-2xl transition-opacity duration-150"
       style={{
         zIndex: 9999,
         top: coords.top,
         left: coords.left,
         opacity: visible ? 1 : 0,
+        width: "min(520px, calc(100vw - 24px))",
       }}
     >
-      {content}
+      {typeof content === "string" ? (
+        <>
+          <span className="mb-3 block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
+            <span className="block font-medium leading-5 text-slate-100">{content}</span>
+          </span>
+          <span className="block rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2.5">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">Exemplo real</span>
+            <span className="block font-medium leading-5 text-slate-100">{getPlainTooltipExample(content)}</span>
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="mb-2 block text-sm font-bold text-white">{content.title}</span>
+          <span className="mb-3 block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
+            <span className="block font-medium leading-5 text-slate-100">{content.summary}</span>
+          </span>
+          <span className="mb-3 block rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2.5">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">Exemplo real</span>
+            <span className="block font-medium leading-5 text-slate-100">{content.example}</span>
+          </span>
+          <span className="grid gap-x-4 gap-y-2.5 sm:grid-cols-[112px_minmax(0,1fr)]">
+            {content.details.map((detail) => (
+              <span key={`${detail.label}-${detail.value}`} className="contents">
+                <span className="font-semibold text-blue-400">{detail.label}:</span>
+                <span className={detail.technical ? "font-mono text-[11px] leading-5 text-slate-200" : "font-medium leading-5 text-slate-100"}>
+                  {detail.value}
+                </span>
+              </span>
+            ))}
+          </span>
+        </>
+      )}
     </span>
   );
 
@@ -290,13 +377,17 @@ export function DeveloperTooltip({ content }: { content: string }) {
     <span className="relative inline-flex align-middle">
       <span
         ref={triggerRef}
-        aria-describedby="dev-tooltip"
+        aria-describedby={visible ? tooltipId : undefined}
+        aria-label={`Ajuda: ${getTooltipText(content)}`}
+        role="button"
         tabIndex={0}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setVisible(false)}
         onFocus={handleFocus}
         onBlur={() => setVisible(false)}
-        className="inline-flex h-4 w-4 cursor-default items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold leading-none text-slate-400 outline-none transition-colors hover:border-slate-400 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold leading-none text-slate-400 outline-none transition-colors hover:border-slate-400 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
       >
         ?
       </span>

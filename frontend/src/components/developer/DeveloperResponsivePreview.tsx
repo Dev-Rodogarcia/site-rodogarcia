@@ -27,6 +27,7 @@ export function DeveloperResponsivePreview({
   anchor,
   revision,
   showConsent = false,
+  showExitPopup = false,
 }: {
   href: AppPath;
   title?: string;
@@ -34,6 +35,8 @@ export function DeveloperResponsivePreview({
   revision?: number;
   /** Mantém o banner de cookies visível no iframe para editar LGPD. */
   showConsent?: boolean;
+  /** Mantém o popup de saída aberto no iframe sem registrar eventos ou leads. */
+  showExitPopup?: boolean;
 }) {
   const [previewMode, setPreviewMode] = useState<PreviewMode>("all");
   const [zoom, setZoom] = useState(0.72);
@@ -70,6 +73,9 @@ export function DeveloperResponsivePreview({
     }
     if (showConsent) {
       params.set("consent-preview", "1");
+    }
+    if (showExitPopup) {
+      params.set("popup-preview", "1");
     }
     return `${href}${href.includes("?") ? "&" : "?"}${params.toString()}${anchor ? `#${anchor}` : ""}`;
   }

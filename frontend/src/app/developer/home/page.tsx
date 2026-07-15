@@ -87,19 +87,19 @@ const HOME_STEPS = [
   {
     key: "section2",
     step: "Etapa 4",
-    title: "Operacao conectada",
-    description: "Ate 5 itens da area escura em desktop e mobile.",
+    title: "Operação conectada",
+    description: "Até 5 itens da área escura em desktop e mobile.",
   },
   {
     key: "section3",
     step: "Etapa 5",
-    title: "Linhas de servico",
+    title: "Linhas de serviço",
     description: "Badge, texto principal e cards paginados de soluções.",
   },
   {
     key: "regionalPresence",
     step: "Etapa 6",
-    title: "Presenca Regional",
+    title: "Presença Regional",
     description: "Unidades exibidas no mapa e no card de unidade ativa.",
   },
   {
@@ -1060,7 +1060,7 @@ export default function DeveloperHomePage() {
   return (
     <DeveloperPage>
       <DeveloperHero
-        eyebrow="Home - Pagina Inicial"
+        eyebrow="Home — Página Inicial"
         title="Editor completo da Home."
         description="Edite os blocos principais da página inicial em um único lugar, com limites claros e dados padronizados."
         stats={[
@@ -1580,7 +1580,7 @@ export default function DeveloperHomePage() {
         {activeStep === "section3" ? (
         <DeveloperCard id="section-3" className="p-5 sm:p-6">
           <DeveloperSectionHeading
-            eyebrow="Etapa 5 - linhas de servico"
+            eyebrow="Etapa 5 — linhas de serviço"
             title="Soluções para a complexidade da sua operação"
             description="O site mostra 3 cards por página, com paginação visual e rotação automática."
             action={

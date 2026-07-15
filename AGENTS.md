@@ -77,6 +77,15 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 - Comentários devem explicar decisões, contratos ou exceções não óbvias; não comente código autoexplicativo.
 - Testes devem acompanhar risco e superfície alterada: services, security, media, storage, validators e contratos compartilhados exigem cobertura próxima da mudança.
 
+### Ajuda Contextual do CMS
+
+- `frontend/src/lib/cmsHelp.ts` é a fonte única das explicações exibidas pelas interrogações do CMS. Use os componentes `DeveloperHelp`, `DeveloperField`, `DeveloperSectionHeading` e `DeveloperCmsAccordion`; não replique descrições de ajuda diretamente em telas novas quando um template puder representar o contrato.
+- Ao criar, remover ou alterar um controle, uma regra de negócio, um destino público, uma validação, um schema ou um fluxo de salvamento do CMS, revise obrigatoriamente a ajuda correspondente em `cmsHelp.ts`. Se a mudança altera o que o controle faz, recebe, valida, grava ou afeta, a explicação deve mudar no mesmo commit.
+- Ajuda de campos e seções comuns deve informar, em linguagem que uma pessoa não técnica entenda, o que controla, de onde vem, onde aparece ou é usada e o efeito após salvar. Cite a rota ou área pública real sempre que ela existir; não use fórmulas vagas como “recurso correspondente”, “conteúdo administrado” ou “comportamento público” sem explicar qual elemento o visitante verá afetado. Controles com impacto técnico, operacional, de segurança, integração ou publicação precisam também explicar o contrato, formato aceito, cálculo, limite ou validação aplicável.
+- Toda ficha estruturada deve começar por `Resumo`: uma explicação curta, pessoal e sem jargão que diga o que a pessoa preenche ou escolhe, o que isso muda e onde o visitante perceberá a mudança. Os detalhes técnicos vêm depois desse resumo, nunca no lugar dele.
+- Toda ficha também deve conter `Exemplo real`, com um valor, texto, imagem, link, resultado ou situação concreta que a pessoa reconheça. O exemplo deve pertencer ao campo explicado — por exemplo, um texto plausível para um botão, uma URL válida para um link ou a descrição de uma foto para texto alternativo — e não uma instrução abstrata.
+- Prefira templates específicos por rota, tipo e chave semântica para controles críticos. O fallback automático deve usar o perfil real da rota e da categoria do campo (texto, botão, mídia, SEO, contato, status, cor, prazo ou filtro); é proibido gerar frases de preenchimento como “altere um campo”, “bloco correspondente” ou “recurso administrado”.
+
 ---
 
 ## Persistência e Conteúdo

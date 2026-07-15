@@ -119,10 +119,11 @@ function SaveButton({ saving, children }: { saving: boolean; children: string })
 function ButtonFields({
   buttons,
   onChange,
-  labels = ["Botao 1", "Botao 2"],
+  labels = ["Botão 1", "Botão 2"],
   max = 2,
   mutedSurface = false,
   singleButtonInline = false,
+  helpKey,
 }: {
   buttons: AnyRecord[];
   onChange: (buttons: AnyRecord[]) => void;
@@ -130,6 +131,7 @@ function ButtonFields({
   max?: number;
   mutedSurface?: boolean;
   singleButtonInline?: boolean;
+  helpKey?: string;
 }) {
   return (
     <div
@@ -151,13 +153,13 @@ function ButtonFields({
           <div className={singleButtonInline && buttons.length === 1 ? "md:col-span-2" : undefined}>
             {singleButtonInline && buttons.length === 1 ? (
               <p className="text-base font-semibold tracking-[-0.015em] text-[var(--foreground)] sm:text-lg">
-                {labels[index] ?? `Botao ${index + 1}`}
+                {labels[index] ?? `Botão ${index + 1}`}
               </p>
             ) : (
-              <DeveloperSectionHeading title={labels[index] ?? `Botao ${index + 1}`} />
+              <DeveloperSectionHeading title={labels[index] ?? `Botão ${index + 1}`} />
             )}
           </div>
-          <DeveloperField label="Texto" required tooltip="Texto exibido no botão. Exemplo: Solicitar cotação.">
+          <DeveloperField label="Texto" required helpKey={helpKey ? `${helpKey}-texto` : undefined}>
             <input
               required
               value={button.label ?? ""}
@@ -171,7 +173,7 @@ function ButtonFields({
             />
             <CountHint value={button.label ?? ""} maxLength={40} />
           </DeveloperField>
-          <DeveloperField label="Link" required tooltip="Use rota interna, URL externa, mailto: ou tel:.">
+          <DeveloperField label="Link" required helpKey={helpKey ? `${helpKey}-link` : undefined}>
             <input
               required
               value={button.url ?? ""}
@@ -414,7 +416,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
             <DeveloperCard className="p-5 sm:p-6">
               <DeveloperSectionHeading eyebrow="Hero" title="Botão WhatsApp" description="Hero fixo; somente este botão é editável." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("hero", { heroWhatsappButton: page.heroWhatsappButton }); }}>
-                <ButtonFields buttons={[page.heroWhatsappButton]} labels={["Botao WhatsApp"]} max={1} mutedSurface singleButtonInline onChange={(buttons) => update((draft) => { draft.heroWhatsappButton = buttons[0]; })} />
+                <ButtonFields buttons={[page.heroWhatsappButton]} labels={["Botão WhatsApp"]} max={1} mutedSurface singleButtonInline helpKey="hero-whatsapp" onChange={(buttons) => update((draft) => { draft.heroWhatsappButton = buttons[0]; })} />
                 <SaveButton saving={saving === "hero"}>Salvar hero</SaveButton>
               </form>
             </DeveloperCard>
@@ -431,7 +433,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   renderItem={(item, index) => (
                     <div className="space-y-5">
                       <TextInput label="Descrição curta" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.mainChannels[index].description = value; })} />
-                      <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.mainChannels[index].button = buttons[0]; })} />
+                      <ButtonFields buttons={[item.button]} labels={["Botão"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.mainChannels[index].button = buttons[0]; })} />
                     </div>
                   )}
                 />
@@ -488,7 +490,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                         <TextInput label="Título" value={item.title} maxLength={220} onChange={(value) => update((draft) => { draft.directChannels[index].title = value; })} />
                         <TextInput label="Descrição" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.directChannels[index].description = value; })} />
                       </div>
-                      <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.directChannels[index].button = buttons[0]; })} />
+                      <ButtonFields buttons={[item.button]} labels={["Botão"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.directChannels[index].button = buttons[0]; })} />
                     </div>
                   )}
                 />
@@ -703,12 +705,12 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               <div className="grid gap-5 md:grid-cols-2 md:items-start">
                 <div className="space-y-5">
                   <TextInput label="Título principal do bloco" value={current.info.companyTitle} maxLength={90} onChange={(value) => update((draft) => { draft.info.companyTitle = value; })} />
-                  <TextInput label="Horario de atendimento" value={current.info.hours} maxLength={160} onChange={(value) => update((draft) => { draft.info.hours = value; })} />
+                  <TextInput label="Horário de atendimento" value={current.info.hours} maxLength={160} onChange={(value) => update((draft) => { draft.info.hours = value; })} />
                   <TextInput label="Título Qual canal usar" value={current.info.channelGuideTitle} maxLength={90} onChange={(value) => update((draft) => { draft.info.channelGuideTitle = value; })} />
                   <TextInput label="Descrição Qual canal usar" value={current.info.channelGuideDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.channelGuideDescription = value; })} />
                 </div>
                 <div className="space-y-5">
-                  <TextInput label="Endereco" value={current.info.address} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.address = value; })} />
+                  <TextInput label="Endereço" value={current.info.address} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.address = value; })} />
                   <TextInput label="Documentos e anexos" value={current.info.documentsDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.documentsDescription = value; })} />
                   <TextInput label="Apoio rápido" value={current.info.quickSupportDescription} maxLength={220} textarea onChange={(value) => update((draft) => { draft.info.quickSupportDescription = value; })} />
                 </div>
@@ -860,7 +862,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   <TextInput label="Descrição" value={item.description} maxLength={220} textarea onChange={(value) => update((draft) => { draft.otherChannels[index].description = value; })} />
                   <DeveloperColorField label="Cor do botão" value={item.buttonColor} className="md:col-span-2" onChange={(value) => update((draft) => { draft.otherChannels[index].buttonColor = value; })} />
                 </div>
-                <ButtonFields buttons={[item.button]} labels={["Botao"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.otherChannels[index].button = buttons[0]; })} />
+                <ButtonFields buttons={[item.button]} labels={["Botão"]} max={1} singleButtonInline onChange={(buttons) => update((draft) => { draft.otherChannels[index].button = buttons[0]; })} />
                 <label className="inline-flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]">
                   <input
                     type="checkbox"

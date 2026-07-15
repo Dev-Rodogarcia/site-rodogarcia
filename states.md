@@ -18,6 +18,9 @@
 - `frontend/src/lib/routes.ts` é a fonte central de rotas públicas, rotas admin, endpoints de API, URLs externas, sitemap, redirects e navegação.
 - Páginas públicas usam fallbacks locais e conteúdo do CMS via `/api/public/content`; SEO editável usa `/api/public/seo` por `buildCmsMetadata`.
 - O CMS usa `SessionProvider`, `DeveloperAuthGate`, `DeveloperShell`, `DevSidebar`, `DevTopbar`, hooks administrativos e componentes compartilhados de `components/developer` e `components/ui`.
+- `frontend/src/lib/cmsHelp.ts` concentra as fichas de ajuda do CMS. Os templates específicos descrevem controle, origem, área pública real afetada, efeito do salvamento e, quando aplicável, contrato técnico; os fallbacks usam perfis reais das rotas e categorias concretas de campo, sem frases genéricas de preenchimento. Toda mudança de lógica, validação, destino, schema ou fluxo de um controle exige a revisão da ficha correspondente no mesmo commit.
+- Cada ficha de ajuda começa pelo bloco `Resumo`, em linguagem leiga: explica o que a pessoa ajusta, o que muda e em qual área o visitante percebe o resultado. Os campos técnicos permanecem abaixo para consulta detalhada.
+- Cada ficha também traz `Exemplo real`, com um preenchimento ou resultado concreto relacionado ao próprio campo; os templates genéricos escolhem exemplos por tipo de controle, como título, texto, link, URL, mídia ou visibilidade.
 - Mutação client-side no CMS passa por `useApiRequest`, que injeta `X-CSRF-Token` automaticamente para métodos inseguros.
 - Cache leve de recursos administrativos fica em `useAdminResource`; coleções CRUD ordenáveis usam `useAdminCollection`.
 - Backend Express é montado em `createApp`, com Helmet, CORS restrito, JSON limit `2mb` para JSON e uploads multipart separados, cookie parser, `/uploads` estático com `nosniff`, router `/api` e `/health`.
@@ -124,6 +127,12 @@ Nenhuma pendência acionável registrada.
 
 ## Atualização recente
 
+- As interrogações do CMS passaram a exibir fichas estruturadas, com labels de leitura rápida e detalhes técnicos somente quando necessários. O template do Botão WhatsApp de `/developer/fale-conosco` documenta o contrato `contactPage.heroWhatsappButton`, posição pública, limites, formatos, sanitização e impacto isolado do salvamento; Texto e Link usam chaves específicas desse CTA.
+- As fichas de mídia passaram a explicar a consequência visível de cada escolha. Em `/developer/servicos`, Arquivo selecionado, Texto alternativo da imagem e Enquadramento descrevem a imagem do módulo aberto de `/servicos`, o comportamento para leitores de tela e falha de carregamento, e a diferença entre recortar a visualização e alterar o arquivo original.
+- O bloco `Resumo` foi inserido no topo de todas as interrogações do CMS, inclusive nas ajudas legadas de texto simples; nos templates estruturados ele possui frase própria e, nos demais, preserva a explicação existente antes dos detalhes.
+- O bloco `Exemplo real` foi inserido nas interrogações do CMS. Exemplos específicos cobrem o CTA de WhatsApp e a mídia de Serviços; os demais campos recebem exemplos coerentes com seu tipo, como rota de contato, URL do WhatsApp, texto de botão, foto de operação ou ativação de item.
+- Os fallbacks de ajuda foram substituídos por perfis de todas as rotas do CMS e categorias de campo. Seções de botão, mídia e FAQ agora explicam sua ação e mostram exemplos próprios; campos de título, texto, link, mídia, cor, status, contato e regras de tempo recebem resumo, destino e exemplo específicos ao tipo.
+- Os rótulos administrativos revisados passaram a usar acentuação em textos visíveis, preservando URLs, identificadores técnicos e código sem alterações.
 - Em `/developer/rastreamento`, Eventos exibe dezoito registros por página para alinhar o rodapé à coluna de auditoria, enquanto `Auditoria > Ações administrativas` permanece limitada a quatro itens por página com paginação própria.
 
 - O inicializador genérico `iniciar.bat` foi removido: `iniciar-dev.bat` (4011/5011) e `iniciar-prod.bat` (4010/5010 privados) são os únicos fluxos. O PROD recria `frontend/dist-prod` com standalone Next, assets estáticos, `public` e `build-info.json`, e o inicia por `node dist-prod/server.js`.
@@ -151,6 +160,7 @@ Nenhuma pendência acionável registrada.
 - Em `/developer/monitoramento-cookies`, os filtros e ações ocupam o espaço ao lado da consulta em telas largas; os consentimentos recentes mantêm até dez registros por página, com paginação imediata quando houver resultados adicionais.
 - O editor de LGPD/Cookies foi reorganizado em blocos de banner, regras, posicionamento e categorias; as categorias do CMS são paginadas em grupos de quatro e a barra de salvamento permanece acessível no fim da edição.
 - O editor de LGPD/Cookies reutiliza `DeveloperResponsivePreview` com Desktop, Tablet e Mobile visíveis por padrão; o parâmetro interno `consent-preview=1` mantém o banner público exposto nos iframes de preview.
+- O editor de Popup de saída também abre `DeveloperResponsivePreview` logo após o cabeçalho, com Desktop, Tablet e Mobile visíveis por padrão. O parâmetro interno `popup-preview=1` abre o popup nos iframes sem exigir consentimento, sem registrar analytics ou leads e sem alterar as regras reais de frequência; Desktop/Tablet usam a configuração desktop e Mobile usa a configuração de folha inferior. A revisão do iframe é atualizada após salvar a configuração.
 - Ao abrir Preferências no banner público, as categorias são exibidas em uma janela modal paginada em grupos de três, evitando o crescimento vertical do banner quando houver muitas categorias.
 - O banner público de cookies permanece centralizado no desktop, assim como a janela de preferências; a posição lateral configurada anteriormente não desloca mais a experiência pública.
 - Os cartões de Leads recentes e Eventos recentes do Popup de saída usam flex vertical com paginação ancorada no rodapé comum, alinhando as barras mesmo quando os registros ocupam alturas diferentes.

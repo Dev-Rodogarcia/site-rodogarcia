@@ -19,6 +19,7 @@ import {
 } from "@/lib/routes";
 import {
   DeveloperCard,
+  DeveloperHelp,
   DeveloperHero,
   DeveloperCarouselPagination,
   DeveloperMessage,
@@ -120,8 +121,9 @@ function DashboardMetric({
       <div className="mt-5 text-4xl font-bold tracking-[-0.06em] text-[var(--foreground)]">
         {value}
       </div>
-      <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-        {title}
+      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
+        <span>{title}</span>
+        <DeveloperHelp label={title} kind="metric" />
       </div>
       <p className="mt-3 text-sm leading-7 text-[var(--color-muted-raw)]">{helper}</p>
     </DeveloperCard>

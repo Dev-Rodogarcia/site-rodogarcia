@@ -115,9 +115,18 @@ function clearFrequency() {
 
 function isMobileDevice() {
   if (typeof window === "undefined") return false;
+  const previewViewport = new URLSearchParams(window.location.search).get("viewport");
+  if (previewViewport === "mobile") return true;
+  if (previewViewport === "desktop" || previewViewport === "tablet") return false;
   const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const narrow = window.matchMedia("(max-width: 900px)").matches;
   return touch && narrow;
+}
+
+function isCmsPopupPreview() {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("preview") === "cms" && params.get("popup-preview") === "1";
 }
 
 function getPopupSessionId() {
@@ -133,6 +142,7 @@ function getPopupSessionId() {
 }
 
 function trackEvent(name: string, meta: Record<string, unknown> = {}) {
+  if (isCmsPopupPreview()) return;
   const payload = JSON.stringify({
     event: name,
     source: "exit-intent-popup",
@@ -208,12 +218,13 @@ export default function ExitPopup() {
   });
 
   useEffect(() => {
-    if (!marketingAllowed) return;
     const path = window.location.pathname;
     if (isAdminRoute(path) || isAuthRoute(path)) return;
 
     const params = new URLSearchParams(window.location.search);
     const testMode = params.get("popup_test") === "1";
+    const previewMode = isCmsPopupPreview();
+    if (!marketingAllowed && !previewMode) return;
 
     fetch(api.popup.config)
       .then((r) => r.json())
@@ -225,9 +236,18 @@ export default function ExitPopup() {
           desktop: { ...DEFAULT_CONFIG.desktop, ...(raw.desktop ?? {}) },
           mobile: { ...DEFAULT_CONFIG.mobile, ...(raw.mobile ?? {}) },
         };
-        if (!merged.enabled) return;
+        if (!merged.enabled && !previewMode) return;
         setConfig(merged);
-        if (testMode) {
+        if (testMode || previewMode) {
+          if (previewMode) {
+            hasShown.current = true;
+            setTimeout(() => {
+              setRendered(true);
+              setClosing(false);
+              setOpen(true);
+            }, 300);
+            return;
+          }
           clearFrequency();
           setTimeout(() => triggerShow(merged), 900);
         }
@@ -409,6 +429,12 @@ export default function ExitPopup() {
 
     setFormStatus("loading");
     setErrorMsg("");
+
+    if (isCmsPopupPreview()) {
+      setFormStatus("success");
+      setTimeout(() => closePopup("auto_after_submit"), 1200);
+      return;
+    }
 
     try {
       const res = await fetch(api.popup.leads, {
