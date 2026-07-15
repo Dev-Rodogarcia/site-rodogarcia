@@ -61,7 +61,9 @@ export default function TrackingPage() {
   const [pageFilter, setPageFilter] = useState("");
   const [appliedKey, setAppliedKey] = useState("");
   const [eventsPage, setEventsPage] = useState(1);
-  const EVENTS_PER_PAGE = 14;
+  const [auditPage, setAuditPage] = useState(1);
+  const EVENTS_PER_PAGE = 18;
+  const AUDIT_ITEMS_PER_PAGE = 4;
   const eventPath = `${api.admin.trackingEvents}?limit=250&event=${encodeURIComponent(eventFilter)}&page=${encodeURIComponent(pageFilter)}`;
   const auditPath = `${api.admin.auditLog}?limit=120`;
 
@@ -101,6 +103,9 @@ export default function TrackingPage() {
 
   const totalEventPages = Math.max(1, Math.ceil(events.length / EVENTS_PER_PAGE));
   const pagedEvents = events.slice((eventsPage - 1) * EVENTS_PER_PAGE, eventsPage * EVENTS_PER_PAGE);
+  const auditEvents = auditData?.events ?? [];
+  const totalAuditPages = Math.max(1, Math.ceil(auditEvents.length / AUDIT_ITEMS_PER_PAGE));
+  const pagedAuditEvents = auditEvents.slice((auditPage - 1) * AUDIT_ITEMS_PER_PAGE, auditPage * AUDIT_ITEMS_PER_PAGE);
 
   return (
     <DeveloperPage>
@@ -245,7 +250,7 @@ export default function TrackingPage() {
               tooltip="Registra operações importantes feitas no CMS, sem expor payloads sensíveis completos."
             />
             <div className="space-y-2">
-              {(auditData?.events ?? []).slice(0, 10).map((event) => (
+              {pagedAuditEvents.map((event) => (
                 <div key={event.id} className="rounded-lg border border-[var(--border)] bg-white/76 px-3 py-2">
                   <p className="text-sm font-semibold text-[var(--foreground)]">
                     {event.action || "Ação administrativa"}
@@ -263,10 +268,37 @@ export default function TrackingPage() {
                   <p className="text-xs text-[var(--color-muted-raw)]">{formatDateTime(event.createdAt)}</p>
                 </div>
               ))}
-              {(auditData?.events ?? []).length === 0 ? (
+              {auditEvents.length === 0 ? (
                 <p className="text-sm text-[var(--color-muted-raw)]">Sem auditoria recente.</p>
               ) : null}
             </div>
+            {totalAuditPages > 1 ? (
+              <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-4">
+                <span className="text-xs text-[var(--color-muted-raw)]">
+                  Página {auditPage} de {totalAuditPages}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={auditPage === 1}
+                    onClick={() => setAuditPage((page) => Math.max(1, page - 1))}
+                    className={developerSecondaryButtonClassName}
+                    style={{ opacity: auditPage === 1 ? 0.4 : 1 }}
+                  >
+                    ← Anterior
+                  </button>
+                  <button
+                    type="button"
+                    disabled={auditPage === totalAuditPages}
+                    onClick={() => setAuditPage((page) => Math.min(totalAuditPages, page + 1))}
+                    className={developerSecondaryButtonClassName}
+                    style={{ opacity: auditPage === totalAuditPages ? 0.4 : 1 }}
+                  >
+                    Próxima →
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </DeveloperCard>
         </div>
       </section>

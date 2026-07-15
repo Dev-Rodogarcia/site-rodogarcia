@@ -124,6 +124,8 @@ Nenhuma pendência acionável registrada.
 
 ## Atualização recente
 
+- Em `/developer/rastreamento`, Eventos exibe dezoito registros por página para alinhar o rodapé à coluna de auditoria, enquanto `Auditoria > Ações administrativas` permanece limitada a quatro itens por página com paginação própria.
+
 - O inicializador genérico `iniciar.bat` foi removido: `iniciar-dev.bat` (4011/5011) e `iniciar-prod.bat` (4010/5010 privados) são os únicos fluxos. O PROD recria `frontend/dist-prod` com standalone Next, assets estáticos, `public` e `build-info.json`, e o inicia por `node dist-prod/server.js`.
 - `docs/cloudflare-urls.md` concentra os campos das URLs públicas que serão recebidas, com o mapeamento para `.env.production.local`; `docs/operacao-producao.md` documenta o artefato, storage e Cloudflare Tunnel. O hardening usa storage e proxy temporários e valida o próprio `dist-prod`, sem herdar ou tocar storage/proxy configurados no ambiente chamador.
 - O arquivo local ignorado `.env.production.local` é preenchido a partir do modelo de produção antes da primeira inicialização PROD; ele deve receber URLs Cloudflare, segredos fortes e caminhos persistentes reais, nunca os placeholders versionados.
