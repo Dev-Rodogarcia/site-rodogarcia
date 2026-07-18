@@ -463,7 +463,10 @@ export interface QuotePageContent {
   };
   directChannels: QuoteDirectChannel[];
   otherChannels: QuoteOtherChannel[];
-  finalCta: {
+}
+
+export interface CollectionsPageContent {
+  hero: {
     buttons: PageButton[];
   };
 }
@@ -482,6 +485,8 @@ export interface OperationalUnit {
   contactLabel?: string;
   description?: string;
   logisticsInfo?: string;
+  quoteCnpj?: string;
+  genericPostalCode?: string;
   isDefault?: boolean;
   active?: boolean;
   createdAt?: string;

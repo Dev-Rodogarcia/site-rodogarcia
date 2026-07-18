@@ -629,7 +629,7 @@
         "id": "qa-coleta",
         "order": 4,
         "label": "Solicitar Coleta",
-        "href": "/fale-conosco",
+        "href": "/coletas",
         "icon": "Truck",
         "type": "link",
         "enabled": true
@@ -1064,13 +1064,13 @@
     "hero": {
       "buttons": [
         {
-          "label": "Falar no WhatsApp",
-          "url": "/fale-conosco",
+            "label": "Solicitar cotação",
+            "url": "#formulario-cotacao",
           "external": false
         },
         {
-          "label": "Ver contato completo",
-          "url": "/fale-conosco",
+            "label": "Solicitar coleta",
+            "url": "/coletas",
           "external": false
         }
       ]
@@ -1168,17 +1168,19 @@
         "createdAt": "2026-05-04T17:43:29.948Z",
         "updatedAt": "2026-05-04T17:43:29.948Z"
       }
-    ],
-    "finalCta": {
+    ]
+  },
+  "collectionsPage": {
+    "hero": {
       "buttons": [
         {
-          "label": "Abrir contato",
-          "url": "/fale-conosco",
+          "label": "Solicitar coleta",
+          "url": "#formulario-coleta",
           "external": false
         },
         {
-          "label": "Central de ajuda",
-          "url": "/central-ajuda",
+          "label": "Solicitar cotação",
+          "url": "/cotacao",
           "external": false
         }
       ]
@@ -1218,15 +1220,22 @@
               "external": false
             },
             {
-              "id": "services-tracking",
+              "id": "services-collection",
               "order": 3,
+              "label": "Solicitar coleta",
+              "url": "/coletas",
+              "external": false
+            },
+            {
+              "id": "services-tracking",
+              "order": 4,
               "label": "Rastrear encomenda",
               "url": "https://rodogarcia.eslcloud.com.br/recipient_tracking",
               "external": true
             },
             {
               "id": "services-business",
-              "order": 4,
+              "order": 5,
               "label": "Para empresas",
               "url": "/para-empresas",
               "external": false
@@ -2045,6 +2054,8 @@
       "type": "matriz",
       "state": "sp",
       "city": "Agudos",
+      "quoteCnpj": "60960473000162",
+      "genericPostalCode": "17123210",
       "address": "Rua Pedro Carmine Deo, 156, Agudos, SP - 17123-210",
       "phone": "0800 591 4557",
       "email": "gerente.financeiro@rodogarcia.com.br",

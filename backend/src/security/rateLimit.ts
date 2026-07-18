@@ -10,6 +10,7 @@ export const RATE_LIMITS = {
   analytics: { windowMs: 60 * 60 * 1000, maxAttempts: 1200 },
   consent: { windowMs: 60 * 60 * 1000, maxAttempts: 20 },
   setup: { windowMs: 60 * 60 * 1000, maxAttempts: 5 },
+  eslPublic: { windowMs: 60 * 60 * 1000, maxAttempts: 10 },
 } as const;
 
 export function getClientIp(req: Request): string {

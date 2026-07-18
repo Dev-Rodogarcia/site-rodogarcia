@@ -4,6 +4,7 @@ import type {
   AboutPageContent,
   BusinessPageContent,
   CareersPageContent,
+  CollectionsPageContent,
   ContactPageContent,
   FooterLinksContent,
   HomePageContent,
@@ -34,8 +35,10 @@ export interface PublicContentResponse {
   contactPage: ContactPageContent;
   careersPage: CareersPageContent;
   quotePage: QuotePageContent;
+  collectionsPage: CollectionsPageContent;
   footerLinks: FooterLinksContent;
   units: OperationalUnit[];
+  quoteBranches: Array<{ id: string; city: string; stateCode: string; genericPostalCode: string; isDefault: boolean }>;
   siteTexts: Record<string, string>;
 }
 

@@ -261,7 +261,7 @@ function validateCmsPagePayload(
   }
 
   if (pageKey === "quote") {
-    if (["hero", "finalCta"].includes(sectionKey)) {
+    if (sectionKey === "hero") {
       return validatePageButtons(payload.buttons, 2, "Cotação / Botões");
     }
     if (sectionKey === "directChannels") {
@@ -294,6 +294,10 @@ function validateCmsPagePayload(
         ? `Cotação: preencha todos os campos obrigatórios do canal ${invalidIndex + 1}.`
         : null;
     }
+  }
+
+  if (pageKey === "collections" && sectionKey === "hero") {
+    return validatePageButtons(payload.buttons, 2, "Coletas / Botões");
   }
 
   return null;
@@ -997,6 +1001,13 @@ function validateEntityInput(entity: Entity, input: Record<string, unknown>) {
   if (email && !sanitizeEmail(input.email)) return "Informe um e-mail válido para a unidade.";
   const contactUrl = sanitizeText(input.contactUrl ?? input.linkContato, 600);
   if (contactUrl && !sanitizeUrl(contactUrl)) return "Informe um link de contato válido.";
+  for (const [label, value, length] of [
+    ["CNPJ para cotação", input.quoteCnpj, 14],
+    ["CEP genérico da cidade", input.genericPostalCode, 8],
+  ] as const) {
+    const digits = sanitizeText(value, 20).replace(/\D/g, "");
+    if (digits && digits.length !== length) return `${label} deve ter ${length} dígitos.`;
+  }
   for (const [key, value] of [
     ["active", input.active ?? input.ativo],
     ["isDefault", input.isDefault ?? input.matriz],
@@ -1022,6 +1033,8 @@ function normalizeAdminItem(entity: Entity, item: RawItem) {
       contactUrl: sanitizeUrl(item.contactUrl ?? item.linkContato),
       description: sanitizeText(item.description ?? item.descricao, 220),
       logisticsInfo: sanitizeText(item.logisticsInfo ?? item.infoLogistica, 260),
+      quoteCnpj: sanitizeText(item.quoteCnpj, 18).replace(/\D/g, "").slice(0, 14),
+      genericPostalCode: sanitizeText(item.genericPostalCode, 12).replace(/\D/g, "").slice(0, 8),
       isDefault: strictBoolean(item.isDefault ?? item.matriz, false),
       active: strictBoolean(item.active ?? item.ativo, true),
     };

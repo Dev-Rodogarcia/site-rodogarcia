@@ -258,7 +258,7 @@ function getTooltipText(content: string | CmsHelpContent) {
   return `${content.title}. Resumo: ${content.summary}. ${content.details.map((detail) => `${detail.label}: ${detail.value}`).join(" ")}`;
 }
 
-export function DeveloperTooltip({ content }: { content: string | CmsHelpContent }) {
+export function DeveloperTooltip({ content, compact = false }: { content: string | CmsHelpContent; compact?: boolean }) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -332,10 +332,12 @@ export function DeveloperTooltip({ content }: { content: string | CmsHelpContent
       }}
     >
       {typeof content === "string" ? (
-        <span className="block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
-          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
-          <span className="block font-medium leading-5 text-slate-100">{content}</span>
-        </span>
+        compact ? <span className="block font-medium leading-5 text-slate-100">{content}</span> : (
+          <span className="block rounded-lg border border-blue-400/20 bg-blue-400/10 px-3 py-2.5">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300">Resumo</span>
+            <span className="block font-medium leading-5 text-slate-100">{content}</span>
+          </span>
+        )
       ) : (
         <>
           <span className="mb-2 block text-sm font-bold text-white">{content.title}</span>

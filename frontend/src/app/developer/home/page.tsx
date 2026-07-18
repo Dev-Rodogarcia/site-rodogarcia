@@ -195,7 +195,7 @@ const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
     id: "qa-coleta",
     order: 4,
     label: "Solicitar Coleta",
-    href: site.contact,
+    href: site.collections,
     icon: "Truck",
     type: "link",
     enabled: true,

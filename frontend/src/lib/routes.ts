@@ -36,6 +36,7 @@ export const site = {
   about: "/sobre",
   business: "/para-empresas",
   quote: "/cotacao",
+  collections: "/coletas",
   contact: "/fale-conosco",
   help: "/central-ajuda",
   press: "/imprensa",
@@ -60,6 +61,7 @@ export const admin = {
   contactPage: "/developer/fale-conosco",
   careersPage: "/developer/trabalhe-conosco",
   quotePage: "/developer/cotacao",
+  collectionsPage: "/developer/coletas",
   footerLinks: "/developer/footer-links",
   units: "/developer/unidades",
   popup: "/developer/popup-exit",
@@ -133,10 +135,19 @@ export const api = {
     contact: "/api/contact",
     quote: "/api/quote",
   },
+  eslTransport: {
+    quoteFractional: "/api/quote/fractional",
+    quoteClosedWhatsapp: "/api/quote/closed/whatsapp",
+    collectionInvoiceValidation: "/api/collections/invoice-validation",
+    collections: "/api/collections",
+    collection: (id: string) => `/api/collections/${id}`,
+    cancelCollection: (id: string) => `/api/collections/${id}/cancel`,
+  },
   public: {
     content: "/api/public/content",
     seo: "/api/public/seo",
     mediaSlots: "/api/public/media-slots",
+    postalCode: (postalCode: string) => `/api/public/postal-code/${postalCode}`,
   },
   consent: {
     settings: "/api/consent-settings",
@@ -191,6 +202,7 @@ export const drawerNavigation = [
   ...headerNavigation,
   { href: site.careers, label: "Carreiras", key: "careers" },
   { href: site.quote, label: "Cotação", key: "quote" },
+  { href: site.collections, label: "Coletas", key: "collections" },
 ] as const satisfies readonly NavigationItem[];
 
 export const adminNavigationGroups = [
@@ -210,6 +222,7 @@ export const adminNavigationGroups = [
       { href: admin.contactPage, label: "Página Contato", key: "contact-page" },
       { href: admin.careersPage, label: "Trabalho Con.", key: "careers-page" },
       { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
+      { href: admin.collectionsPage, label: "Página Coletas", key: "collections-page" },
       { href: admin.footerLinks, label: "FOOTER LINKS", key: "footer-links" },
       { href: admin.units, label: "Base de unidades", key: "units" },
     ],
@@ -249,6 +262,7 @@ export const sitemapRoutes = [
   { path: site.about, changeFrequency: "monthly", priority: 0.8 },
   { path: site.business, changeFrequency: "monthly", priority: 0.8 },
   { path: site.quote, changeFrequency: "monthly", priority: 0.9 },
+  { path: site.collections, changeFrequency: "monthly", priority: 0.8 },
   { path: site.contact, changeFrequency: "monthly", priority: 0.7 },
   { path: site.help, changeFrequency: "monthly", priority: 0.6 },
   { path: site.press, changeFrequency: "monthly", priority: 0.5 },
@@ -275,6 +289,8 @@ export const redirectAliases = [
   { source: "/cotacao.html", destination: site.quote, permanent: true },
   { source: "/quote", destination: site.quote, permanent: true },
   { source: "/orcamento", destination: site.quote, permanent: true },
+  { source: "/coleta", destination: site.collections, permanent: true },
+  { source: "/solicitar-coleta", destination: site.collections, permanent: true },
   { source: "/trabalhe-conosco.html", destination: site.careers, permanent: true },
   { source: "/careers", destination: site.careers, permanent: true },
   { source: "/vagas", destination: site.careers, permanent: true },

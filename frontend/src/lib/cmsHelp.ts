@@ -34,6 +34,7 @@ const CMS_PAGE_NAMES: Record<string, string> = {
   "/developer": "Painel do CMS",
   "/developer/analytics": "Analytics",
   "/developer/cotacao": "Cotação",
+  "/developer/coletas": "Coletas",
   "/developer/fale-conosco": "Fale Conosco",
   "/developer/footer-links": "Footer Links",
   "/developer/home": "Home",
@@ -59,6 +60,7 @@ const CMS_PAGE_NAMES: Record<string, string> = {
 
 const CMS_PUBLIC_DESTINATIONS: Record<string, string> = {
   "/developer/cotacao": "/cotacao",
+  "/developer/coletas": "/coletas",
   "/developer/fale-conosco": "/fale-conosco",
   "/developer/footer-links": "o rodapé e as páginas institucionais",
   "/developer/home": "/",
@@ -84,6 +86,7 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
   "/developer": { destination: "o painel inicial do CMS", action: "acompanha o conteúdo, acessos e indicadores do site", example: "Veja quantos itens são editáveis antes de entrar no módulo que deseja alterar." },
   "/developer/analytics": { destination: "os relatórios de Analytics, sem alterar a página pública", action: "consulta visualizações, eventos e integrações de medição", example: "Filtre por /servicos para saber quantas visitas essa página recebeu." },
   "/developer/cotacao": { destination: "/cotacao", action: "edita os textos, canais e chamadas da página de cotação", example: "Troque o texto “Solicitar cotação” pelo CTA que sua equipe utiliza." },
+  "/developer/coletas": { destination: "/coletas", action: "edita os botões do hero da página de coleta", example: "Use “Solicitar coleta” com o link “#formulario-coleta” para levar o visitante ao formulário na própria página." },
   "/developer/fale-conosco": { destination: "/fale-conosco", action: "edita os canais e chamadas de contato", example: "Atualize o telefone ou o botão de WhatsApp que o visitante verá." },
   "/developer/footer-links": { destination: "o rodapé e as páginas institucionais", action: "edita links, textos institucionais e redes sociais", example: "Altere o link de Privacidade para levar o visitante à política correta." },
   "/developer/home": { destination: "a página inicial /", action: "edita os blocos principais da Home", example: "Troque uma imagem do hero para atualizar a primeira área vista pelo visitante." },
@@ -108,6 +111,49 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
 };
 
 const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
+  "unidades.field.cnpj-para-cotacao": {
+    title: "CNPJ para cotação",
+    summary: "Aqui você informa o CNPJ que será enviado ao ESL quando o visitante escolher esta cidade na filial de /cotacao. O número não aparece para o visitante.",
+    example: "Informe os 14 dígitos do CNPJ cadastrado para esta unidade no ESL.",
+    details: [
+      { label: "Onde é usado", value: "No seletor de filial do formulário público em /cotacao." },
+      { label: "Proteção", value: "O backend resolve este CNPJ a partir da unidade escolhida; o navegador não recebe o número.", technical: true },
+      { label: "Após salvar", value: "A cidade desta unidade passa a ficar disponível para cotação quando houver um CNPJ válido." },
+    ],
+  },
+  "unidades.field.cep-generico-da-cidade": {
+    title: "CEP genérico da cidade",
+    summary: "Aqui você define o CEP de referência usado quando o visitante escolher apenas esta cidade em /cotacao. Ele ajuda a completar origem ou destino sem pedir um endereço completo.",
+    example: "Use um CEP válido de referência da cidade, com 8 dígitos.",
+    details: [
+      { label: "Onde é usado", value: "No formulário público de /cotacao ao informar cidade e UF." },
+      { label: "Importante", value: "Este CEP é uma referência municipal; não substitui o CEP exato de uma rua quando a operação precisar dele." },
+      { label: "Após salvar", value: "A cidade configurada poderá preencher CEP e UF automaticamente para o visitante." },
+    ],
+  },
+  "coletas.section.hero": {
+    title: "Botões do hero de Coletas",
+    summary: "Aqui você configura os dois botões no topo de /coletas. Um pode levar ao formulário desta página e o outro à cotação, para que o visitante escolha o próximo passo sem procurar no menu.",
+    example: "Use “Solicitar coleta” com “#formulario-coleta” e “Solicitar cotação” com “/cotacao”.",
+    details: [
+      { label: "Onde aparece", value: "No hero, no topo da rota /coletas." },
+      { label: "Primeiro botão", value: "Use a âncora #formulario-coleta para rolar até o formulário de coleta desta página." },
+      { label: "Segundo botão", value: "Pode apontar para /cotacao ou outra rota interna, URL externa, telefone ou e-mail válido." },
+      { label: "Validação", value: "Cada botão exige texto e link válido; o CMS sanitiza o endereço antes de publicar.", technical: true },
+      { label: "Após salvar", value: "Os dois CTAs do hero de /coletas são atualizados sem alterar os campos do formulário." },
+    ],
+  },
+  "cotacao.section.hero": {
+    title: "Botões do hero de Cotação",
+    summary: "Aqui você configura os dois botões no topo de /cotacao. Um pode levar ao formulário desta página e o outro à coleta, para orientar o visitante ao fluxo certo.",
+    example: "Use “Solicitar cotação” com “#formulario-cotacao” e “Solicitar coleta” com “/coletas”.",
+    details: [
+      { label: "Onde aparece", value: "No hero, no topo da rota /cotacao." },
+      { label: "Primeiro botão", value: "Use a âncora #formulario-cotacao para rolar até o formulário de cotação desta página." },
+      { label: "Segundo botão", value: "Pode apontar para /coletas ou outro destino válido." },
+      { label: "Após salvar", value: "Os CTAs exibidos no hero de /cotacao passam a usar os valores salvos aqui." },
+    ],
+  },
   "usuarios.section.criar-usuario": {
     title: "Criar usuário",
     summary: "Aqui você cria um acesso ao CMS e define uma senha temporária. A pessoa precisará criar a própria senha no primeiro login antes de acessar o painel.",

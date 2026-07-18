@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import {
-  ArrowRight,
-  ClipboardText,
-  EnvelopeSimple,
-  PhoneCall,
-  WhatsappLogo,
-} from "@phosphor-icons/react/dist/ssr";
+import { PhoneCall } from "@phosphor-icons/react/dist/ssr";
+import { EslQuoteForm } from "@/components/forms/EslTransportForms";
+import { OperationGuidanceAccordion } from "@/components/internal/OperationGuidanceAccordion";
+import { QuoteOtherChannelsSection } from "@/components/internal/QuoteOtherChannelsSection";
 import {
   ActionLink,
   PageContainer,
@@ -14,7 +11,6 @@ import {
   SemanticLink,
   SectionHeader,
 } from "@/components/internal/PageContent";
-import { QuoteOtherChannelsSection } from "@/components/internal/QuoteOtherChannelsSection";
 import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { external, seo, site } from "@/lib/routes";
@@ -22,32 +18,22 @@ import type { QuotePageContent } from "@/types/content";
 
 const fallbackMetadata: Metadata = {
   title: "Cotação",
-  description:
-    "Solicite sua cotação de transporte direto pelo WhatsApp ou pelo formulário oficial da Rodogarcia.",
+  description: "Solicite uma cotação de transporte online para carga fracionada ou fechada.",
   alternates: { canonical: seo.absoluteUrl(site.quote) },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: seo.siteName,
     title: "Cotação | Rodogarcia Transportes",
-    description:
-      "Abra sua solicitação comercial pelo canal certo, com a mesma clareza visual da Home.",
+    description: "Faça sua solicitação de cotação de transporte pelo formulário Rodogarcia.",
     url: seo.absoluteUrl(site.quote),
     images: [{ url: seo.absoluteUrl("/foto1.webp") }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Cotação | Rodogarcia Transportes",
-    description:
-      "Página de cotação com WhatsApp direto e formulário integrado ao fluxo comercial.",
+    description: "Faça sua solicitação de cotação de transporte pelo formulário Rodogarcia.",
     images: [seo.absoluteUrl("/foto1.webp")],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    "max-image-preview": "large",
-    "max-snippet": -1,
-    "max-video-preview": -1,
   },
 };
 
@@ -55,141 +41,30 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildCmsMetadata(site.quote, fallbackMetadata);
 }
 
-const WHATSAPP_CHANNELS = [
-  {
-    tag: "Carga fracionada",
-    title: "Distribuição e volumes menores",
-    description:
-      "Canal ideal para distribuição e volumes com maior frequência de embarque. Resposta ágil, direto com o time de cotação.",
-    href: external.whatsappQuoteFractional,
-    label: "Abrir WhatsApp — Fracionado",
-  },
-  {
-    tag: "Carga fechada",
-    title: "Lotação e operações especiais",
-    description:
-      "Melhor opção para lotação, projetos de maior volume e operações com requisito técnico específico.",
-    href: external.whatsappQuoteFull,
-    label: "Abrir WhatsApp — Lotação",
-  },
-];
-
-const CONTACT_OPTIONS = [
-  {
-    icon: WhatsappLogo,
-    title: "WhatsApp comercial",
-    description: "Canal mais rápido para abrir conversa e pedir cotação.",
-    action: { label: "Abrir WhatsApp", href: external.whatsappCommercial, external: true },
-    accent: "text-emerald-500",
-    accentBg: "bg-emerald-500/10",
-    btnClass:
-      "inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(34,197,94,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-600",
-  },
-  {
-    icon: PhoneCall,
-    title: "Telefone",
-    description: `Ligue para ${external.phoneDisplay} e fale direto com o atendimento.`,
-    action: { label: "Ligar agora", href: external.phoneHref, external: true },
-    accent: "text-sky-500",
-    accentBg: "bg-sky-500/10",
-    btnClass:
-      "inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white/80 px-6 text-sm font-semibold text-[var(--foreground)] shadow-[0_14px_30px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-surface-2)]",
-  },
-  {
-    icon: EnvelopeSimple,
-    title: "E-mail comercial",
-    description: "Ideal para mensagens formais, briefings e envio de documentos.",
-    action: { label: "Enviar e-mail", href: external.commercialEmail, external: true },
-    accent: "text-[var(--primary)]",
-    accentBg: "bg-[var(--primary)]/10",
-    btnClass:
-      "inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white/80 px-6 text-sm font-semibold text-[var(--foreground)] shadow-[0_14px_30px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-surface-2)]",
-  },
-  {
-    icon: ClipboardText,
-    title: "Formulário completo",
-    description: "Prefere detalhar a carga por escrito? Preencha o formulário estruturado.",
-    action: { label: "Abrir formulário", href: site.contact, external: false },
-    accent: "text-slate-500",
-    accentBg: "bg-slate-500/10",
-    btnClass:
-      "inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white/80 px-6 text-sm font-semibold text-[var(--foreground)] shadow-[0_14px_30px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-surface-2)]",
-  },
-];
-
-const FINAL_CTA_POINTS = [
-  "Contato institucional para demandas ainda em definição.",
-  "Direcionamento rápido para o canal comercial adequado.",
-  "Apoio inicial sem depender de formulário extenso.",
-  "Central de ajuda disponível para dúvidas operacionais.",
-];
-
 const FALLBACK_QUOTE_PAGE: QuotePageContent = {
   hero: {
     buttons: [
-      { label: "Falar no WhatsApp", url: external.whatsappCommercial, external: true },
-      { label: "Ver contato completo", url: site.contact },
-    ],
-  },
-  directChannels: WHATSAPP_CHANNELS.map((item, index) => ({
-    id: index === 0 ? "fractional" : "full-load",
-    order: index + 1,
-    title: item.title,
-    description: item.description,
-    button: { label: item.label, url: item.href, external: true },
-  })),
-  otherChannels: [
-    {
-      id: "quote-channel-whatsapp",
-      order: 1,
-      icon: "WhatsappLogo",
-      iconColor: "#22c55e",
-      title: "WhatsApp comercial",
-      description: "Canal mais rápido para abrir conversa e pedir cotação.",
-      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
-      buttonColor: "#22c55e",
-      active: true,
-    },
-    {
-      id: "quote-channel-phone",
-      order: 2,
-      icon: "PhoneCall",
-      iconColor: "#0ea5e9",
-      title: "Telefone",
-      description: `Ligue para ${external.phoneDisplay} e fale direto com o atendimento.`,
-      button: { label: "Ligar agora", url: external.phoneHref, external: true },
-      buttonColor: "#0f172a",
-      active: true,
-    },
-    {
-      id: "quote-channel-email",
-      order: 3,
-      icon: "EnvelopeSimple",
-      iconColor: "#1d4ed8",
-      title: "E-mail comercial",
-      description: "Ideal para mensagens formais, briefings e envio de documentos.",
-      button: { label: "Enviar e-mail", url: external.commercialEmail, external: true },
-      buttonColor: "#0f172a",
-      active: true,
-    },
-    {
-      id: "quote-channel-form",
-      order: 4,
-      icon: "ClipboardText",
-      iconColor: "#64748b",
-      title: "Formulario completo",
-      description: "Prefere detalhar a carga por escrito? Use o fluxo estruturado.",
-      button: { label: "Abrir formulario", url: site.contact },
-      buttonColor: "#0f172a",
-      active: true,
-    },
-  ],
-  finalCta: {
-    buttons: [
-      { label: "Abrir contato", url: site.contact },
+      { label: "Falar com atendimento", url: site.contact },
       { label: "Central de ajuda", url: site.help },
     ],
   },
+  directChannels: [
+    {
+      id: "fractional-service",
+      order: 1,
+      title: "Atendimento para carga fracionada",
+      description: "Se precisar de apoio antes de enviar a cotação, fale com o time comercial.",
+      button: { label: "Abrir atendimento", url: external.whatsappQuoteFractional, external: true },
+    },
+    {
+      id: "closed-service",
+      order: 2,
+      title: "Atendimento para carga fechada",
+      description: "Para operações especiais e lotação, o time pode orientar o melhor caminho.",
+      button: { label: "Abrir atendimento", url: external.whatsappQuoteFull, external: true },
+    },
+  ],
+  otherChannels: [],
 };
 
 export default async function CotacaoPage() {
@@ -197,190 +72,71 @@ export default async function CotacaoPage() {
   const quotePage = content.data?.quotePage ?? FALLBACK_QUOTE_PAGE;
 
   return (
-    <PageShell>
-      {/* HERO — azul escuro, padrão /servicos */}
+    <PageShell className="!pb-0">
       <div className="relative overflow-hidden bg-slate-950">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
-
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.18),transparent_60%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
         <section className="relative pt-20 sm:pt-24 lg:pt-28" aria-labelledby="cotacao-hero-title">
           <PageContainer>
             <div className="mx-auto max-w-[920px] py-10 text-center sm:py-12 lg:py-16">
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/6 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/80 backdrop-blur-sm">
-                Solicitar proposta
-              </span>
-
-              <h1
-                id="cotacao-hero-title"
-                className="mx-auto mt-6 max-w-[16ch] text-[clamp(3rem,8vw,6rem)] font-bold leading-[0.9] tracking-[-0.05em] sm:max-w-[18ch] sm:tracking-[-0.07em]"
-              >
-                <span className="block bg-[linear-gradient(180deg,#a5f3fc_0%,#dbeafe_100%)] bg-clip-text text-transparent">
-                  Cotação rápida,
-                </span>
-                <span className="mt-1 block text-white">pelo canal certo.</span>
+              <h1 id="cotacao-hero-title" className="mx-auto max-w-[16ch] text-[clamp(3rem,8vw,6rem)] font-bold leading-[0.9] tracking-[-0.05em] sm:max-w-[18ch] sm:tracking-[-0.07em]">
+                <span className="block bg-[linear-gradient(180deg,#a5f3fc_0%,#dbeafe_100%)] bg-clip-text text-transparent">Cotação de transporte</span>
+                <span className="mt-1 block text-white">para a sua operação.</span>
               </h1>
-
-              <p className="mx-auto mt-5 max-w-[42rem] text-sm leading-7 text-white/68 sm:text-base">
-                Escolha o caminho mais direto: WhatsApp para resposta ágil, telefone para orientação, ou e-mail para detalhes formais.
-              </p>
-
+              <p className="mx-auto mt-5 max-w-[44rem] text-sm leading-7 text-white/68 sm:text-base">Para carga fracionada, o valor é calculado online. Para carga fechada, organizamos os dados para o atendimento comercial.</p>
               <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
-                <ActionLink
-                  action={{
-                    label: quotePage.hero.buttons[0]?.label || "Falar no WhatsApp",
-                    href: quotePage.hero.buttons[0]?.url || external.whatsappCommercial,
-                    external: quotePage.hero.buttons[0]?.external,
-                  }}
-                  tone="dark"
-                  className="w-full min-w-0 sm:w-auto"
-                />
-                <ActionLink
-                  action={{
-                    label: quotePage.hero.buttons[1]?.label || "Ver contato completo",
-                    href: quotePage.hero.buttons[1]?.url || site.contact,
-                    external: quotePage.hero.buttons[1]?.external,
-                    variant: "secondary",
-                  }}
-                  tone="dark"
-                  className="w-full min-w-0 sm:w-auto"
-                />
+                {quotePage.hero.buttons.slice(0, 2).map((button, index) => (
+                  <ActionLink key={`${button.label}-${button.url}`} action={{ label: button.label, href: button.url, variant: index === 1 ? "secondary" : "primary" }} tone="dark" className="w-full min-w-0 sm:w-auto" />
+                ))}
               </div>
             </div>
           </PageContainer>
         </section>
       </div>
 
-      {/* SEÇÃO 2 — clara: canais WhatsApp por tipo de carga */}
-      <PageSection>
+      <PageSection className="relative bg-[linear-gradient(180deg,#f8fafc_0%,#eaf1f9_100%)]" >
         <PageContainer>
-          <SectionHeader
-            eyebrow="WhatsApp comercial"
-            title="Dois canais diretos para iniciar sua cotação agora."
-            description="Escolha o canal conforme o tipo de carga. O time comercial responde com agilidade em ambos."
-            align="center"
-          />
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {quotePage.directChannels.map((item, index) => (
-              <div
-                key={item.title}
-                className="flex flex-col gap-4 border-b border-[var(--border)] pb-8 last:border-b-0 md:border-b-0 md:border-l md:pb-0 md:pl-8"
-              >
-                <span className="inline-flex w-fit items-center rounded-full bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">
-                  {index === 0 ? "Carga fracionada" : "Carga fechada"}
-                </span>
-                <h3 className="text-xl font-semibold tracking-[-0.03em] text-[var(--foreground)]">
-                  {item.title}
-                </h3>
-                <p className="text-sm leading-7 text-[var(--color-muted-raw)]">
-                  {item.description}
-                </p>
-                <SemanticLink
-                  href={item.button.url}
-                  external={item.button.external}
-                  className="mt-auto inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(34,197,94,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_22px_48px_rgba(34,197,94,0.32)]"
-                >
-                  <WhatsappLogo size={18} weight="fill" />
-                  {item.button.label}
-                </SemanticLink>
-              </div>
-            ))}
+          <div id="formulario-cotacao" className="scroll-mt-28">
+            <p className="mb-6 text-center text-sm font-medium text-[var(--color-muted-raw)]">Preencha os dados da sua carga para continuar.</p>
+            <EslQuoteForm quoteBranches={content.data?.quoteBranches ?? []} />
           </div>
         </PageContainer>
       </PageSection>
 
-      {/* SEÇÃO 3 — azul escuro: todos os canais de contato */}
-      <section className="relative overflow-hidden bg-slate-950 py-12 sm:py-16 lg:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
-
+      <section className="relative overflow-hidden bg-slate-950 py-14 sm:py-16 lg:py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.14),transparent_60%)]" />
         <PageContainer>
-          <div className="relative space-y-12">
-            <SectionHeader
-              eyebrow="Outros canais"
-              title="Mais formas de falar com o time comercial."
-              description="Prefere ligar, enviar e-mail ou preencher um formulário? Escolha o canal mais adequado."
-              theme="dark"
-              align="center"
-            />
-
-            <QuoteOtherChannelsSection channels={quotePage.otherChannels} />
-          </div>
-        </PageContainer>
-      </section>
-
-      {/* CTA FINAL */}
-      <section
-        className="relative overflow-hidden py-16 sm:py-20 lg:py-24"
-        aria-labelledby="cotacao-cta-final-title"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(241,245,249,0.94)_52%,rgba(255,255,255,0.72)_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(29,78,216,0.08),transparent_20%),radial-gradient(circle_at_84%_24%,rgba(6,182,212,0.1),transparent_22%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.22] [background-image:linear-gradient(rgba(29,78,216,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(29,78,216,0.08)_1px,transparent_1px)] [background-size:34px_34px]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/16 to-transparent" />
-
-        <PageContainer>
-          <div className="relative grid gap-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] lg:items-end lg:gap-16">
-            <div>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
-                Se quiser alinhar antes
-              </span>
-              <h2
-                id="cotacao-cta-final-title"
-                className="mt-3 max-w-[14ch] text-[clamp(2.2rem,4.3vw,4rem)] font-bold leading-[0.98] tracking-[-0.05em] text-[var(--foreground)]"
-              >
-                Também atendemos por contato institucional.
-              </h2>
-              <p className="mt-5 max-w-[60ch] text-sm leading-7 text-[var(--color-muted-raw)] sm:text-base">
-                Se a demanda ainda estiver no começo, você pode seguir para contato geral ou abrir a central de ajuda sem sair do mesmo fluxo.
-              </p>
-
-              <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-                {FINAL_CTA_POINTS.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start gap-3 border-b border-[var(--border)] pb-4 last:border-b-0 sm:last:border-b sm:odd:last:border-b-0"
-                  >
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
-                    <span className="text-sm leading-7 text-[var(--color-muted-raw)]">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 lg:flex lg:flex-col lg:gap-4 lg:border-l lg:border-[var(--border)] lg:pl-10">
-              <p className="col-span-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)] lg:col-span-1">
-                Próximo passo
-              </p>
-              <p className="col-span-2 max-w-[34ch] text-sm leading-7 text-[var(--color-muted-raw)] lg:col-span-1">
-                Escolha o canal mais confortável para abrir a conversa. Os dois CTAs continuam grandes, diretos e prontos para fechamento da jornada.
-              </p>
-
-              <SemanticLink
-                href={quotePage.finalCta.buttons[0]?.url || site.contact}
-                external={quotePage.finalCta.buttons[0]?.external}
-                className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-[15px] font-extrabold tracking-tight text-white shadow-[0_12px_32px_rgba(2,132,199,0.25)] transition-all duration-200 hover:-translate-y-1 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_20px_48px_rgba(2,132,199,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/30 sm:px-8"
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <span className="min-w-0 truncate">{quotePage.finalCta.buttons[0]?.label || "Abrir contato"}</span>
-                  <ArrowRight size={18} weight="bold" className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
-                </span>
-              </SemanticLink>
-
-              <SemanticLink
-                href={quotePage.finalCta.buttons[1]?.url || site.help}
-                external={quotePage.finalCta.buttons[1]?.external}
-                className="group inline-flex min-h-[64px] w-full min-w-0 items-center justify-center rounded-full bg-slate-900 px-4 text-[15px] font-bold tracking-tight text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] transition-all duration-200 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-900/30 sm:px-8"
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <span className="min-w-0 truncate">{quotePage.finalCta.buttons[1]?.label || "Central de ajuda"}</span>
-                  <ArrowRight size={18} weight="bold" className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
-                </span>
-              </SemanticLink>
+          <div className="relative space-y-10">
+            <SectionHeader eyebrow="Precisa de ajuda?" title="Também atendemos pelos canais comerciais." description="Os formulários são o caminho principal. Estes canais continuam disponíveis para orientações e operações especiais." theme="dark" align="center" />
+            {quotePage.otherChannels.length > 0 ? <QuoteOtherChannelsSection channels={quotePage.otherChannels} /> : null}
+            <div className="grid gap-4 md:grid-cols-2">
+              {quotePage.directChannels.map((channel) => (
+                <SemanticLink key={channel.id} href={channel.button.url} external={channel.button.external} className="rounded-3xl border border-white/10 bg-white/6 p-5 text-white transition-colors hover:bg-white/10">
+                  <p className="text-lg font-semibold tracking-[-0.03em] text-white">{channel.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/64">{channel.description}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-200"><PhoneCall size={17} weight="bold" />{channel.button.label}</span>
+                </SemanticLink>
+              ))}
             </div>
           </div>
         </PageContainer>
       </section>
+
+      <section className="bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] py-14 sm:py-16">
+        <PageContainer>
+          <OperationGuidanceAccordion
+            eyebrow="Antes do atendimento"
+            title="Quer alinhar a operação antes?"
+            description="Veja qual caminho faz mais sentido para a sua carga antes de acionar o atendimento institucional."
+            items={[
+              { title: "Qual tipo de carga devo selecionar?", content: "Use carga fracionada quando os volumes seguirem junto de outras cargas e você quiser calcular a proposta nesta página. Escolha carga fechada para uma operação com veículo dedicado." },
+              { title: "Quais informações agilizam o atendimento?", content: "Tenha em mãos origem, destino, o CNPJ do cliente, peso, volume, valor da nota e quantidade de volumes. A cotação do site usa a tabela PADRÃO." },
+              { title: "Quando devo falar com o time institucional?", content: "Use os canais abaixo para orientações, necessidades especiais ou para alinhar uma operação antes de enviar a solicitação. O formulário continua sendo o caminho principal para calcular ou preparar a cotação." },
+            ]}
+          />
+        </PageContainer>
+      </section>
+
     </PageShell>
   );
 }

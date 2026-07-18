@@ -11,6 +11,8 @@ const LEGACY_URL_ALIASES = new Map<string, string>([
   ["/servicos.html", site.services],
   ["/para-empresas.html", site.business],
   ["/cotacao.html", site.quote],
+  ["/coleta", site.collections],
+  ["/solicitar-coleta", site.collections],
   ["/fale-conosco.html", site.contact],
   ["/central-ajuda.html", site.help],
   ["/imprensa.html", site.press],

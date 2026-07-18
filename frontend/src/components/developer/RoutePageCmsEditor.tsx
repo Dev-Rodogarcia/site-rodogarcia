@@ -24,7 +24,7 @@ import {
 import { api, site, type AppPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
-type PageKey = "about" | "business" | "contact" | "careers" | "quote";
+type PageKey = "about" | "business" | "contact" | "careers" | "quote" | "collections";
 type AnyRecord = Record<string, any>;
 
 const PAGE_META: Record<
@@ -59,7 +59,13 @@ const PAGE_META: Record<
     eyebrow: "Página Cotação",
     title: "Página Cotação.",
     publicHref: site.quote,
-    description: "Botões, canais diretos, outros canais e CTA final da rota /cotacao.",
+    description: "Botões, canais diretos, outros canais e atalhos de ajuda da rota /cotacao.",
+  },
+  collections: {
+    eyebrow: "Página Coletas",
+    title: "Página Coletas.",
+    publicHref: site.collections,
+    description: "Botões do hero exibidos na rota /coletas.",
   },
 };
 
@@ -498,8 +504,11 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               </form>
             </DeveloperCard>
             {renderOtherChannels()}
-            {renderButtonsOnly("finalCta", page.finalCta, "CTA final", "Somente os dois botões são editáveis.", true)}
           </>
+        ) : null}
+
+        {pageKey === "collections" ? (
+          renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; configure os botões que levam ao formulário ou à página de cotação.", true)
         ) : null}
       </div>
     </DeveloperPage>

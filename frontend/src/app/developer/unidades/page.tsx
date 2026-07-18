@@ -40,6 +40,8 @@ interface UnitFormState {
   contactUrl: string;
   description: string;
   logisticsInfo: string;
+  quoteCnpj: string;
+  genericPostalCode: string;
   isDefault: boolean;
   active: boolean;
 }
@@ -60,6 +62,8 @@ const EMPTY_FORM: UnitFormState = {
   contactUrl: "/fale-conosco",
   description: "",
   logisticsInfo: "",
+  quoteCnpj: "",
+  genericPostalCode: "",
   isDefault: false,
   active: true,
 };
@@ -84,6 +88,8 @@ function normalizeUnit(item: Record<string, unknown>): UnitItem {
     contactUrl: String(item.contactUrl ?? item.linkContato ?? "/fale-conosco"),
     description: String(item.description ?? item.descricao ?? ""),
     logisticsInfo: String(item.logisticsInfo ?? item.infoLogistica ?? ""),
+    quoteCnpj: String(item.quoteCnpj ?? ""),
+    genericPostalCode: String(item.genericPostalCode ?? ""),
     isDefault: Boolean(item.isDefault ?? item.matriz),
     active: Boolean(item.active ?? item.ativo ?? true),
   };
@@ -119,6 +125,8 @@ export default function UnidadesPage() {
       contactUrl: item.contactUrl || "/fale-conosco",
       description: item.description,
       logisticsInfo: item.logisticsInfo,
+      quoteCnpj: item.quoteCnpj,
+      genericPostalCode: item.genericPostalCode,
       isDefault: item.isDefault,
       active: item.active,
     });
@@ -139,6 +147,8 @@ export default function UnidadesPage() {
       contactUrl: form.contactUrl.trim(),
       description: form.description.trim(),
       logisticsInfo: form.logisticsInfo.trim(),
+      quoteCnpj: form.quoteCnpj.replace(/\D/g, ""),
+      genericPostalCode: form.genericPostalCode.replace(/\D/g, ""),
     };
 
     if (!payload.name || !BRAZILIAN_STATE_CODES.includes(payload.state as (typeof BRAZILIAN_STATE_CODES)[number]) || !payload.address) {
@@ -282,6 +292,15 @@ export default function UnidadesPage() {
                 className={developerInputClassName}
               />
             </DeveloperField>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <DeveloperField label="CNPJ para cotação">
+                <input value={form.quoteCnpj} onChange={(event) => setForm((current) => ({ ...current, quoteCnpj: event.target.value }))} inputMode="numeric" maxLength={18} className={developerInputClassName} />
+              </DeveloperField>
+              <DeveloperField label="CEP genérico da cidade">
+                <input value={form.genericPostalCode} onChange={(event) => setForm((current) => ({ ...current, genericPostalCode: event.target.value }))} inputMode="numeric" maxLength={9} className={developerInputClassName} />
+              </DeveloperField>
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <DeveloperField label="Telefone">

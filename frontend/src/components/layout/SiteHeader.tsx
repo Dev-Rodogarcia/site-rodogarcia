@@ -14,6 +14,7 @@ import {
   List,
   MagnifyingGlass,
   ShieldCheck,
+  Truck,
   X,
 } from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
@@ -28,6 +29,7 @@ const DARK_HERO_ROUTES = [
   site.about,
   site.business,
   site.quote,
+  site.collections,
   site.contact,
   site.careers,
   site.help,
@@ -52,6 +54,7 @@ const MENU_ICONS: Record<string, MenuIcon> = {
   contact: ChatCircleDots,
   careers: Briefcase,
   quote: Calculator,
+  collections: Truck,
   voice: ShieldCheck,
 };
 

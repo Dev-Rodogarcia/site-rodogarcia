@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   description:
     "Há mais de 35 anos conectando o Brasil com soluções de logística fracionada, distribuição e transporte especializado.",
   metadataBase: new URL(seo.baseUrl),
+  icons: {
+    icon: [{ url: "/favicon-rodogarcia-20260718.svg", type: "image/svg+xml" }],
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",

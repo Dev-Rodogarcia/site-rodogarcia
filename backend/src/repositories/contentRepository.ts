@@ -61,6 +61,12 @@ const DEFAULT_CONTENT: ContentData = {
   units: [],
 };
 
+const DEFAULT_QUOTE_UNIT = {
+  id: "unit-matriz",
+  quoteCnpj: "60960473000162",
+  genericPostalCode: "17123210",
+} as const;
+
 type RawItem = Record<string, unknown> & { order?: number };
 
 function sortByOrder(items: RawItem[]) {
@@ -98,6 +104,10 @@ function serializeContent(content: ContentData) {
       content.quotePage && typeof content.quotePage === "object"
         ? content.quotePage
         : undefined,
+    collectionsPage:
+      content.collectionsPage && typeof content.collectionsPage === "object"
+        ? content.collectionsPage
+        : undefined,
     footerLinks:
       content.footerLinks && typeof content.footerLinks === "object"
         ? content.footerLinks
@@ -120,7 +130,25 @@ function shouldPersistPageMigration(data: ContentData) {
     data.businessPage &&
     data.contactPage &&
     data.careersPage &&
-    data.quotePage
+    data.quotePage &&
+    data.collectionsPage
+  );
+}
+
+function needsQuoteUnitMigration(units: ContentData["units"]) {
+  const matrix = units.find((unit) => unit.id === DEFAULT_QUOTE_UNIT.id);
+  return Boolean(matrix && (!matrix.quoteCnpj || !matrix.genericPostalCode));
+}
+
+function migrateQuoteUnit(units: ContentData["units"]) {
+  return units.map((unit) =>
+    unit.id === DEFAULT_QUOTE_UNIT.id
+      ? {
+          ...unit,
+          quoteCnpj: unit.quoteCnpj || DEFAULT_QUOTE_UNIT.quoteCnpj,
+          genericPostalCode: unit.genericPostalCode || DEFAULT_QUOTE_UNIT.genericPostalCode,
+        }
+      : unit
   );
 }
 
@@ -175,7 +203,7 @@ export const contentRepository = {
       dnaSlides: Array.isArray(data.dnaSlides) ? data.dnaSlides : [],
       vagas: Array.isArray(data.vagas) ? data.vagas : [],
       feedbacks: Array.isArray(data.feedbacks) ? data.feedbacks : [],
-      units: Array.isArray(data.units) ? data.units : [],
+      units: migrateQuoteUnit(Array.isArray(data.units) ? data.units : []),
       aboutPage:
         data.aboutPage && typeof data.aboutPage === "object" ? data.aboutPage : undefined,
       businessPage:
@@ -192,6 +220,10 @@ export const contentRepository = {
           : undefined,
       quotePage:
         data.quotePage && typeof data.quotePage === "object" ? data.quotePage : undefined,
+      collectionsPage:
+        data.collectionsPage && typeof data.collectionsPage === "object"
+          ? data.collectionsPage
+          : undefined,
       footerLinks:
         data.footerLinks && typeof data.footerLinks === "object"
           ? data.footerLinks
@@ -218,7 +250,8 @@ export const contentRepository = {
       !data.footerLinks ||
       !data.homePage?.regionalPresence ||
       !data.homePage?.trackingCta ||
-      !Array.isArray(data.homePage?.quickActions)
+      !Array.isArray(data.homePage?.quickActions) ||
+      needsQuoteUnitMigration(Array.isArray(data.units) ? data.units : [])
     ) {
       writeJsonFile(storagePaths.content, serializeContent(migrated));
     }

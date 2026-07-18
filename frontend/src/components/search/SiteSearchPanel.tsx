@@ -27,7 +27,7 @@ function labelForRoute(href: string, fallback: string) {
 const SEARCH_INDEX: SearchItem[] = [
   { title: labelForRoute(site.quote, "Cotação"), href: site.quote, category: "Serviços" },
   { title: "Rastreamento", description: external.tracking, href: external.tracking, isExternal: true, category: "Serviços" },
-  { title: "Solicitar Coleta", href: site.contact, category: "Serviços" },
+  { title: "Solicitar Coleta", href: site.collections, category: "Serviços" },
   { title: labelForRoute(site.services, "Serviços"), href: site.services, category: "Páginas" },
   { title: labelForRoute(site.business, "Empresas"), href: site.business, category: "Páginas" },
   { title: labelForRoute(site.contact, "Contato"), href: site.contact, category: "Páginas" },

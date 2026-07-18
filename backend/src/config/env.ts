@@ -71,6 +71,25 @@ function isWeakSetupCode(value: string) {
   );
 }
 
+function normalizeEslTenant(value: string | undefined) {
+  const tenant = value?.trim().toLowerCase() || "rodogarcia";
+  return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(tenant)
+    ? tenant
+    : "rodogarcia";
+}
+
+function resolveEslGraphqlUrl(tenant: string, override: string | undefined) {
+  const value = override?.trim();
+  if (!value) return `https://${tenant}.eslcloud.com.br/graphql`;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
 const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://127.0.0.1:5010";
 const frontendOriginLocalhost =
   frontendOrigin.includes("127.0.0.1")
@@ -85,6 +104,7 @@ const trustProxy = parseTrustProxy(process.env.TRUST_PROXY);
 const rawJwtSecret = process.env.JWT_SECRET ?? process.env.SESSION_SECRET ?? "";
 const jwtSecret = rawJwtSecret || "dev-only-change-this-rodogarcia-secret";
 const adminSetupCode = process.env.ADMIN_SETUP_CODE ?? "";
+const eslTenant = normalizeEslTenant(process.env.ESL_TENANT);
 
 if (isProduction) {
   const errors: string[] = [];
@@ -133,5 +153,8 @@ export const env = {
   trustProxy,
   jwtSecret,
   adminSetupCode,
+  eslTenant,
+  eslGraphqlUrl: resolveEslGraphqlUrl(eslTenant, process.env.ESL_GRAPHQL_URL),
+  eslGraphqlApiKey: process.env.GRAPHQL_API_KEY?.trim() ?? "",
   isProduction,
 } as const;

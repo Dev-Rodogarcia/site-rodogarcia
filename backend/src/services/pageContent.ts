@@ -2,6 +2,7 @@ import type {
   AboutPageContent,
   BusinessPageContent,
   CareersPageContent,
+  CollectionsPageContent,
   CareersPageJob,
   ContactPageContent,
   ContentData,
@@ -20,7 +21,7 @@ import {
   normalizeInternalMediaUrl,
 } from "./mediaValidationService.js";
 
-export const PAGE_KEYS = ["about", "business", "contact", "careers", "quote"] as const;
+export const PAGE_KEYS = ["about", "business", "contact", "careers", "quote", "collections"] as const;
 export type CmsPageKey = (typeof PAGE_KEYS)[number];
 export type PageSectionKey =
   | "hero"
@@ -43,6 +44,7 @@ const site = {
   quote: "/cotacao",
   contact: "/fale-conosco",
   careers: "/trabalhe-conosco",
+  collections: "/coletas",
   help: "/central-ajuda",
 } as const;
 
@@ -358,8 +360,8 @@ const DEFAULT_CAREERS_PAGE: CareersPageContent = {
 const DEFAULT_QUOTE_PAGE: QuotePageContent = {
   hero: {
     buttons: [
-      { label: "Falar no WhatsApp", url: external.whatsappCommercial, external: false },
-      { label: "Ver contato completo", url: site.contact },
+      { label: "Solicitar cotação", url: "#formulario-cotacao" },
+      { label: "Solicitar coleta", url: site.collections },
     ],
   },
   directChannels: [
@@ -434,10 +436,13 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       active: true,
     },
   ],
-  finalCta: {
+};
+
+const DEFAULT_COLLECTIONS_PAGE: CollectionsPageContent = {
+  hero: {
     buttons: [
-      { label: "Abrir contato", url: site.contact },
-      { label: "Central de ajuda", url: site.help },
+      { label: "Solicitar coleta", url: "#formulario-coleta" },
+      { label: "Solicitar cotação", url: site.quote },
     ],
   },
 };
@@ -448,7 +453,8 @@ export function pageContentKey(pageKey: CmsPageKey) {
     | "businessPage"
     | "contactPage"
     | "careersPage"
-    | "quotePage";
+    | "quotePage"
+    | "collectionsPage";
 }
 
 export function parsePageKey(value: string | undefined): CmsPageKey | null {
@@ -884,13 +890,13 @@ export function migratePageContent(
       ? sanitizeCareersPage(content.careersPage)
       : careersPageFromLegacy(content, legacy.mediaSlots),
     quotePage: sanitizeQuotePage(content.quotePage),
+    collectionsPage: sanitizeCollectionsPage(content.collectionsPage),
   };
 }
 
 export function sanitizeQuotePage(payload: unknown): QuotePageContent {
   const source = isRecord(payload) ? payload : {};
   const hero = isRecord(source.hero) ? source.hero : {};
-  const finalCta = isRecord(source.finalCta) ? source.finalCta : {};
   const hasOtherChannels = Array.isArray(source.otherChannels);
   const otherChannels = arrayPayload(source.otherChannels);
   return {
@@ -907,8 +913,15 @@ export function sanitizeQuotePage(payload: unknown): QuotePageContent {
         (channel, index) => sanitizeOtherChannel(channel as RawRecord, index)
       )
     ),
-    finalCta: {
-      buttons: sanitizeButtons(finalCta.buttons, DEFAULT_QUOTE_PAGE.finalCta.buttons),
+  };
+}
+
+export function sanitizeCollectionsPage(payload: unknown): CollectionsPageContent {
+  const source = isRecord(payload) ? payload : {};
+  const hero = isRecord(source.hero) ? source.hero : {};
+  return {
+    hero: {
+      buttons: sanitizeButtons(hero.buttons, DEFAULT_COLLECTIONS_PAGE.hero.buttons),
     },
   };
 }
@@ -925,6 +938,8 @@ export function getPageContent(content: ContentData, pageKey: CmsPageKey) {
       return sanitizeCareersPage(content.careersPage, content.vagas);
     case "quote":
       return sanitizeQuotePage(content.quotePage);
+    case "collections":
+      return sanitizeCollectionsPage(content.collectionsPage);
   }
 }
 
@@ -935,6 +950,7 @@ export function getAllPageContent(content: ContentData) {
     contactPage: sanitizeContactPage(content.contactPage),
     careersPage: sanitizeCareersPage(content.careersPage, content.vagas),
     quotePage: sanitizeQuotePage(content.quotePage),
+    collectionsPage: sanitizeCollectionsPage(content.collectionsPage),
   };
 }
 
@@ -992,7 +1008,11 @@ export function updatePageSection(
       if (sectionKey === "otherChannels") {
         return sanitizeQuotePage({ ...page, otherChannels: payload.otherChannels });
       }
-      if (sectionKey === "finalCta") return sanitizeQuotePage({ ...page, finalCta: payload });
+      break;
+    }
+    case "collections": {
+      const page = current as CollectionsPageContent;
+      if (sectionKey === "hero") return sanitizeCollectionsPage({ ...page, hero: payload });
       break;
     }
   }

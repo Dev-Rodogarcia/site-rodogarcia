@@ -465,7 +465,10 @@ export interface QuotePageContent {
   };
   directChannels: QuoteDirectChannel[];
   otherChannels: QuoteOtherChannel[];
-  finalCta: {
+}
+
+export interface CollectionsPageContent {
+  hero: {
     buttons: PageButton[];
   };
 }
@@ -573,6 +576,8 @@ export interface OperationalUnit {
   contactLabel?: string;
   description?: string;
   logisticsInfo?: string;
+  quoteCnpj?: string;
+  genericPostalCode?: string;
   isDefault?: boolean;
   active?: boolean;
   createdAt?: string;
@@ -587,6 +592,7 @@ export interface ContentData {
   contactPage?: ContactPageContent;
   careersPage?: CareersPageContent;
   quotePage?: QuotePageContent;
+  collectionsPage?: CollectionsPageContent;
   footerLinks?: FooterLinksContent;
   /** Legacy storage only: old root hero slides kept for migration safety, not an active CMS module. */
   heroSlides: LegacyHeroSlide[];

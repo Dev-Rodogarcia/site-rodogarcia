@@ -26,6 +26,7 @@ const site = {
   about: "/sobre",
   business: "/para-empresas",
   quote: "/cotacao",
+  collections: "/coletas",
   contact: "/fale-conosco",
   help: "/central-ajuda",
   press: "/imprensa",
@@ -287,8 +288,9 @@ export const DEFAULT_FOOTER_LINKS: FooterLinksContent = {
         links: [
           { id: "services-road", order: 1, label: "Transporte rodoviário", url: site.services },
           { id: "services-quote", order: 2, label: "Solicitar cotação", url: site.quote },
-          { id: "services-tracking", order: 3, label: "Rastrear encomenda", url: external.tracking, external: true },
-          { id: "services-business", order: 4, label: "Para empresas", url: site.business },
+          { id: "services-collection", order: 3, label: "Solicitar coleta", url: site.collections },
+          { id: "services-tracking", order: 4, label: "Rastrear encomenda", url: external.tracking, external: true },
+          { id: "services-business", order: 5, label: "Para empresas", url: site.business },
         ],
       },
       {

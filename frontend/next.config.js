@@ -42,6 +42,7 @@ function buildContentSecurityPolicy(frameAncestors) {
       "https://www.googletagmanager.com",
       "https://*.clarity.ms",
       "https://*.sentry.io",
+      "https://viacep.com.br",
     ],
     [
       "img-src",
@@ -111,6 +112,7 @@ const cmsPreviewPaths = [
   "/sobre",
   "/para-empresas",
   "/cotacao",
+  "/coletas",
   "/fale-conosco",
   "/central-ajuda",
   "/imprensa",

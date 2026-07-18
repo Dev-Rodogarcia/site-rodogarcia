@@ -76,7 +76,7 @@ const EMPTY_HOME_PAGE: HomePageContent = {
     { id: "qa-taxas", order: 1, label: "Taxas", href: "", icon: "FilePdf", type: "download", enabled: false, downloadFile: "" },
     { id: "qa-cotacao", order: 2, label: "Cotação", href: site.quote, icon: "Calculator", type: "link", enabled: true },
     { id: "qa-rastreamento", order: 3, label: "Rastreamento", href: external.tracking, icon: "MagnifyingGlass", type: "external", enabled: true },
-    { id: "qa-coleta", order: 4, label: "Solicitar Coleta", href: site.contact, icon: "Truck", type: "link", enabled: true },
+    { id: "qa-coleta", order: 4, label: "Solicitar Coleta", href: site.collections, icon: "Truck", type: "link", enabled: true },
     { id: "qa-cidades", order: 5, label: "Cidades", href: "#mapa-regional", icon: "MapPin", type: "modal", enabled: true },
     { id: "qa-whatsapp", order: 6, label: "WhatsApp", href: site.contact, icon: "WhatsappLogo", type: "link", enabled: true },
     { id: "qa-telefone", order: 7, label: "Telefone", href: external.phoneHref, icon: "Phone", type: "external", enabled: true },
