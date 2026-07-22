@@ -1,7 +1,7 @@
 import { storagePaths } from "../config/storagePaths.js";
 import { sanitizeFooterLinks } from "../services/footerLinksContent.js";
 import { migratePageContent } from "../services/pageContent.js";
-import type { ContentData, HomePageContent, ServicesPageContent } from "../types/content.js";
+import type { ContentData, HomeFeedback, HomePageContent, ServicesPageContent } from "../types/content.js";
 import { readJsonFile, writeJsonFile } from "../utils/jsonStore.js";
 import { mediaSlotsRepository } from "./jsonRepositories.js";
 import { defaultHomeQuickActions } from "../config/contentDefaults.js";
@@ -66,6 +66,18 @@ const DEFAULT_QUOTE_UNIT = {
   quoteCnpj: "60960473000162",
   genericPostalCode: "17123210",
 } as const;
+
+const LEGACY_FEEDBACK_CONTEXTS = [
+  "Distribuição e abastecimento",
+  "Logística industrial e rastreabilidade",
+  "Supply chain e entregas nacionais",
+  "Transporte e distribuição regional",
+  "Atendimento logístico e agendamento",
+  "Operações de distribuição",
+  "Coleta, entrega e acompanhamento",
+  "Distribuição B2B",
+  "Logística e previsibilidade operacional",
+] as const;
 
 type RawItem = Record<string, unknown> & { order?: number };
 
@@ -169,6 +181,68 @@ function homeUnitFromLegacy(unit: RawItem, index: number) {
   };
 }
 
+function legacyText(value: unknown) {
+  return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
+}
+
+function hasConfiguredSocialProof(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const socialProof = value as { title?: unknown; feedbacks?: unknown };
+  return Boolean(
+    legacyText(socialProof.title) &&
+      Array.isArray(socialProof.feedbacks) &&
+      socialProof.feedbacks.length > 0 &&
+      socialProof.feedbacks.every(
+        (feedback) =>
+          feedback &&
+          typeof feedback === "object" &&
+          legacyText((feedback as RawItem).name) &&
+          legacyText((feedback as RawItem).role) &&
+          legacyText((feedback as RawItem).context) &&
+          legacyText((feedback as RawItem).testimonial)
+      )
+  );
+}
+
+function homeFeedbackFromLegacy(feedback: RawItem, index: number): HomeFeedback {
+  return {
+    id: legacyText(feedback.id) || `home-feedback-${index + 1}`,
+    order: Number(feedback.order ?? index + 1),
+    name: legacyText(feedback.name ?? feedback.nome) || `Cliente ${index + 1}`,
+    role: legacyText(feedback.role) || "Profissional de logística",
+    context:
+      legacyText(feedback.highlight ?? feedback.resultadoTexto) ||
+      LEGACY_FEEDBACK_CONTEXTS[index % LEGACY_FEEDBACK_CONTEXTS.length],
+    testimonial:
+      legacyText(feedback.testimonial ?? feedback.comment ?? feedback.texto) ||
+      "A operação ganhou mais previsibilidade, acompanhamento e agilidade nas tratativas.",
+    photo: "",
+    rating: Math.min(5, Math.max(1, Math.round(Number(feedback.rating ?? feedback.nota ?? 5)))),
+    active: feedback.active !== false && feedback.ativo !== false,
+  };
+}
+
+function socialProofFromLegacy(feedbacks: RawItem[], title?: unknown) {
+  return {
+    title: legacyText(title) || "Experiências em logística, transporte e distribuição.",
+    feedbacks: sortByOrder(feedbacks).map(homeFeedbackFromLegacy),
+  };
+}
+
+function needsSocialProofMigration(content: Pick<ContentData, "homePage" | "feedbacks">) {
+  const currentSocialProof = content.homePage && typeof content.homePage === "object"
+    ? (content.homePage as unknown as Record<string, unknown>).socialProof
+    : undefined;
+  const homeFeedbacks =
+    currentSocialProof && typeof currentSocialProof === "object"
+      ? (currentSocialProof as { feedbacks?: unknown }).feedbacks
+      : undefined;
+  return (
+    !hasConfiguredSocialProof(currentSocialProof) &&
+    (content.feedbacks.length > 0 || (Array.isArray(homeFeedbacks) && homeFeedbacks.length > 0))
+  );
+}
+
 function normalizeHomeRoot(content: ContentData) {
   const homePage = content.homePage && typeof content.homePage === "object"
     ? content.homePage
@@ -178,6 +252,16 @@ function normalizeHomeRoot(content: ContentData) {
     Array.isArray(content.units) && content.units.length > 0
       ? sortByOrder(content.units as unknown as RawItem[]).map(homeUnitFromLegacy)
       : [];
+  const legacyHomeSocialProof =
+    homeRecord.socialProof && typeof homeRecord.socialProof === "object"
+      ? (homeRecord.socialProof as { title?: unknown; feedbacks?: unknown })
+      : undefined;
+  const legacyHomeFeedbacks = Array.isArray(legacyHomeSocialProof?.feedbacks)
+    ? (legacyHomeSocialProof.feedbacks as RawItem[])
+    : [];
+  const shouldMigrateSocialProof =
+    !hasConfiguredSocialProof(homeRecord.socialProof) &&
+    (content.feedbacks.length > 0 || legacyHomeFeedbacks.length > 0);
 
   return {
     ...emptyHomePage(),
@@ -192,6 +276,14 @@ function normalizeHomeRoot(content: ContentData) {
       homeRecord.trackingCta && typeof homeRecord.trackingCta === "object"
         ? homePage.trackingCta
         : emptyHomePage().trackingCta,
+    socialProof: shouldMigrateSocialProof
+      ? socialProofFromLegacy(
+          content.feedbacks.length > 0
+            ? (content.feedbacks as unknown as RawItem[])
+            : legacyHomeFeedbacks,
+          legacyHomeSocialProof?.title
+        )
+      : homePage.socialProof,
   };
 }
 
@@ -251,6 +343,7 @@ export const contentRepository = {
       !data.homePage?.regionalPresence ||
       !data.homePage?.trackingCta ||
       !Array.isArray(data.homePage?.quickActions) ||
+      needsSocialProofMigration(data) ||
       needsQuoteUnitMigration(Array.isArray(data.units) ? data.units : [])
     ) {
       writeJsonFile(storagePaths.content, serializeContent(migrated));

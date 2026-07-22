@@ -122,7 +122,17 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Validação", value: "Cada botão exige texto e link válido; o CMS sanitiza o endereço antes de publicar.", technical: true },
       { label: "Após salvar", value: "Os dois CTAs do hero de /coletas são atualizados sem alterar os campos do formulário." },
     ],
-  },
+    },
+    "coletas.section.orientacoes-em-acordeao": {
+      title: "Orientações em acordeão de Coletas",
+      summary: "Aqui você ajusta o cabeçalho e as três orientações mostradas após o formulário de /coletas. Cada pergunta ajuda a pessoa a concluir a solicitação com os dados certos.",
+      example: "Mantenha uma pergunta objetiva, como “Quando recebo a confirmação?”, seguida de uma resposta direta.",
+      details: [
+        { label: "Onde aparece", value: "Depois do formulário, no final da rota /coletas." },
+        { label: "Estrutura", value: "O bloco mantém uma chamada curta, título, descrição e exatamente 3 itens de pergunta e resposta." },
+        { label: "Após salvar", value: "O acordeão público de /coletas passa a exibir os textos atualizados, sem alterar os dados do formulário." },
+      ],
+    },
   "cotacao.section.hero": {
     title: "Botões do hero de Cotação",
     summary: "Aqui você configura os dois botões no topo de /cotacao. Um pode levar ao formulário desta página e o outro à coleta, para orientar o visitante ao fluxo certo.",
@@ -133,7 +143,17 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Segundo botão", value: "Pode apontar para /coletas ou outro destino válido." },
       { label: "Após salvar", value: "Os CTAs exibidos no hero de /cotacao passam a usar os valores salvos aqui." },
     ],
-  },
+    },
+    "cotacao.section.orientacoes-em-acordeao": {
+      title: "Orientações em acordeão de Cotação",
+      summary: "Aqui você ajusta o cabeçalho e as três orientações mostradas antes do rodapé de /cotacao. Elas explicam como a pessoa deve seguir com a operação.",
+      example: "Use perguntas curtas, como “Qual tipo de carga devo selecionar?”, com uma resposta clara e prática.",
+      details: [
+        { label: "Onde aparece", value: "Depois dos canais de atendimento, no final da rota /cotacao." },
+        { label: "Estrutura", value: "O bloco mantém uma chamada curta, título, descrição e exatamente 3 itens de pergunta e resposta." },
+        { label: "Após salvar", value: "O acordeão público de /cotacao passa a exibir os textos atualizados, sem mudar o cálculo ou os canais de atendimento." },
+      ],
+    },
   "usuarios.section.criar-usuario": {
     title: "Criar usuário",
     summary: "Aqui você cria um acesso ao CMS e define uma senha temporária. A pessoa precisará criar a própria senha no primeiro login antes de acessar o painel.",
@@ -468,6 +488,17 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Após salvar", value: "Altera apenas o destino deste CTA; não muda texto, canais ou botões do CTA final." },
     ],
   },
+  "cotacao.field.aprovacao-whatsapp": {
+    title: "WhatsApp para aprovar cotação",
+    summary: "Aqui você escolhe o WhatsApp que receberá o pedido quando uma pessoa aprovar uma cotação no popup da rota /cotacao. O valor, a referência e a rota da cotação seguem preenchidos na mensagem.",
+    example: "Use “https://wa.me/5514991053696” para direcionar a aprovação ao atendimento responsável.",
+    details: [
+      { label: "Onde aparece", value: "No botão “Aprovar cotação” do popup exibido após uma cotação fracionada na rota /cotacao." },
+      { label: "Formato aceito", value: "Somente links oficiais do WhatsApp, iniciados por https://wa.me/ ou https://api.whatsapp.com/.", technical: true },
+      { label: "Mensagem", value: "O site inclui automaticamente a referência, o valor, a origem e o destino; não é necessário editar esses dados aqui." },
+      { label: "Após salvar", value: "Altera apenas esse destino de aprovação, sem mudar o WhatsApp comercial geral ou os demais canais da página." },
+    ],
+  },
   "servicos.field.arquivo-selecionado": {
     title: "Imagem do módulo de Serviços",
     summary: "Aqui você escolhe a foto que será mostrada no card do serviço aberto. Depois de salvar, só esse card em /servicos recebe a nova imagem.",
@@ -588,6 +619,20 @@ function getFieldFallback(label: string, context: CmsHelpContext): Omit<CmsHelpC
       summary: `Aqui você escreve o texto que o visitante vai ler em ${context.destination}. Salvar troca somente essa frase, descrição ou resposta.`,
       example: "Exemplo: escreva “Fale com nosso time para encontrar a melhor solução para sua operação”.",
       details: [...baseDetails, { label: "Onde aparece", value: `No texto do bloco que está aberto em ${context.destination}.` }, { label: "Após salvar", value: "O texto anterior desse bloco é substituído." }],
+    };
+  }
+  if (normalizedLabel.includes("contexto-da-operacao")) {
+    return {
+      summary: "Aqui você descreve o tipo de operação do relato, sem identificar a empresa cliente. Esse texto aparece abaixo da foto na Prova Social da Home e ajuda o visitante e a busca a entender o cenário atendido.",
+      example: "Exemplo: escreva “Distribuição nacional” ou “Logística industrial”, sem citar marca, empresa ou dado confidencial.",
+      details: [...baseDetails, { label: "Onde aparece", value: "Abaixo da foto ou das iniciais da pessoa, no card de Prova Social da Home (/)." }, { label: "Após salvar", value: "O contexto substitui somente essa identificação operacional; empresas não são exibidas nessa seção." }],
+    };
+  }
+  if (normalizedLabel.includes("foto-da-pessoa")) {
+    return {
+      summary: "Aqui você pode escolher uma foto autorizada da pessoa que deu o relato. Ela aparece no card da Prova Social da Home; se ficar vazio, o site mostra as iniciais do nome.",
+      example: "Exemplo: envie um retrato profissional autorizado da pessoa, sem logo de empresa e sem dados sensíveis visíveis.",
+      details: [...baseDetails, { label: "Onde aparece", value: "No topo do card de Prova Social da Home (/)." }, { label: "Após salvar", value: "A imagem escolhida substitui as iniciais somente nesse relato." }],
     };
   }
   if (normalizedLabel.includes("link") || normalizedLabel.includes("url") || normalizedLabel.includes("canonical")) {

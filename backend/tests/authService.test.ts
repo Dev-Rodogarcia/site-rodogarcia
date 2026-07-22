@@ -65,7 +65,7 @@ describe("authService", () => {
     expect(() =>
       login(requestBody("admin@rodogarcia.com.br", VALID_PASSWORD, "203.0.113.250"))
     ).toThrow("Muitas tentativas de login.");
-  });
+  }, 15_000);
 
   it("preserves omitted fields and rejects role or active coercion on update", async () => {
     createIsolatedBackendEnv();

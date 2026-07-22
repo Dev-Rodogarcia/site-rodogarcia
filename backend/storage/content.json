@@ -493,16 +493,16 @@
       ]
     },
     "socialProof": {
-      "title": "Marcas gigantes confiam a operação na Rodogarcia.",
+      "title": "Experiências em logística, transporte e distribuição.",
       "feedbacks": [
         {
           "id": "home-feedback-1",
           "order": 1,
           "name": "Mariana Araujo",
           "role": "Gerente de Abastecimento",
-          "company": "Capricche",
+          "context": "Abastecimento e distribuição no varejo",
           "testimonial": "Nas janelas de campanha, a Rodogarcia manteve previsibilidade de coleta e entrega entre CD e lojas, com menos ruptura e retorno rápido nas ocorrências.",
-          "photo": "/feedbacks/capricche.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -511,9 +511,9 @@
           "order": 2,
           "name": "Leandro Martins",
           "role": "Coordenador de Logistica Industrial",
-          "company": "Corbion Brasil",
+          "context": "Logística industrial e rastreabilidade",
           "testimonial": "Em uma operação industrial sensível, o que pesou foi a disciplina de agendamento e rastreabilidade. O SLA ficou mais estável e a leitura de ocorrências muito mais objetiva.",
-          "photo": "/feedbacks/corbion-brasil.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -522,9 +522,9 @@
           "order": 3,
           "name": "Patricia Nunes",
           "role": "Gerente de Supply Chain",
-          "company": "Danfoss",
+          "context": "Supply chain e entregas industriais",
           "testimonial": "A Rodogarcia trouxe regularidade para embarques tecnicos e maior confianca nas janelas de entrega para clientes industriais. A reducao de desvios operacionais foi perceptivel.",
-          "photo": "/feedbacks/danfoss.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -533,9 +533,9 @@
           "order": 4,
           "name": "Carlos Eduardo Prado",
           "role": "Supervisor Nacional de Transportes",
-          "company": "Frigelar",
+          "context": "Transporte e distribuição nacional",
           "testimonial": "Com capilaridade nacional e resposta rapida, conseguimos sustentar picos sazonais com mais previsibilidade de entrega e menos retrabalho no atendimento.",
-          "photo": "/feedbacks/frigelar.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -544,9 +544,9 @@
           "order": 5,
           "name": "Aline Moreira",
           "role": "Coordenadora de Customer Service Logistico",
-          "company": "H.B. Fuller",
+          "context": "Atendimento logístico e operações industriais",
           "testimonial": "Precisávamos de controle fino de agendamento, compliance e rastreabilidade. A Rodogarcia entregou consistência operacional e menos ruído nas tratativas com planta e cliente.",
-          "photo": "/feedbacks/hbfuller.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -555,9 +555,9 @@
           "order": 6,
           "name": "Diego Carvalho",
           "role": "Gerente de Operacoes",
-          "company": "Hidrodomi",
+          "context": "Operações de distribuição",
           "testimonial": "Nossa distribuição ganhou cadência. Hoje temos mais visibilidade por etapa, melhor ocupação das janelas e menos impacto quando a operação exige replanejamento.",
-          "photo": "/feedbacks/hidrodomi.gif",
+          "photo": "",
           "rating": 4,
           "active": true
         },
@@ -566,9 +566,9 @@
           "order": 7,
           "name": "Renata Campos",
           "role": "Especialista de Supply Chain",
-          "company": "Kemira",
+          "context": "Cadeia de suprimentos e coleta",
           "testimonial": "Em uma malha sensível, a diferença esteve na previsibilidade de coleta, no acompanhamento das entregas e na qualidade do retorno para a nossa equipe.",
-          "photo": "/feedbacks/kemira.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -577,9 +577,9 @@
           "order": 8,
           "name": "Bruno Tavares",
           "role": "Gerente de Distribuicao",
-          "company": "PPG",
+          "context": "Distribuição B2B em todo o Brasil",
           "testimonial": "A combinacao entre capilaridade e controle de entrega ajudou a reduzir avarias e melhorar o cumprimento das janelas dos nossos clientes em todo o Brasil.",
-          "photo": "/feedbacks/PPG.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         },
@@ -588,9 +588,9 @@
           "order": 9,
           "name": "Thiago Fernandes",
           "role": "Coordenador de Logistica",
-          "company": "Tigre",
+          "context": "Logística e distribuição nacional",
           "testimonial": "Para uma operação com alto volume e distribuição nacional, a Rodogarcia sustentou SLA, agendamento e rastreabilidade com padrão muito acima da média.",
-          "photo": "/feedbacks/tigre.webp",
+          "photo": "",
           "rating": 5,
           "active": true
         }
@@ -1075,6 +1075,34 @@
         }
       ]
     },
+    "operationGuidance": {
+      "eyebrow": "Antes do atendimento",
+      "title": "Quer alinhar a operação antes?",
+      "description": "Veja qual caminho faz mais sentido para a sua carga antes de acionar o atendimento institucional.",
+      "items": [
+        {
+          "id": "quote-guidance-cargo",
+          "order": 1,
+          "question": "Qual tipo de carga devo selecionar?",
+          "answer": "Use carga fracionada quando os volumes seguirem junto de outras cargas e você quiser calcular a proposta nesta página. Escolha carga fechada para uma operação com veículo dedicado."
+        },
+        {
+          "id": "quote-guidance-details",
+          "order": 2,
+          "question": "Quais informações agilizam o atendimento?",
+          "answer": "Tenha em mãos origem, destino, o CNPJ do cliente, peso, volume, valor da nota e quantidade de volumes. A cotação do site usa a tabela PADRÃO."
+        },
+        {
+          "id": "quote-guidance-support",
+          "order": 3,
+          "question": "Quando devo falar com o time institucional?",
+          "answer": "Use os canais abaixo para orientações, necessidades especiais ou para alinhar uma operação antes de enviar a solicitação. O formulário continua sendo o caminho principal para calcular ou preparar a cotação."
+        }
+      ]
+    },
+    "approvalChannel": {
+      "whatsappUrl": "https://wa.me/5514991053696"
+    },
     "directChannels": [
       {
         "id": "fractional",
@@ -1182,6 +1210,31 @@
           "label": "Solicitar cotação",
           "url": "/cotacao",
           "external": false
+        }
+      ]
+    },
+    "operationGuidance": {
+      "eyebrow": "Antes de solicitar",
+      "title": "Orientações para a coleta",
+      "description": "Confira os pontos essenciais antes de finalizar para a solicitação seguir sem retrabalho.",
+      "items": [
+        {
+          "id": "collections-guidance-request",
+          "order": 1,
+          "question": "O que preciso informar para solicitar a coleta?",
+          "answer": "Preencha os CNPJs da operação, escolha a data e a janela de horário e informe os dados da nota fiscal. Os campos com a interrogação explicam cada dado."
+        },
+        {
+          "id": "collections-guidance-invoice",
+          "order": 2,
+          "question": "Por que a nota fiscal precisa ser validada?",
+          "answer": "A validação confirma os valores, volumes e peso da nota antes de liberar o agendamento. Se algum dado da nota ou dos CNPJs for alterado depois, valide novamente."
+        },
+        {
+          "id": "collections-guidance-confirmation",
+          "order": 3,
+          "question": "Quando recebo a confirmação?",
+          "answer": "Após validar a nota e enviar a solicitação, o site mostra o número da coleta. Caso o cadastro do cliente exija atendimento, a mensagem da operação fica pronta para continuar pelo canal comercial."
         }
       ]
     }

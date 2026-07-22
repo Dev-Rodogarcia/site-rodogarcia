@@ -34,8 +34,10 @@ export type PageSectionKey =
   | "cultureImage"
   | "jobs"
   | "directApplication"
+  | "approvalChannel"
   | "directChannels"
-  | "otherChannels";
+  | "otherChannels"
+  | "operationGuidance";
 
 const site = {
   services: "/servicos",
@@ -53,6 +55,7 @@ const external = {
   whatsappCommercial: "https://wa.me/5511993139536",
   whatsappQuoteFractional: "https://wa.me/5514991053933",
   whatsappQuoteFull: "https://wa.me/5514991053933",
+  whatsappQuoteApproval: "https://wa.me/5514991053696",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
   careersEmailWithSubject:
@@ -95,6 +98,11 @@ function sanitizeButton(payload: unknown, fallback: PageButton): PageButton {
   };
 }
 
+function sanitizeWhatsappUrl(value: unknown, fallback: string) {
+  const url = sanitizeUrl(value);
+  return /^https:\/\/(?:wa\.me|api\.whatsapp\.com)\//i.test(url) ? url : fallback;
+}
+
 function sanitizeButtons(payload: unknown, fallbacks: PageButton[], count = 2) {
   const source = Array.isArray(payload) ? payload : [];
   return Array.from({ length: count }, (_, index) =>
@@ -126,6 +134,16 @@ function sanitizeFixedFaq(payload: unknown, fallbacks: PageFaqItem[]) {
       sanitizeFaqItem(items[index] ?? {}, index, fallback)
     )
   );
+}
+
+function sanitizeOperationGuidance(payload: unknown, fallback: { eyebrow: string; title: string; description: string; items: PageFaqItem[] }) {
+  const source = isRecord(payload) ? payload : {};
+  return {
+    eyebrow: sanitizeText(source.eyebrow, 80) || fallback.eyebrow,
+    title: sanitizeText(source.title, 120) || fallback.title,
+    description: sanitizeText(source.description, 320) || fallback.description,
+    items: sanitizeFixedFaq(source, fallback.items),
+  };
 }
 
 const DEFAULT_ABOUT_PAGE: AboutPageContent = {
@@ -364,6 +382,19 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       { label: "Solicitar coleta", url: site.collections },
     ],
   },
+  operationGuidance: {
+    eyebrow: "Antes do atendimento",
+    title: "Quer alinhar a operação antes?",
+    description: "Veja qual caminho faz mais sentido para a sua carga antes de acionar o atendimento institucional.",
+    items: [
+      { id: "quote-guidance-cargo", order: 1, question: "Qual tipo de carga devo selecionar?", answer: "Use carga fracionada quando os volumes seguirem junto de outras cargas e você quiser calcular a proposta nesta página. Escolha carga fechada para uma operação com veículo dedicado." },
+      { id: "quote-guidance-details", order: 2, question: "Quais informações agilizam o atendimento?", answer: "Tenha em mãos origem, destino, o CNPJ do cliente, peso, volume, valor da nota e quantidade de volumes. A cotação do site usa a tabela PADRÃO." },
+      { id: "quote-guidance-support", order: 3, question: "Quando devo falar com o time institucional?", answer: "Use os canais abaixo para orientações, necessidades especiais ou para alinhar uma operação antes de enviar a solicitação. O formulário continua sendo o caminho principal para calcular ou preparar a cotação." },
+    ],
+  },
+  approvalChannel: {
+    whatsappUrl: external.whatsappQuoteApproval,
+  },
   directChannels: [
     {
       id: "fractional",
@@ -443,6 +474,16 @@ const DEFAULT_COLLECTIONS_PAGE: CollectionsPageContent = {
     buttons: [
       { label: "Solicitar coleta", url: "#formulario-coleta" },
       { label: "Solicitar cotação", url: site.quote },
+    ],
+  },
+  operationGuidance: {
+    eyebrow: "Antes de solicitar",
+    title: "Orientações para a coleta",
+    description: "Confira os pontos essenciais antes de finalizar para a solicitação seguir sem retrabalho.",
+    items: [
+      { id: "collections-guidance-request", order: 1, question: "O que preciso informar para solicitar a coleta?", answer: "Preencha os CNPJs da operação, escolha a data e a janela de horário e informe os dados da nota fiscal. Os campos com a interrogação explicam cada dado." },
+      { id: "collections-guidance-invoice", order: 2, question: "Por que a nota fiscal precisa ser validada?", answer: "A validação confirma os valores, volumes e peso da nota antes de liberar o agendamento. Se algum dado da nota ou dos CNPJs for alterado depois, valide novamente." },
+      { id: "collections-guidance-confirmation", order: 3, question: "Quando recebo a confirmação?", answer: "Após validar a nota e enviar a solicitação, o site mostra o número da coleta. Caso o cadastro do cliente exija atendimento, a mensagem da operação fica pronta para continuar pelo canal comercial." },
     ],
   },
 };
@@ -897,11 +938,19 @@ export function migratePageContent(
 export function sanitizeQuotePage(payload: unknown): QuotePageContent {
   const source = isRecord(payload) ? payload : {};
   const hero = isRecord(source.hero) ? source.hero : {};
+  const approvalChannel = isRecord(source.approvalChannel) ? source.approvalChannel : {};
   const hasOtherChannels = Array.isArray(source.otherChannels);
   const otherChannels = arrayPayload(source.otherChannels);
   return {
     hero: {
       buttons: sanitizeButtons(hero.buttons, DEFAULT_QUOTE_PAGE.hero.buttons),
+    },
+    operationGuidance: sanitizeOperationGuidance(source.operationGuidance, DEFAULT_QUOTE_PAGE.operationGuidance),
+    approvalChannel: {
+      whatsappUrl: sanitizeWhatsappUrl(
+        approvalChannel.whatsappUrl,
+        DEFAULT_QUOTE_PAGE.approvalChannel.whatsappUrl
+      ),
     },
     directChannels: withOrder(
       DEFAULT_QUOTE_PAGE.directChannels.map((_, index) =>
@@ -923,6 +972,7 @@ export function sanitizeCollectionsPage(payload: unknown): CollectionsPageConten
     hero: {
       buttons: sanitizeButtons(hero.buttons, DEFAULT_COLLECTIONS_PAGE.hero.buttons),
     },
+    operationGuidance: sanitizeOperationGuidance(source.operationGuidance, DEFAULT_COLLECTIONS_PAGE.operationGuidance),
   };
 }
 
@@ -1002,6 +1052,12 @@ export function updatePageSection(
     case "quote": {
       const page = current as QuotePageContent;
       if (sectionKey === "hero") return sanitizeQuotePage({ ...page, hero: payload });
+      if (sectionKey === "approvalChannel") {
+        return sanitizeQuotePage({ ...page, approvalChannel: payload });
+      }
+      if (sectionKey === "operationGuidance") {
+        return sanitizeQuotePage({ ...page, operationGuidance: payload });
+      }
       if (sectionKey === "directChannels") {
         return sanitizeQuotePage({ ...page, directChannels: payload.directChannels });
       }
@@ -1013,6 +1069,9 @@ export function updatePageSection(
     case "collections": {
       const page = current as CollectionsPageContent;
       if (sectionKey === "hero") return sanitizeCollectionsPage({ ...page, hero: payload });
+      if (sectionKey === "operationGuidance") {
+        return sanitizeCollectionsPage({ ...page, operationGuidance: payload });
+      }
       break;
     }
   }

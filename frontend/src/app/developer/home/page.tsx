@@ -371,7 +371,7 @@ function emptyFeedback(): HomeFeedback {
     id: createId("home-feedback"),
     name: "",
     role: "",
-    company: "",
+    context: "",
     testimonial: "",
     photo: "",
     rating: 5,
@@ -1932,7 +1932,7 @@ export default function DeveloperHomePage() {
           <DeveloperSectionHeading
             eyebrow="Etapa 8 - carrossel de depoimentos"
             title="Prova Social da Home"
-            description="Lista livre de feedbacks. A ordem aqui e a ordem exibida no carrossel da Home."
+            description="Lista livre de relatos autorizados. A ordem aqui é a ordem exibida no carrossel da Home; empresas não são publicadas."
             action={
               <button type="button" onClick={() => setHome((current) => ({ ...current, socialProof: { ...current.socialProof, feedbacks: [...current.socialProof.feedbacks, emptyFeedback()] } }))} className={developerSecondaryButtonClassName}>
                 <Plus size={16} weight="bold" />
@@ -1952,7 +1952,7 @@ export default function DeveloperHomePage() {
                 key={feedback.id}
                 label={`Feedback ${index + 1}`}
                 title={feedback.name || "Feedback sem nome"}
-                description="Foto/logo, depoimento, empresa e avaliacao exibidos no card."
+                description="Foto autorizada, contexto da operação, depoimento e avaliação exibidos no card."
                 active={feedback.active !== false}
                 open={openFeedback === index}
                 onToggle={() => setOpenFeedback(openFeedback === index ? null : index)}
@@ -1965,14 +1965,14 @@ export default function DeveloperHomePage() {
                 }
               >
                 <div className={cn(homeCtaPanelClassName, "grid gap-5 md:grid-cols-4")}>
-                  <DeveloperField label="Nome" required hint="Normalmente, nome da empresa.">
+                  <DeveloperField label="Nome da pessoa" required hint="Use somente o nome de uma pessoa que autorizou a publicação do relato.">
                     <input value={feedback.name} onChange={(event) => updateFeedback(index, { name: event.target.value })} maxLength={80} className={developerInputClassName} />
                   </DeveloperField>
-                  <DeveloperField label="Cargo/descrição" required>
+                  <DeveloperField label="Cargo ou perfil" required hint="Exemplo: Coordenadora de logística. Não informe a empresa da pessoa.">
                     <input value={feedback.role} onChange={(event) => updateFeedback(index, { role: event.target.value })} maxLength={80} className={developerInputClassName} />
                   </DeveloperField>
-                  <DeveloperField label="Empresa" required>
-                    <input value={feedback.company} onChange={(event) => updateFeedback(index, { company: event.target.value })} maxLength={120} className={developerInputClassName} />
+                  <DeveloperField label="Contexto da operação" required hint="Descreva o tema com palavras úteis para busca, como “Distribuição nacional” ou “Logística industrial”, sem citar empresas.">
+                    <input value={feedback.context} onChange={(event) => updateFeedback(index, { context: event.target.value })} maxLength={120} className={developerInputClassName} />
                   </DeveloperField>
                   <DeveloperField label="Estrelas" required>
                     <input type="number" min={1} max={5} value={feedback.rating} onChange={(event) => updateFeedback(index, { rating: Math.min(5, Math.max(1, Number(event.target.value) || 1)) })} className={developerInputClassName} />
@@ -1985,13 +1985,13 @@ export default function DeveloperHomePage() {
                   </DeveloperField>
                   <div className="space-y-4">
                     <DeveloperMediaField
-                      label="Foto ou logo"
-                      required
+                      label="Foto da pessoa (opcional)"
                       mediaType="image"
-                      value={feedback.photo}
+                      value={feedback.photo ?? ""}
                       onChange={(photo) => updateFeedback(index, { photo })}
                       previewAlt={feedback.name}
                       stackControls
+                      hint="Use apenas foto autorizada da pessoa. Sem foto, a Home mostra as iniciais do nome; logos de empresas não são usados nesta seção."
                       afterControls={
                         <label className="inline-flex min-h-10 min-w-40 items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
                           <input type="checkbox" checked={feedback.active !== false} onChange={(event) => updateFeedback(index, { active: event.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />

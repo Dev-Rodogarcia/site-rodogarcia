@@ -100,9 +100,9 @@ export interface HomeFeedback {
   order?: number;
   name: string;
   role: string;
-  company: string;
+  context: string;
   testimonial: string;
-  photo: string;
+  photo?: string;
   rating: number;
   active?: boolean;
 }
@@ -463,6 +463,10 @@ export interface QuotePageContent {
   hero: {
     buttons: PageButton[];
   };
+  operationGuidance: OperationGuidanceContent;
+  approvalChannel: {
+    whatsappUrl: string;
+  };
   directChannels: QuoteDirectChannel[];
   otherChannels: QuoteOtherChannel[];
 }
@@ -471,6 +475,14 @@ export interface CollectionsPageContent {
   hero: {
     buttons: PageButton[];
   };
+  operationGuidance: OperationGuidanceContent;
+}
+
+export interface OperationGuidanceContent {
+  eyebrow: string;
+  title: string;
+  description: string;
+  items: PageFaqItem[];
 }
 
 export interface LegacyHeroButton {

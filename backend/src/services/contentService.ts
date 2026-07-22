@@ -305,13 +305,13 @@ function normalizeHomePage(content: ContentData): HomePageContent {
       order: Number(item.order ?? index + 1),
       name: sanitizeText(item.name, 80),
       role: sanitizeText(item.role, 80),
-      company: sanitizeText(item.company, 120),
+      context: sanitizeText(item.context, 120),
       testimonial: sanitizeText(item.testimonial, 800),
       photo: publicAssetUrl(item.photo),
       rating: Math.min(5, Math.max(1, Math.round(Number(item.rating ?? 5)))),
       active: true,
     }))
-    .filter((item) => item.name && item.role && item.company && item.testimonial && item.photo);
+    .filter((item) => item.name && item.role && item.context && item.testimonial);
   const socialTitle = sanitizeText(rawSocialProof.title, 160);
   if (socialTitle && feedbacks.length > 0) {
     homePage.socialProof = {

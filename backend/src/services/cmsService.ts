@@ -157,6 +157,18 @@ function validateCmsPagePayload(
     const media = isRecord(value) ? value : {};
     return requiredFields(media, ["src", "alt"], label);
   };
+  const validateOperationGuidance = (payload: Record<string, unknown>, label: string) => {
+    const baseError = requiredFields(payload, ["eyebrow", "title", "description"], label);
+    if (baseError) return baseError;
+    const items = arrayPayload(payload.items);
+    if (items.length !== 3) return `${label}: mantenha exatamente 3 orientações.`;
+    const invalidIndex = items.findIndex(
+      (item) => !hasRequiredText(item.question) || !hasRequiredText(item.answer)
+    );
+    return invalidIndex >= 0
+      ? `${label}: pergunta e resposta são obrigatórias na orientação ${invalidIndex + 1}.`
+      : null;
+  };
   const quoteIcons = new Set([
     "WhatsappLogo",
     "PhoneCall",
@@ -264,6 +276,15 @@ function validateCmsPagePayload(
     if (sectionKey === "hero") {
       return validatePageButtons(payload.buttons, 2, "Cotação / Botões");
     }
+    if (sectionKey === "approvalChannel") {
+      const whatsappUrl = sanitizeUrl(payload.whatsappUrl);
+      return /^https:\/\/(?:wa\.me|api\.whatsapp\.com)\//i.test(whatsappUrl)
+        ? null
+        : "Cotação: informe um link oficial do WhatsApp para aprovar a cotação.";
+    }
+    if (sectionKey === "operationGuidance") {
+      return validateOperationGuidance(payload, "Cotação / Orientações");
+    }
     if (sectionKey === "directChannels") {
       const channels = arrayPayload(payload.directChannels);
       if (channels.length !== 2) return "Cotação: informe exatamente 2 canais diretos.";
@@ -296,8 +317,11 @@ function validateCmsPagePayload(
     }
   }
 
-  if (pageKey === "collections" && sectionKey === "hero") {
-    return validatePageButtons(payload.buttons, 2, "Coletas / Botões");
+  if (pageKey === "collections") {
+    if (sectionKey === "hero") return validatePageButtons(payload.buttons, 2, "Coletas / Botões");
+    if (sectionKey === "operationGuidance") {
+      return validateOperationGuidance(payload, "Coletas / Orientações");
+    }
   }
 
   return null;
@@ -634,7 +658,7 @@ function sanitizeHomeFeedback(payload: Record<string, unknown>, index: number): 
     order: Number(payload.order ?? index + 1),
     name: sanitizeText(payload.name, 80),
     role: sanitizeText(payload.role, 80),
-    company: sanitizeText(payload.company, 120),
+    context: sanitizeText(payload.context, 120),
     testimonial: sanitizeText(payload.testimonial, 800),
     photo: sanitizeInternalImageUrl(payload.photo, "Prova social: foto"),
     rating: Math.min(5, Math.max(1, Math.round(Number(payload.rating ?? 5)))),
@@ -785,8 +809,8 @@ function validateHomeTrackingCta(section: HomePageContent["trackingCta"]) {
 function validateHomeSocialProof(section: HomeSocialProof) {
   if (!section.title) return "Prova Social: título principal obrigatório.";
   for (const feedback of section.feedbacks) {
-    if (!feedback.name || !feedback.role || !feedback.company || !feedback.testimonial || !feedback.photo) {
-      return "Prova Social: foto/logo, nome, cargo, empresa e depoimento são obrigatórios.";
+    if (!feedback.name || !feedback.role || !feedback.context || !feedback.testimonial) {
+      return "Prova Social: nome, cargo, contexto da operação e depoimento são obrigatórios.";
     }
   }
   return null;

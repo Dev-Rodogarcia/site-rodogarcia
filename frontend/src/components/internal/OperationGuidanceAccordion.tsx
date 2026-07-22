@@ -1,11 +1,7 @@
 "use client";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-
-type OperationGuidanceItem = {
-  title: string;
-  content: string;
-};
+import type { PageFaqItem } from "@/types/content";
 
 export function OperationGuidanceAccordion({
   eyebrow,
@@ -16,7 +12,7 @@ export function OperationGuidanceAccordion({
   eyebrow: string;
   title: string;
   description: string;
-  items: OperationGuidanceItem[];
+  items: PageFaqItem[];
 }) {
   return (
     <section className="mx-auto max-w-[980px]" aria-labelledby="operation-guidance-title">
@@ -27,12 +23,12 @@ export function OperationGuidanceAccordion({
       </div>
       <Accordion className="mt-8 flex w-full flex-col">
         {items.map((item) => (
-          <AccordionItem key={item.title} value={item.title} className="border-b border-[var(--border)] last:border-b-0">
+          <AccordionItem key={item.id} value={item.id} className="border-b border-[var(--border)] last:border-b-0">
             <AccordionTrigger className="py-6 text-left text-base font-semibold tracking-[-0.02em] text-[var(--foreground)] hover:text-[var(--primary)] hover:no-underline">
-              {item.title}
+              {item.question}
             </AccordionTrigger>
             <AccordionContent className="max-w-[62ch] pb-6 pr-8 text-sm leading-7 text-[var(--color-muted-raw)]">
-              {item.content}
+              {item.answer}
             </AccordionContent>
           </AccordionItem>
         ))}

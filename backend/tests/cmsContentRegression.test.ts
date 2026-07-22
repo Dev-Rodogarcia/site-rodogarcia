@@ -146,6 +146,95 @@ describe("CMS content regressions", () => {
     ).toThrow(/externo/i);
   });
 
+  it("migrates legacy feedbacks into the Home CMS social proof without companies or logos", async () => {
+    const env = isolatedBackend();
+    fs.writeFileSync(
+      path.join(env.storageRoot, "content.json"),
+      JSON.stringify({
+        homePage: { socialProof: { title: "", feedbacks: [] } },
+        feedbacks: [
+          {
+            id: "legacy-feedback-1",
+            name: "Mariana Araujo",
+            role: "Gerente de Abastecimento",
+            company: "Empresa anterior",
+            testimonial: "A operação passou a ter mais previsibilidade nas entregas.",
+            photo: "/feedbacks/logo-antigo.webp",
+            rating: 5,
+            active: true,
+          },
+        ],
+      })
+    );
+
+    const { getHomePage } = await import("../src/services/cmsService.js");
+    const home = getHomePage();
+
+    expect(home.socialProof).toMatchObject({
+      title: "Experiências em logística, transporte e distribuição.",
+      feedbacks: [
+        {
+          id: "legacy-feedback-1",
+          name: "Mariana Araujo",
+          role: "Gerente de Abastecimento",
+          context: "Distribuição e abastecimento",
+          photo: "",
+          rating: 5,
+        },
+      ],
+    });
+    expect(home.socialProof.feedbacks[0]).not.toHaveProperty("company");
+
+    const persisted = JSON.parse(fs.readFileSync(path.join(env.storageRoot, "content.json"), "utf8"));
+    expect(persisted.homePage.socialProof.feedbacks).toHaveLength(1);
+  });
+
+  it("upgrades incomplete social proof already stored on the Home", async () => {
+    const env = isolatedBackend();
+    fs.writeFileSync(
+      path.join(env.storageRoot, "content.json"),
+      JSON.stringify({
+        homePage: {
+          socialProof: {
+            title: "Marcas gigantes confiam na operação da Rodogarcia.",
+            feedbacks: [
+              {
+                id: "old-home-feedback",
+                name: "Aline Moreira",
+                role: "Coordenadora de Customer Service Logístico",
+                testimonial: "A operação ganhou consistência e menos ruído nas tratativas.",
+                photo: "/feedbacks/hbfuller.webp",
+                rating: 5,
+                active: true,
+              },
+            ],
+          },
+        },
+        feedbacks: [],
+      })
+    );
+
+    const { getHomePage } = await import("../src/services/cmsService.js");
+    const home = getHomePage();
+
+    expect(home.socialProof).toMatchObject({
+      title: "Marcas gigantes confiam na operação da Rodogarcia.",
+      feedbacks: [
+        {
+          id: "old-home-feedback",
+          context: "Distribuição e abastecimento",
+          photo: "",
+        },
+      ],
+    });
+
+    const persisted = JSON.parse(fs.readFileSync(path.join(env.storageRoot, "content.json"), "utf8"));
+    expect(persisted.homePage.socialProof.feedbacks[0]).toMatchObject({
+      context: "Distribuição e abastecimento",
+      photo: "",
+    });
+  });
+
   it("derives SEO slug from the canonical route and keeps multiline meta tags", async () => {
     const env = isolatedBackend();
     createPublicAsset(env.publicDir, "foto5.webp");

@@ -26,7 +26,6 @@ import {
 import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { seo, site } from "@/lib/routes";
-import type { HomeFeedback } from "@/types/content";
 
 export const dynamic = "force-dynamic";
 
@@ -162,22 +161,9 @@ const FALLBACK_PARTNERS: PartnerLogo[] = [
   { name: "Kemira", category: "Industria Quimica", image: "/feedbacks/kemira.webp" },
 ];
 
-function normalizePartners(feedbacks: HomeFeedback[]): PartnerLogo[] {
-  const partners = feedbacks
-    .filter((item) => item.active !== false)
-    .map((item) => ({
-      name: String(item.company ?? item.name ?? "").trim(),
-      category: String(item.role ?? "Cliente Rodogarcia").trim(),
-      image: String(item.photo ?? "").trim(),
-    }))
-    .filter((item) => item.name && item.image);
-
-  return partners.length > 0 ? partners : FALLBACK_PARTNERS;
-}
-
 export default async function ParaEmpresasPage() {
   const content = await fetchPublicContent();
-  const partners = normalizePartners(content.data?.homePage.socialProof.feedbacks ?? []);
+  const partners = FALLBACK_PARTNERS;
   const businessPage = content.data?.businessPage;
   const scaleButtons = businessPage?.scaleCta.buttons ?? [
     { label: "Solicitar cotação", url: site.quote },

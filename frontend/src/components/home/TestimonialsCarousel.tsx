@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Buildings, CaretLeft, CaretRight, Quotes, Star } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, Quotes, Star } from "@phosphor-icons/react";
 import type { HomeFeedback, HomeSocialProof } from "@/types/content";
 
 interface TestimonialsCarouselProps {
@@ -28,7 +28,16 @@ function normalizeFeedbacks(feedbacks: HomeFeedback[]): HomeFeedback[] {
       id: item.id || `feedback-${index + 1}`,
       rating: clampRating(item.rating),
     }))
-    .filter((item) => item.name && item.role && item.company && item.testimonial && item.photo);
+    .filter((item) => item.name && item.role && item.context && item.testimonial);
+}
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 }
 
 function wrapIndex(index: number, length: number) {
@@ -128,18 +137,21 @@ export default function TestimonialsCarousel({ section }: TestimonialsCarouselPr
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                   className={`relative overflow-hidden rounded-[28px] border bg-white text-center shadow-[0_18px_44px_rgba(3,10,26,0.2)] ${isCurrent ? "z-10 border-white p-6 sm:p-8 lg:p-9" : "hidden border-white/80 p-5 sm:block sm:p-6"}`}
                 >
-                  <div className={`mx-auto flex items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 ${isCurrent ? "h-20 w-36 sm:h-24 sm:w-44" : "h-14 w-24 sm:h-16 sm:w-28"}`}>
-                    <img
-                      src={feedback.photo}
-                      alt={`Logo da empresa ${feedback.company}`}
-                      className="h-full w-full object-contain"
-                      loading="lazy"
-                      decoding="async"
-                    />
+                  <div className={`mx-auto flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-[linear-gradient(145deg,#eff6ff,#dbeafe)] text-[var(--primary)] shadow-[0_10px_24px_rgba(15,23,42,0.08)] ${isCurrent ? "h-24 w-24 sm:h-28 sm:w-28" : "h-16 w-16 sm:h-20 sm:w-20"}`}>
+                    {feedback.photo ? (
+                      <img
+                        src={feedback.photo}
+                        alt={`Foto de ${feedback.name}`}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <span className={`font-bold tracking-[-0.08em] ${isCurrent ? "text-3xl" : "text-xl"}`} aria-hidden="true">{initials(feedback.name)}</span>
+                    )}
                   </div>
                   <p className={`mt-3 inline-flex items-center justify-center gap-1.5 break-words font-semibold text-slate-700 ${isCurrent ? "text-sm sm:text-base" : "text-xs"}`}>
-                    <Buildings size={isCurrent ? 16 : 14} weight="duotone" aria-hidden="true" />
-                    {feedback.company}
+                    {feedback.context}
                   </p>
                   <div className={`relative mt-5 rounded-[22px] border border-slate-200 bg-slate-50 text-slate-800 ${isCurrent ? "p-5 sm:p-6" : "p-4"}`}>
                     <span className={`absolute left-1/2 inline-flex -translate-x-1/2 items-center justify-center rounded-2xl bg-white text-[var(--primary)] shadow-[0_8px_20px_rgba(15,23,42,0.08)] ${isCurrent ? "-top-5 h-10 w-10" : "-top-4 h-8 w-8"}`}>

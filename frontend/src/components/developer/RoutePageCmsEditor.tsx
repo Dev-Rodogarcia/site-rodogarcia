@@ -59,13 +59,13 @@ const PAGE_META: Record<
     eyebrow: "Página Cotação",
     title: "Página Cotação.",
     publicHref: site.quote,
-    description: "Botões, canais diretos, outros canais e atalhos de ajuda da rota /cotacao.",
+    description: "Botões, canais, destino de aprovação e orientações em acordeão da rota /cotacao.",
   },
   collections: {
     eyebrow: "Página Coletas",
     title: "Página Coletas.",
     publicHref: site.collections,
-    description: "Botões do hero exibidos na rota /coletas.",
+    description: "Botões do hero e orientações em acordeão exibidos na rota /coletas.",
   },
 };
 
@@ -279,7 +279,8 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         (page.faq?.items?.length ?? 0) +
         (page.jobs?.length ?? 0) +
         (page.otherChannels?.length ?? 0) +
-        (page.mainChannels?.length ?? 0),
+        (page.mainChannels?.length ?? 0) +
+        (page.operationGuidance?.items?.length ?? 0),
     };
   }, [page]);
 
@@ -481,6 +482,29 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
           <>
             {renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; somente os botões são editáveis.", true)}
             <DeveloperCard className="p-5 sm:p-6">
+              <DeveloperSectionHeading
+                eyebrow="Resultado da cotação"
+                title="Aprovação pelo WhatsApp"
+                description="Define o atendimento que recebe o pedido quando a pessoa seleciona “Aprovar cotação” no popup após calcular o valor."
+              />
+              <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("approvalChannel", page.approvalChannel); }}>
+                <div className={priorityPanelClassName}>
+                  <DeveloperField label="WhatsApp para aprovar cotação" required helpKey="aprovacao-whatsapp">
+                    <input
+                      required
+                      type="url"
+                      value={page.approvalChannel.whatsappUrl ?? ""}
+                      onChange={(event) => update((draft) => { draft.approvalChannel.whatsappUrl = event.target.value; })}
+                      placeholder="https://wa.me/5514991053696"
+                      className={developerInputClassName}
+                    />
+                  </DeveloperField>
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-muted-raw)]">Use apenas um link oficial do WhatsApp no formato <code>https://wa.me/...</code>. A mensagem com número, valor, origem e destino da cotação é preenchida automaticamente.</p>
+                </div>
+                <SaveButton saving={saving === "approvalChannel"}>Salvar destino de aprovação</SaveButton>
+              </form>
+            </DeveloperCard>
+            <DeveloperCard className="p-5 sm:p-6">
               <DeveloperSectionHeading eyebrow="Canais diretos" title="Dois cards fixos" description="Título, descrição e botão dos dois cards." />
               <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("directChannels", { directChannels: page.directChannels }); }}>
                 <DeveloperCmsAccordion
@@ -504,11 +528,15 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               </form>
             </DeveloperCard>
             {renderOtherChannels()}
+            {renderOperationGuidance(page.operationGuidance)}
           </>
         ) : null}
 
         {pageKey === "collections" ? (
-          renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; configure os botões que levam ao formulário ou à página de cotação.", true)
+          <>
+            {renderButtonsOnly("hero", page.hero, "Hero", "Hero fixo; configure os botões que levam ao formulário ou à página de cotação.", true)}
+            {renderOperationGuidance(page.operationGuidance)}
+          </>
         ) : null}
       </div>
     </DeveloperPage>
@@ -676,6 +704,40 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
             )}
           />
           <SaveButton saving={saving === sectionKey}>Salvar FAQ</SaveButton>
+        </form>
+      </DeveloperCard>
+    );
+  }
+
+  function renderOperationGuidance(guidance: AnyRecord) {
+    return (
+      <DeveloperCard className="p-5 sm:p-6">
+        <DeveloperSectionHeading
+          eyebrow="Orientação operacional"
+          title="Orientações em acordeão"
+          description="Edite o cabeçalho e as três perguntas exibidas depois do formulário desta página."
+        />
+        <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("operationGuidance", guidance); }}>
+          <div className={cn(panelClassName, "grid gap-5 md:grid-cols-2")}>
+            <TextInput label="Chamada curta" value={guidance.eyebrow} maxLength={80} onChange={(value) => update((draft) => { draft.operationGuidance.eyebrow = value; })} />
+            <TextInput label="Título" value={guidance.title} maxLength={120} onChange={(value) => update((draft) => { draft.operationGuidance.title = value; })} />
+            <TextInput label="Descrição" value={guidance.description} maxLength={320} textarea onChange={(value) => update((draft) => { draft.operationGuidance.description = value; })} />
+          </div>
+          <DeveloperCmsAccordion
+            items={guidance.items.slice(0, 3)}
+            openIndex={openIndex}
+            onOpenChange={setOpenIndex}
+            getEyebrow={(_, index) => `Orientação ${index + 1}`}
+            getTitle={(item) => item.question || "Pergunta sem texto"}
+            variant="services"
+            renderItem={(item, index) => (
+              <div className="grid gap-5 md:grid-cols-2">
+                <TextInput label="Pergunta" value={item.question} maxLength={180} onChange={(value) => update((draft) => { draft.operationGuidance.items[index].question = value; })} />
+                <TextInput label="Resposta" value={item.answer} maxLength={320} textarea onChange={(value) => update((draft) => { draft.operationGuidance.items[index].answer = value; })} />
+              </div>
+            )}
+          />
+          <SaveButton saving={saving === "operationGuidance"}>Salvar orientações</SaveButton>
         </form>
       </DeveloperCard>
     );

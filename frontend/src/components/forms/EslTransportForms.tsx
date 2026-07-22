@@ -423,7 +423,11 @@ function quoteApprovalMessage(quote: QuoteResponse["quote"], values: QuoteValues
   ].join("\n");
 }
 
-export function EslQuoteForm() {
+export function EslQuoteForm({
+  approvalWhatsappUrl = external.whatsappQuoteApproval,
+}: {
+  approvalWhatsappUrl?: string;
+}) {
   const { apiRequest } = useApiRequest();
   const [values, setValues] = useState<QuoteValues>(defaultQuoteValues);
   const [status, setStatus] = useState<RequestStatus>("idle");
@@ -436,7 +440,7 @@ export function EslQuoteForm() {
   const kindLabel = values.kind === "fractional" ? "carga fracionada" : "carga fechada";
   const originNeedsCommercial = error.startsWith("Ainda não atendemos a cidade de origem");
   const approvalMessage = quote ? quoteApprovalMessage(quote, values) : "";
-  const approvalUrl = quote ? whatsappUrl(external.whatsappCommercial, approvalMessage) : null;
+  const approvalUrl = quote ? whatsappUrl(approvalWhatsappUrl, approvalMessage) : null;
 
   function update<K extends keyof QuoteValues>(key: K, value: QuoteValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));

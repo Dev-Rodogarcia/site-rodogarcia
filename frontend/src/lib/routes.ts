@@ -164,6 +164,7 @@ export const external = {
   whatsappCommercial: "https://wa.me/5511993139536",
   whatsappQuoteFractional: "https://wa.me/5514991053933",
   whatsappQuoteFull: "https://wa.me/5514991053933",
+  whatsappQuoteApproval: "https://wa.me/5514991053696",
   commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   careersEmailAddress: "rh@rodogarcia.com.br",

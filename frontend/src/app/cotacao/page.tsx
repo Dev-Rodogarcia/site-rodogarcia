@@ -48,6 +48,19 @@ const FALLBACK_QUOTE_PAGE: QuotePageContent = {
       { label: "Central de ajuda", url: site.help },
     ],
   },
+  operationGuidance: {
+    eyebrow: "Antes do atendimento",
+    title: "Quer alinhar a operação antes?",
+    description: "Veja qual caminho faz mais sentido para a sua carga antes de acionar o atendimento institucional.",
+    items: [
+      { id: "quote-guidance-cargo", order: 1, question: "Qual tipo de carga devo selecionar?", answer: "Use carga fracionada quando os volumes seguirem junto de outras cargas e você quiser calcular a proposta nesta página. Escolha carga fechada para uma operação com veículo dedicado." },
+      { id: "quote-guidance-details", order: 2, question: "Quais informações agilizam o atendimento?", answer: "Tenha em mãos origem, destino, o CNPJ do cliente, peso, volume, valor da nota e quantidade de volumes. A cotação do site usa a tabela PADRÃO." },
+      { id: "quote-guidance-support", order: 3, question: "Quando devo falar com o time institucional?", answer: "Use os canais abaixo para orientações, necessidades especiais ou para alinhar uma operação antes de enviar a solicitação. O formulário continua sendo o caminho principal para calcular ou preparar a cotação." },
+    ],
+  },
+  approvalChannel: {
+    whatsappUrl: external.whatsappQuoteApproval,
+  },
   directChannels: [
     {
       id: "fractional-service",
@@ -98,7 +111,7 @@ export default async function CotacaoPage() {
         <PageContainer>
           <div id="formulario-cotacao" className="scroll-mt-28">
             <p className="mb-6 text-center text-sm font-medium text-[var(--color-muted-raw)]">Preencha os dados da sua carga para continuar.</p>
-            <EslQuoteForm />
+            <EslQuoteForm approvalWhatsappUrl={quotePage.approvalChannel.whatsappUrl} />
           </div>
         </PageContainer>
       </PageSection>
@@ -125,14 +138,7 @@ export default async function CotacaoPage() {
       <section className="bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] py-14 sm:py-16">
         <PageContainer>
           <OperationGuidanceAccordion
-            eyebrow="Antes do atendimento"
-            title="Quer alinhar a operação antes?"
-            description="Veja qual caminho faz mais sentido para a sua carga antes de acionar o atendimento institucional."
-            items={[
-              { title: "Qual tipo de carga devo selecionar?", content: "Use carga fracionada quando os volumes seguirem junto de outras cargas e você quiser calcular a proposta nesta página. Escolha carga fechada para uma operação com veículo dedicado." },
-              { title: "Quais informações agilizam o atendimento?", content: "Tenha em mãos origem, destino, o CNPJ do cliente, peso, volume, valor da nota e quantidade de volumes. A cotação do site usa a tabela PADRÃO." },
-              { title: "Quando devo falar com o time institucional?", content: "Use os canais abaixo para orientações, necessidades especiais ou para alinhar uma operação antes de enviar a solicitação. O formulário continua sendo o caminho principal para calcular ou preparar a cotação." },
-            ]}
+            {...quotePage.operationGuidance}
           />
         </PageContainer>
       </section>

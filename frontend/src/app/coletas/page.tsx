@@ -40,6 +40,16 @@ const FALLBACK_COLLECTIONS_PAGE: CollectionsPageContent = {
       { label: "Solicitar cotação", url: site.quote },
     ],
   },
+  operationGuidance: {
+    eyebrow: "Antes de solicitar",
+    title: "Orientações para a coleta",
+    description: "Confira os pontos essenciais antes de finalizar para a solicitação seguir sem retrabalho.",
+    items: [
+      { id: "collections-guidance-request", order: 1, question: "O que preciso informar para solicitar a coleta?", answer: "Preencha os CNPJs da operação, escolha a data e a janela de horário e informe os dados da nota fiscal. Os campos com a interrogação explicam cada dado." },
+      { id: "collections-guidance-invoice", order: 2, question: "Por que a nota fiscal precisa ser validada?", answer: "A validação confirma os valores, volumes e peso da nota antes de liberar o agendamento. Se algum dado da nota ou dos CNPJs for alterado depois, valide novamente." },
+      { id: "collections-guidance-confirmation", order: 3, question: "Quando recebo a confirmação?", answer: "Após validar a nota e enviar a solicitação, o site mostra o número da coleta. Caso o cadastro do cliente exija atendimento, a mensagem da operação fica pronta para continuar pelo canal comercial." },
+    ],
+  },
 };
 
 export default async function CollectionsPage() {
@@ -78,14 +88,7 @@ export default async function CollectionsPage() {
           </div>
           <div className="mt-16 sm:mt-20">
             <OperationGuidanceAccordion
-              eyebrow="Antes de solicitar"
-              title="Orientações para a coleta"
-              description="Confira os pontos essenciais antes de finalizar para a solicitação seguir sem retrabalho."
-              items={[
-                { title: "O que preciso informar para solicitar a coleta?", content: "Preencha os CNPJs da operação, escolha a data e a janela de horário e informe os dados da nota fiscal. Os campos com a interrogação explicam cada dado." },
-                { title: "Por que a nota fiscal precisa ser validada?", content: "A validação confirma os valores, volumes e peso da nota antes de liberar o agendamento. Se algum dado da nota ou dos CNPJs for alterado depois, valide novamente." },
-                { title: "Quando recebo a confirmação?", content: "Após validar a nota e enviar a solicitação, o site mostra o número da coleta. Caso o cadastro do cliente exija atendimento, a mensagem da operação fica pronta para continuar pelo canal comercial." },
-              ]}
+              {...collectionsPage.operationGuidance}
             />
           </div>
         </PageContainer>
