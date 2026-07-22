@@ -7,6 +7,7 @@ import { getMediaSlotsController } from "../controllers/mediaController.js";
 import { getPublicContentController } from "../controllers/publicContentController.js";
 import { getPublicSeoController } from "../controllers/seoController.js";
 import { lookupPostalCodeController } from "../controllers/postalCodeController.js";
+import { lookupCompanyAddressController } from "../controllers/companyLookupController.js";
 import { createTrackingEventController } from "../controllers/trackingController.js";
 import { requireAllowedOrigin } from "../security/origin.js";
 import { RATE_LIMITS, requireRateLimit } from "../security/rateLimit.js";
@@ -24,6 +25,11 @@ apiRouter.get("/public/content", getPublicContentController);
 apiRouter.get("/public/seo", getPublicSeoController);
 apiRouter.get("/public/media-slots", getMediaSlotsController);
 apiRouter.get("/public/postal-code/:postalCode", lookupPostalCodeController);
+apiRouter.get(
+  "/public/company/:cnpj",
+  requireRateLimit("public-company-lookup", RATE_LIMITS.publicLookup),
+  lookupCompanyAddressController
+);
 apiRouter.get("/consent-settings", getConsentSettingsController);
 apiRouter.post(
   "/consent-events",

@@ -38,6 +38,7 @@ const site = {
 
 const external = {
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
+  whatsappCommercial: "https://wa.me/5511993139536",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   phoneDisplay: "0800 591 4557",
   phoneHref: "tel:08005914557",
@@ -279,7 +280,7 @@ export const DEFAULT_FOOTER_LINKS: FooterLinksContent = {
     description:
       "Estruturamos operações de transporte, distribuição e rastreabilidade com consistência e cobertura nacional.",
     proposalButton: { label: "Receber proposta", url: site.quote },
-    supportButton: { label: "Falar com atendimento", url: site.contact },
+    supportButton: { label: "Falar com atendimento", url: external.whatsappCommercial, external: true },
     columns: [
       {
         id: "services",
@@ -313,7 +314,7 @@ export const DEFAULT_FOOTER_LINKS: FooterLinksContent = {
         links: [
           { id: "resources-help", order: 1, label: "Central de ajuda", url: site.help },
           { id: "resources-privacy", order: 2, label: "Privacidade de dados", url: site.privacy },
-          { id: "resources-contact", order: 3, label: "Atendimento comercial", url: site.contact },
+          { id: "resources-contact", order: 3, label: "Atendimento comercial", url: external.whatsappCommercial, external: true },
           { id: "resources-email", order: 4, label: "E-mail comercial", url: external.commercialEmail, external: true },
           { id: "resources-phone", order: 5, label: external.phoneDisplay, url: external.phoneHref, external: true },
         ],
@@ -330,7 +331,7 @@ export const DEFAULT_FOOTER_LINKS: FooterLinksContent = {
       { id: "social-instagram", order: 1, icon: "InstagramLogo", label: "Instagram", url: "#" },
       { id: "social-linkedin", order: 2, icon: "LinkedinLogo", label: "LinkedIn", url: "#" },
       { id: "social-facebook", order: 3, icon: "FacebookLogo", label: "Facebook", url: "#" },
-      { id: "social-whatsapp", order: 4, icon: "WhatsappLogo", label: "WhatsApp", url: "#" },
+      { id: "social-whatsapp", order: 4, icon: "WhatsappLogo", label: "WhatsApp", url: external.whatsappCommercial, external: true },
     ],
     bottomLinks: [
       { id: "bottom-terms", order: 1, label: "Termos de uso", url: site.terms },

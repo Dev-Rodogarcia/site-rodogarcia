@@ -193,6 +193,27 @@ export default function ExitPopup() {
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
+  const closePopup = useCallback((closeType: string) => {
+    if (closing) return;
+    if (closeType !== "auto_after_submit" && formStatus !== "success") {
+      trackEvent("popup_ignored", { closeType });
+    }
+    trackEvent("popup_closed", { closeType });
+    setClosing(true);
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    closeTimer.current = window.setTimeout(
+      () => {
+        setOpen(false);
+        setRendered(false);
+        setClosing(false);
+      },
+      shouldReduceMotion ? 0 : 180
+    );
+  }, [closing, formStatus]);
+
+  const handleEscape = useCallback(() => closePopup("esc"), [closePopup]);
+
   useEffect(() => {
     const syncConsent = (event?: Event) => {
       const detail = event instanceof CustomEvent ? (event.detail as StoredConsent | undefined) : undefined;
@@ -214,7 +235,7 @@ export default function ExitPopup() {
     active: open && rendered,
     containerRef: dialogRef,
     initialFocusRef: firstFieldRef,
-    onEscape: () => closePopup("esc"),
+    onEscape: handleEscape,
   });
 
   useEffect(() => {
@@ -370,25 +391,6 @@ export default function ExitPopup() {
       if (closeTimer.current) window.clearTimeout(closeTimer.current);
     };
   }, []);
-
-  function closePopup(closeType: string) {
-    if (closing) return;
-    if (closeType !== "auto_after_submit" && formStatus !== "success") {
-      trackEvent("popup_ignored", { closeType });
-    }
-    trackEvent("popup_closed", { closeType });
-    setClosing(true);
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    closeTimer.current = window.setTimeout(
-      () => {
-        setOpen(false);
-        setRendered(false);
-        setClosing(false);
-      },
-      shouldReduceMotion ? 0 : 180
-    );
-  }
 
   function dispatchPopupFormTracking(status: "success" | "fail", reason = "") {
     window.dispatchEvent(

@@ -98,7 +98,7 @@ export default async function CotacaoPage() {
         <PageContainer>
           <div id="formulario-cotacao" className="scroll-mt-28">
             <p className="mb-6 text-center text-sm font-medium text-[var(--color-muted-raw)]">Preencha os dados da sua carga para continuar.</p>
-            <EslQuoteForm quoteBranches={content.data?.quoteBranches ?? []} />
+            <EslQuoteForm />
           </div>
         </PageContainer>
       </PageSection>

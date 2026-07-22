@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import {
   CheckCircle,
-  CaretDown,
   ClipboardText,
   Copy,
   Package,
@@ -13,6 +12,14 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import { DeveloperTooltip } from "@/components/developer/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { api, external, site } from "@/lib/routes";
 import styles from "./EslTransportForms.module.css";
@@ -22,7 +29,6 @@ type QuoteKind = "fractional" | "closed";
 
 interface QuoteValues {
   kind: QuoteKind;
-  corporationUnitId: string;
   customerCnpj: string;
   senderCnpj: string;
   recipientCnpj: string;
@@ -46,14 +52,6 @@ interface QuoteValues {
   comments: string;
 }
 
-export interface QuoteBranch {
-  id: string;
-  city: string;
-  stateCode: string;
-  genericPostalCode: string;
-  isDefault: boolean;
-}
-
 interface QuoteResponse {
   quote: {
     id: string;
@@ -72,12 +70,19 @@ interface WhatsappMessageResponse {
 }
 
 interface CollectionValues {
-  corporationCnpj: string;
   customerCnpj: string;
   pickupLocationCnpj: string;
-  payerCnpj: string;
   senderCnpj: string;
   recipientCnpj: string;
+  originName: string;
+  originStateCode: string;
+  deliveryPostalCode: string;
+  deliveryStreet: string;
+  deliveryNumber: string;
+  deliveryComplement: string;
+  deliveryNeighborhood: string;
+  deliveryCity: string;
+  deliveryStateCode: string;
   serviceDate: string;
   serviceStartHour: string;
   serviceEndHour: string;
@@ -104,6 +109,17 @@ interface InvoiceValidationResponse {
   invoice: ValidatedInvoice;
 }
 
+interface CompanyAddressResponse {
+  cnpj: string;
+  postalCode: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  stateCode: string;
+}
+
 interface CollectionResponse {
   requiresWhatsApp: false;
   collection: {
@@ -125,22 +141,29 @@ const sectionTitleClassName =
   "text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]";
 
 const fieldHelp: Record<string, string> = {
-  "Filial Rodogarcia": "Escolha a cidade da unidade Rodogarcia que atenderá esta operação. O CNPJ é enviado internamente.",
   "CNPJ do cliente e pagador": "Informe o CNPJ da empresa cliente, que também será usada como responsável pelo pagamento do frete.",
-  "CNPJ do local de coleta": "Informe o CNPJ do endereço onde a mercadoria será coletada.",
-  "CNPJ do remetente": "Informe o CNPJ de quem está enviando a mercadoria.",
-  "CNPJ do destinatário": "Informe o CNPJ de quem receberá a mercadoria.",
+  "CNPJ do local de coleta": "Informe o CNPJ do endereço onde a mercadoria será coletada. Este campo é obrigatório.",
+  "CNPJ do remetente": "Informe o CNPJ de quem está enviando a mercadoria, se disponível.",
+  "CNPJ do destinatário": "Informe o CNPJ de quem receberá a mercadoria, se disponível.",
+  "CEP de entrega": "Informe o CEP do endereço de entrega. Cidade e UF serão preenchidas quando a consulta estiver disponível.",
+  Logradouro: "Informe a rua, avenida ou estrada do endereço de entrega.",
+  Número: "Informe o número do endereço de entrega.",
+  Complemento: "Informe bloco, sala, galpão, referência ou outro complemento, se necessário.",
+  Bairro: "Informe o bairro do endereço de entrega, se disponível.",
+  "Cidade de entrega": "Informe a cidade do endereço de entrega.",
+  "UF de entrega": "Informe a sigla do estado do endereço de entrega, com duas letras.",
   "CEP de origem": "Informe o CEP de onde a carga parte para preencher automaticamente cidade e UF.",
-  "Cidade de origem": "Informe a cidade de onde a carga parte. Nas cidades configuradas, o CEP genérico é preenchido automaticamente.",
+  "Cidade de origem": "Informe a cidade de onde a carga parte. O sistema consulta a região atendida para definir a filial responsável internamente.",
   "UF de origem": "Informe a sigla do estado de origem, com duas letras.",
   "CEP de destino": "Informe o CEP para onde a carga seguirá para preencher automaticamente cidade e UF.",
-  "Cidade de destino": "Informe a cidade de destino. Nas cidades configuradas, o CEP genérico é preenchido automaticamente.",
+  "Cidade de destino": "Informe a cidade para onde a carga seguirá.",
   "UF de destino": "Informe a sigla do estado de destino, com duas letras.",
   "Peso real (kg)": "Informe o peso total real da mercadoria em quilogramas.",
-  "Metro cúbico (m³)": "Informe o volume total ocupado pela carga em metros cúbicos.",
-  "Altura (m)": "Informe a altura em metros. Junto com largura e comprimento, ela calcula o metro cúbico automaticamente.",
-  "Largura (m)": "Informe a largura em metros. Este é um campo opcional de apoio ao cálculo do volume.",
-  "Comprimento (m)": "Informe o comprimento em metros. Este é um campo opcional de apoio ao cálculo do volume.",
+  "Metro cúbico (m³)": "Calculado automaticamente: quantidade × altura × largura × comprimento.",
+  "Peso taxado (kg)": "Calculado automaticamente em quilogramas: metro cúbico × 300.",
+  "Altura (m)": "Informe a altura de uma unidade em metros. Junto com quantidade, largura e comprimento, ela calcula o metro cúbico automaticamente.",
+  "Largura (m)": "Informe a largura de uma unidade em metros. Junto com quantidade, altura e comprimento, ela calcula o metro cúbico automaticamente.",
+  "Comprimento (m)": "Informe o comprimento de uma unidade em metros. Junto com quantidade, altura e largura, ele calcula o metro cúbico automaticamente.",
   "Valor da NF (R$)": "Informe o valor total da nota fiscal em reais.",
   Quantidade: "Informe a quantidade total de caixas, pallets ou demais volumes.",
   "Classificação do produto": "Descreva o produto ou a categoria da mercadoria, se disponível.",
@@ -152,14 +175,13 @@ const fieldHelp: Record<string, string> = {
   "Horário inicial": "Informe a partir de que horário a coleta pode começar.",
   "Horário final": "Informe até que horário a coleta pode ser realizada.",
   "Referência interna": "Informe um código, pedido ou referência interna para facilitar a identificação.",
-  "Chave da NF": "Informe a chave de acesso de 44 dígitos da nota fiscal, quando disponível.",
-  "Número da NF": "Informe o número da nota fiscal que será validada.",
+  "Chave da NF": "Informe a chave de acesso de 44 dígitos se quiser consultar a nota. A consulta é opcional e não impede o agendamento.",
+  "Número da NF": "Informe o número da nota se quiser consultá-la. A consulta é opcional e não impede o agendamento.",
   "Série": "Informe a série da nota fiscal, se houver.",
 };
 
 const defaultQuoteValues: QuoteValues = {
   kind: "fractional",
-  corporationUnitId: "",
   customerCnpj: "",
   senderCnpj: "",
   recipientCnpj: "",
@@ -184,12 +206,19 @@ const defaultQuoteValues: QuoteValues = {
 };
 
 const defaultCollectionValues: CollectionValues = {
-  corporationCnpj: "",
   customerCnpj: "",
   pickupLocationCnpj: "",
-  payerCnpj: "",
   senderCnpj: "",
   recipientCnpj: "",
+  originName: "",
+  originStateCode: "",
+  deliveryPostalCode: "",
+  deliveryStreet: "",
+  deliveryNumber: "",
+  deliveryComplement: "",
+  deliveryNeighborhood: "",
+  deliveryCity: "",
+  deliveryStateCode: "",
   serviceDate: "",
   serviceStartHour: "",
   serviceEndHour: "",
@@ -375,23 +404,39 @@ function digits(value: string) {
   return value.replace(/\D/g, "");
 }
 
-function volumeFromDimensions(height: string, width: string, length: string) {
-  const dimensions = [height, width, length].map((value) => Number(value.replace(",", ".")));
-  return dimensions.every((value) => Number.isFinite(value) && value > 0)
-    ? dimensions.reduce((total, value) => total * value, 1)
+function volumeFromDimensions(quantity: string, height: string, width: string, length: string) {
+  const measures = [quantity, height, width, length].map((value) => Number(value.replace(",", ".")));
+  return measures.every((value) => Number.isFinite(value) && value > 0)
+    ? measures.reduce((total, value) => total * value, 1)
     : null;
 }
 
-export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }) {
+function quoteApprovalMessage(quote: QuoteResponse["quote"], values: QuoteValues) {
+  const reference = quote.sequenceCode || quote.referenceNumber || "registrada";
+  const value = quote.price.total === null ? "em análise" : formatCurrency(quote.price.total);
+  return [
+    "Olá, fiz uma cotação pelo site Rodogarcia e gostaria de aprová-la para seguir com o transporte.",
+    `Cotação: ${reference}`,
+    `Valor apresentado: ${value}`,
+    `Origem: ${values.originName}/${values.originStateCode}`,
+    `Destino: ${values.destinationName}/${values.destinationStateCode}`,
+  ].join("\n");
+}
+
+export function EslQuoteForm() {
   const { apiRequest } = useApiRequest();
   const [values, setValues] = useState<QuoteValues>(defaultQuoteValues);
   const [status, setStatus] = useState<RequestStatus>("idle");
   const [error, setError] = useState("");
   const [quote, setQuote] = useState<QuoteResponse["quote"] | null>(null);
+  const [quoteResultOpen, setQuoteResultOpen] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
   const postalLookupTimer = useRef<number | null>(null);
 
   const kindLabel = values.kind === "fractional" ? "carga fracionada" : "carga fechada";
+  const originNeedsCommercial = error.startsWith("Ainda não atendemos a cidade de origem");
+  const approvalMessage = quote ? quoteApprovalMessage(quote, values) : "";
+  const approvalUrl = quote ? whatsappUrl(external.whatsappCommercial, approvalMessage) : null;
 
   function update<K extends keyof QuoteValues>(key: K, value: QuoteValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -400,10 +445,20 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
   function updateDimensions(key: "height" | "width" | "length", value: string) {
     setValues((current) => {
       const next = { ...current, [key]: value };
-      const calculated = volumeFromDimensions(next.height, next.width, next.length);
-      return calculated === null ? next : { ...next, cubicVolume: String(Number(calculated.toFixed(4))) };
+      const calculated = volumeFromDimensions(next.invoiceVolumes, next.height, next.width, next.length);
+      return { ...next, cubicVolume: calculated === null ? "" : String(Number(calculated.toFixed(4))) };
     });
   }
+
+  function updateQuantity(value: string) {
+    setValues((current) => {
+      const next = { ...current, invoiceVolumes: value };
+      const calculated = volumeFromDimensions(next.invoiceVolumes, next.height, next.width, next.length);
+      return { ...next, cubicVolume: calculated === null ? "" : String(Number(calculated.toFixed(4))) };
+    });
+  }
+
+  const taxedWeight = Number(values.cubicVolume) > 0 ? Number(values.cubicVolume) * 300 : null;
 
   async function fillCityFromPostalCode(kind: "origin" | "destination", rawPostalCode: string) {
     const postalCode = digits(rawPostalCode);
@@ -437,18 +492,6 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
     }, 350);
   }
 
-  function fillPostalCodeFromCity(kind: "origin" | "destination") {
-    const city = values[`${kind}Name`].trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    const stateCode = values[`${kind}StateCode`].trim().toUpperCase();
-    const branch = quoteBranches.find((item) =>
-      item.city.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === city &&
-      (!stateCode || item.stateCode === stateCode) && /^\d{8}$/.test(item.genericPostalCode)
-    );
-    if (branch) {
-      setValues((current) => ({ ...current, [`${kind}PostalCode`]: branch.genericPostalCode, [`${kind}StateCode`]: branch.stateCode }));
-    }
-  }
-
   function input<K extends keyof QuoteValues>(key: K) {
     return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       update(key, event.target.value as QuoteValues[K]);
@@ -463,7 +506,6 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
     setClosedMessage("");
 
     const payload = {
-      corporationUnitId: values.corporationUnitId,
       customerCnpj: values.customerCnpj,
       senderCnpj: values.senderCnpj,
       recipientCnpj: values.recipientCnpj,
@@ -501,6 +543,7 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
         return;
       }
       setQuote(result.data.quote);
+      setQuoteResultOpen(true);
       setStatus("success");
       dispatchFormTracking("quote", "success");
       return;
@@ -522,25 +565,6 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
     dispatchFormTracking("quote", "success");
   }
 
-  if (status === "success" && quote) {
-    return (
-      <div className="rounded-[32px] border border-emerald-500/18 bg-[linear-gradient(180deg,rgba(236,253,245,0.94)_0%,rgba(255,255,255,0.96)_100%)] p-6 text-center shadow-[0_24px_56px_rgba(15,23,42,0.08)] sm:p-8" role="status">
-        <CheckCircle size={38} weight="fill" className="mx-auto text-emerald-600" />
-        <h3 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Cotação criada.</h3>
-        <p className="mt-3 text-sm leading-7 text-[var(--color-muted-raw)]">Referência {quote.sequenceCode || quote.referenceNumber || "registrada"}.</p>
-        <div className="mx-auto mt-6 max-w-sm rounded-2xl border border-emerald-500/14 bg-white/86 px-5 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">Valor da cotação</p>
-          <p className="mt-1 text-3xl font-bold tracking-[-0.05em] text-[var(--foreground)]">
-            {quote.price.total === null ? "Em análise" : formatCurrency(quote.price.total)}
-          </p>
-        </div>
-        <button type="button" onClick={() => { setValues(defaultQuoteValues); setStatus("idle"); }} className="mt-6 inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--color-surface-2)]">
-          Fazer outra cotação
-        </button>
-      </div>
-    );
-  }
-
   if (status === "success" && closedMessage) {
     return (
       <div className="rounded-[32px] border border-emerald-500/18 bg-[linear-gradient(180deg,rgba(236,253,245,0.94)_0%,rgba(255,255,255,0.96)_100%)] p-6 text-center shadow-[0_24px_56px_rgba(15,23,42,0.08)] sm:p-8" role="status">
@@ -554,7 +578,39 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
+    <>
+      <Dialog open={quoteResultOpen && Boolean(quote)} onOpenChange={setQuoteResultOpen}>
+        <DialogContent className="max-w-[min(34rem,calc(100%-2rem))] overflow-hidden border-emerald-500/20 bg-[linear-gradient(180deg,rgba(236,253,245,0.98)_0%,rgba(255,255,255,1)_100%)] p-0 shadow-[0_30px_80px_rgba(15,23,42,0.2)] sm:max-w-[34rem]" showCloseButton>
+          <DialogHeader className="items-center px-6 pb-2 pt-8 text-center sm:px-8">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_12px_28px_rgba(5,150,105,0.26)]">
+              <CheckCircle size={27} weight="fill" />
+            </span>
+            <DialogTitle className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Cotação pronta.</DialogTitle>
+            <DialogDescription className="max-w-sm text-center leading-6 text-[var(--color-muted-raw)]">Confira o valor e aprove pelo atendimento para seguir com o transporte.</DialogDescription>
+          </DialogHeader>
+          {quote ? (
+            <div className="space-y-5 px-6 pb-6 pt-4 sm:px-8">
+              <div className="rounded-2xl border border-slate-200 bg-white/88 px-5 py-4 text-center shadow-[0_12px_26px_rgba(15,23,42,0.05)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">Cotação</p>
+                <p className="mt-1 text-lg font-bold text-[var(--foreground)]">{quote.sequenceCode || quote.referenceNumber || "Registrada"}</p>
+                <div className="my-4 h-px bg-slate-200" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">Valor da cotação</p>
+                <p className="mt-1 text-4xl font-bold tracking-[-0.06em] text-[var(--foreground)]">{quote.price.total === null ? "Em análise" : formatCurrency(quote.price.total)}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-left text-sm">
+                <div className="rounded-xl border border-slate-200/90 bg-white/68 p-3"><p className="text-xs text-[var(--color-muted-raw)]">Origem</p><p className="mt-1 font-semibold text-[var(--foreground)]">{values.originName}/{values.originStateCode}</p></div>
+                <div className="rounded-xl border border-slate-200/90 bg-white/68 p-3"><p className="text-xs text-[var(--color-muted-raw)]">Destino</p><p className="mt-1 font-semibold text-[var(--foreground)]">{values.destinationName}/{values.destinationStateCode}</p></div>
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter className="mx-0 mb-0 flex-col gap-3 border-0 bg-white/72 px-6 py-5 sm:flex-row sm:justify-between sm:px-8">
+            <button type="button" onClick={() => { setValues(defaultQuoteValues); setQuote(null); setQuoteResultOpen(false); setStatus("idle"); }} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--color-surface-2)]">Fazer outra cotação</button>
+            {approvalUrl ? <a href={approvalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.22)] transition-colors hover:bg-emerald-700"><PaperPlaneTilt size={18} weight="bold" />Aprovar cotação</a> : <a href={site.contact} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">Falar com atendimento</a>}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
       <div className="flex flex-col gap-5 rounded-[28px] border border-blue-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(219,234,254,0.82)_100%)] p-5 shadow-[0_18px_42px_rgba(30,64,175,0.08)] sm:p-6 lg:col-span-12 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className={sectionTitleClassName}>Dados da operação</p>
@@ -581,9 +637,8 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
         })}
       </div>
 
-      <Fieldset title="Empresas envolvidas" description="Selecione a filial e informe o CNPJ do cliente responsável pela operação." className="lg:col-span-12">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Field label="Filial Rodogarcia" required><div className="relative"><select value={values.corporationUnitId} onChange={input("corporationUnitId")} className={`${fieldClassName} appearance-none pr-10`}><option value="">Selecione a cidade</option>{quoteBranches.map((branch) => <option key={branch.id} value={branch.id}>{branch.city}/{branch.stateCode}</option>)}</select><CaretDown aria-hidden size={17} weight="bold" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" /></div></Field>
+      <Fieldset title="Empresas envolvidas" description="Informe o CNPJ da empresa responsável pela operação. A filial Rodogarcia é identificada automaticamente pela cidade de origem." className="lg:col-span-12">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={input("customerCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
           <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={input("senderCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
           <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={input("recipientCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
@@ -593,25 +648,29 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
       <Fieldset title="Origem e destino" className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="CEP de origem" required><input value={values.originPostalCode} onChange={(event) => { update("originPostalCode", event.target.value); schedulePostalLookup("origin", event.target.value); }} onBlur={(event) => void fillCityFromPostalCode("origin", event.currentTarget.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
-          <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} onBlur={() => fillPostalCodeFromCity("origin")} list="quote-cities" autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
+          <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
           <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
           <Field label="CEP de destino" required><input value={values.destinationPostalCode} onChange={(event) => { update("destinationPostalCode", event.target.value); schedulePostalLookup("destination", event.target.value); }} onBlur={(event) => void fillCityFromPostalCode("destination", event.currentTarget.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
-          <Field label="Cidade de destino" required><input value={values.destinationName} onChange={input("destinationName")} onBlur={() => fillPostalCodeFromCity("destination")} list="quote-cities" autoComplete="address-level2" placeholder="Ex.: Agudos" className={fieldClassName} /></Field>
+          <Field label="Cidade de destino" required><input value={values.destinationName} onChange={input("destinationName")} autoComplete="address-level2" placeholder="Ex.: Agudos" className={fieldClassName} /></Field>
           <Field label="UF de destino" required><input value={values.destinationStateCode} onChange={input("destinationStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
         </div>
-        <datalist id="quote-cities">{quoteBranches.map((branch) => <option key={branch.id} value={branch.city}>{branch.city}/{branch.stateCode}</option>)}</datalist>
       </Fieldset>
 
       <Fieldset title="Dados da carga" className="lg:col-span-7 lg:self-stretch">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))] [&>label]:min-w-0 [&>label>span]:whitespace-nowrap">
-          <Field label="Peso real (kg)" required><input value={values.realWeight} onChange={input("realWeight")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="25000" className={fieldClassName} /></Field>
-          <Field label="Metro cúbico (m³)" required><input value={values.cubicVolume} onChange={input("cubicVolume")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="25" className={fieldClassName} /></Field>
-          <Field label="Altura (m)"><input value={values.height} onChange={(event) => updateDimensions("height", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="1,2" className={fieldClassName} /></Field>
-          <Field label="Largura (m)"><input value={values.width} onChange={(event) => updateDimensions("width", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0,8" className={fieldClassName} /></Field>
-          <Field label="Comprimento (m)"><input value={values.length} onChange={(event) => updateDimensions("length", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="2,5" className={fieldClassName} /></Field>
-          <Field label="Valor da NF (R$)" required><input value={values.invoiceValue} onChange={input("invoiceValue")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="250000" className={fieldClassName} /></Field>
-          <Field label="Quantidade" required className="lg:col-span-2"><input value={values.invoiceVolumes} onChange={input("invoiceVolumes")} type="number" min="1" step="1" inputMode="numeric" placeholder="150" className={fieldClassName} /></Field>
-          <div className="sm:col-span-2 lg:col-span-4"><Field label="Classificação do produto"><input value={values.productClassificationName} onChange={input("productClassificationName")} placeholder="Ex.: Produtos químicos" className={fieldClassName} /></Field></div>
+        <div className="grid gap-4 [&>label]:min-w-0 [&>label>span]:whitespace-nowrap">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.72fr)_repeat(3,minmax(0,1fr))]">
+            <Field label="Quantidade" required><input value={values.invoiceVolumes} onChange={(event) => updateQuantity(event.target.value)} type="number" min="1" step="1" inputMode="numeric" placeholder="1" className={fieldClassName} /></Field>
+            <Field label="Altura (m)" required><input value={values.height} onChange={(event) => updateDimensions("height", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="1,2" className={fieldClassName} /></Field>
+            <Field label="Largura (m)" required><input value={values.width} onChange={(event) => updateDimensions("width", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0,8" className={fieldClassName} /></Field>
+            <Field label="Comprimento (m)" required><input value={values.length} onChange={(event) => updateDimensions("length", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="2,5" className={fieldClassName} /></Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label="Metro cúbico (m³)" required><input value={values.cubicVolume} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
+            <Field label="Peso taxado (kg)"><input value={taxedWeight === null ? "" : String(Number(taxedWeight.toFixed(2)))} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
+            <Field label="Peso real (kg)" required><input value={values.realWeight} onChange={input("realWeight")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="20" className={fieldClassName} /></Field>
+            <Field label="Valor da NF (R$)" required><input value={values.invoiceValue} onChange={input("invoiceValue")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="200" className={fieldClassName} /></Field>
+          </div>
+          <Field label="Classificação do produto"><input value={values.productClassificationName} onChange={input("productClassificationName")} placeholder="Ex.: Produtos químicos" className={fieldClassName} /></Field>
         </div>
       </Fieldset>
 
@@ -627,8 +686,23 @@ export function EslQuoteForm({ quoteBranches }: { quoteBranches: QuoteBranch[] }
         </div>
       </Fieldset>
 
-      {status === "error" ? <div className="lg:col-span-12"><Alert kind="error">{error}</Alert></div> : null}
-    </form>
+      {status === "error" ? (
+        <div className="space-y-3 lg:col-span-12">
+          <Alert kind="error">{error}</Alert>
+          {originNeedsCommercial ? (
+            <a
+              href={external.whatsappCommercial}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--primary-dark)]"
+            >
+              Falar com o comercial
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+      </form>
+    </>
   );
 }
 
@@ -641,19 +715,106 @@ export function EslCollectionForm() {
   const [invoice, setInvoice] = useState<ValidatedInvoice | null>(null);
   const [collection, setCollection] = useState<CollectionResponse["collection"] | null>(null);
   const [whatsappMessage, setWhatsappMessage] = useState("");
+  const [companyLookupStatus, setCompanyLookupStatus] = useState<RequestStatus>("idle");
+  const [companyLookupMessage, setCompanyLookupMessage] = useState("");
+  const companyLookupTimer = useRef<number | null>(null);
 
   const validationFingerprint = useMemo(
-    () => [values.corporationCnpj, values.customerCnpj, values.pickupLocationCnpj, values.payerCnpj, values.senderCnpj, values.recipientCnpj, values.invoiceKey, values.invoiceNumber, values.invoiceSeries].join("|"),
-    [values.corporationCnpj, values.customerCnpj, values.invoiceKey, values.invoiceNumber, values.invoiceSeries, values.payerCnpj, values.pickupLocationCnpj, values.recipientCnpj, values.senderCnpj]
+    () => [values.customerCnpj, values.pickupLocationCnpj, values.senderCnpj, values.recipientCnpj, values.originName, values.originStateCode, values.invoiceKey, values.invoiceNumber, values.invoiceSeries].join("|"),
+    [values.customerCnpj, values.invoiceKey, values.invoiceNumber, values.invoiceSeries, values.originName, values.originStateCode, values.pickupLocationCnpj, values.recipientCnpj, values.senderCnpj]
   );
   const [validatedFingerprint, setValidatedFingerprint] = useState("");
   const isInvoiceCurrent = Boolean(invoice && validationFingerprint === validatedFingerprint);
 
   function update<K extends keyof CollectionValues>(key: K, value: CollectionValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
-    if (["corporationCnpj", "customerCnpj", "pickupLocationCnpj", "payerCnpj", "senderCnpj", "recipientCnpj", "invoiceKey", "invoiceNumber", "invoiceSeries"].includes(key)) {
+    if (["customerCnpj", "pickupLocationCnpj", "senderCnpj", "recipientCnpj", "originName", "originStateCode", "invoiceKey", "invoiceNumber", "invoiceSeries"].includes(key)) {
       setInvoice(null);
       setValidatedFingerprint("");
+    }
+  }
+
+  function updateDeliveryAddress<K extends keyof CollectionValues>(key: K, value: CollectionValues[K]) {
+    setValues((current) => {
+      const next = { ...current, [key]: value };
+      if (key === "deliveryCity") next.originName = value as string;
+      if (key === "deliveryStateCode") next.originStateCode = value as string;
+      return next;
+    });
+    if (key === "deliveryCity" || key === "deliveryStateCode") {
+      setInvoice(null);
+      setValidatedFingerprint("");
+    }
+  }
+
+  async function lookupPickupLocationAddress(rawCnpj: string) {
+    const cnpj = digits(rawCnpj);
+    if (cnpj.length !== 14) return;
+    setCompanyLookupStatus("loading");
+    setCompanyLookupMessage("");
+    try {
+      const response = await fetch(api.public.company(cnpj));
+      const data: unknown = await response.json().catch(() => null);
+      if (!response.ok || !data || typeof data !== "object") {
+        throw new Error("Não foi possível confirmar o endereço pelo CNPJ.");
+      }
+      const address = data as CompanyAddressResponse;
+      setValues((current) => ({
+        ...current,
+        deliveryPostalCode: address.postalCode,
+        deliveryStreet: address.street,
+        deliveryNumber: address.number,
+        deliveryComplement: address.complement,
+        deliveryNeighborhood: address.neighborhood,
+        deliveryCity: address.city,
+        deliveryStateCode: address.stateCode,
+        originName: address.city,
+        originStateCode: address.stateCode,
+      }));
+      setInvoice(null);
+      setValidatedFingerprint("");
+      setCompanyLookupStatus("success");
+      setCompanyLookupMessage("Endereço confirmado pelo CNPJ. Confira os dados antes de solicitar.");
+    } catch {
+      setCompanyLookupStatus("error");
+      setCompanyLookupMessage("Não foi possível confirmar pelo CNPJ. Preencha o endereço manualmente.");
+    }
+  }
+
+  function schedulePickupLocationLookup(rawCnpj: string) {
+    if (companyLookupTimer.current) window.clearTimeout(companyLookupTimer.current);
+    if (digits(rawCnpj).length !== 14) {
+      setCompanyLookupStatus("idle");
+      setCompanyLookupMessage("");
+      return;
+    }
+    companyLookupTimer.current = window.setTimeout(() => {
+      void lookupPickupLocationAddress(rawCnpj);
+    }, 350);
+  }
+
+  async function fillDeliveryCityFromPostalCode(rawPostalCode: string) {
+    const postalCode = digits(rawPostalCode);
+    if (postalCode.length !== 8) return;
+    try {
+      const response = await fetch(api.public.postalCode(postalCode));
+      const data: unknown = await response.json().catch(() => null);
+      if (!response.ok || !data || typeof data !== "object") return;
+      const address = data as { city?: unknown; stateCode?: unknown };
+      const city = typeof address.city === "string" ? address.city : "";
+      const stateCode = typeof address.stateCode === "string" ? address.stateCode : "";
+      if (!city || !stateCode) return;
+      setValues((current) => ({
+        ...current,
+        deliveryCity: city,
+        deliveryStateCode: stateCode,
+        originName: city,
+        originStateCode: stateCode,
+      }));
+      setInvoice(null);
+      setValidatedFingerprint("");
+    } catch {
+      // O endereço manual continua disponível quando a consulta de CEP falha.
     }
   }
 
@@ -690,29 +851,36 @@ export function EslCollectionForm() {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!invoice || !isInvoiceCurrent) {
-      setError("Valide a nota fiscal antes de solicitar a coleta.");
-      setStatus("error");
-      return;
-    }
     setStatus("loading");
     setError("");
+    setValidationStatus("idle");
     setCollection(null);
     setWhatsappMessage("");
 
     const result = await apiRequest<CollectionResponse | CollectionWhatsappResponse>(api.eslTransport.collections, {
       method: "POST",
       body: JSON.stringify({
-        corporationCnpj: values.corporationCnpj,
         customerCnpj: values.customerCnpj,
         pickupLocationCnpj: values.pickupLocationCnpj,
-        payerCnpj: values.payerCnpj,
         senderCnpj: values.senderCnpj,
         recipientCnpj: values.recipientCnpj,
+        origin: {
+          name: values.originName,
+          stateCode: values.originStateCode,
+        },
+        deliveryAddress: {
+          postalCode: values.deliveryPostalCode,
+          street: values.deliveryStreet,
+          number: values.deliveryNumber,
+          complement: values.deliveryComplement,
+          neighborhood: values.deliveryNeighborhood,
+          city: values.deliveryCity,
+          stateCode: values.deliveryStateCode,
+        },
         serviceDate: values.serviceDate,
         serviceStartHour: values.serviceStartHour,
         serviceEndHour: values.serviceEndHour,
-        invoiceId: invoice.id,
+        invoiceId: isInvoiceCurrent && invoice ? invoice.id : "",
         invoice: {
           invoiceKey: values.invoiceKey,
           invoiceNumber: values.invoiceNumber,
@@ -771,18 +939,32 @@ export function EslCollectionForm() {
           <p className={sectionTitleClassName}>Agendamento de coleta</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Registre a coleta com os dados da NF.</h2>
         </div>
-        <span className="w-fit rounded-full border border-[var(--border)] bg-white/74 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">Validação obrigatória</span>
+        <span className="w-fit rounded-full border border-[var(--border)] bg-white/74 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">NF opcional</span>
       </div>
 
-      <Fieldset title="Cadastros da operação" description="O cliente precisa estar cadastrado no ESL para que a coleta seja criada automaticamente." className="lg:col-span-12">
+      <Fieldset title="Cadastros da operação" description="O cliente precisa estar cadastrado no ESL. O mesmo CNPJ é usado como cliente e pagador; a filial é identificada pela cidade de origem." className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <Field label="CNPJ da filial" required><input value={values.corporationCnpj} onChange={input("corporationCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do cliente" required><input value={values.customerCnpj} onChange={input("customerCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do local de coleta" required><input value={values.pickupLocationCnpj} onChange={input("pickupLocationCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do pagador" required><input value={values.payerCnpj} onChange={input("payerCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do remetente" required><input value={values.senderCnpj} onChange={input("senderCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do destinatário" required><input value={values.recipientCnpj} onChange={input("recipientCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={input("customerCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do local de coleta" required><input value={values.pickupLocationCnpj} onChange={(event) => { update("pickupLocationCnpj", event.target.value); schedulePickupLocationLookup(event.target.value); }} onBlur={(event) => void lookupPickupLocationAddress(event.currentTarget.value)} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={input("senderCnpj")} inputMode="numeric" autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
+          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={input("recipientCnpj")} inputMode="numeric" autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
+          <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
+          <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
         </div>
+      </Fieldset>
+
+      <Fieldset title="Endereço de entrega" description="O endereço é confirmado automaticamente quando o CNPJ do local de coleta for localizado. Se não for, preencha ou ajuste os campos abaixo antes de solicitar." className="lg:col-span-12">
+        <div className="grid gap-4 sm:grid-cols-6">
+          <Field label="CEP de entrega" className="sm:col-span-1"><input value={values.deliveryPostalCode} onChange={(event) => { updateDeliveryAddress("deliveryPostalCode", event.target.value); void fillDeliveryCityFromPostalCode(event.target.value); }} onBlur={(event) => void fillDeliveryCityFromPostalCode(event.currentTarget.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
+          <Field label="Logradouro" className="sm:col-span-3"><input value={values.deliveryStreet} onChange={(event) => updateDeliveryAddress("deliveryStreet", event.target.value)} autoComplete="address-line1" placeholder="Rua, avenida ou estrada" className={fieldClassName} /></Field>
+          <Field label="Número" className="sm:col-span-1"><input value={values.deliveryNumber} onChange={(event) => updateDeliveryAddress("deliveryNumber", event.target.value)} autoComplete="address-line2" placeholder="Número" className={fieldClassName} /></Field>
+          <Field label="Complemento" className="sm:col-span-1"><input value={values.deliveryComplement} onChange={(event) => updateDeliveryAddress("deliveryComplement", event.target.value)} autoComplete="address-line2" placeholder="Opcional" className={fieldClassName} /></Field>
+          <Field label="Bairro" className="sm:col-span-2"><input value={values.deliveryNeighborhood} onChange={(event) => updateDeliveryAddress("deliveryNeighborhood", event.target.value)} autoComplete="address-level3" placeholder="Bairro" className={fieldClassName} /></Field>
+          <Field label="Cidade de entrega" className="sm:col-span-3"><input value={values.deliveryCity} onChange={(event) => updateDeliveryAddress("deliveryCity", event.target.value)} autoComplete="address-level2" placeholder="Cidade" className={fieldClassName} /></Field>
+          <Field label="UF de entrega" className="sm:col-span-1"><input value={values.deliveryStateCode} onChange={(event) => updateDeliveryAddress("deliveryStateCode", event.target.value)} maxLength={2} autoComplete="address-level1" placeholder="UF" className={fieldClassName} /></Field>
+        </div>
+        {companyLookupStatus === "loading" ? <p className="mt-4 text-sm text-[var(--color-muted-raw)]">Confirmando o endereço do CNPJ...</p> : null}
+        {companyLookupMessage ? <p className={`mt-4 text-sm ${companyLookupStatus === "success" ? "text-emerald-700" : "text-amber-700"}`}>{companyLookupMessage}</p> : null}
       </Fieldset>
 
       <Fieldset title="Programação da coleta" className="lg:col-span-5 lg:self-stretch">
@@ -800,7 +982,7 @@ export function EslCollectionForm() {
         </div>
       </Fieldset>
 
-      <Fieldset title="Nota fiscal" description="Valide a NF para confirmar seus valores, volumes e peso antes de agendar." className="lg:col-span-7 lg:self-stretch">
+      <Fieldset title="Nota fiscal" description="A consulta é opcional: use a chave ou o número para conferir os dados disponíveis, sem bloquear o agendamento." className="lg:col-span-7 lg:self-stretch">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Chave da NF"><input value={values.invoiceKey} onChange={input("invoiceKey")} inputMode="numeric" autoComplete="off" placeholder="44 dígitos" className={fieldClassName} /></Field>
           <Field label="Número da NF"><input value={values.invoiceNumber} onChange={input("invoiceNumber")} autoComplete="off" placeholder="Ex.: 12345" className={fieldClassName} /></Field>
@@ -809,9 +991,9 @@ export function EslCollectionForm() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" onClick={() => void validateInvoice()} disabled={validationStatus === "loading"} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(29,78,216,0.2)] transition-colors hover:bg-[var(--color-primary-strong)] disabled:cursor-not-allowed disabled:opacity-60">
             {validationStatus === "loading" ? <SpinnerGap size={17} className="animate-spin" weight="bold" /> : <ClipboardText size={17} weight="bold" />}
-            {validationStatus === "loading" ? "Validando..." : "Validar NF"}
+            {validationStatus === "loading" ? "Consultando..." : "Consultar NF"}
           </button>
-          {isInvoiceCurrent ? <span className="text-sm font-semibold text-emerald-700">NF validada</span> : <span className="text-xs text-[var(--color-muted-raw)]">Informe a chave ou o número da NF.</span>}
+          {isInvoiceCurrent ? <span className="text-sm font-semibold text-emerald-700">NF consultada</span> : <span className="text-xs text-[var(--color-muted-raw)]">Você pode solicitar a coleta sem consultar a NF.</span>}
         </div>
         {isInvoiceCurrent && invoice ? (
           <div className="grid gap-3 rounded-2xl border border-emerald-500/14 bg-emerald-500/6 p-4 text-sm sm:grid-cols-3">
@@ -822,8 +1004,7 @@ export function EslCollectionForm() {
         ) : null}
         <div className="grid gap-4 border-t border-slate-300/80 pt-5">
           {status === "error" || validationStatus === "error" ? <Alert kind="error">{error}</Alert> : null}
-          <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${isInvoiceCurrent ? "sm:justify-end" : "sm:justify-between"}`}>
-            {!isInvoiceCurrent ? <div className="sm:flex-1"><Alert kind="info">O agendamento será liberado depois que a nota fiscal for validada.</Alert></div> : null}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
             <SubmitButton loading={status === "loading"} className="shrink-0">{status === "loading" ? "Solicitando..." : "Solicitar coleta"}</SubmitButton>
           </div>
         </div>

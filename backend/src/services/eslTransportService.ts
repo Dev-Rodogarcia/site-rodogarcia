@@ -1,6 +1,5 @@
 import { generateId } from "../utils/ids.js";
 import { HttpError } from "../utils/http.js";
-import { readContentData } from "./contentService.js";
 import {
   type CancellationReason,
   type CollectionCancellationRequest,
@@ -53,6 +52,39 @@ const INVOICE_QUERY = `
     }
   }
 `;
+
+const DELIVERY_REGION_QUERY = `
+  query deliveryRegion($params: DeliveryRegionQueryInput, $after: String, $first: Int) {
+    deliveryRegion(params: $params, after: $after, first: $first) {
+      nodes {
+        id
+        deliveryCities {
+          city {
+            name
+            state { code }
+          }
+        }
+        ediDefaultCorporation {
+          id
+          person { cnpj }
+        }
+        deliveryRegionCorporations {
+          corporation {
+            id
+            person { cnpj }
+          }
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+`;
+
+const DELIVERY_REGION_CACHE_TTL_MS = 5 * 60 * 1_000;
+const DELIVERY_REGION_PAGE_LIMIT = 100;
 
 const PICK_RESOURCE_FIELDS = `
   id
@@ -111,14 +143,14 @@ const CANCELLATION_LABELS: Record<CancellationReason, string> = {
 
 type EslRecord = Record<string, unknown>;
 
-function quoteCorporationCnpj(unitId: string) {
-  const unit = readContentData().units.find((item) => item.id === unitId && item.active !== false);
-  const cnpj = String(unit?.quoteCnpj ?? "").replace(/\D/g, "");
-  if (!/^\d{14}$/.test(cnpj)) {
-    throw new HttpError(422, "A filial selecionada não está disponível para cotação.");
-  }
-  return cnpj;
+interface DeliveryRegionSnapshot {
+  cities: Array<{ name: string; stateCode: string }>;
+  defaultCorporationCnpj: string;
+  corporationCnpjs: string[];
 }
+
+let deliveryRegionsCache: { expiresAt: number; regions: DeliveryRegionSnapshot[] } | null = null;
+let deliveryRegionsLoading: Promise<DeliveryRegionSnapshot[]> | null = null;
 
 interface ValidatedInvoice {
   id: string;
@@ -131,6 +163,8 @@ interface ValidatedInvoice {
   weight: number;
   status: string;
 }
+
+type CollectionAddress = CollectionRequest["deliveryAddress"];
 
 function asRecord(value: unknown): EslRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -147,6 +181,125 @@ function asText(value: unknown, maxLength = 120) {
 function asNumber(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function asCnpj(value: unknown) {
+  const cnpj = asText(value, 24).replace(/\D/g, "");
+  return /^\d{14}$/.test(cnpj) ? cnpj : "";
+}
+
+function normalizeCity(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLocaleLowerCase("pt-BR");
+}
+
+function corporationCnpj(value: unknown) {
+  return asCnpj(asRecord(asRecord(value)?.person)?.cnpj);
+}
+
+function deliveryRegionSnapshot(value: unknown): DeliveryRegionSnapshot {
+  const region = asRecord(value);
+  const deliveryCities = Array.isArray(region?.deliveryCities) ? region.deliveryCities : [];
+  const cities = deliveryCities
+    .map((item) => asRecord(asRecord(item)?.city))
+    .map((city) => ({
+      name: asText(city?.name, 100),
+      stateCode: asText(asRecord(city?.state)?.code, 2).toUpperCase(),
+    }))
+    .filter((city) => city.name && /^[A-Z]{2}$/.test(city.stateCode));
+  const corporationCnpjs = Array.from(
+    new Set(
+      (Array.isArray(region?.deliveryRegionCorporations) ? region.deliveryRegionCorporations : [])
+        .map((item) => corporationCnpj(asRecord(item)?.corporation))
+        .filter(Boolean)
+    )
+  );
+
+  return {
+    cities,
+    defaultCorporationCnpj: corporationCnpj(region?.ediDefaultCorporation),
+    corporationCnpjs,
+  };
+}
+
+async function fetchDeliveryRegions() {
+  const regions: DeliveryRegionSnapshot[] = [];
+  let after = "";
+
+  for (let page = 0; page < DELIVERY_REGION_PAGE_LIMIT; page += 1) {
+    const data = await executeEslGraphql(DELIVERY_REGION_QUERY, {
+      params: { active: true },
+      ...(after ? { after } : {}),
+      first: 100,
+    });
+    const connection = asRecord(asRecord(data)?.deliveryRegion);
+    const nodes = Array.isArray(connection?.nodes) ? connection.nodes : null;
+    const pageInfo = asRecord(connection?.pageInfo);
+    if (!nodes || !pageInfo) {
+      throw new HttpError(502, "O ESL não retornou as regiões de entrega.");
+    }
+
+    regions.push(...nodes.map(deliveryRegionSnapshot));
+
+    if (pageInfo.hasNextPage !== true) return regions;
+    after = asText(pageInfo.endCursor, 500);
+    if (!after) throw new HttpError(502, "O ESL não retornou a próxima região de entrega.");
+  }
+
+  throw new HttpError(502, "O ESL retornou mais regiões de entrega do que o esperado.");
+}
+
+async function getDeliveryRegions() {
+  if (deliveryRegionsCache && deliveryRegionsCache.expiresAt > Date.now()) {
+    return deliveryRegionsCache.regions;
+  }
+  if (!deliveryRegionsLoading) {
+    deliveryRegionsLoading = fetchDeliveryRegions()
+      .then((regions) => {
+        deliveryRegionsCache = { regions, expiresAt: Date.now() + DELIVERY_REGION_CACHE_TTL_MS };
+        return regions;
+      })
+      .finally(() => {
+        deliveryRegionsLoading = null;
+      });
+  }
+  return deliveryRegionsLoading;
+}
+
+async function resolveCorporationCnpj(origin: Pick<QuoteRequest["origin"], "name" | "stateCode">) {
+  const city = normalizeCity(origin.name);
+  const stateCode = origin.stateCode.toUpperCase();
+  const matches = (await getDeliveryRegions()).filter((region) =>
+    region.cities.some(
+      (item) => normalizeCity(item.name) === city && item.stateCode === stateCode
+    )
+  );
+
+  if (matches.length === 0) {
+    throw new HttpError(
+      422,
+      "Ainda não atendemos a cidade de origem informada. Fale com nosso comercial para avaliar sua operação."
+    );
+  }
+
+  const cnpjs = Array.from(
+    new Set(
+      matches
+        .map((region) =>
+          region.corporationCnpjs.length > 1
+            ? region.defaultCorporationCnpj
+            : region.corporationCnpjs[0] ?? region.defaultCorporationCnpj
+        )
+        .filter(Boolean)
+    )
+  );
+  if (cnpjs.length !== 1) {
+    throw new HttpError(503, "Não foi possível definir a filial responsável pela operação.");
+  }
+  return cnpjs[0];
 }
 
 function operationResult(data: unknown, operationName: string) {
@@ -240,15 +393,49 @@ function collectionReference(value: string) {
   return value || `SITE-${generateId("pick").replace("pick_", "").slice(0, 24)}`;
 }
 
-function buildWhatsappCollectionMessage(input: CollectionRequest) {
+function formatCollectionAddress(address: CollectionAddress) {
+  const streetLine = [address.street, address.number].filter(Boolean).join(", ");
+  const cityLine = [address.neighborhood, address.city, address.stateCode]
+    .filter(Boolean)
+    .join(" — ");
+  return [streetLine, address.complement, cityLine, address.postalCode ? `CEP ${address.postalCode}` : ""]
+    .filter(Boolean)
+    .join(" | ");
+}
+
+function collectionComments(input: CollectionRequest) {
+  const address = formatCollectionAddress(input.deliveryAddress);
+  return [input.comments, address ? `Endereço de entrega informado: ${address}` : ""]
+    .filter(Boolean)
+    .join("\n")
+    .slice(0, 700);
+}
+
+function hasInvoiceReference(input: CollectionRequest["invoice"]) {
+  return Boolean(input.invoiceKey || input.invoiceNumber);
+}
+
+async function resolveCollectionInvoice(input: CollectionRequest) {
+  if (!input.invoiceId || !hasInvoiceReference(input.invoice)) return null;
+  try {
+    const invoice = await resolveInvoice(input.invoice);
+    return invoice.id === input.invoiceId ? invoice : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildWhatsappCollectionMessage(input: CollectionRequest, corporationCnpj: string) {
+  const address = formatCollectionAddress(input.deliveryAddress);
   return [
     "Solicitação de coleta pelo site Rodogarcia",
-    `Filial: ${input.corporationCnpj}`,
+    `Filial: ${corporationCnpj}`,
     `Cliente: ${input.customerCnpj}`,
     `Local de coleta: ${input.pickupLocationCnpj}`,
     `Data: ${input.serviceDate}`,
     `Horário: ${input.serviceStartHour} até ${input.serviceEndHour}`,
-    `NF: ${input.invoice.invoiceKey || input.invoice.invoiceNumber}`,
+    ...(address ? [`Endereço de entrega: ${address}`] : []),
+    ...(hasInvoiceReference(input.invoice) ? [`NF: ${input.invoice.invoiceKey || input.invoice.invoiceNumber}`] : []),
   ].join("\n");
 }
 
@@ -275,8 +462,8 @@ async function resolveInvoice(input: InvoiceLookupRequest) {
       params: {
         ...(input.invoiceKey ? { key: input.invoiceKey } : { number: input.invoiceNumber }),
         ...(input.invoiceSeries ? { series: input.invoiceSeries } : {}),
-        issuer: { document: input.senderCnpj },
-        recipient: { document: input.recipientCnpj },
+        ...(input.senderCnpj ? { issuer: { document: input.senderCnpj } } : {}),
+        ...(input.recipientCnpj ? { recipient: { document: input.recipientCnpj } } : {}),
       },
       first: 2,
     });
@@ -287,8 +474,8 @@ async function resolveInvoice(input: InvoiceLookupRequest) {
 }
 
 export async function createFractionalQuote(input: QuoteRequest) {
-  const corporationCnpj = quoteCorporationCnpj(input.corporationUnitId);
   try {
+    const corporationCnpj = await resolveCorporationCnpj(input.origin);
     const data = await executeEslGraphql(QUOTE_CREATE_MUTATION, {
       params: {
         corporation: { document: corporationCnpj },
@@ -346,8 +533,8 @@ export async function createFractionalQuote(input: QuoteRequest) {
   }
 }
 
-export function prepareClosedQuoteWhatsapp(input: QuoteRequest) {
-  quoteCorporationCnpj(input.corporationUnitId);
+export async function prepareClosedQuoteWhatsapp(input: QuoteRequest) {
+  await resolveCorporationCnpj(input.origin);
   return { whatsappMessage: buildClosedQuoteWhatsappMessage(input) };
 }
 
@@ -357,15 +544,13 @@ export async function validateCollectionInvoice(input: InvoiceLookupRequest) {
 }
 
 export async function createCollection(input: CollectionRequest) {
-  const invoice = await resolveInvoice(input.invoice);
-  if (invoice.id !== input.invoiceId) {
-    throw new HttpError(422, "A validação da nota fiscal expirou. Valide a NF novamente.");
-  }
+  const corporationCnpj = await resolveCorporationCnpj(input.origin);
+  const invoice = await resolveCollectionInvoice(input);
 
   try {
     const data = await executeEslGraphql(PICK_CREATE_MUTATION, {
       params: {
-        corporation: { document: input.corporationCnpj },
+        corporation: { document: corporationCnpj },
         requestDate: currentSaoPauloDate(),
         requestHour: currentSaoPauloTime(),
         customer: { document: input.customerCnpj },
@@ -374,17 +559,21 @@ export async function createCollection(input: CollectionRequest) {
         serviceDate: input.serviceDate,
         serviceStartHour: input.serviceStartHour,
         serviceEndHour: input.serviceEndHour,
-        comments: input.comments || undefined,
+        comments: collectionComments(input) || undefined,
         pickItemsAttributes: [
           {
             modal: "rodo",
-            invoicesValue: invoice.value,
-            invoicesVolumes: invoice.volume,
-            invoicesRealWeight: invoice.weight,
-            recipient: { document: input.recipientCnpj },
-            payer: { document: input.payerCnpj },
-            sender: { document: input.senderCnpj },
-            pickItemInvoicesAttributes: [{ invoiceId: Number(invoice.id) }],
+            payer: { document: input.customerCnpj },
+            ...(input.recipientCnpj ? { recipient: { document: input.recipientCnpj } } : {}),
+            ...(input.senderCnpj ? { sender: { document: input.senderCnpj } } : {}),
+            ...(invoice
+              ? {
+                  invoicesValue: invoice.value,
+                  invoicesVolumes: invoice.volume,
+                  invoicesRealWeight: invoice.weight,
+                  pickItemInvoicesAttributes: [{ invoiceId: Number(invoice.id) }],
+                }
+              : {}),
           },
         ],
       },
@@ -402,7 +591,7 @@ export async function createCollection(input: CollectionRequest) {
     if (customerIsNotRegistered(error)) {
       return {
         requiresWhatsApp: true as const,
-        whatsappMessage: buildWhatsappCollectionMessage(input),
+        whatsappMessage: buildWhatsappCollectionMessage(input, corporationCnpj),
       };
     }
     clientError(error, "Não foi possível agendar a coleta. Confira os dados e tente novamente.");

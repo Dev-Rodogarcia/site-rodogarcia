@@ -465,24 +465,12 @@ export function preparePublicContent(content: ContentData) {
     }))
     .filter((item) => item.id && item.name && item.state && item.address);
 
-  const quoteBranches = sortByOrder(rawUnits)
-    .filter((item) => item.active !== false && /^\d{14}$/.test(String(item.quoteCnpj ?? "").replace(/\D/g, "")))
-    .map((item) => ({
-      id: String(item.id ?? ""),
-      city: sanitizeText(item.city ?? item.cidade, 80),
-      stateCode: sanitizeText(item.state ?? item.estado, 2).toUpperCase(),
-      genericPostalCode: sanitizeText(item.genericPostalCode, 12).replace(/\D/g, "").slice(0, 8),
-      isDefault: Boolean(item.isDefault ?? item.matriz),
-    }))
-    .filter((item) => item.id && item.city && /^[A-Z]{2}$/.test(item.stateCode));
-
   return {
     homePage: normalizeHomePage(content),
     servicesPage: normalizeServicesPage(content),
     ...getAllPageContent(content),
     footerLinks: getFooterLinksContent(content) satisfies FooterLinksContent,
     units,
-    quoteBranches,
     siteTexts: readSiteTextsData(),
   };
 }

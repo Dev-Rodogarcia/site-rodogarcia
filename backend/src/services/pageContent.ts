@@ -50,9 +50,9 @@ const site = {
 
 const external = {
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
-  whatsappCommercial: site.contact,
-  whatsappQuoteFractional: site.contact,
-  whatsappQuoteFull: site.contact,
+  whatsappCommercial: "https://wa.me/5511993139536",
+  whatsappQuoteFractional: "https://wa.me/5514991053933",
+  whatsappQuoteFull: "https://wa.me/5514991053933",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
   careersEmailWithSubject:
@@ -203,7 +203,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
   heroWhatsappButton: {
     label: "Abrir WhatsApp",
     url: external.whatsappCommercial,
-    external: false,
+    external: true,
   },
   mainChannels: [
     {
@@ -225,7 +225,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageContent = {
       order: 3,
       title: "WhatsApp comercial",
       description: "Canal mais rápido para abrir conversa e pedir direcionamento.",
-      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: false },
+      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
     },
   ],
   info: {
@@ -374,7 +374,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       button: {
         label: "Abrir WhatsApp - Fracionado",
         url: external.whatsappQuoteFractional,
-        external: false,
+        external: true,
       },
     },
     {
@@ -386,7 +386,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       button: {
         label: "Abrir WhatsApp - Lotação",
         url: external.whatsappQuoteFull,
-        external: false,
+        external: true,
       },
     },
   ],
@@ -398,7 +398,7 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
       iconColor: "#22c55e",
       title: "WhatsApp comercial",
       description: "Canal mais rápido para abrir conversa e pedir cotação.",
-      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: false },
+      button: { label: "Abrir WhatsApp", url: external.whatsappCommercial, external: true },
       buttonColor: "#22c55e",
       active: true,
     },

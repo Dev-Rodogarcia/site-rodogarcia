@@ -111,26 +111,6 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
 };
 
 const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
-  "unidades.field.cnpj-para-cotacao": {
-    title: "CNPJ para cotação",
-    summary: "Aqui você informa o CNPJ que será enviado ao ESL quando o visitante escolher esta cidade na filial de /cotacao. O número não aparece para o visitante.",
-    example: "Informe os 14 dígitos do CNPJ cadastrado para esta unidade no ESL.",
-    details: [
-      { label: "Onde é usado", value: "No seletor de filial do formulário público em /cotacao." },
-      { label: "Proteção", value: "O backend resolve este CNPJ a partir da unidade escolhida; o navegador não recebe o número.", technical: true },
-      { label: "Após salvar", value: "A cidade desta unidade passa a ficar disponível para cotação quando houver um CNPJ válido." },
-    ],
-  },
-  "unidades.field.cep-generico-da-cidade": {
-    title: "CEP genérico da cidade",
-    summary: "Aqui você define o CEP de referência usado quando o visitante escolher apenas esta cidade em /cotacao. Ele ajuda a completar origem ou destino sem pedir um endereço completo.",
-    example: "Use um CEP válido de referência da cidade, com 8 dígitos.",
-    details: [
-      { label: "Onde é usado", value: "No formulário público de /cotacao ao informar cidade e UF." },
-      { label: "Importante", value: "Este CEP é uma referência municipal; não substitui o CEP exato de uma rua quando a operação precisar dele." },
-      { label: "Após salvar", value: "A cidade configurada poderá preencher CEP e UF automaticamente para o visitante." },
-    ],
-  },
   "coletas.section.hero": {
     title: "Botões do hero de Coletas",
     summary: "Aqui você configura os dois botões no topo de /coletas. Um pode levar ao formulário desta página e o outro à cotação, para que o visitante escolha o próximo passo sem procurar no menu.",

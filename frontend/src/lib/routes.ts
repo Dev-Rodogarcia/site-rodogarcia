@@ -148,6 +148,7 @@ export const api = {
     seo: "/api/public/seo",
     mediaSlots: "/api/public/media-slots",
     postalCode: (postalCode: string) => `/api/public/postal-code/${postalCode}`,
+    company: (cnpj: string) => `/api/public/company/${cnpj}`,
   },
   consent: {
     settings: "/api/consent-settings",
@@ -160,9 +161,9 @@ export const api = {
 
 export const external = {
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
-  whatsappCommercial: site.contact,
-  whatsappQuoteFractional: site.contact,
-  whatsappQuoteFull: site.contact,
+  whatsappCommercial: "https://wa.me/5511993139536",
+  whatsappQuoteFractional: "https://wa.me/5514991053933",
+  whatsappQuoteFull: "https://wa.me/5514991053933",
   commercialEmailAddress: "gerente.financeiro@rodogarcia.com.br",
   commercialEmail: "mailto:gerente.financeiro@rodogarcia.com.br",
   careersEmailAddress: "rh@rodogarcia.com.br",

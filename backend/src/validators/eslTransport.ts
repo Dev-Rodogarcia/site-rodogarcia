@@ -39,20 +39,27 @@ const optionalCnpj = z
   .transform((value) => digits(value, 14))
   .refine((value) => !value || /^\d{14}$/.test(value), "Informe um CNPJ válido.");
 
-const corporationUnitId = z
-  .unknown()
-  .transform((value) => sanitizeText(value, 80))
-  .refine(Boolean, "Selecione a cidade da filial.");
-
 const remoteId = z
   .unknown()
   .transform((value) => sanitizeText(value, 30))
   .refine((value) => /^\d+$/.test(value), "Identificador remoto inválido.");
 
+const optionalRemoteId = z
+  .unknown()
+  .optional()
+  .transform((value) => sanitizeText(value, 30))
+  .refine((value) => !value || /^\d+$/.test(value), "Identificador remoto inválido.");
+
 const stateCode = z
   .unknown()
   .transform((value) => sanitizeText(value, 2).toUpperCase())
   .refine((value) => /^[A-Z]{2}$/.test(value), "Informe a UF com duas letras.");
+
+const optionalStateCode = z
+  .unknown()
+  .optional()
+  .transform((value) => sanitizeText(value, 2).toUpperCase())
+  .refine((value) => !value || /^[A-Z]{2}$/.test(value), "Informe a UF com duas letras.");
 
 const postalCode = z
   .unknown()
@@ -106,7 +113,6 @@ const city = z.object({
 });
 
 const quoteRequestSchema = z.object({
-  corporationUnitId,
   customerCnpj: cnpj,
   senderCnpj: optionalCnpj,
   recipientCnpj: optionalCnpj,
@@ -133,19 +139,19 @@ const quoteRequestSchema = z.object({
   comments: optionalText(700),
 });
 
-const invoiceLookupSchema = z
-  .object({
-    invoiceKey: z
-      .unknown()
-      .optional()
-      .transform((value) => digits(value, 44))
-      .refine((value) => !value || /^\d{44}$/.test(value), "Chave da NF deve ter 44 dígitos."),
-    invoiceNumber: optionalText(40),
-    invoiceSeries: optionalText(20),
-    senderCnpj: cnpj,
-    recipientCnpj: cnpj,
-  })
-  .superRefine((value, ctx) => {
+const invoiceReferenceSchema = z.object({
+  invoiceKey: z
+    .unknown()
+    .optional()
+    .transform((value) => digits(value, 44))
+    .refine((value) => !value || /^\d{44}$/.test(value), "Chave da NF deve ter 44 dígitos."),
+  invoiceNumber: optionalText(40),
+  invoiceSeries: optionalText(20),
+  senderCnpj: optionalCnpj,
+  recipientCnpj: optionalCnpj,
+});
+
+const invoiceLookupSchema = invoiceReferenceSchema.superRefine((value, ctx) => {
     if (!value.invoiceKey && !value.invoiceNumber) {
       ctx.addIssue({
         code: "custom",
@@ -153,20 +159,43 @@ const invoiceLookupSchema = z
         message: "Informe a chave ou o número da NF.",
       });
     }
-  });
+});
+
+const collectionAddressSchema = z
+  .object({
+    postalCode: optionalText(12).transform((value) => value.replace(/\D/g, "").slice(0, 8)),
+    street: optionalText(160),
+    number: optionalText(40),
+    complement: optionalText(120),
+    neighborhood: optionalText(100),
+    city: optionalText(100),
+    stateCode: optionalStateCode,
+  })
+  .optional()
+  .transform((value) =>
+    value ?? {
+      postalCode: "",
+      street: "",
+      number: "",
+      complement: "",
+      neighborhood: "",
+      city: "",
+      stateCode: "",
+    }
+  );
 
 const collectionRequestSchema = z.object({
-  corporationCnpj: cnpj,
   customerCnpj: cnpj,
   pickupLocationCnpj: cnpj,
-  payerCnpj: cnpj,
-  senderCnpj: cnpj,
-  recipientCnpj: cnpj,
+  senderCnpj: optionalCnpj,
+  recipientCnpj: optionalCnpj,
+  origin: city,
   serviceDate: date,
   serviceStartHour: time,
   serviceEndHour: time,
-  invoiceId: remoteId,
-  invoice: invoiceLookupSchema,
+  deliveryAddress: collectionAddressSchema,
+  invoiceId: optionalRemoteId,
+  invoice: invoiceReferenceSchema,
   referenceNumber: optionalText(100),
   comments: optionalText(700),
 });

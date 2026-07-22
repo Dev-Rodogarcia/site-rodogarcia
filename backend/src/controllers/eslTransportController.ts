@@ -22,8 +22,9 @@ export const createFractionalQuoteController: RequestHandler = asyncHandler(asyn
   res.status(201).json({ quote });
 });
 
-export const prepareClosedQuoteWhatsappController: RequestHandler = asyncHandler((req, res) => {
-  res.json(prepareClosedQuoteWhatsapp(parseQuoteRequest(req.body)));
+export const prepareClosedQuoteWhatsappController: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await prepareClosedQuoteWhatsapp(parseQuoteRequest(req.body));
+  res.json(result);
 });
 
 export const validateCollectionInvoiceController: RequestHandler = asyncHandler(async (req, res) => {

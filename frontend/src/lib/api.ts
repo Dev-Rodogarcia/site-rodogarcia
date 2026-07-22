@@ -38,7 +38,6 @@ export interface PublicContentResponse {
   collectionsPage: CollectionsPageContent;
   footerLinks: FooterLinksContent;
   units: OperationalUnit[];
-  quoteBranches: Array<{ id: string; city: string; stateCode: string; genericPostalCode: string; isDefault: boolean }>;
   siteTexts: Record<string, string>;
 }
 

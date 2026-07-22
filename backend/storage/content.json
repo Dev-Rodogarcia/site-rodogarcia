@@ -868,8 +868,8 @@
   "contactPage": {
     "heroWhatsappButton": {
       "label": "Abrir WhatsApp",
-      "url": "/fale-conosco",
-      "external": false
+      "url": "https://wa.me/5511993139536",
+      "external": true
     },
     "mainChannels": [
       {
@@ -901,8 +901,8 @@
         "description": "Canal mais rápido para abrir conversa e pedir direcionamento.",
         "button": {
           "label": "Abrir WhatsApp",
-          "url": "/fale-conosco",
-          "external": false
+          "url": "https://wa.me/5511993139536",
+          "external": true
         }
       }
     ],
@@ -927,7 +927,7 @@
           "order": 3,
           "label": "WhatsApp",
           "title": "atendimento Rodogarcia",
-          "description": "/fale-conosco"
+          "description": "https://wa.me/5511993139536"
         },
         {
           "id": "address",
@@ -1083,8 +1083,8 @@
         "description": "Canal ideal para distribuição e volumes com maior frequência de embarque.",
         "button": {
           "label": "Abrir WhatsApp - Fracionado",
-          "url": "/fale-conosco",
-          "external": false
+          "url": "https://wa.me/5514991053933",
+          "external": true
         }
       },
       {
@@ -1094,8 +1094,8 @@
         "description": "Melhor opção para lotação, projetos de maior volume e requisitos técnicos específicos.",
         "button": {
           "label": "Abrir WhatsApp - Lotacao",
-          "url": "/fale-conosco",
-          "external": false
+          "url": "https://wa.me/5514991053933",
+          "external": true
         }
       }
     ],
@@ -1109,8 +1109,8 @@
         "description": "Canal mais rápido para abrir conversa e pedir cotação.",
         "button": {
           "label": "Abrir WhatsApp",
-          "url": "/fale-conosco",
-          "external": false
+          "url": "https://wa.me/5511993139536",
+          "external": true
         },
         "buttonColor": "#22c55e",
         "active": true,
@@ -1196,8 +1196,8 @@
       },
       "supportButton": {
         "label": "Falar com atendimento",
-        "url": "/fale-conosco",
-        "external": false
+        "url": "https://wa.me/5511993139536",
+        "external": true
       },
       "columns": [
         {
@@ -1314,8 +1314,8 @@
               "id": "resources-contact",
               "order": 3,
               "label": "Atendimento comercial",
-              "url": "/fale-conosco",
-              "external": false
+              "url": "https://wa.me/5511993139536",
+              "external": true
             },
             {
               "id": "resources-email",
@@ -1370,8 +1370,8 @@
           "id": "social-whatsapp",
           "order": 4,
           "label": "WhatsApp",
-          "url": "#",
-          "external": false,
+          "url": "https://wa.me/5511993139536",
+          "external": true,
           "icon": "WhatsappLogo"
         }
       ],

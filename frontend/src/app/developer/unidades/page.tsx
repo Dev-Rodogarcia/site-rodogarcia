@@ -294,15 +294,6 @@ export default function UnidadesPage() {
             </DeveloperField>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <DeveloperField label="CNPJ para cotação">
-                <input value={form.quoteCnpj} onChange={(event) => setForm((current) => ({ ...current, quoteCnpj: event.target.value }))} inputMode="numeric" maxLength={18} className={developerInputClassName} />
-              </DeveloperField>
-              <DeveloperField label="CEP genérico da cidade">
-                <input value={form.genericPostalCode} onChange={(event) => setForm((current) => ({ ...current, genericPostalCode: event.target.value }))} inputMode="numeric" maxLength={9} className={developerInputClassName} />
-              </DeveloperField>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
               <DeveloperField label="Telefone">
                 <input
                   value={form.phone}
