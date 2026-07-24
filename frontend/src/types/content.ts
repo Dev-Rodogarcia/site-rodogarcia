@@ -120,6 +120,7 @@ export interface HomeRegionalUnit {
   address: string;
   phone: string;
   email: string;
+  additionalEmail: string;
   buttonLabel?: string;
   contactUrl: string;
   active?: boolean;
@@ -500,6 +501,7 @@ export interface OperationalUnit {
   address: string;
   phone?: string;
   email?: string;
+  additionalEmail: string;
   contactUrl?: string;
   contactLabel?: string;
   description?: string;

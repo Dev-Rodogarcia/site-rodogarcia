@@ -132,7 +132,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
       if (!nextUnit) return;
 
       resetAllPaths(svg);
-      applyFill(svg, estadoId, CORES.hover, CORES.strokeWidthDestacado);
+      applyFill(svg, estadoId, CORES.selected, CORES.strokeWidthSelected);
       selectedEstadoRef.current = estadoId;
       setSelectedUnitId(nextUnit.id);
     },
@@ -230,7 +230,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
     if (!svgRef.current || !selectedEstado) return;
 
     resetAllPaths(svgRef.current);
-    applyFill(svgRef.current, selectedEstado, CORES.hover, CORES.strokeWidthDestacado);
+    applyFill(svgRef.current, selectedEstado, CORES.selected, CORES.strokeWidthSelected);
   }, [applyFill, resetAllPaths, selectedEstado]);
 
   if (!selectedUnit) return null;
@@ -268,17 +268,17 @@ export default function BrazilMap({ units }: BrazilMapProps) {
 
       <div className="mt-10 grid w-full grid-cols-1 items-stretch gap-8 xl:grid-cols-[minmax(340px,400px)_minmax(440px,520px)] xl:justify-center xl:gap-8 2xl:gap-10">
         <aside className="min-w-0">
-          <div className="h-full rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,248,252,0.98)_100%)] p-6 shadow-[0_22px_48px_rgba(15,23,42,0.16)]">
+          <div className="h-[560px] rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,248,252,0.98)_100%)] p-6 shadow-[0_22px_48px_rgba(15,23,42,0.16)] sm:p-7">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted-raw)]">
                   Unidade ativa
                 </p>
-                <h3 className="mt-3 text-[1.4rem] font-semibold tracking-[-0.03em] text-[var(--foreground)]">
+                <h3 className="mt-2 truncate text-[1.4rem] font-semibold tracking-[-0.03em] text-[var(--foreground)]">
                   {selectedUnit.name}
                 </h3>
                 {unitDescription ? (
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted-raw)]">
+                  <p className="mt-2 line-clamp-2 min-h-6 text-sm leading-6 text-[var(--color-muted-raw)]">
                     {unitDescription}
                   </p>
                 ) : null}
@@ -288,7 +288,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
               </span>
             </div>
 
-            <div className="mt-6 border-t border-[var(--border)]/70 pt-6">
+            <div className="mt-5 border-t border-[var(--border)]/70 pt-5">
               <label
                 htmlFor="selectFilial"
                 className="block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]"
@@ -308,7 +308,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
                 ))}
               </select>
 
-              <div className="mt-3 flex items-start gap-2 text-xs leading-5 text-[var(--color-muted-raw)]">
+              <div className="mt-2.5 flex items-start gap-2 text-xs leading-5 text-[var(--color-muted-raw)]">
                 <CursorClick
                   size={14}
                   weight="fill"
@@ -318,27 +318,35 @@ export default function BrazilMap({ units }: BrazilMapProps) {
               </div>
             </div>
 
-            <ul className="mt-6 space-y-4 text-sm text-[var(--color-muted-raw)]">
-              <li className="flex items-start gap-3">
-                <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
+            <ul className="mt-5 space-y-3.5 text-sm text-[var(--color-muted-raw)]">
+              <li className="grid min-h-10 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3">
+                <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
                   <MapPin size={16} weight="fill" />
                 </span>
-                <span className="leading-6">{selectedUnit.address}</span>
+                <span className="line-clamp-2 min-w-0 pt-0.5 leading-6">{selectedUnit.address}</span>
               </li>
               {selectedUnit.phone ? (
-                <li className="flex items-center gap-3">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
+                <li className="grid min-h-10 grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-3">
+                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
                     <Phone size={16} weight="fill" />
                   </span>
-                  <span>{selectedUnit.phone}</span>
+                  <span className="min-w-0">{selectedUnit.phone}</span>
                 </li>
               ) : null}
               {selectedUnit.email ? (
-                <li className="flex items-start gap-3">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
+                <li className="grid min-h-10 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3">
+                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
                     <EnvelopeSimple size={16} weight="fill" />
                   </span>
-                  <span className="break-all leading-6">{selectedUnit.email}</span>
+                  <span className="min-w-0 break-all pt-0.5 leading-6">{selectedUnit.email}</span>
+                </li>
+              ) : null}
+              {selectedUnit.additionalEmail ? (
+                <li className="grid min-h-10 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3">
+                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)]">
+                    <EnvelopeSimple size={16} weight="fill" />
+                  </span>
+                  <span className="min-w-0 break-all pt-0.5 leading-6">{selectedUnit.additionalEmail}</span>
                 </li>
               ) : null}
             </ul>

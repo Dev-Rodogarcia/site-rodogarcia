@@ -235,6 +235,44 @@ describe("CMS content regressions", () => {
     });
   });
 
+  it("backfills commercial e-mails in a persisted production-like unit store without replacing configured values", async () => {
+    const env = isolatedBackend();
+    fs.writeFileSync(
+      path.join(env.storageRoot, "content.json"),
+      JSON.stringify({
+        units: [
+          { id: "unit-castro", name: "Castro/PR", additionalEmail: "" },
+          { id: "unit-recife", name: "Recife/PE", additionalEmail: "comercial.local@rodogarcia.com.br" },
+        ],
+        homePage: {
+          regionalPresence: {
+            units: [
+              { id: "unit-castro", linkedUnitId: "unit-castro", additionalEmail: "" },
+              { id: "unit-recife", linkedUnitId: "unit-recife", additionalEmail: "" },
+            ],
+          },
+        },
+      })
+    );
+
+    const { contentRepository } = await import("../src/repositories/contentRepository.js");
+    const content = contentRepository.read();
+    const persisted = JSON.parse(fs.readFileSync(path.join(env.storageRoot, "content.json"), "utf8"));
+
+    expect(content.units.find((unit) => unit.id === "unit-castro")?.additionalEmail).toBe(
+      "comercial.cwb3@rodogarcia.com.br"
+    );
+    expect(content.homePage?.regionalPresence.units.find((unit) => unit.id === "unit-castro")?.additionalEmail).toBe(
+      "comercial.cwb3@rodogarcia.com.br"
+    );
+    expect(content.units.find((unit) => unit.id === "unit-recife")?.additionalEmail).toBe(
+      "comercial.local@rodogarcia.com.br"
+    );
+    expect(persisted.homePage.regionalPresence.units.find((unit: { id: string }) => unit.id === "unit-recife")?.additionalEmail).toBe(
+      "comercial.local@rodogarcia.com.br"
+    );
+  });
+
   it("derives SEO slug from the canonical route and keeps multiline meta tags", async () => {
     const env = isolatedBackend();
     createPublicAsset(env.publicDir, "foto5.webp");

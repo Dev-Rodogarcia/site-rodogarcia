@@ -713,6 +713,13 @@ function getFieldFallback(label: string, context: CmsHelpContext): Omit<CmsHelpC
       details: [...baseDetails, { label: "Onde aparece", value: `Na lista ou bloco ligado a este item em ${context.destination}.` }, { label: "Após salvar", value: "O item aparece quando ativo e fica oculto quando desativado." }],
     };
   }
+  if (normalizedLabel.includes("email adicional")) {
+    return {
+      summary: "Informe o segundo e-mail obrigatório da unidade. Ele aparece logo abaixo do primeiro e-mail no mapa da Página Inicial (/), para o visitante escolher o canal de atendimento adequado.",
+      example: "Exemplo: comercial.agu@rodogarcia.com.br.",
+      details: [...baseDetails, { label: "Onde aparece", value: "No cartão da unidade selecionada, dentro do mapa da Página Inicial (/)." }, { label: "Formato aceito", value: "Use um e-mail válido. O salvamento é bloqueado se este campo ficar vazio.", technical: true }],
+    };
+  }
   if (normalizedLabel.includes("email") || normalizedLabel.includes("telefone") || normalizedLabel.includes("endereco") || normalizedLabel.includes("cidade") || normalizedLabel.includes("uf") || normalizedLabel.includes("contato")) {
     return {
       summary: `Aqui você informa o dado de contato ou localização que o visitante poderá usar em ${context.destination}.`,

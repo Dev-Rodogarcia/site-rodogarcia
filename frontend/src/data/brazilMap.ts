@@ -42,9 +42,11 @@ export const CORES = {
   base: "#A9D4EF",
   destaque: "#2E2882",
   hover: "#414D82",
+  selected: "#1D4ED8",
   stroke: "#ffffff",
   strokeWidthNormal: "1.5",
   strokeWidthDestacado: "2",
+  strokeWidthSelected: "3",
 } as const;
 
 export const SVG_PATH = "/map.svg";

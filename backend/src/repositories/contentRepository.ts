@@ -3,6 +3,7 @@ import { sanitizeFooterLinks } from "../services/footerLinksContent.js";
 import { migratePageContent } from "../services/pageContent.js";
 import type { ContentData, HomeFeedback, HomePageContent, ServicesPageContent } from "../types/content.js";
 import { readJsonFile, writeJsonFile } from "../utils/jsonStore.js";
+import { sanitizeEmail } from "../utils/sanitize.js";
 import { mediaSlotsRepository } from "./jsonRepositories.js";
 import { defaultHomeQuickActions } from "../config/contentDefaults.js";
 
@@ -66,6 +67,18 @@ const DEFAULT_QUOTE_UNIT = {
   quoteCnpj: "60960473000162",
   genericPostalCode: "17123210",
 } as const;
+
+const DEFAULT_UNIT_ADDITIONAL_EMAILS: Record<string, string> = {
+  "unit-matriz": "comercial.agu@rodogarcia.com.br",
+  "unit-agudos": "comercial.agu@rodogarcia.com.br",
+  "unit-campinas": "comercial.cpq@rodogarcia.com.br",
+  "unit-osasco": "comercial.sp03@rodogarcia.com.br",
+  "unit-castro": "comercial.cwb3@rodogarcia.com.br",
+  "unit-curitiba": "comercial.cwb2@rodogarcia.com.br",
+  "unit-rio": "comercial.rj2@rodogarcia.com.br",
+  "unit-hamburgo": "comercial.cwb3@rodogarcia.com.br",
+  "unit-recife": "comercial.rec@rodogarcia.com.br",
+};
 
 const LEGACY_FEEDBACK_CONTEXTS = [
   "Distribuição e abastecimento",
@@ -164,6 +177,35 @@ function migrateQuoteUnit(units: ContentData["units"]) {
   );
 }
 
+function migrateAdditionalUnitEmails(content: ContentData) {
+  const emailByUnitId = new Map<string, string>();
+  let changed = false;
+
+  for (const unit of content.units) {
+    const resolvedEmail =
+      sanitizeEmail(unit.additionalEmail) || DEFAULT_UNIT_ADDITIONAL_EMAILS[unit.id] || "";
+    if (resolvedEmail && unit.additionalEmail !== resolvedEmail) {
+      unit.additionalEmail = resolvedEmail;
+      changed = true;
+    }
+    if (resolvedEmail) emailByUnitId.set(unit.id, resolvedEmail);
+  }
+
+  for (const unit of content.homePage?.regionalPresence.units ?? []) {
+    const resolvedEmail =
+      sanitizeEmail(unit.additionalEmail) ||
+      emailByUnitId.get(unit.linkedUnitId || unit.id) ||
+      DEFAULT_UNIT_ADDITIONAL_EMAILS[unit.linkedUnitId || unit.id] ||
+      "";
+    if (resolvedEmail && unit.additionalEmail !== resolvedEmail) {
+      unit.additionalEmail = resolvedEmail;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
 function homeUnitFromLegacy(unit: RawItem, index: number) {
   return {
     id: String(unit.id ?? `home-unit-${index + 1}`),
@@ -175,6 +217,7 @@ function homeUnitFromLegacy(unit: RawItem, index: number) {
     address: String(unit.address ?? unit.endereco ?? ""),
     phone: String(unit.phone ?? unit.telefone ?? ""),
     email: String(unit.email ?? ""),
+    additionalEmail: String(unit.additionalEmail ?? ""),
     buttonLabel: "Falar com esta unidade",
     contactUrl: String(unit.contactUrl ?? unit.linkContato ?? "/fale-conosco"),
     active: unit.active !== false && unit.ativo !== false,
@@ -330,6 +373,7 @@ export const contentRepository = {
           : emptyServicesPage(),
     };
     normalized.homePage = normalizeHomeRoot(normalized);
+    const additionalUnitEmailsMigrated = migrateAdditionalUnitEmails(normalized);
 
     const migrated = migratePageContent(normalized, {
       siteTexts: readJsonFile<Record<string, unknown>>(storagePaths.siteTexts, {}),
@@ -344,7 +388,8 @@ export const contentRepository = {
       !data.homePage?.trackingCta ||
       !Array.isArray(data.homePage?.quickActions) ||
       needsSocialProofMigration(data) ||
-      needsQuoteUnitMigration(Array.isArray(data.units) ? data.units : [])
+      needsQuoteUnitMigration(Array.isArray(data.units) ? data.units : []) ||
+      additionalUnitEmailsMigrated
     ) {
       writeJsonFile(storagePaths.content, serializeContent(migrated));
     }

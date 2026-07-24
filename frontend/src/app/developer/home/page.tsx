@@ -389,6 +389,7 @@ function emptyRegionalUnit(): HomeRegionalUnit {
     address: "",
     phone: "",
     email: "",
+    additionalEmail: "",
     buttonLabel: "Falar com esta unidade",
     contactUrl: "/fale-conosco",
     active: true,
@@ -1030,6 +1031,7 @@ export default function DeveloperHomePage() {
       address: linked.address || "",
       phone: linked.phone || "",
       email: linked.email || "",
+      additionalEmail: linked.additionalEmail || "",
       contactUrl: linked.contactUrl || "/fale-conosco",
     });
   }
@@ -1816,7 +1818,7 @@ export default function DeveloperHomePage() {
                     </DeveloperField>
                   </div>
 
-                  <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-4")}>
+                  <div className={cn(homeNestedPanelClassName, "mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-5")}>
                     <DeveloperField label="Telefone">
                       <input
                         value={unit.phone}
@@ -1830,6 +1832,16 @@ export default function DeveloperHomePage() {
                         type="email"
                         value={unit.email}
                         onChange={(event) => updateRegionalUnit(index, { email: event.target.value })}
+                        maxLength={120}
+                        className={developerInputClassName}
+                      />
+                    </DeveloperField>
+                    <DeveloperField label="E-mail adicional" required>
+                      <input
+                        type="email"
+                        required
+                        value={unit.additionalEmail ?? ""}
+                        onChange={(event) => updateRegionalUnit(index, { additionalEmail: event.target.value })}
                         maxLength={120}
                         className={developerInputClassName}
                       />

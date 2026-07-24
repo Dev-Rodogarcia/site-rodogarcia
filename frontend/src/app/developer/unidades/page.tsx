@@ -37,6 +37,7 @@ interface UnitFormState {
   address: string;
   phone: string;
   email: string;
+  additionalEmail: string;
   contactUrl: string;
   description: string;
   logisticsInfo: string;
@@ -59,6 +60,7 @@ const EMPTY_FORM: UnitFormState = {
   address: "",
   phone: "",
   email: "",
+  additionalEmail: "",
   contactUrl: "/fale-conosco",
   description: "",
   logisticsInfo: "",
@@ -85,6 +87,7 @@ function normalizeUnit(item: Record<string, unknown>): UnitItem {
     address: String(item.address ?? item.endereco ?? ""),
     phone: String(item.phone ?? item.telefone ?? ""),
     email: String(item.email ?? ""),
+    additionalEmail: String(item.additionalEmail ?? ""),
     contactUrl: String(item.contactUrl ?? item.linkContato ?? "/fale-conosco"),
     description: String(item.description ?? item.descricao ?? ""),
     logisticsInfo: String(item.logisticsInfo ?? item.infoLogistica ?? ""),
@@ -122,6 +125,7 @@ export default function UnidadesPage() {
       address: item.address,
       phone: item.phone,
       email: item.email,
+      additionalEmail: item.additionalEmail,
       contactUrl: item.contactUrl || "/fale-conosco",
       description: item.description,
       logisticsInfo: item.logisticsInfo,
@@ -144,6 +148,7 @@ export default function UnidadesPage() {
       address: form.address.trim(),
       phone: form.phone.trim(),
       email: form.email.trim(),
+      additionalEmail: form.additionalEmail.trim(),
       contactUrl: form.contactUrl.trim(),
       description: form.description.trim(),
       logisticsInfo: form.logisticsInfo.trim(),
@@ -158,6 +163,10 @@ export default function UnidadesPage() {
 
     if (!payload.phone && !payload.email) {
       setStatus("Informe ao menos telefone ou e-mail da unidade.");
+      return;
+    }
+    if (!payload.additionalEmail) {
+      setStatus("Informe o e-mail adicional da unidade.");
       return;
     }
 
@@ -221,7 +230,7 @@ export default function UnidadesPage() {
           />
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <DeveloperField label="Nome da unidade" required>
                 <input
                   required
@@ -311,6 +320,19 @@ export default function UnidadesPage() {
                   value={form.email}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, email: event.target.value }))
+                  }
+                  maxLength={160}
+                  className={developerInputClassName}
+                />
+              </DeveloperField>
+
+              <DeveloperField label="E-mail adicional" required>
+                <input
+                  type="email"
+                  required
+                  value={form.additionalEmail}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, additionalEmail: event.target.value }))
                   }
                   maxLength={160}
                   className={developerInputClassName}
@@ -462,7 +484,7 @@ export default function UnidadesPage() {
                             {item.address || "Endereço não cadastrado."}
                           </p>
                           <p className="mt-2 text-xs leading-6 text-[var(--color-muted-raw)]">
-                            {item.phone || "-"} - {item.email || "-"}
+                            {item.phone || "-"} - {item.email || "-"}{item.additionalEmail ? ` - ${item.additionalEmail}` : ""}
                           </p>
                           {item.logisticsInfo ? (
                             <p className="mt-2 text-sm leading-7 text-[var(--color-muted-raw)]">

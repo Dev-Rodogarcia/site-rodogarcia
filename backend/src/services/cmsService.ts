@@ -106,6 +106,7 @@ function sanitizeUnitPayload(payload: Record<string, unknown>) {
     address: sanitizeText(payload.address ?? payload.endereco, 220),
     phone: sanitizeText(payload.phone ?? payload.telefone, 60),
     email: sanitizeEmail(payload.email),
+    additionalEmail: sanitizeEmail(payload.additionalEmail),
     contactUrl: sanitizeUrl(payload.contactUrl ?? payload.linkContato),
     description: sanitizeText(payload.description ?? payload.descricao, 220),
     logisticsInfo: sanitizeText(payload.logisticsInfo ?? payload.infoLogistica, 260),
@@ -537,6 +538,7 @@ function sanitizeHomeRegionalUnit(
     address: sanitizeText(payload.address, 220),
     phone: sanitizeText(payload.phone, 60),
     email: sanitizeEmail(payload.email),
+    additionalEmail: sanitizeEmail(payload.additionalEmail),
     buttonLabel: sanitizeText(payload.buttonLabel, 40) || "Falar com esta unidade",
     contactUrl: sanitizeUrl(payload.contactUrl),
     active: strictBoolean(payload.active, true),
@@ -791,8 +793,8 @@ function validateHomeSection3(section: HomeSection3) {
 function validateHomeRegionalPresence(section: HomeRegionalPresence) {
   for (const unit of section.units) {
     if (unit.active === false) continue;
-    if (!unit.name || !unit.state || !unit.description || !unit.address || !unit.contactUrl) {
-      return "Presença Regional: nome, UF, descrição, endereço e link do botão são obrigatórios em unidades ativas.";
+    if (!unit.name || !unit.state || !unit.description || !unit.address || !unit.contactUrl || !unit.additionalEmail) {
+      return "Presença Regional: nome, UF, descrição, endereço, e-mail adicional e link do botão são obrigatórios em unidades ativas.";
     }
     if (!BRAZIL_UF.has(unit.state)) {
       return "Presença Regional: selecione uma UF válida.";
@@ -1021,6 +1023,9 @@ function validateEntityPayload(entity: Entity, payload: Record<string, unknown>)
     if (!payload.phone && !payload.email) {
       return "Informe ao menos telefone ou e-mail da unidade.";
     }
+    if (!payload.additionalEmail) {
+      return "Informe o e-mail adicional da unidade.";
+    }
   }
   return null;
 }
@@ -1029,6 +1034,8 @@ function validateEntityInput(entity: Entity, input: Record<string, unknown>) {
   if (entity !== "units") return null;
   const email = sanitizeText(input.email, 160);
   if (email && !sanitizeEmail(input.email)) return "Informe um e-mail válido para a unidade.";
+  const additionalEmail = sanitizeText(input.additionalEmail, 160);
+  if (!additionalEmail || !sanitizeEmail(input.additionalEmail)) return "Informe um e-mail adicional válido para a unidade.";
   const contactUrl = sanitizeText(input.contactUrl ?? input.linkContato, 600);
   if (contactUrl && !sanitizeUrl(contactUrl)) return "Informe um link de contato válido.";
   for (const [label, value, length] of [
@@ -1060,6 +1067,7 @@ function normalizeAdminItem(entity: Entity, item: RawItem) {
       address: sanitizeText(item.address ?? item.endereco, 220),
       phone: sanitizeText(item.phone ?? item.telefone, 60),
       email: sanitizeEmail(item.email),
+      additionalEmail: sanitizeEmail(item.additionalEmail),
       contactUrl: sanitizeUrl(item.contactUrl ?? item.linkContato),
       description: sanitizeText(item.description ?? item.descricao, 220),
       logisticsInfo: sanitizeText(item.logisticsInfo ?? item.infoLogistica, 260),
