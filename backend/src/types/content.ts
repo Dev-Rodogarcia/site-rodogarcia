@@ -459,6 +459,12 @@ export interface QuoteOtherChannel {
   updatedAt?: string;
 }
 
+export interface QuoteUnservedOriginContent {
+  title: string;
+  description: string;
+  button: PageButton;
+}
+
 export interface QuotePageContent {
   hero: {
     buttons: PageButton[];
@@ -467,6 +473,7 @@ export interface QuotePageContent {
   approvalChannel: {
     whatsappUrl: string;
   };
+  unservedOrigin: QuoteUnservedOriginContent;
   directChannels: QuoteDirectChannel[];
   otherChannels: QuoteOtherChannel[];
 }

@@ -282,6 +282,12 @@ function validateCmsPagePayload(
         ? null
         : "Cotação: informe um link oficial do WhatsApp para aprovar a cotação.";
     }
+    if (sectionKey === "unservedOrigin") {
+      if (!hasRequiredText(payload.title) || !hasRequiredText(payload.description)) {
+        return "Cotação: preencha o título e a mensagem do popup de região não atendida.";
+      }
+      return validatePageButtons([payload.button], 1, "Cotação / Região não atendida");
+    }
     if (sectionKey === "operationGuidance") {
       return validateOperationGuidance(payload, "Cotação / Orientações");
     }

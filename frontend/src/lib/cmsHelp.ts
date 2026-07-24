@@ -111,6 +111,16 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
 };
 
 const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
+  "home.field.visibilidade-do-atalho": {
+    title: "Visibilidade do atalho",
+    summary: "Aqui você decide se este atalho aparece abaixo do hero da página inicial. Ao ocultar o botão de Taxas, os demais atalhos são centralizados automaticamente para a faixa continuar equilibrada.",
+    example: "Desative Taxas quando o PDF não estiver disponível; os atalhos de rastreamento e coleta permanecem visíveis e centralizados.",
+    details: [
+      { label: "Onde aparece", value: "Na faixa de busca e atalhos logo abaixo do hero da página inicial (/)." },
+      { label: "Taxas ocultas", value: "Quando o atalho identificado como Taxas é desativado e restam duas ações principais, o site mantém a largura dos botões e centraliza o conjunto no desktop." },
+      { label: "Após salvar", value: "O atalho fica oculto ou volta a aparecer imediatamente na página inicial; seu texto e link permanecem guardados no CMS." },
+    ],
+  },
   "coletas.section.hero": {
     title: "Botões do hero de Coletas",
     summary: "Aqui você configura os dois botões no topo de /coletas. Um pode levar ao formulário desta página e o outro à cotação, para que o visitante escolha o próximo passo sem procurar no menu.",
@@ -497,6 +507,46 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Formato aceito", value: "Somente links oficiais do WhatsApp, iniciados por https://wa.me/ ou https://api.whatsapp.com/.", technical: true },
       { label: "Mensagem", value: "O site inclui automaticamente a referência, o valor, a origem e o destino; não é necessário editar esses dados aqui." },
       { label: "Após salvar", value: "Altera apenas esse destino de aprovação, sem mudar o WhatsApp comercial geral ou os demais canais da página." },
+    ],
+  },
+  "cotacao.field.regiao-nao-atendida-titulo": {
+    title: "Título do popup de região não atendida",
+    summary: "Aqui você escreve o título que o visitante vê no popup de /cotacao e /coletas quando a cidade de origem não é atendida. Depois de salvar, os dois avisos são atualizados.",
+    example: "Use “Ainda não atendemos esta origem” para explicar a situação logo no início.",
+    details: [
+      { label: "Onde aparece", value: "No popup aberto após uma tentativa de cotação ou de solicitação de coleta com origem fora da área atendida, nas rotas /cotacao e /coletas." },
+      { label: "Limite", value: "Até 120 caracteres para manter o título legível em celular e desktop.", technical: true },
+      { label: "Após salvar", value: "O título antigo do popup é substituído; a regra de atendimento e o formulário não são alterados." },
+    ],
+  },
+  "cotacao.field.regiao-nao-atendida-mensagem": {
+    title: "Mensagem do popup de região não atendida",
+    summary: "Aqui você explica o que aconteceu e orienta a pessoa a falar com o comercial quando a origem informada não é atendida em /cotacao ou /coletas.",
+    example: "Escreva “A cidade de origem informada ainda não faz parte da nossa área de atendimento. Fale com nosso comercial para avaliar a operação.”",
+    details: [
+      { label: "Onde aparece", value: "Abaixo do título, no popup de indisponibilidade das rotas /cotacao e /coletas." },
+      { label: "Limite", value: "Até 320 caracteres para preservar a leitura no popup.", technical: true },
+      { label: "Após salvar", value: "A nova orientação é mostrada nas próximas tentativas com uma origem não atendida." },
+    ],
+  },
+  "cotacao.field.regiao-nao-atendida-botao-texto": {
+    title: "Texto do botão comercial",
+    summary: "Aqui você define o texto do botão que a pessoa usa no popup de /cotacao e /coletas para continuar o atendimento comercial após uma origem não atendida.",
+    example: "Use “Falar com o comercial”.",
+    details: [
+      { label: "Onde aparece", value: "No botão principal do popup de região não atendida das rotas /cotacao e /coletas." },
+      { label: "Limite", value: "Até 40 caracteres para o botão não perder legibilidade.", technical: true },
+      { label: "Após salvar", value: "Muda apenas o texto do botão; o destino é configurado no campo Link." },
+    ],
+  },
+  "cotacao.field.regiao-nao-atendida-botao-link": {
+    title: "Link do botão comercial",
+    summary: "Aqui você informa para onde o botão do popup de /cotacao e /coletas deve levar a pessoa para falar com o comercial.",
+    example: "Use “https://wa.me/5511993139536” para abrir o WhatsApp comercial.",
+    details: [
+      { label: "Onde aparece", value: "No botão principal do popup de região não atendida das rotas /cotacao e /coletas." },
+      { label: "Formato aceito", value: "Use uma rota interna, URL externa, e-mail ou telefone válido. Para WhatsApp, use uma URL oficial como https://wa.me/.", technical: true },
+      { label: "Após salvar", value: "Muda somente o destino do botão do popup, sem alterar o texto ou a validação de regiões." },
     ],
   },
   "servicos.field.arquivo-selecionado": {

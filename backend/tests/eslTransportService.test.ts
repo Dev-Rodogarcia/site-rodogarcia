@@ -29,6 +29,9 @@ const quotePayload = {
   recipientCnpj: "60960473000162",
   origin: { postalCode: "06268000", name: "Osasco", stateCode: "SP" },
   destination: { postalCode: "17123210", name: "Agudos", stateCode: "SP" },
+  height: 2,
+  width: 2,
+  length: 2,
   realWeight: 25000,
   cubicVolume: 25,
   invoiceValue: 250000,
@@ -78,6 +81,24 @@ describe("EslRequestScheduler", () => {
 });
 
 describe("integração ESL de cotação e coleta", () => {
+  it("envia o maior peso entre o real e o taxado pelo volume", async () => {
+    configureEslForTest();
+    const { quoteWeightForEsl } = await import("../src/services/eslTransportService.js");
+
+    expect(quoteWeightForEsl({ realWeight: 4_700, cubicVolume: 16 })).toBe(4_800);
+    expect(quoteWeightForEsl({ realWeight: 5_222, cubicVolume: 16 })).toBe(5_222);
+  });
+
+  it("seleciona a tabela de 3 metros quando alguma medida atinge o limite", async () => {
+    configureEslForTest();
+    const { quotePriceTableForEsl } = await import("../src/services/eslTransportService.js");
+
+    expect(quotePriceTableForEsl({ height: 2.99, width: 2, length: 2 })).toBe("PADRÃO");
+    expect(quotePriceTableForEsl({ height: 2, width: 3, length: 2 })).toBe(
+      "PADRÃO - 3 METROS"
+    );
+  });
+
   it("envia cotação fracionada ao endpoint privado e devolve o total dos trechos", async () => {
     configureEslForTest();
     const fetchMock = vi
@@ -135,13 +156,23 @@ describe("integração ESL de cotação e coleta", () => {
       variables: {
         params: {
           corporation: { document: string };
-          quoteStretchBidsAttributes: Array<{ calculationType: string }>;
+          quoteStretchBidsAttributes: Array<{
+            calculationType: string;
+            realWeight: number;
+            customerPriceTable: { name: string };
+          }>;
         };
       };
     };
     expect(sent.query).toContain("quoteStretchBids { total }");
     expect(sent.variables.params.quoteStretchBidsAttributes[0]?.calculationType).toBe(
       "price_table"
+    );
+    expect(sent.variables.params.quoteStretchBidsAttributes[0]?.realWeight).toBe(
+      quotePayload.realWeight
+    );
+    expect(sent.variables.params.quoteStretchBidsAttributes[0]?.customerPriceTable.name).toBe(
+      "PADRÃO"
     );
     expect(sent.variables.params.corporation.document).toBe("60960473000243");
   });

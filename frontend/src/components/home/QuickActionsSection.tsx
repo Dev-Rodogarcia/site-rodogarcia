@@ -20,6 +20,7 @@ interface SearchHeroProps {
 
 interface ActionsListProps {
   actions: QuickAction[];
+  compactDesktop?: boolean;
 }
 
 const primaryActionsVariants: Variants = {
@@ -120,6 +121,8 @@ export default function QuickActionsSection({ actions }: QuickActionsSectionProp
     () => visible.filter((action) => !isQuickIconAction(action)),
     [visible]
   );
+  const shouldCenterRemainingActions =
+    !visible.some(isRatesAction) && iconActions.length > 0 && cardActions.length === 2;
 
   if (visible.length === 0) return null;
 
@@ -147,12 +150,12 @@ export default function QuickActionsSection({ actions }: QuickActionsSectionProp
           <div className="mt-5 h-px w-full bg-[linear-gradient(90deg,transparent,rgba(15,23,42,0.09),rgba(29,78,216,0.11),transparent)] sm:mt-6" />
         ) : null}
 
-        <div className="mt-5 sm:mt-6 flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+        <div className={cn("mt-5 flex flex-col sm:mt-6 lg:flex-row lg:items-center lg:gap-6", shouldCenterRemainingActions ? "lg:justify-center" : "lg:justify-between")}>
           <div className="w-full order-2 lg:order-1 mt-5 lg:mt-0 lg:w-auto lg:shrink-0">
             <QuickActions actions={iconActions} />
           </div>
-          <div className="w-full order-1 lg:order-2 lg:flex-1 lg:max-w-[65%] xl:max-w-[70%]">
-            <PrimaryActionsGrid actions={cardActions} />
+          <div className={cn("order-1 w-full lg:order-2", shouldCenterRemainingActions ? "lg:w-[calc(43.333%_-_0.333rem)] lg:shrink-0 xl:w-[calc(46.667%_-_0.333rem)]" : "lg:flex-1 lg:max-w-[65%] xl:max-w-[70%]")}>
+            <PrimaryActionsGrid actions={cardActions} compactDesktop={shouldCenterRemainingActions} />
           </div>
         </div>
       </div>
@@ -228,13 +231,14 @@ export function QuickActions({ actions }: ActionsListProps) {
   );
 }
 
-export function PrimaryActionsGrid({ actions }: ActionsListProps) {
+export function PrimaryActionsGrid({ actions, compactDesktop = false }: ActionsListProps) {
   if (actions.length === 0) return null;
 
   return (
     <motion.div
       className={cn(
-        "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3 lg:gap-4",
+        "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:gap-4",
+        compactDesktop ? "lg:grid-cols-2" : "lg:grid-cols-3",
         actions.length === 1 ? "mx-auto max-w-sm sm:grid-cols-1" : ""
       )}
       role="list"

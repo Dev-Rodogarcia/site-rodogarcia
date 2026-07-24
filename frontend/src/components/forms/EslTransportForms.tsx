@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { api, external, site } from "@/lib/routes";
+import type { QuoteUnservedOriginContent } from "@/types/content";
 import styles from "./EslTransportForms.module.css";
 
 type RequestStatus = "idle" | "loading" | "success" | "error";
@@ -141,34 +142,34 @@ const sectionTitleClassName =
   "text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]";
 
 const fieldHelp: Record<string, string> = {
-  "CNPJ do cliente e pagador": "Informe o CNPJ da empresa cliente, que também será usada como responsável pelo pagamento do frete.",
-  "CNPJ do local de coleta": "Informe o CNPJ do endereço onde a mercadoria será coletada. Este campo é obrigatório.",
-  "CNPJ do remetente": "Informe o CNPJ de quem está enviando a mercadoria, se disponível.",
-  "CNPJ do destinatário": "Informe o CNPJ de quem receberá a mercadoria, se disponível.",
-  "CEP de entrega": "Informe o CEP do endereço de entrega. Cidade e UF serão preenchidas quando a consulta estiver disponível.",
+  "CNPJ do cliente e pagador": "Informe os 14 números do CNPJ da empresa cliente, que também será usada como responsável pelo pagamento do frete. A pontuação é aplicada automaticamente.",
+  "CNPJ do local de coleta": "Informe os 14 números do CNPJ do endereço onde a mercadoria será coletada. Este campo é obrigatório e a pontuação é aplicada automaticamente.",
+  "CNPJ do remetente": "Informe os 14 números do CNPJ de quem está enviando a mercadoria, se disponível. A pontuação é aplicada automaticamente.",
+  "CNPJ do destinatário": "Informe os 14 números do CNPJ de quem receberá a mercadoria, se disponível. A pontuação é aplicada automaticamente.",
+  "CEP de entrega": "Informe os 8 números do CEP do endereço de entrega. O hífen é aplicado automaticamente e cidade e UF serão preenchidas quando a consulta estiver disponível.",
   Logradouro: "Informe a rua, avenida ou estrada do endereço de entrega.",
   Número: "Informe o número do endereço de entrega.",
   Complemento: "Informe bloco, sala, galpão, referência ou outro complemento, se necessário.",
   Bairro: "Informe o bairro do endereço de entrega, se disponível.",
   "Cidade de entrega": "Informe a cidade do endereço de entrega.",
   "UF de entrega": "Informe a sigla do estado do endereço de entrega, com duas letras.",
-  "CEP de origem": "Informe o CEP de onde a carga parte para preencher automaticamente cidade e UF.",
+  "CEP de origem": "Informe os 8 números do CEP de onde a carga parte. O hífen é aplicado automaticamente para preencher cidade e UF.",
   "Cidade de origem": "Informe a cidade de onde a carga parte. O sistema consulta a região atendida para definir a filial responsável internamente.",
   "UF de origem": "Informe a sigla do estado de origem, com duas letras.",
-  "CEP de destino": "Informe o CEP para onde a carga seguirá para preencher automaticamente cidade e UF.",
+  "CEP de destino": "Informe os 8 números do CEP para onde a carga seguirá. O hífen é aplicado automaticamente para preencher cidade e UF.",
   "Cidade de destino": "Informe a cidade para onde a carga seguirá.",
   "UF de destino": "Informe a sigla do estado de destino, com duas letras.",
-  "Peso real (kg)": "Informe o peso total real da mercadoria em quilogramas.",
+  "Peso real (kg)": "Informe o peso total real da mercadoria em quilogramas. Para calcular a cotação, a API recebe o maior valor entre este peso e o peso taxado.",
   "Metro cúbico (m³)": "Calculado automaticamente: quantidade × altura × largura × comprimento.",
-  "Peso taxado (kg)": "Calculado automaticamente em quilogramas: metro cúbico × 300.",
-  "Altura (m)": "Informe a altura de uma unidade em metros. Junto com quantidade, largura e comprimento, ela calcula o metro cúbico automaticamente.",
-  "Largura (m)": "Informe a largura de uma unidade em metros. Junto com quantidade, altura e comprimento, ela calcula o metro cúbico automaticamente.",
-  "Comprimento (m)": "Informe o comprimento de uma unidade em metros. Junto com quantidade, altura e largura, ele calcula o metro cúbico automaticamente.",
+  "Peso taxado (kg)": "Calculado automaticamente em quilogramas: metro cúbico × 300. Para calcular a cotação, a API recebe o maior valor entre este peso e o peso real.",
+  "Altura (m)": "Informe a altura de uma unidade em metros. Junto com quantidade, largura e comprimento, ela calcula o metro cúbico automaticamente. Com 3 m ou mais, a cotação usa a tabela PADRÃO - 3 METROS.",
+  "Largura (m)": "Informe a largura de uma unidade em metros. Junto com quantidade, altura e comprimento, ela calcula o metro cúbico automaticamente. Com 3 m ou mais, a cotação usa a tabela PADRÃO - 3 METROS.",
+  "Comprimento (m)": "Informe o comprimento de uma unidade em metros. Junto com quantidade, altura e largura, ele calcula o metro cúbico automaticamente. Com 3 m ou mais, a cotação usa a tabela PADRÃO - 3 METROS.",
   "Valor da NF (R$)": "Informe o valor total da nota fiscal em reais.",
   Quantidade: "Informe a quantidade total de caixas, pallets ou demais volumes.",
   "Classificação do produto": "Descreva o produto ou a categoria da mercadoria, se disponível.",
   "Nome": "Informe o nome da pessoa responsável por esta solicitação.",
-  "Telefone": "Informe um telefone com DDD para contato sobre a operação.",
+  "Telefone": "Informe um telefone brasileiro com DDD para contato sobre a operação. A formatação é aplicada automaticamente e aceita até 11 números.",
   "E-mail": "Informe o e-mail que receberá as informações da solicitação.",
   "Observações": "Inclua detalhes úteis para a operação que não aparecem nos demais campos.",
   "Data": "Escolha a data desejada para a coleta.",
@@ -404,6 +405,28 @@ function digits(value: string) {
   return value.replace(/\D/g, "");
 }
 
+function formatCnpj(value: string) {
+  const cnpj = digits(value).slice(0, 14);
+  if (cnpj.length <= 2) return cnpj;
+  if (cnpj.length <= 5) return `${cnpj.slice(0, 2)}.${cnpj.slice(2)}`;
+  if (cnpj.length <= 8) return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5)}`;
+  if (cnpj.length <= 12) return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8)}`;
+  return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
+}
+
+function formatPostalCode(value: string) {
+  const postalCode = digits(value).slice(0, 8);
+  return postalCode.length <= 5 ? postalCode : `${postalCode.slice(0, 5)}-${postalCode.slice(5)}`;
+}
+
+function formatPhone(value: string) {
+  const phone = digits(value).slice(0, 11);
+  if (phone.length <= 2) return phone.length ? `(${phone}` : "";
+  if (phone.length <= 6) return `(${phone.slice(0, 2)}) ${phone.slice(2)}`;
+  if (phone.length <= 10) return `(${phone.slice(0, 2)}) ${phone.slice(2, 6)}-${phone.slice(6)}`;
+  return `(${phone.slice(0, 2)}) ${phone.slice(2, 7)}-${phone.slice(7)}`;
+}
+
 function volumeFromDimensions(quantity: string, height: string, width: string, length: string) {
   const measures = [quantity, height, width, length].map((value) => Number(value.replace(",", ".")));
   return measures.every((value) => Number.isFinite(value) && value > 0)
@@ -423,10 +446,44 @@ function quoteApprovalMessage(quote: QuoteResponse["quote"], values: QuoteValues
   ].join("\n");
 }
 
+function isUnservedOriginError(message: string) {
+  return message.startsWith("Ainda não atendemos a cidade de origem");
+}
+
+function UnservedOriginDialog({
+  content,
+  open,
+  onOpenChange,
+}: {
+  content: QuoteUnservedOriginContent;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[min(32rem,calc(100%-2rem))] overflow-hidden border-amber-500/25 bg-[linear-gradient(180deg,rgba(255,251,235,0.98)_0%,rgba(255,255,255,1)_100%)] p-0 shadow-[0_30px_80px_rgba(15,23,42,0.2)] sm:max-w-[32rem]" showCloseButton>
+        <DialogHeader className="items-center px-6 pb-2 pt-8 text-center sm:px-8">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 text-white shadow-[0_12px_28px_rgba(217,119,6,0.24)]">
+            <WarningCircle size={27} weight="fill" />
+          </span>
+          <DialogTitle className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">{content.title}</DialogTitle>
+          <DialogDescription className="max-w-sm text-center leading-6 text-[var(--color-muted-raw)]">{content.description}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="mx-0 mb-0 flex-col gap-3 border-0 bg-white/72 px-6 py-5 sm:flex-row sm:justify-between sm:px-8">
+          <button type="button" onClick={() => onOpenChange(false)} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--color-surface-2)]">Revisar origem</button>
+          <a href={content.button.url} target={content.button.external ? "_blank" : undefined} rel={content.button.external ? "noopener noreferrer" : undefined} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.22)] transition-colors hover:bg-emerald-700"><PaperPlaneTilt size={18} weight="bold" />{content.button.label}</a>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function EslQuoteForm({
   approvalWhatsappUrl = external.whatsappQuoteApproval,
+  unservedOrigin,
 }: {
   approvalWhatsappUrl?: string;
+  unservedOrigin: QuoteUnservedOriginContent;
 }) {
   const { apiRequest } = useApiRequest();
   const [values, setValues] = useState<QuoteValues>(defaultQuoteValues);
@@ -434,11 +491,11 @@ export function EslQuoteForm({
   const [error, setError] = useState("");
   const [quote, setQuote] = useState<QuoteResponse["quote"] | null>(null);
   const [quoteResultOpen, setQuoteResultOpen] = useState(false);
+  const [unservedOriginOpen, setUnservedOriginOpen] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
   const postalLookupTimer = useRef<number | null>(null);
 
   const kindLabel = values.kind === "fractional" ? "carga fracionada" : "carga fechada";
-  const originNeedsCommercial = error.startsWith("Ainda não atendemos a cidade de origem");
   const approvalMessage = quote ? quoteApprovalMessage(quote, values) : "";
   const approvalUrl = quote ? whatsappUrl(approvalWhatsappUrl, approvalMessage) : null;
 
@@ -502,6 +559,13 @@ export function EslQuoteForm({
     };
   }
 
+  function formattedInput<K extends "customerCnpj" | "senderCnpj" | "recipientCnpj" | "requesterPhone">(key: K) {
+    const formatter = key === "requesterPhone" ? formatPhone : formatCnpj;
+    return (event: ChangeEvent<HTMLInputElement>) => {
+      update(key, formatter(event.target.value) as QuoteValues[K]);
+    };
+  }
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("loading");
@@ -523,6 +587,9 @@ export function EslQuoteForm({
         name: values.destinationName,
         stateCode: values.destinationStateCode,
       },
+      height: values.height,
+      width: values.width,
+      length: values.length,
       realWeight: values.realWeight,
       cubicVolume: values.cubicVolume,
       invoiceValue: values.invoiceValue,
@@ -541,6 +608,13 @@ export function EslQuoteForm({
       });
       if (!result.success || !result.data) {
         const reason = result.error ?? "Não foi possível calcular a cotação.";
+        if (isUnservedOriginError(reason)) {
+          setError("");
+          setStatus("idle");
+          setUnservedOriginOpen(true);
+          dispatchFormTracking("quote", "fail", "unserved_origin");
+          return;
+        }
         setError(reason);
         setStatus("error");
         dispatchFormTracking("quote", "fail", reason);
@@ -614,6 +688,15 @@ export function EslQuoteForm({
         </DialogContent>
       </Dialog>
 
+      <UnservedOriginDialog
+        content={unservedOrigin}
+        open={unservedOriginOpen}
+        onOpenChange={(open) => {
+          setUnservedOriginOpen(open);
+          if (!open) setError("");
+        }}
+      />
+
       <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
       <div className="flex flex-col gap-5 rounded-[28px] border border-blue-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(219,234,254,0.82)_100%)] p-5 shadow-[0_18px_42px_rgba(30,64,175,0.08)] sm:p-6 lg:col-span-12 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -643,18 +726,18 @@ export function EslQuoteForm({
 
       <Fieldset title="Empresas envolvidas" description="Informe o CNPJ da empresa responsável pela operação. A filial Rodogarcia é identificada automaticamente pela cidade de origem." className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={input("customerCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={input("senderCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={input("recipientCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
         </div>
       </Fieldset>
 
       <Fieldset title="Origem e destino" className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="CEP de origem" required><input value={values.originPostalCode} onChange={(event) => { update("originPostalCode", event.target.value); schedulePostalLookup("origin", event.target.value); }} onBlur={(event) => void fillCityFromPostalCode("origin", event.currentTarget.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
+          <Field label="CEP de origem" required><input value={values.originPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("originPostalCode", postalCode); schedulePostalLookup("origin", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("origin", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
           <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
           <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
-          <Field label="CEP de destino" required><input value={values.destinationPostalCode} onChange={(event) => { update("destinationPostalCode", event.target.value); schedulePostalLookup("destination", event.target.value); }} onBlur={(event) => void fillCityFromPostalCode("destination", event.currentTarget.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
+          <Field label="CEP de destino" required><input value={values.destinationPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("destinationPostalCode", postalCode); schedulePostalLookup("destination", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("destination", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
           <Field label="Cidade de destino" required><input value={values.destinationName} onChange={input("destinationName")} autoComplete="address-level2" placeholder="Ex.: Agudos" className={fieldClassName} /></Field>
           <Field label="UF de destino" required><input value={values.destinationStateCode} onChange={input("destinationStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
         </div>
@@ -681,7 +764,7 @@ export function EslQuoteForm({
       <Fieldset title="Solicitante" className="lg:col-span-5 lg:self-stretch">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome" required><input value={values.requesterName} onChange={input("requesterName")} autoComplete="name" placeholder="Seu nome" className={fieldClassName} /></Field>
-          <Field label="Telefone" required><input value={values.requesterPhone} onChange={input("requesterPhone")} type="tel" autoComplete="tel" placeholder="(00) 00000-0000" className={fieldClassName} /></Field>
+          <Field label="Telefone" required><input value={values.requesterPhone} onChange={formattedInput("requesterPhone")} type="tel" inputMode="tel" maxLength={15} autoComplete="tel" placeholder="(00) 00000-0000" className={fieldClassName} /></Field>
           <Field label="E-mail" required><input value={values.requesterEmail} onChange={input("requesterEmail")} type="email" autoComplete="email" placeholder="seu@email.com" className={fieldClassName} /></Field>
           <Field label="Observações"><input value={values.comments} onChange={input("comments")} placeholder="Informações adicionais (opcional)" className={fieldClassName} /></Field>
         </div>
@@ -693,16 +776,6 @@ export function EslQuoteForm({
       {status === "error" ? (
         <div className="space-y-3 lg:col-span-12">
           <Alert kind="error">{error}</Alert>
-          {originNeedsCommercial ? (
-            <a
-              href={external.whatsappCommercial}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--primary-dark)]"
-            >
-              Falar com o comercial
-            </a>
-          ) : null}
         </div>
       ) : null}
       </form>
@@ -710,7 +783,7 @@ export function EslQuoteForm({
   );
 }
 
-export function EslCollectionForm() {
+export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUnservedOriginContent }) {
   const { apiRequest } = useApiRequest();
   const [values, setValues] = useState<CollectionValues>(defaultCollectionValues);
   const [status, setStatus] = useState<RequestStatus>("idle");
@@ -721,6 +794,7 @@ export function EslCollectionForm() {
   const [whatsappMessage, setWhatsappMessage] = useState("");
   const [companyLookupStatus, setCompanyLookupStatus] = useState<RequestStatus>("idle");
   const [companyLookupMessage, setCompanyLookupMessage] = useState("");
+  const [unservedOriginOpen, setUnservedOriginOpen] = useState(false);
   const companyLookupTimer = useRef<number | null>(null);
 
   const validationFingerprint = useMemo(
@@ -828,6 +902,12 @@ export function EslCollectionForm() {
     };
   }
 
+  function formattedInput<K extends "customerCnpj" | "pickupLocationCnpj" | "senderCnpj" | "recipientCnpj">(key: K) {
+    return (event: ChangeEvent<HTMLInputElement>) => {
+      update(key, formatCnpj(event.target.value) as CollectionValues[K]);
+    };
+  }
+
   async function validateInvoice() {
     setValidationStatus("loading");
     setError("");
@@ -898,6 +978,13 @@ export function EslCollectionForm() {
     });
     if (!result.success || !result.data) {
       const reason = result.error ?? "Não foi possível agendar a coleta.";
+      if (isUnservedOriginError(reason)) {
+        setError("");
+        setStatus("idle");
+        setUnservedOriginOpen(true);
+        dispatchFormTracking("collection", "fail", "unserved_origin");
+        return;
+      }
       setError(reason);
       setStatus("error");
       dispatchFormTracking("collection", "fail", reason);
@@ -937,7 +1024,16 @@ export function EslCollectionForm() {
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
+    <>
+      <UnservedOriginDialog
+        content={unservedOrigin}
+        open={unservedOriginOpen}
+        onOpenChange={(open) => {
+          setUnservedOriginOpen(open);
+          if (!open) setError("");
+        }}
+      />
+      <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
       <div className="flex flex-col gap-2 rounded-[28px] border border-blue-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(219,234,254,0.82)_100%)] p-5 shadow-[0_18px_42px_rgba(30,64,175,0.08)] sm:flex-row sm:items-end sm:justify-between sm:p-6 lg:col-span-12">
         <div>
           <p className={sectionTitleClassName}>Agendamento de coleta</p>
@@ -948,10 +1044,10 @@ export function EslCollectionForm() {
 
       <Fieldset title="Cadastros da operação" description="O cliente precisa estar cadastrado no ESL. O mesmo CNPJ é usado como cliente e pagador; a filial é identificada pela cidade de origem." className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={input("customerCnpj")} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do local de coleta" required><input value={values.pickupLocationCnpj} onChange={(event) => { update("pickupLocationCnpj", event.target.value); schedulePickupLocationLookup(event.target.value); }} onBlur={(event) => void lookupPickupLocationAddress(event.currentTarget.value)} inputMode="numeric" autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={input("senderCnpj")} inputMode="numeric" autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
-          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={input("recipientCnpj")} inputMode="numeric" autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
+          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do local de coleta" required><input value={values.pickupLocationCnpj} onChange={(event) => { const cnpj = formatCnpj(event.target.value); update("pickupLocationCnpj", cnpj); schedulePickupLocationLookup(cnpj); }} onBlur={(event) => void lookupPickupLocationAddress(event.currentTarget.value)} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
+          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
           <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
           <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
         </div>
@@ -959,7 +1055,7 @@ export function EslCollectionForm() {
 
       <Fieldset title="Endereço de entrega" description="O endereço é confirmado automaticamente quando o CNPJ do local de coleta for localizado. Se não for, preencha ou ajuste os campos abaixo antes de solicitar." className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-6">
-          <Field label="CEP de entrega" className="sm:col-span-1"><input value={values.deliveryPostalCode} onChange={(event) => { updateDeliveryAddress("deliveryPostalCode", event.target.value); void fillDeliveryCityFromPostalCode(event.target.value); }} onBlur={(event) => void fillDeliveryCityFromPostalCode(event.currentTarget.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
+          <Field label="CEP de entrega" className="sm:col-span-1"><input value={values.deliveryPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); updateDeliveryAddress("deliveryPostalCode", postalCode); void fillDeliveryCityFromPostalCode(postalCode); }} onBlur={(event) => void fillDeliveryCityFromPostalCode(event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
           <Field label="Logradouro" className="sm:col-span-3"><input value={values.deliveryStreet} onChange={(event) => updateDeliveryAddress("deliveryStreet", event.target.value)} autoComplete="address-line1" placeholder="Rua, avenida ou estrada" className={fieldClassName} /></Field>
           <Field label="Número" className="sm:col-span-1"><input value={values.deliveryNumber} onChange={(event) => updateDeliveryAddress("deliveryNumber", event.target.value)} autoComplete="address-line2" placeholder="Número" className={fieldClassName} /></Field>
           <Field label="Complemento" className="sm:col-span-1"><input value={values.deliveryComplement} onChange={(event) => updateDeliveryAddress("deliveryComplement", event.target.value)} autoComplete="address-line2" placeholder="Opcional" className={fieldClassName} /></Field>
@@ -1013,6 +1109,7 @@ export function EslCollectionForm() {
           </div>
         </div>
       </Fieldset>
-    </form>
+      </form>
+    </>
   );
 }

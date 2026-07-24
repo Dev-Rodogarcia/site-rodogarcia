@@ -35,6 +35,7 @@ export type PageSectionKey =
   | "jobs"
   | "directApplication"
   | "approvalChannel"
+  | "unservedOrigin"
   | "directChannels"
   | "otherChannels"
   | "operationGuidance";
@@ -394,6 +395,16 @@ const DEFAULT_QUOTE_PAGE: QuotePageContent = {
   },
   approvalChannel: {
     whatsappUrl: external.whatsappQuoteApproval,
+  },
+  unservedOrigin: {
+    title: "Ainda não atendemos esta origem",
+    description:
+      "A cidade de origem informada ainda não faz parte da nossa área de atendimento. Fale com nosso comercial para avaliar a sua operação.",
+    button: {
+      label: "Falar com o comercial",
+      url: external.whatsappCommercial,
+      external: true,
+    },
   },
   directChannels: [
     {
@@ -939,6 +950,7 @@ export function sanitizeQuotePage(payload: unknown): QuotePageContent {
   const source = isRecord(payload) ? payload : {};
   const hero = isRecord(source.hero) ? source.hero : {};
   const approvalChannel = isRecord(source.approvalChannel) ? source.approvalChannel : {};
+  const unservedOrigin = isRecord(source.unservedOrigin) ? source.unservedOrigin : {};
   const hasOtherChannels = Array.isArray(source.otherChannels);
   const otherChannels = arrayPayload(source.otherChannels);
   return {
@@ -951,6 +963,12 @@ export function sanitizeQuotePage(payload: unknown): QuotePageContent {
         approvalChannel.whatsappUrl,
         DEFAULT_QUOTE_PAGE.approvalChannel.whatsappUrl
       ),
+    },
+    unservedOrigin: {
+      title: sanitizeText(unservedOrigin.title, 120) || DEFAULT_QUOTE_PAGE.unservedOrigin.title,
+      description:
+        sanitizeText(unservedOrigin.description, 320) || DEFAULT_QUOTE_PAGE.unservedOrigin.description,
+      button: sanitizeButton(unservedOrigin.button, DEFAULT_QUOTE_PAGE.unservedOrigin.button),
     },
     directChannels: withOrder(
       DEFAULT_QUOTE_PAGE.directChannels.map((_, index) =>
@@ -1054,6 +1072,9 @@ export function updatePageSection(
       if (sectionKey === "hero") return sanitizeQuotePage({ ...page, hero: payload });
       if (sectionKey === "approvalChannel") {
         return sanitizeQuotePage({ ...page, approvalChannel: payload });
+      }
+      if (sectionKey === "unservedOrigin") {
+        return sanitizeQuotePage({ ...page, unservedOrigin: payload });
       }
       if (sectionKey === "operationGuidance") {
         return sanitizeQuotePage({ ...page, operationGuidance: payload });

@@ -85,6 +85,10 @@ const DELIVERY_REGION_QUERY = `
 
 const DELIVERY_REGION_CACHE_TTL_MS = 5 * 60 * 1_000;
 const DELIVERY_REGION_PAGE_LIMIT = 100;
+const TAXED_WEIGHT_PER_CUBIC_METER = 300;
+const STANDARD_PRICE_TABLE = "PADRÃO";
+const THREE_METERS_PRICE_TABLE = "PADRÃO - 3 METROS";
+const THREE_METERS_THRESHOLD = 3;
 
 const PICK_RESOURCE_FIELDS = `
   id
@@ -456,6 +460,18 @@ function buildClosedQuoteWhatsappMessage(input: QuoteRequest) {
   ].join("\n");
 }
 
+export function quoteWeightForEsl(input: Pick<QuoteRequest, "realWeight" | "cubicVolume">) {
+  return Math.max(input.realWeight, input.cubicVolume * TAXED_WEIGHT_PER_CUBIC_METER);
+}
+
+export function quotePriceTableForEsl(input: Pick<QuoteRequest, "height" | "width" | "length">) {
+  return [input.height, input.width, input.length].some(
+    (measure) => measure >= THREE_METERS_THRESHOLD
+  )
+    ? THREE_METERS_PRICE_TABLE
+    : STANDARD_PRICE_TABLE;
+}
+
 async function resolveInvoice(input: InvoiceLookupRequest) {
   try {
     const data = await executeEslGraphql(INVOICE_QUERY, {
@@ -476,6 +492,8 @@ async function resolveInvoice(input: InvoiceLookupRequest) {
 export async function createFractionalQuote(input: QuoteRequest) {
   try {
     const corporationCnpj = await resolveCorporationCnpj(input.origin);
+    const weightForEsl = quoteWeightForEsl(input);
+    const priceTableForEsl = quotePriceTableForEsl(input);
     const data = await executeEslGraphql(QUOTE_CREATE_MUTATION, {
       params: {
         corporation: { document: corporationCnpj },
@@ -497,12 +515,12 @@ export async function createFractionalQuote(input: QuoteRequest) {
           {
             cubicVolume: input.cubicVolume,
             modal: "rodo",
-            realWeight: input.realWeight,
+            realWeight: weightForEsl,
             payer: { document: input.customerCnpj },
             ...(input.senderCnpj ? { sender: { document: input.senderCnpj } } : {}),
             ...(input.recipientCnpj ? { recipient: { document: input.recipientCnpj } } : {}),
             calculationType: "price_table",
-            customerPriceTable: { name: "PADRÃO" },
+            customerPriceTable: { name: priceTableForEsl },
             originCity: { name: input.origin.name, stateCode: input.origin.stateCode },
             destinationCity: { name: input.destination.name, stateCode: input.destination.stateCode },
             productClassification: { name: input.productClassificationName || "Outros" },

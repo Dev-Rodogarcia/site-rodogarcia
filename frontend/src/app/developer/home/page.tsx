@@ -1303,7 +1303,7 @@ export default function DeveloperHomePage() {
           <DeveloperSectionHeading
             eyebrow="Etapa 2 - atalhos abaixo do hero"
             title="Atalhos rápidos e botão de Taxas"
-            description="Controle os botões compactos exibidos logo abaixo do hero. Downloads só aparecem no site quando estiverem ativos e com URL configurada."
+            description="Controle os botões compactos exibidos logo abaixo do hero. Downloads só aparecem no site quando estiverem ativos e com URL configurada; ao ocultar Taxas, os atalhos restantes são centralizados automaticamente."
             action={
               <button type="button" onClick={addQuickAction} className={developerSecondaryButtonClassName}>
                 <Plus size={16} weight="bold" />
@@ -1436,7 +1436,7 @@ export default function DeveloperHomePage() {
                         placeholder="/uploads/taxas.pdf"
                       />
                     </DeveloperField>
-                    <DeveloperField label="Visibilidade" hint="Desative para ocultar este atalho no site.">
+                    <DeveloperField label="Visibilidade" helpKey="visibilidade-do-atalho" hint="Desative para ocultar este atalho no site.">
                       <span className="inline-flex min-h-10 w-fit items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
                         <input
                           type="checkbox"

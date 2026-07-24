@@ -59,13 +59,13 @@ const PAGE_META: Record<
     eyebrow: "Página Cotação",
     title: "Página Cotação.",
     publicHref: site.quote,
-    description: "Botões, canais, destino de aprovação e orientações em acordeão da rota /cotacao.",
+    description: "Botões, popups, canais, destino de aprovação e orientações em acordeão da rota /cotacao.",
   },
   collections: {
     eyebrow: "Página Coletas",
     title: "Página Coletas.",
     publicHref: site.collections,
-    description: "Botões do hero e orientações em acordeão exibidos na rota /coletas.",
+    description: "Botões do hero e orientações em acordeão da rota /coletas. O popup de origem não atendida é configurado em Cotação.",
   },
 };
 
@@ -204,6 +204,7 @@ function TextInput({
   maxLength,
   textarea,
   tooltip,
+  helpKey,
 }: {
   label: string;
   value: string;
@@ -211,9 +212,10 @@ function TextInput({
   maxLength: number;
   textarea?: boolean;
   tooltip?: string;
+  helpKey?: string;
 }) {
   return (
-    <DeveloperField label={label} required tooltip={tooltip}>
+    <DeveloperField label={label} required tooltip={tooltip} helpKey={helpKey}>
       {textarea ? (
         <textarea
           required
@@ -502,6 +504,32 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                   <p className="mt-3 text-sm leading-6 text-[var(--color-muted-raw)]">Use apenas um link oficial do WhatsApp no formato <code>https://wa.me/...</code>. A mensagem com número, valor, origem e destino da cotação é preenchida automaticamente.</p>
                 </div>
                 <SaveButton saving={saving === "approvalChannel"}>Salvar destino de aprovação</SaveButton>
+              </form>
+            </DeveloperCard>
+            <DeveloperCard className="p-5 sm:p-6">
+              <DeveloperSectionHeading
+                eyebrow="Região não atendida"
+                title="Popup de indisponibilidade"
+                description="Define a mensagem e o botão exibidos quando a cidade de origem não é atendida nas rotas /cotacao e /coletas."
+              />
+              <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void saveSection("unservedOrigin", page.unservedOrigin); }}>
+                <div className={priorityPanelClassName}>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <TextInput label="Título do popup" value={page.unservedOrigin.title ?? ""} maxLength={120} helpKey="regiao-nao-atendida-titulo" onChange={(value) => update((draft) => { draft.unservedOrigin.title = value; })} />
+                    <TextInput label="Mensagem do popup" value={page.unservedOrigin.description ?? ""} maxLength={320} textarea helpKey="regiao-nao-atendida-mensagem" onChange={(value) => update((draft) => { draft.unservedOrigin.description = value; })} />
+                  </div>
+                  <div className="mt-5">
+                    <ButtonFields
+                      buttons={[page.unservedOrigin.button]}
+                      labels={["Botão para falar com o comercial"]}
+                      max={1}
+                      singleButtonInline
+                      helpKey="regiao-nao-atendida-botao"
+                      onChange={(buttons) => update((draft) => { draft.unservedOrigin.button = buttons[0]; })}
+                    />
+                  </div>
+                </div>
+                <SaveButton saving={saving === "unservedOrigin"}>Salvar popup de indisponibilidade</SaveButton>
               </form>
             </DeveloperCard>
             <DeveloperCard className="p-5 sm:p-6">

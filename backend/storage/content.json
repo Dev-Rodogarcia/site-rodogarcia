@@ -1103,6 +1103,15 @@
     "approvalChannel": {
       "whatsappUrl": "https://wa.me/5514991053696"
     },
+    "unservedOrigin": {
+      "title": "Ainda não atendemos esta origem",
+      "description": "A cidade de origem informada ainda não faz parte da nossa área de atendimento. Fale com nosso comercial para avaliar a sua operação.",
+      "button": {
+        "label": "Falar com o comercial",
+        "url": "https://wa.me/5511993139536",
+        "external": true
+      }
+    },
     "directChannels": [
       {
         "id": "fractional",

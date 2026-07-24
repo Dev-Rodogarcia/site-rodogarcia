@@ -5,8 +5,8 @@ import { OperationGuidanceAccordion } from "@/components/internal/OperationGuida
 import { ActionLink, PageContainer, PageSection, PageShell } from "@/components/internal/PageContent";
 import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
-import { seo, site } from "@/lib/routes";
-import type { CollectionsPageContent } from "@/types/content";
+import { external, seo, site } from "@/lib/routes";
+import type { CollectionsPageContent, QuoteUnservedOriginContent } from "@/types/content";
 
 const fallbackMetadata: Metadata = {
   title: "Solicitar coleta",
@@ -52,9 +52,17 @@ const FALLBACK_COLLECTIONS_PAGE: CollectionsPageContent = {
   },
 };
 
+const FALLBACK_UNSERVED_ORIGIN: QuoteUnservedOriginContent = {
+  title: "Ainda não atendemos esta origem",
+  description:
+    "A cidade de origem informada ainda não faz parte da nossa área de atendimento. Fale com nosso comercial para avaliar a sua operação.",
+  button: { label: "Falar com o comercial", url: external.whatsappCommercial, external: true },
+};
+
 export default async function CollectionsPage() {
   const content = await fetchPublicContent();
   const collectionsPage = content.data?.collectionsPage ?? FALLBACK_COLLECTIONS_PAGE;
+  const unservedOrigin = content.data?.quotePage?.unservedOrigin ?? FALLBACK_UNSERVED_ORIGIN;
 
   return (
     <PageShell className="!pb-0">
@@ -84,7 +92,7 @@ export default async function CollectionsPage() {
         <PageContainer>
           <div id="formulario-coleta" className="scroll-mt-28">
             <p className="mb-6 text-center text-sm font-medium text-[var(--color-muted-raw)]">Preencha os dados da operação para agendar a coleta.</p>
-            <EslCollectionForm />
+            <EslCollectionForm unservedOrigin={unservedOrigin} />
           </div>
           <div className="mt-16 sm:mt-20">
             <OperationGuidanceAccordion
