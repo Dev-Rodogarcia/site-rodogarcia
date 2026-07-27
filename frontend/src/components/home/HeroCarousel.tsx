@@ -110,7 +110,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
       }}
       tabIndex={0}
     >
-      <div className="relative overflow-hidden" style={{ minHeight: "clamp(704px, 96vh, 1012px)" }}>
+      <div className="home-hero-viewport relative overflow-hidden">
         <div
           className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translate3d(-${current * 100}%, 0, 0)` }}
@@ -126,7 +126,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
             return (
               <article
                 key={slide.id}
-                className="relative min-h-[clamp(704px,96vh,1012px)] w-full min-w-full shrink-0 overflow-hidden"
+                className="home-hero-viewport relative w-full min-w-full shrink-0 overflow-hidden"
                 aria-hidden={!isCurrent}
               >
                 <div className="absolute inset-0">
@@ -157,9 +157,9 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                 </div>
 
                 {!isImageOnly ? (
-                  <div className="relative z-10 mx-auto grid min-h-[clamp(704px,96vh,1012px)] max-w-[1320px] grid-cols-1 items-center gap-10 px-6 pb-26 pt-35 sm:px-8 sm:pb-28 sm:pt-28 lg:grid-cols-[minmax(0,504px)_minmax(0,1fr)] lg:gap-14 lg:px-10 lg:pt-32 xl:px-12">
+                  <div className="home-hero-content relative z-10 mx-auto grid min-h-[clamp(704px,96vh,1012px)] max-w-[1320px] grid-cols-1 items-center gap-10 px-6 pb-26 pt-35 sm:px-8 sm:pb-28 sm:pt-28 lg:grid-cols-[minmax(0,504px)_minmax(0,1fr)] lg:gap-14 lg:px-10 lg:pt-32 xl:px-12">
                     <div className="flex w-full max-w-[504px] min-w-0 flex-col justify-center self-center">
-                      <HeadingTag className="max-w-[11ch] text-[clamp(3rem,6vw,6rem)] font-bold leading-[0.94] tracking-[-0.065em] text-white">
+                      <HeadingTag className="home-hero-title max-w-[11ch] text-[clamp(3rem,6vw,6rem)] font-bold leading-[0.94] tracking-[-0.065em] text-white">
                         {title}
                       </HeadingTag>
                       <p className="mt-5 max-w-[58ch] text-base leading-7 text-white/74 sm:text-lg sm:leading-8">
@@ -208,9 +208,11 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         </div>
 
         {activeSlides.length > 1 ? (
-          <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-20 hidden items-center justify-between px-3 md:flex lg:px-5 xl:px-6">
-            <SliderArrowButton direction="left" onClick={() => goTo(current - 1)} label="Ver slide anterior" />
-            <SliderArrowButton direction="right" onClick={() => goTo(current + 1)} label="Ver próximo slide" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-20 hidden lg:block">
+            <div className="mx-auto flex h-full max-w-[1320px] items-center justify-between lg:px-0 xl:px-2">
+              <SliderArrowButton direction="left" onClick={() => goTo(current - 1)} label="Ver slide anterior" />
+              <SliderArrowButton direction="right" onClick={() => goTo(current + 1)} label="Ver próximo slide" />
+            </div>
           </div>
         ) : null}
 
@@ -368,7 +370,7 @@ function SliderArrowButton({
       onClick={onClick}
       aria-label={label}
       title={direction === "left" ? "Anterior" : "Proximo"}
-      className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/12 text-white/88 backdrop-blur-sm transition-all duration-200 hover:bg-black/22 hover:text-white"
+      className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center text-white/88 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
     >
       <ArrowSliderIcon direction={direction} />
     </button>

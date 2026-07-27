@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { HomeSection3 } from "@/types/content";
 import { cn } from "@/lib/utils";
 
-const CARDS_PER_PAGE = 3;
+const CARDS_PER_PAGE = 2;
 const AUTO_ADVANCE_MS = 8500;
 
 export default function ServiceLinesRebrand({
@@ -105,7 +105,7 @@ export default function ServiceLinesRebrand({
               {pages.map((page, pageIndex) => (
                 <div
                   key={`service-page-${pageIndex}`}
-                  className="grid w-full shrink-0 gap-5 sm:grid-cols-2 xl:grid-cols-3"
+                  className="grid w-full shrink-0 gap-5 sm:grid-cols-2"
                 >
                   {page.map((card) => (
                     <ServiceCard key={card.id} card={card} />
