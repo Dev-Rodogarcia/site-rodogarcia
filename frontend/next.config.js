@@ -129,6 +129,11 @@ const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+  experimental: {
+    // Uploads administrativos passam pelo rewrite /api antes de chegar ao backend.
+    // O backend aceita vídeos de até 64 MB; reservamos margem para o multipart.
+    proxyClientMaxBodySize: "70mb",
+  },
   async headers() {
     return [
       {

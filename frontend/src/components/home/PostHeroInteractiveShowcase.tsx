@@ -169,13 +169,13 @@ export default function PostHeroInteractiveShowcase({
                   </div>
                   <span
                     className={[
-                      "mt-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
-                      isActive ? "border-[var(--primary)] bg-[var(--primary)] text-white" : "border-[var(--border)] bg-white/55 text-[var(--foreground)]",
+                      "mt-4 inline-flex h-4 w-4 shrink-0 rotate-45 items-center justify-center rounded-[3px] border transition-all duration-300",
+                      isActive
+                        ? "border-[var(--primary)] bg-[var(--primary)] shadow-[0_3px_8px_rgba(29,78,216,0.18)]"
+                        : "border-slate-200 bg-white",
                     ].join(" ")}
                     aria-hidden="true"
-                  >
-                    <ArrowUpRightIcon />
-                  </span>
+                  />
                 </button>
               );
             })}
