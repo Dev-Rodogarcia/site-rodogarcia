@@ -90,6 +90,11 @@ const STANDARD_PRICE_TABLE = "PADRÃO";
 const THREE_METERS_PRICE_TABLE = "PADRÃO - 3 METROS";
 const THREE_METERS_THRESHOLD = 3;
 
+const INTERNAL_ORIGIN_CITY_FALLBACKS = [
+  { city: "São Paulo", stateCode: "SP", targetCity: "Osasco", targetStateCode: "SP" },
+  { city: "Guarulhos", stateCode: "SP", targetCity: "Osasco", targetStateCode: "SP" },
+] as const;
+
 const PICK_RESOURCE_FIELDS = `
   id
   sequenceCode
@@ -276,13 +281,28 @@ async function getDeliveryRegions() {
 async function resolveCorporationCnpj(origin: Pick<QuoteRequest["origin"], "name" | "stateCode">) {
   const city = normalizeCity(origin.name);
   const stateCode = origin.stateCode.toUpperCase();
-  const matches = (await getDeliveryRegions()).filter((region) =>
+  const regions = await getDeliveryRegions();
+  const matches = regions.filter((region) =>
     region.cities.some(
       (item) => normalizeCity(item.name) === city && item.stateCode === stateCode
     )
   );
 
-  if (matches.length === 0) {
+  const fallback = INTERNAL_ORIGIN_CITY_FALLBACKS.find(
+    (item) => normalizeCity(item.city) === city && item.stateCode === stateCode
+  );
+  const fallbackMatches = fallback && matches.length === 0
+    ? regions.filter((region) =>
+        region.cities.some(
+          (item) =>
+            normalizeCity(item.name) === normalizeCity(fallback.targetCity) &&
+            item.stateCode === fallback.targetStateCode
+        )
+      )
+    : [];
+  const resolvedMatches = matches.length > 0 ? matches : fallbackMatches;
+
+  if (resolvedMatches.length === 0) {
     throw new HttpError(
       422,
       "Ainda não atendemos a cidade de origem informada. Fale com nosso comercial para avaliar sua operação."
@@ -291,7 +311,7 @@ async function resolveCorporationCnpj(origin: Pick<QuoteRequest["origin"], "name
 
   const cnpjs = Array.from(
     new Set(
-      matches
+      resolvedMatches
         .map((region) =>
           region.corporationCnpjs.length > 1
             ? region.defaultCorporationCnpj

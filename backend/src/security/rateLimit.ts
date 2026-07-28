@@ -6,6 +6,7 @@ import { HttpError } from "../utils/http.js";
 export const RATE_LIMITS = {
   login: { windowMs: 10 * 60 * 1000, maxAttempts: 8 },
   lead: { windowMs: 60 * 60 * 1000, maxAttempts: 8 },
+  improvement: { windowMs: 60 * 60 * 1000, maxAttempts: 8 },
   popupEvent: { windowMs: 60 * 60 * 1000, maxAttempts: 150 },
   analytics: { windowMs: 60 * 60 * 1000, maxAttempts: 1200 },
   consent: { windowMs: 60 * 60 * 1000, maxAttempts: 20 },

@@ -228,38 +228,52 @@ describe("integração ESL de cotação e coleta", () => {
     expect(sent.variables.params.corporation.document).toBe("60960473000839");
   });
 
-  it("bloqueia a cotação quando a cidade de origem não está em uma região atendida", async () => {
+  it("direciona São Paulo/SP para a filial de Osasco quando a cidade não vier do ESL", async () => {
     configureEslForTest();
-    const fetchMock = vi.fn(async () =>
-      jsonResponse({
-        data: {
-          deliveryRegion: {
-            nodes: [
-              {
-                deliveryCities: [{ city: { name: "Agudos", state: { code: "SP" } } }],
-                deliveryRegionCorporations: [
-                  { corporation: { id: "agu", person: { cnpj: "60960473001134" } } },
-                ],
-              },
-            ],
-            pageInfo: { endCursor: null, hasNextPage: false },
-          },
-        },
-      })
-    );
+    const fetchMock = vi.fn(async () => jsonResponse({ data: { deliveryRegion: { nodes: [{ deliveryCities: [{ city: { name: "Osasco", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "spo", person: { cnpj: "60960473000243" } } }] }], pageInfo: { endCursor: null, hasNextPage: false } } } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { parseQuoteRequest } = await import("../src/validators/eslTransport.js");
+    const { prepareClosedQuoteWhatsapp } = await import("../src/services/eslTransportService.js");
+    await expect(prepareClosedQuoteWhatsapp(parseQuoteRequest({ ...quotePayload, origin: { postalCode: "01001000", name: "São Paulo", stateCode: "SP" } }))).resolves.toMatchObject({ whatsappMessage: expect.any(String) });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("direciona Guarulhos/SP para a filial de Osasco quando a cidade não vier do ESL", async () => {
+    configureEslForTest();
+    const fetchMock = vi.fn(async () => jsonResponse({ data: { deliveryRegion: { nodes: [{ deliveryCities: [{ city: { name: "Osasco", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "spo", person: { cnpj: "60960473000243" } } }] }], pageInfo: { endCursor: null, hasNextPage: false } } } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { parseQuoteRequest } = await import("../src/validators/eslTransport.js");
+    const { prepareClosedQuoteWhatsapp } = await import("../src/services/eslTransportService.js");
+    await expect(prepareClosedQuoteWhatsapp(parseQuoteRequest({ ...quotePayload, origin: { postalCode: "07000000", name: "Guarulhos", stateCode: "SP" } }))).resolves.toMatchObject({ whatsappMessage: expect.any(String) });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("mantém a cidade direta do ESL como prioridade sobre o fallback de Guarulhos", async () => {
+    configureEslForTest();
+    const fetchMock = vi.fn(async () => jsonResponse({ data: { deliveryRegion: { nodes: [
+      { deliveryCities: [{ city: { name: "Guarulhos", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "gru", person: { cnpj: "60960473001134" } } }] },
+      { deliveryCities: [{ city: { name: "Osasco", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "spo", person: { cnpj: "60960473000243" } } }] },
+    ], pageInfo: { endCursor: null, hasNextPage: false } } } }));
     vi.stubGlobal("fetch", fetchMock);
 
     const { parseQuoteRequest } = await import("../src/validators/eslTransport.js");
     const { createFractionalQuote } = await import("../src/services/eslTransportService.js");
-    await expect(
-      createFractionalQuote(
-        parseQuoteRequest({
-          ...quotePayload,
-          origin: { postalCode: "01001000", name: "São Paulo", stateCode: "SP" },
-        })
-      )
-    ).rejects.toThrow("Ainda não atendemos a cidade de origem informada");
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fetchMock.mockResolvedValueOnce(jsonResponse({ data: { deliveryRegion: { nodes: [{ deliveryCities: [{ city: { name: "Guarulhos", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "gru", person: { cnpj: "60960473001134" } } }] }, { deliveryCities: [{ city: { name: "Osasco", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "spo", person: { cnpj: "60960473000243" } } }] }], pageInfo: { endCursor: null, hasNextPage: false } } } }));
+    fetchMock.mockResolvedValueOnce(jsonResponse({ data: { quoteCreate: { success: true, errors: [], resource: { id: "gru-quote", quoteStretchBids: [] } } } }));
+    await createFractionalQuote(parseQuoteRequest({ ...quotePayload, origin: { postalCode: "07000000", name: "Guarulhos", stateCode: "SP" } }));
+    const sent = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { variables: { params: { corporation: { document: string } } } };
+    expect(sent.variables.params.corporation.document).toBe("60960473001134");
+  });
+
+  it("bloqueia uma cidade sem região no ESL e sem fallback comercial", async () => {
+    configureEslForTest();
+    const fetchMock = vi.fn(async () => jsonResponse({ data: { deliveryRegion: { nodes: [{ deliveryCities: [{ city: { name: "Agudos", state: { code: "SP" } } }], deliveryRegionCorporations: [{ corporation: { id: "agu", person: { cnpj: "60960473001134" } } }] }], pageInfo: { endCursor: null, hasNextPage: false } } } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { parseQuoteRequest } = await import("../src/validators/eslTransport.js");
+    const { createFractionalQuote } = await import("../src/services/eslTransportService.js");
+    await expect(createFractionalQuote(parseQuoteRequest({ ...quotePayload, origin: { postalCode: "13010000", name: "Campinas", stateCode: "SP" } }))).rejects.toThrow("Ainda não atendemos a cidade de origem informada");
   });
 
   it("valida a NF pelo ESL antes de devolver seu identificador remoto", async () => {

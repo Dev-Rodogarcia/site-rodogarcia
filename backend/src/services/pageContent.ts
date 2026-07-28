@@ -3,6 +3,7 @@ import type {
   BusinessPageContent,
   CareersPageContent,
   CollectionsPageContent,
+  ImprovementsPageContent,
   CareersPageJob,
   ContactPageContent,
   ContentData,
@@ -21,7 +22,7 @@ import {
   normalizeInternalMediaUrl,
 } from "./mediaValidationService.js";
 
-export const PAGE_KEYS = ["about", "business", "contact", "careers", "quote", "collections"] as const;
+export const PAGE_KEYS = ["about", "business", "contact", "careers", "quote", "collections", "improvements"] as const;
 export type CmsPageKey = (typeof PAGE_KEYS)[number];
 export type PageSectionKey =
   | "hero"
@@ -48,6 +49,7 @@ const site = {
   contact: "/fale-conosco",
   careers: "/trabalhe-conosco",
   collections: "/coletas",
+  improvements: "/melhoria-continua",
   help: "/central-ajuda",
 } as const;
 
@@ -499,6 +501,19 @@ const DEFAULT_COLLECTIONS_PAGE: CollectionsPageContent = {
   },
 };
 
+const DEFAULT_IMPROVEMENTS_PAGE: ImprovementsPageContent = {
+  operationGuidance: {
+    eyebrow: "Para aproveitar melhor",
+    title: "Dicas para enviar uma boa sugestão",
+    description: "Quanto mais contexto você compartilhar, mais fácil será avaliar o próximo passo.",
+    items: [
+      { id: "improvements-guidance-context", order: 1, question: "O que vale a pena explicar?", answer: "Conte o que acontece hoje, em que momento isso dificulta sua rotina ou experiência no site e qual resultado você espera alcançar." },
+      { id: "improvements-guidance-files", order: 2, question: "Posso enviar um arquivo ou uma imagem?", answer: "Sim. Você pode anexar fotos, planilhas CSV, XLS ou XLSX que ajudem a entender o caso. Os arquivos ficam disponíveis apenas para a equipe responsável." },
+      { id: "improvements-guidance-return", order: 3, question: "Quando receberei um retorno?", answer: "Cada sugestão é analisada pela equipe responsável. O envio não gera atendimento imediato, mas ajuda a priorizar melhorias reais para o site e para a operação." },
+    ],
+  },
+};
+
 export function pageContentKey(pageKey: CmsPageKey) {
   return `${pageKey === "business" ? "business" : pageKey}Page` as
     | "aboutPage"
@@ -506,7 +521,8 @@ export function pageContentKey(pageKey: CmsPageKey) {
     | "contactPage"
     | "careersPage"
     | "quotePage"
-    | "collectionsPage";
+    | "collectionsPage"
+    | "improvementsPage";
 }
 
 export function parsePageKey(value: string | undefined): CmsPageKey | null {
@@ -943,6 +959,7 @@ export function migratePageContent(
       : careersPageFromLegacy(content, legacy.mediaSlots),
     quotePage: sanitizeQuotePage(content.quotePage),
     collectionsPage: sanitizeCollectionsPage(content.collectionsPage),
+    improvementsPage: sanitizeImprovementsPage(content.improvementsPage),
   };
 }
 
@@ -994,6 +1011,11 @@ export function sanitizeCollectionsPage(payload: unknown): CollectionsPageConten
   };
 }
 
+export function sanitizeImprovementsPage(payload: unknown): ImprovementsPageContent {
+  const source = isRecord(payload) ? payload : {};
+  return { operationGuidance: sanitizeOperationGuidance(source.operationGuidance, DEFAULT_IMPROVEMENTS_PAGE.operationGuidance) };
+}
+
 export function getPageContent(content: ContentData, pageKey: CmsPageKey) {
   switch (pageKey) {
     case "about":
@@ -1008,6 +1030,8 @@ export function getPageContent(content: ContentData, pageKey: CmsPageKey) {
       return sanitizeQuotePage(content.quotePage);
     case "collections":
       return sanitizeCollectionsPage(content.collectionsPage);
+    case "improvements":
+      return sanitizeImprovementsPage(content.improvementsPage);
   }
 }
 
@@ -1019,6 +1043,7 @@ export function getAllPageContent(content: ContentData) {
     careersPage: sanitizeCareersPage(content.careersPage, content.vagas),
     quotePage: sanitizeQuotePage(content.quotePage),
     collectionsPage: sanitizeCollectionsPage(content.collectionsPage),
+    improvementsPage: sanitizeImprovementsPage(content.improvementsPage),
   };
 }
 
@@ -1093,6 +1118,11 @@ export function updatePageSection(
       if (sectionKey === "operationGuidance") {
         return sanitizeCollectionsPage({ ...page, operationGuidance: payload });
       }
+      break;
+    }
+    case "improvements": {
+      const page = current as ImprovementsPageContent;
+      if (sectionKey === "operationGuidance") return sanitizeImprovementsPage({ ...page, operationGuidance: payload });
       break;
     }
   }

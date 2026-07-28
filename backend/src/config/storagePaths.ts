@@ -74,6 +74,14 @@ export const storagePaths = {
     "LEADS_STORE_PATH",
     path.join(env.storageRoot, "leads.json")
   ),
+  improvements: resolveStoragePath(
+    "IMPROVEMENTS_STORE_PATH",
+    path.join(privateRoot, "improvements.json")
+  ),
+  improvementAttachments: resolveStoragePath(
+    "IMPROVEMENT_ATTACHMENTS_PATH",
+    path.join(privateRoot, "improvement-attachments")
+  ),
   trackingEvents: resolveStoragePath(
     "TRACKING_EVENTS_STORE_PATH",
     path.join(privateRoot, "tracking-events.json")

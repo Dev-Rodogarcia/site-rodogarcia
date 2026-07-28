@@ -37,6 +37,7 @@ const DARK_HERO_ROUTES = [
   site.terms,
   site.privacy,
   site.voice,
+  site.improvements,
 ] as const;
 
 type MenuIcon = ComponentType<{

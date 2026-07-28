@@ -484,6 +484,10 @@ export interface CollectionsPageContent {
   operationGuidance: OperationGuidanceContent;
 }
 
+export interface ImprovementsPageContent {
+  operationGuidance: OperationGuidanceContent;
+}
+
 export interface OperationGuidanceContent {
   eyebrow: string;
   title: string;

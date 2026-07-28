@@ -42,6 +42,7 @@ const CMS_PAGE_NAMES: Record<string, string> = {
   "/developer/home-hero": "Home — Hero",
   "/developer/imagens": "Imagens",
   "/developer/leads": "Leads",
+  "/developer/melhorias": "Melhoria Contínua",
   "/developer/lgpd-cookies": "LGPD e Cookies",
   "/developer/monitoramento-cookies": "Monitoramento de Cookies",
   "/developer/para-empresas": "Para Empresas",
@@ -61,6 +62,7 @@ const CMS_PAGE_NAMES: Record<string, string> = {
 const CMS_PUBLIC_DESTINATIONS: Record<string, string> = {
   "/developer/cotacao": "/cotacao",
   "/developer/coletas": "/coletas",
+  "/developer/melhorias": "/melhoria-continua e a lista interna de sugestões",
   "/developer/fale-conosco": "/fale-conosco",
   "/developer/footer-links": "o rodapé e as páginas institucionais",
   "/developer/home": "/",
@@ -94,6 +96,7 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
   "/developer/home-hero": { destination: "o hero da página inicial /", action: "edita os slides e botões de abertura da Home", example: "Escolha uma nova imagem para o primeiro slide do site." },
   "/developer/imagens": { destination: "a Biblioteca de mídia e os slots de imagem do site", action: "faz upload, organiza mídia e vincula arquivos a áreas do site", example: "Troque a imagem do slot do popup sem mexer nas outras imagens da Biblioteca." },
   "/developer/leads": { destination: "a lista interna de contatos recebidos, sem alterar o site", action: "consulta e filtra leads enviados por formulários", example: "Pesquise um e-mail para localizar o contato enviado pelo formulário." },
+  "/developer/melhorias": { destination: "/melhoria-continua", action: "acompanha as sugestões enviadas por visitantes e colaboradores, incluindo os anexos privados", example: "Abra o anexo de uma sugestão, marque como concluída quando ela for entregue e ela seguirá para Arquivadas após 60 dias." },
   "/developer/lgpd-cookies": { destination: "o banner de cookies mostrado ao visitante", action: "edita os textos e as regras de consentimento", example: "Aumente a versão ao mudar a mensagem que o visitante precisa aceitar." },
   "/developer/monitoramento-cookies": { destination: "os registros internos de consentimento, sem alterar o site", action: "consulta as escolhas de cookies registradas", example: "Filtre por categoria Analytics para conferir os consentimentos relacionados." },
   "/developer/para-empresas": { destination: "/para-empresas", action: "edita a página voltada a clientes empresariais", example: "Atualize o CTA que leva empresas ao formulário de cotação." },

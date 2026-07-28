@@ -39,6 +39,7 @@ export const adminResourceKeys = {
   consent: "admin:consent",
   cookieConsents: (query: string) => `admin:cookie-consents:${query}`,
   leads: (query: string) => `admin:leads:${query}`,
+  improvements: (status: string) => `admin:improvements:${status}`,
   tracking: (query: string) => `admin:tracking:${query}`,
   users: "admin:users",
 } as const;

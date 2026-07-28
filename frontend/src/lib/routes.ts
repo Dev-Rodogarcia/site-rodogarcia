@@ -37,6 +37,7 @@ export const site = {
   business: "/para-empresas",
   quote: "/cotacao",
   collections: "/coletas",
+  improvements: "/melhoria-continua",
   contact: "/fale-conosco",
   help: "/central-ajuda",
   press: "/imprensa",
@@ -62,6 +63,7 @@ export const admin = {
   careersPage: "/developer/trabalhe-conosco",
   quotePage: "/developer/cotacao",
   collectionsPage: "/developer/coletas",
+  improvements: "/developer/melhorias",
   footerLinks: "/developer/footer-links",
   units: "/developer/unidades",
   popup: "/developer/popup-exit",
@@ -114,6 +116,7 @@ export const api = {
     consentSettings: "/api/admin/consent-settings",
     cookieConsents: "/api/admin/cookie-consents",
     leads: "/api/admin/leads",
+    improvements: "/api/admin/improvements",
     trackingEvents: "/api/admin/tracking-events",
     auditLog: "/api/admin/audit-log",
     entity: (entity: string) => `/api/admin/${entity}`,
@@ -134,6 +137,7 @@ export const api = {
   forms: {
     contact: "/api/contact",
     quote: "/api/quote",
+    improvements: "/api/improvements",
   },
   eslTransport: {
     quoteFractional: "/api/quote/fractional",
@@ -205,6 +209,7 @@ export const drawerNavigation = [
   { href: site.careers, label: "Carreiras", key: "careers" },
   { href: site.quote, label: "Cotação", key: "quote" },
   { href: site.collections, label: "Coletas", key: "collections" },
+  { href: site.improvements, label: "Melhoria contínua", key: "improvements" },
 ] as const satisfies readonly NavigationItem[];
 
 export const adminNavigationGroups = [
@@ -225,6 +230,7 @@ export const adminNavigationGroups = [
       { href: admin.careersPage, label: "Trabalho Con.", key: "careers-page" },
       { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
       { href: admin.collectionsPage, label: "Página Coletas", key: "collections-page" },
+      { href: admin.improvements, label: "Melhoria contínua", key: "improvements" },
       { href: admin.footerLinks, label: "FOOTER LINKS", key: "footer-links" },
       { href: admin.units, label: "Base de unidades", key: "units" },
     ],
@@ -265,6 +271,7 @@ export const sitemapRoutes = [
   { path: site.business, changeFrequency: "monthly", priority: 0.8 },
   { path: site.quote, changeFrequency: "monthly", priority: 0.9 },
   { path: site.collections, changeFrequency: "monthly", priority: 0.8 },
+  { path: site.improvements, changeFrequency: "monthly", priority: 0.5 },
   { path: site.contact, changeFrequency: "monthly", priority: 0.7 },
   { path: site.help, changeFrequency: "monthly", priority: 0.6 },
   { path: site.press, changeFrequency: "monthly", priority: 0.5 },

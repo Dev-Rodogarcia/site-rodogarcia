@@ -331,6 +331,10 @@ function validateCmsPagePayload(
     }
   }
 
+  if (pageKey === "improvements" && sectionKey === "operationGuidance") {
+    return validateOperationGuidance(payload, "Melhoria contínua / Orientações");
+  }
+
   return null;
 }
 

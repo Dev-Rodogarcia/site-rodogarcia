@@ -37,6 +37,7 @@ import {
   updateSiteTextsController,
 } from "../controllers/cmsController.js";
 import { listUnifiedLeadsController } from "../controllers/leadsController.js";
+import { downloadImprovementAttachmentController, listImprovementsController, updateImprovementStatusController } from "../controllers/improvementController.js";
 import {
   deleteImageController,
   getMediaSlotsController,
@@ -225,6 +226,9 @@ adminRouter.post(
 );
 
 adminRouter.get("/leads", listUnifiedLeadsController);
+adminRouter.get("/improvements", listImprovementsController);
+adminRouter.get("/improvements/:id/attachments/:attachmentId", downloadImprovementAttachmentController);
+adminRouter.patch("/improvements/:id", requireAllowedOrigin, requireJson, requireCsrf, updateImprovementStatusController);
 adminRouter.get("/tracking-events", listTrackingEventsController);
 adminRouter.get("/audit-log", listAuditLogController);
 

@@ -486,6 +486,10 @@ export interface CollectionsPageContent {
   operationGuidance: OperationGuidanceContent;
 }
 
+export interface ImprovementsPageContent {
+  operationGuidance: OperationGuidanceContent;
+}
+
 export interface OperationGuidanceContent {
   eyebrow: string;
   title: string;
@@ -614,6 +618,7 @@ export interface ContentData {
   careersPage?: CareersPageContent;
   quotePage?: QuotePageContent;
   collectionsPage?: CollectionsPageContent;
+  improvementsPage?: ImprovementsPageContent;
   footerLinks?: FooterLinksContent;
   /** Legacy storage only: old root hero slides kept for migration safety, not an active CMS module. */
   heroSlides: LegacyHeroSlide[];

@@ -113,6 +113,7 @@ const cmsPreviewPaths = [
   "/para-empresas",
   "/cotacao",
   "/coletas",
+  "/melhoria-continua",
   "/fale-conosco",
   "/central-ajuda",
   "/imprensa",

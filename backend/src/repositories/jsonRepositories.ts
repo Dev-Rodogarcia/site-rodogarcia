@@ -27,6 +27,9 @@ export const popupEventRepository = listRepository<Record<string, unknown>>(
 export const leadRepository = listRepository<Record<string, unknown>>(
   storagePaths.leads
 );
+export const improvementRepository = listRepository<Record<string, unknown>>(
+  storagePaths.improvements
+);
 export const trackingEventRepository = listRepository<Record<string, unknown>>(
   storagePaths.trackingEvents
 );
