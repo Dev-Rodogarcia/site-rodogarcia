@@ -11,6 +11,7 @@ import {
   GearSix,
   HouseLine,
   Info,
+  Lightbulb,
   List,
   MagnifyingGlass,
   ShieldCheck,
@@ -57,6 +58,7 @@ const MENU_ICONS: Record<string, MenuIcon> = {
   quote: Calculator,
   collections: Truck,
   voice: ShieldCheck,
+  improvements: Lightbulb,
 };
 
 function matchesRoute(pathname: string, href: string) {
@@ -146,6 +148,10 @@ export function SiteHeader() {
     if (href === site.home) return pathname === site.home;
     return pathname.startsWith(href);
   };
+  const navigationGroups = [
+    { label: "Principal", items: drawerNavigation.filter((item) => item.href === site.home) },
+    { label: "Explorar", items: drawerNavigation.filter((item) => item.href !== site.home).toSorted((a, b) => a.label.localeCompare(b.label, "pt-BR")) },
+  ];
 
   const iconButtonClassName = [
     "p-2 rounded-full transition-colors duration-[400ms] ease-out z-10",
@@ -286,38 +292,19 @@ export function SiteHeader() {
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-4">
-          {drawerNavigation.map(({ href, label, key }) => {
+        <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-4" aria-label="Navegação principal">
+          {navigationGroups.map((group) => <section key={group.label}><p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{group.label}</p><div className="flex flex-col gap-1">{group.items.map(({ href, label, key }) => {
             const Icon = MENU_ICONS[key] ?? Info;
             const active = isActive(href);
-
-            return (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setDrawerOpen(false)}
-              className={[
-                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-150",
-                active
-                  ? "bg-[var(--color-primary-soft)] text-[var(--primary)]"
-                  : "text-[var(--foreground)] hover:bg-black/5",
-              ].join(" ")}
-            >
-              <span
-                className={[
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
-                  active
-                    ? "border-[var(--primary)]/15 bg-white/70 text-[var(--primary)]"
-                    : "border-slate-200/70 bg-slate-50 text-slate-500",
-                ].join(" ")}
-                aria-hidden="true"
-              >
-                <Icon size={17} weight={active ? "fill" : "duotone"} />
-              </span>
-              <span className="min-w-0 leading-none">{label}</span>
-            </Link>
-            );
-          })}
+            const isImprovement = key === "improvements";
+            return <Link key={href} href={href} onClick={() => setDrawerOpen(false)} className={[
+              "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+              isImprovement ? active ? "bg-[var(--primary)] text-white shadow-[0_10px_22px_rgba(29,78,216,0.24)]" : "border border-blue-100 bg-blue-50 text-[var(--primary)] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-100" : active ? "bg-[var(--color-primary-soft)] text-[var(--primary)]" : "text-[var(--foreground)] hover:bg-black/5",
+            ].join(" ")}><span className={[
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
+              isImprovement ? active ? "border-white/20 bg-white/16 text-white" : "border-blue-200 bg-white text-[var(--primary)]" : active ? "border-[var(--primary)]/15 bg-white/70 text-[var(--primary)]" : "border-slate-200/70 bg-slate-50 text-slate-500",
+            ].join(" ")} aria-hidden="true"><Icon size={17} weight={active || isImprovement ? "fill" : "duotone"} /></span><span className="min-w-0 leading-none">{label}</span>{isImprovement ? <span className={active ? "ml-auto text-[9px] font-bold uppercase tracking-[0.14em] text-white/78" : "ml-auto text-[9px] font-bold uppercase tracking-[0.14em] text-blue-500"}>Novo</span> : null}</Link>;
+          })}</div></section>)}
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-black/8 p-4">

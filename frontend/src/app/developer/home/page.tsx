@@ -507,20 +507,20 @@ function CountHint({
 }
 
 const homeFormGroupClassName =
-  "rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_48%,#f8fbff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_28px_rgba(29,78,216,0.1)] ring-1 ring-[var(--primary)]/8 sm:p-5";
+  "cms-home-form-group rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_48%,#f8fbff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_28px_rgba(29,78,216,0.1)] ring-1 ring-[var(--primary)]/8 sm:p-5";
 
 const homeNestedPanelClassName =
-  "rounded-[20px] border border-[var(--primary)]/12 bg-white/84 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_6px_16px_rgba(29,78,216,0.025)]";
+  "cms-home-nested-panel rounded-[20px] border border-[var(--primary)]/12 bg-white/84 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_6px_16px_rgba(29,78,216,0.025)]";
 
 const homeHighlightPanelClassName =
-  "rounded-[20px] border border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_56%,#f8fbff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_10px_24px_rgba(29,78,216,0.09)] ring-1 ring-[var(--primary)]/7";
+  "cms-home-highlight-panel rounded-[20px] border border-[#93c5fd] bg-[linear-gradient(135deg,#dbeafe_0%,#eff6ff_56%,#f8fbff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_10px_24px_rgba(29,78,216,0.09)] ring-1 ring-[var(--primary)]/7";
 
 const homeCtaPanelClassName =
-  "rounded-[20px] border border-[var(--primary)]/18 bg-white p-4 shadow-[0_8px_18px_rgba(29,78,216,0.05)]";
+  "cms-home-cta-panel rounded-[20px] border border-[var(--primary)]/18 bg-white p-4 shadow-[0_8px_18px_rgba(29,78,216,0.05)]";
 
 function homeEditableCardClassName(active = true) {
   return cn(
-    "overflow-hidden rounded-[24px] border p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-colors sm:p-5",
+    "cms-home-editable-card overflow-hidden rounded-[24px] border p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-colors sm:p-5",
     active
       ? "border-[var(--primary)]/26 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(239,246,255,0.86)_100%)]"
       : "border-slate-200/90 bg-slate-50/68"

@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import DevSidebar from "./DevSidebar";
 import DevTopbar from "./DevTopbar";
+import { DeveloperPageHeaderProvider } from "./DeveloperPageHeaderContext";
+import { api, external } from "@/lib/routes";
+import { useSession } from "@/hooks/useSession";
+import { useApiRequest } from "@/hooks/useApiRequest";
 
 const SIDEBAR_STORAGE_KEY = "developer.sidebar.expanded";
 
@@ -13,6 +17,9 @@ export default function DeveloperShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [darkTheme, setDarkTheme] = useState(false);
+  const { session, loading: sessionLoading } = useSession();
+  const { apiRequest } = useApiRequest();
 
   useEffect(() => {
     const storedValue = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
@@ -29,10 +36,28 @@ export default function DeveloperShell({
     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarExpanded ? "1" : "0");
   }, [sidebarExpanded]);
 
+  useEffect(() => {
+    if (sessionLoading) return;
+    const enabled = session?.authenticated === true && session.user?.cmsTheme === "dark";
+    setDarkTheme(enabled);
+    document.documentElement.dataset.cmsTheme = enabled ? "dark" : "light";
+  }, [session?.authenticated, session?.user?.cmsTheme, sessionLoading]);
+
+  function toggleTheme() {
+    const nextTheme = darkTheme ? "light" : "dark";
+    setDarkTheme(nextTheme === "dark");
+    document.documentElement.dataset.cmsTheme = nextTheme;
+    void apiRequest(api.auth.cmsTheme, {
+      method: "PATCH",
+      body: JSON.stringify({ theme: nextTheme }),
+    });
+  }
+
   return (
     <div
       data-admin-shell="true"
-      className="relative h-dvh overflow-hidden bg-[#f3f6fa]"
+      data-admin-theme={darkTheme ? "dark" : "light"}
+      className={`relative h-dvh overflow-hidden bg-[#f3f6fa] transition-colors duration-300 ${darkTheme ? "cms-dark" : ""}`}
     >
       <div className="relative flex h-full min-w-0">
         <DevSidebar
@@ -42,24 +67,32 @@ export default function DeveloperShell({
           onToggleExpanded={() => setSidebarExpanded((current) => !current)}
         />
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <div
-            data-admin-scroll
-            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
-          >
-            <div className="flex min-h-full flex-col">
-              <DevTopbar onOpenNavigation={() => setMobileOpen(true)} />
-              <div className="flex-1">{children}</div>
-              <footer className="mt-auto w-full border-t border-[rgba(15,23,42,0.08)] bg-white/66 px-4 py-3 text-xs text-[var(--color-muted-raw)] backdrop-blur-sm sm:px-5 lg:px-6">
-                <span className="font-semibold tracking-[-0.02em] text-[var(--foreground)]">
-                  Feito por Lucas
-                </span>
-                {" \u00B7 "}
-                <span>Painel interno Rodogarcia</span>
-              </footer>
+        <DeveloperPageHeaderProvider>
+          <div data-admin-theme-content="true" className="relative isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            {darkTheme ? <div aria-hidden="true" className="cms-dark-background" /> : null}
+            <div
+              data-admin-scroll
+              className="relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+            >
+              <div className="flex min-h-full flex-col">
+                <DevTopbar onOpenNavigation={() => setMobileOpen(true)} darkTheme={darkTheme} onToggleTheme={toggleTheme} />
+                <div className="flex-1">{children}</div>
+                <footer className="mt-auto w-full border-t border-[rgba(15,23,42,0.08)] bg-white/66 px-4 py-3 text-xs text-[var(--color-muted-raw)] backdrop-blur-sm sm:px-5 lg:px-6">
+                  <a
+                    href={external.developerProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold tracking-[-0.02em] text-[var(--foreground)] transition-colors hover:text-[var(--primary)]"
+                  >
+                    Feito por Lucas
+                  </a>
+                  {" \u00B7 "}
+                  <span>Painel interno Rodogarcia</span>
+                </footer>
+              </div>
             </div>
           </div>
-        </div>
+        </DeveloperPageHeaderProvider>
       </div>
     </div>
   );

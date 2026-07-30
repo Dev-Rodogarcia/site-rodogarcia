@@ -217,7 +217,7 @@ export const reorderEntityController: RequestHandler = asyncHandler((req, res) =
 export const listUsersController: RequestHandler = asyncHandler((req, res) => {
   res.json({
     user: publicUser(req.auth!.user),
-    users: listUsers(),
+    users: listUsers(req.auth!.user),
   });
 });
 
@@ -232,7 +232,7 @@ export const createUserController: RequestHandler = asyncHandler((req, res) => {
   res.status(201).json({
     message: "Usuário criado com sucesso.",
     createdUser: publicUser(created),
-    users: listUsers(),
+    users: listUsers(req.auth!.user),
   });
 });
 
@@ -247,7 +247,7 @@ export const updateUserController: RequestHandler = asyncHandler((req, res) => {
   res.json({
     message: "Usuário atualizado com sucesso.",
     updatedUser: publicUser(updated),
-    users: listUsers(),
+    users: listUsers(req.auth!.user),
   });
 });
 
@@ -261,6 +261,6 @@ export const deleteUserController: RequestHandler = asyncHandler((req, res) => {
   });
   res.json({
     message: "Usuário removido com sucesso.",
-    users: listUsers(),
+    users: listUsers(req.auth!.user),
   });
 });

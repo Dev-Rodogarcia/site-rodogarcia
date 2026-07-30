@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Briefcase,
@@ -114,18 +114,24 @@ function DashboardMetric({
   helper: string;
 }) {
   return (
-    <DeveloperCard>
-      <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
-        <Icon size={22} weight="duotone" />
+    <DeveloperCard className="flex min-h-[98px] items-center gap-3 p-3.5 sm:gap-4 sm:p-4">
+      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] sm:h-10 sm:w-10">
+        <Icon size={20} weight="duotone" />
       </span>
-      <div className="mt-5 text-4xl font-bold tracking-[-0.06em] text-[var(--foreground)]">
-        {value}
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+            {title}
+          </p>
+          <DeveloperHelp label={title} kind="metric" />
+        </div>
+        <p className="mt-0.5 text-2xl font-bold leading-none tracking-[-0.045em] text-[var(--foreground)] sm:text-[1.75rem]">
+          {value}
+        </p>
+        <p className="mt-1.5 truncate text-xs leading-5 text-[var(--color-muted-raw)]" title={helper}>
+          {helper}
+        </p>
       </div>
-      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-        <span>{title}</span>
-        <DeveloperHelp label={title} kind="metric" />
-      </div>
-      <p className="mt-3 text-sm leading-7 text-[var(--color-muted-raw)]">{helper}</p>
     </DeveloperCard>
   );
 }
@@ -157,6 +163,14 @@ function countFilled(values: Array<unknown>) {
 }
 
 export default function DeveloperDashboardPage() {
+  const [passwordChanged, setPasswordChanged] = useState(false);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("passwordChanged") !== "1") return;
+    setPasswordChanged(true);
+    url.searchParams.delete("passwordChanged");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
   const { data, loading, error } = useAdminResource<DashboardData>({
     key: adminResourceKeys.dashboard,
     fetcher: async (apiRequest) => {
@@ -358,7 +372,7 @@ export default function DeveloperDashboardPage() {
     totalPages: popupTopPagesTotalPages,
     nextPage: nextPopupTopPagesPage,
     prevPage: prevPopupTopPagesPage,
-  } = useCarouselPagination(popupTopPages, 5);
+  } = useCarouselPagination(popupTopPages, 6);
 
   return (
     <DeveloperPage>
@@ -371,6 +385,12 @@ export default function DeveloperDashboardPage() {
           { label: "Últimos 30 dias", value: data?.analytics.uniqueSessions ?? 0 },
         ]}
       />
+
+      {passwordChanged ? (
+        <div className="mt-5">
+          <DeveloperMessage tone="success">Senha atualizada com sucesso. Seu acesso ao CMS está liberado.</DeveloperMessage>
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="mt-6">
@@ -429,28 +449,32 @@ export default function DeveloperDashboardPage() {
                 <CoverageRow label="Mídia e social proof" value={summary.coverageContent} />
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[24px] border border-[var(--border)] bg-white/72 px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                    Publicação ativa
-                  </p>
-                  <p className="mt-3 text-3xl font-bold tracking-[-0.05em] text-[var(--foreground)]">
-                    {summary.publicationRate}%
-                  </p>
-                  <p className="mt-2 text-sm text-[var(--color-muted-raw)]">
-                    Hero ativos: {summary.heroActive} • operações ativas: {summary.operationsActive}
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <div className="rounded-xl border border-[var(--border)] bg-white/72 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--primary)]">
+                      Publicação ativa
+                    </p>
+                    <p className="text-xl font-bold leading-none tracking-[-0.04em] text-[var(--foreground)]">
+                      {summary.publicationRate}%
+                    </p>
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--color-muted-raw)]">
+                    Hero: {summary.heroActive} • Operações: {summary.operationsActive}
                   </p>
                 </div>
 
-                <div className="rounded-[24px] border border-[var(--border)] bg-white/72 px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                    Biblioteca
-                  </p>
-                  <p className="mt-3 text-3xl font-bold tracking-[-0.05em] text-[var(--foreground)]">
-                    {summary.contentImages}
-                  </p>
-                  <p className="mt-2 text-sm text-[var(--color-muted-raw)]">
-                    Imagens em uso • uploads salvos: {summary.uploadImages}
+                <div className="rounded-xl border border-[var(--border)] bg-white/72 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--primary)]">
+                      Biblioteca
+                    </p>
+                    <p className="text-xl font-bold leading-none tracking-[-0.04em] text-[var(--foreground)]">
+                      {summary.contentImages}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--color-muted-raw)]">
+                    Uploads salvos: {summary.uploadImages}
                   </p>
                 </div>
               </div>
@@ -463,7 +487,7 @@ export default function DeveloperDashboardPage() {
                 description="Indicadores de jobs, depoimentos e popup para leitura diária."
               />
 
-              <div className="space-y-3">
+              <div className="grid gap-2.5 sm:grid-cols-2">
                 {[
                   {
                     label: "Vagas ativas",
@@ -498,18 +522,15 @@ export default function DeveloperDashboardPage() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center gap-4 rounded-[24px] border border-[var(--border)] bg-white/72 px-4 py-4"
+                    className="flex min-h-[72px] items-center gap-3 rounded-xl border border-[var(--border)] bg-white/72 px-3 py-3"
                   >
-                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
-                      <item.icon size={20} weight="duotone" />
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                      <item.icon size={18} weight="duotone" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-[var(--foreground)]">{item.label}</p>
-                      <p className="text-xs text-[var(--color-muted-raw)]">
-                        Atualizado a partir dos storages e APIs atuais do projeto.
-                      </p>
                     </div>
-                    <span className="text-xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">
+                    <span className="text-lg font-semibold tracking-[-0.04em] text-[var(--foreground)]">
                       {item.value}
                     </span>
                   </div>
@@ -526,7 +547,7 @@ export default function DeveloperDashboardPage() {
                 description="As páginas abaixo receberam mais visualizações no período atual."
               />
 
-              <div className="flex flex-1 flex-col justify-between pt-4">
+              <div className="space-y-4 pt-4">
                 {topPages.length > 0 ? (
                   topPages.map((item) => {
                     const maxViews = Math.max(...data.analytics.topPages.map((page) => page.views), 1);
@@ -562,7 +583,7 @@ export default function DeveloperDashboardPage() {
                 description="Cada rota abaixo foi reescrita em React/TypeScript dentro de src/app/developer."
               />
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {quickLinks.map((item) => (
                   <Link
                     key={item.href}
@@ -574,22 +595,22 @@ export default function DeveloperDashboardPage() {
                 ))}
               </div>
 
-              <div className="mt-6 rounded-[24px] border border-[var(--border)] bg-white/72 px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
+              <div className="mt-4 rounded-xl border border-[var(--border)] bg-white/72 px-3 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
                   Top páginas do popup
                 </p>
-                <div className="mt-3 overflow-hidden">
+                <div className="mt-2 overflow-hidden px-px">
                   <div
                     className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                     style={{ transform: `translateX(-${popupTopPagesPage * 100}%)` }}
                   >
                     {popupTopPagesPages.map((page, index) => (
-                      <div key={index} className="w-full shrink-0 space-y-2">
+                      <div key={index} className="grid min-w-0 basis-full shrink-0 gap-1.5 sm:grid-cols-2">
                         {page.length > 0 ? (
                           page.map((item) => (
                             <div
                               key={item.pagePath}
-                              className="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-3 text-sm"
+                              className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-[var(--border)]/75 px-2.5 py-2 text-xs"
                             >
                               <span className="truncate text-[var(--foreground)]">{item.pagePath}</span>
                               <strong className="text-[var(--primary)]">{item.total}</strong>
@@ -609,6 +630,7 @@ export default function DeveloperDashboardPage() {
                   totalPages={popupTopPagesTotalPages}
                   onNext={nextPopupTopPagesPage}
                   onPrev={prevPopupTopPagesPage}
+                  compact
                 />
               </div>
             </DeveloperCard>

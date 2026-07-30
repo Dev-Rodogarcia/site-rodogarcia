@@ -78,7 +78,7 @@ export const DEFAULT_FOOTER_LINKS: FooterLinksContent = {
     copyrightText: "Rodogarcia Transportes. Todos os direitos reservados.",
     locationText: "Agudos, SP - Cobertura nacional",
     creditText: "Feito por Lucas Andrade @valentelucass",
-    creditUrl: "https://www.linkedin.com/in/dev-lucasandrade/",
+    creditUrl: external.developerProfile,
   },
   terms: {
     hero: {

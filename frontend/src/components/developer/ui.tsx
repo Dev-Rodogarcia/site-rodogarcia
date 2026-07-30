@@ -1,20 +1,21 @@
 "use client";
 
-import { useState, useRef, useEffect, useId, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { useState, useRef, useEffect, useId, useMemo, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { CaretDown, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { getCmsHelp, type CmsHelpContent, type CmsHelpKind } from "@/lib/cmsHelp";
 import { cn } from "@/lib/utils";
+import { useDeveloperPageHeader, type DeveloperPageHeaderStat } from "./DeveloperPageHeaderContext";
 
 export const developerPageClassName =
-  "w-full px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6";
+  "cms-developer-page w-full px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6";
 
 export const developerCardClassName =
-  "rounded-lg border border-[var(--border)] bg-white/[0.9] p-4 shadow-[0_8px_22px_rgba(15,23,42,0.035)] backdrop-blur-xl sm:p-5";
+  "cms-admin-card rounded-lg border border-[var(--border)] bg-white/[0.9] p-4 shadow-[0_8px_22px_rgba(15,23,42,0.035)] backdrop-blur-xl sm:p-5";
 
 export const developerInputClassName =
-  "w-full rounded-lg border border-[var(--border)]/80 bg-white px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--color-muted-raw)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition-all duration-200 focus:border-[var(--primary)]/35 focus:bg-white focus:ring-4 focus:ring-[var(--primary)]/10";
+  "cms-admin-input w-full rounded-lg border border-[var(--border)]/80 bg-white px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--color-muted-raw)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition-all duration-200 focus:border-[var(--primary)]/35 focus:bg-white focus:ring-4 focus:ring-[var(--primary)]/10";
 
 export const developerPrimaryButtonClassName =
   "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-bold text-white shadow-[0_6px_16px_rgba(29,78,216,0.22),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(29,78,216,0.3)] hover:bg-[var(--color-primary-strong)] active:scale-95 active:shadow-none disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:active:scale-100";
@@ -31,18 +32,15 @@ export const developerDangerButtonClassName =
 export const developerSplitLayoutClassName =
   "mt-5 grid gap-5 xl:grid-cols-[minmax(420px,640px)_minmax(0,1fr)]";
 
-interface DeveloperHeroStat {
-  label: string;
-  value: ReactNode;
-}
-
 interface DeveloperHeroProps {
   eyebrow: string;
   title: string;
   description?: string;
-  stats?: DeveloperHeroStat[];
+  stats?: DeveloperPageHeaderStat[];
   actions?: ReactNode;
 }
+
+const EMPTY_DEVELOPER_HERO_STATS: DeveloperPageHeaderStat[] = [];
 
 export function DeveloperPage({ children }: { children: ReactNode }) {
   return <div className={developerPageClassName}>{children}</div>;
@@ -52,50 +50,17 @@ export function DeveloperHero({
   eyebrow,
   title,
   description,
-  stats = [],
+  stats = EMPTY_DEVELOPER_HERO_STATS,
   actions,
 }: DeveloperHeroProps) {
-  return (
-    <section className="relative overflow-hidden rounded-[22px] border border-[var(--border)] bg-white/92 px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-xl sm:px-6 sm:py-6">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-        <div className="max-w-[860px]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
-            {eyebrow}
-          </p>
-          <div className="mt-2 flex items-center gap-2">
-            <h1 className="text-[clamp(1.45rem,2vw,2.1rem)] font-bold leading-[1.04] tracking-[-0.03em] text-[var(--foreground)]">
-              {title}
-            </h1>
-            <DeveloperHelp label={title} kind="page" />
-          </div>
-          {description ? (
-            <p className="mt-2 max-w-[68ch] text-sm leading-6 text-[var(--color-muted-raw)]">
-              {description}
-            </p>
-          ) : null}
-        </div>
+  const { setHeader } = useDeveloperPageHeader();
+  const header = useMemo(() => ({ eyebrow, title, description, stats, actions }), [actions, description, eyebrow, stats, title]);
 
-        {stats.length > 0 || actions ? (
-          <div className="flex flex-wrap gap-2.5 sm:justify-end">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="min-w-[108px] rounded-[16px] border border-[var(--border)]/90 bg-slate-50/82 px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.045)]"
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-                  {stat.label}
-                </div>
-                <div className="mt-1 text-xl font-bold tracking-[-0.03em] text-[var(--foreground)]">
-                  {stat.value}
-                </div>
-              </div>
-            ))}
-            {actions}
-          </div>
-        ) : null}
-      </div>
-    </section>
-  );
+  useEffect(() => {
+    setHeader((current) => current === header ? current : header);
+  }, [header, setHeader]);
+
+  return null;
 }
 
 export function DeveloperCard({
@@ -459,6 +424,7 @@ export function DeveloperCarouselPagination({
   alwaysVisible?: boolean;
 }) {
   if (totalPages <= 1 && !alwaysVisible) return null;
+  const showPageCounter = totalPages > 7;
 
   return (
     <div
@@ -482,21 +448,30 @@ export function DeveloperCarouselPagination({
         Voltar
       </button>
 
-      <div className="flex items-center gap-2">
-        {Array.from({ length: totalPages }).map((_, index) => (
-          <div
-            key={index}
-            className={cn(
-              "h-2 w-2 rounded-full transition-all duration-500",
-              currentPage === index
-                ? compact
-                  ? "w-4 bg-[var(--primary)]"
-                  : "w-6 bg-[var(--primary)]"
-                : "bg-[var(--border)]"
-            )}
-          />
-        ))}
-      </div>
+      {showPageCounter ? (
+        <span
+          aria-live="polite"
+          className="min-w-[76px] rounded-full border border-[var(--border)] bg-white/72 px-3 py-1.5 text-center text-xs font-semibold tabular-nums text-[var(--color-muted-raw)]"
+        >
+          {currentPage + 1} de {totalPages}
+        </span>
+      ) : (
+        <div className="flex items-center gap-2" aria-label={`Página ${currentPage + 1} de ${totalPages}`}>
+          {Array.from({ length: totalPages }).map((_, index) => (
+            <div
+              key={index}
+              className={cn(
+                "h-2 w-2 rounded-full transition-all duration-500",
+                currentPage === index
+                  ? compact
+                    ? "w-4 bg-[var(--primary)]"
+                    : "w-6 bg-[var(--primary)]"
+                  : "bg-[var(--border)]"
+              )}
+            />
+          ))}
+        </div>
+      )}
 
       <button
         type="button"

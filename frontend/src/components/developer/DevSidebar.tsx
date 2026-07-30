@@ -148,6 +148,7 @@ function SidebarItem({
   expanded,
   destructive = false,
   showTooltip,
+  activating = false,
 }: {
   href?: string;
   label: string;
@@ -157,12 +158,13 @@ function SidebarItem({
   expanded: boolean;
   destructive?: boolean;
   showTooltip: boolean;
+  activating?: boolean;
 }) {
   const content = (
     <>
       <span
         className={cn(
-          "inline-flex h-10 w-10 shrink-0 items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
+          "cms-sidebar-item__icon inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[color,transform,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
           active
             ? "text-sky-400 drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]"
             : destructive
@@ -174,7 +176,7 @@ function SidebarItem({
       </span>
       <span
         className={cn(
-          "min-w-0 overflow-hidden truncate whitespace-nowrap text-[13px] tracking-[0.01em] transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
+          "cms-sidebar-item__label min-w-0 overflow-hidden truncate whitespace-nowrap text-[13px] tracking-[0.01em] transition-[color,transform,opacity,max-width,margin] duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
           expanded ? "ml-2.5 max-w-[180px] translate-x-0 opacity-100" : "ml-0 max-w-0 -translate-x-2 opacity-0",
           active ? "font-semibold text-white" : destructive ? "font-medium text-rose-300/80 group-hover:text-rose-200" : "font-medium text-slate-300 group-hover:text-white"
         )}
@@ -190,14 +192,16 @@ function SidebarItem({
   );
 
   const className = cn(
-    "group relative flex min-w-0 items-center outline-none transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-sky-500",
+    "cms-sidebar-item group relative flex min-w-0 items-center outline-none transition-[background-color,border-color,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-sky-500",
     "mx-2.5 h-9 rounded-lg border",
     expanded ? "justify-start" : "justify-center",
     active
       ? "border-sky-500/20 bg-sky-500/10 shadow-[0_2px_10px_rgba(14,165,233,0.08)]"
       : destructive
-        ? "border-transparent hover:bg-rose-500/10"
-        : "border-transparent hover:bg-white/[0.06]"
+        ? "border-transparent bg-transparent hover:bg-rose-500/10"
+        : "border-transparent bg-transparent hover:bg-white/[0.06]"
+    ,
+    activating && "cms-sidebar-item--activating"
   );
 
   if (href) {
@@ -237,6 +241,13 @@ export default function DevSidebar({
   const router = useRouter();
   const { apiRequest } = useApiRequest();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [activatingHref, setActivatingHref] = useState<string | null>(null);
+
+  function handleNavigation(href: string) {
+    setActivatingHref(href);
+    window.setTimeout(() => setActivatingHref(null), 460);
+    onCloseMobile();
+  }
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -284,7 +295,7 @@ export default function DevSidebar({
               onClick={onToggleExpanded}
               aria-label="Alternar sidebar"
               className={cn(
-                "group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/5 hover:text-white active:scale-95",
+                "cms-sidebar-toggle group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/5 hover:text-white active:scale-95",
                 navigationExpanded ? "bg-transparent" : "bg-white/[0.04] text-white hover:bg-white/[0.08]"
               )}
             >
@@ -324,9 +335,10 @@ export default function DevSidebar({
                       label={item.label}
                       icon={Icon}
                       active={isActive(item)}
-                      onClick={onCloseMobile}
+                      onClick={() => handleNavigation(item.href)}
                       expanded={navigationExpanded}
                       showTooltip={!navigationExpanded}
+                      activating={activatingHref === item.href}
                     />
                   );
                 })}
@@ -349,9 +361,10 @@ export default function DevSidebar({
               href={site.home}
               label="Voltar ao site"
               icon={ArrowSquareOut}
-              onClick={onCloseMobile}
+              onClick={() => handleNavigation(site.home)}
               expanded={navigationExpanded}
               showTooltip={!navigationExpanded}
+              activating={activatingHref === site.home}
             />
             <SidebarItem
               label={loggingOut ? "Saindo..." : "Encerrar sessão"}

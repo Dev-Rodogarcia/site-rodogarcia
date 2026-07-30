@@ -6,6 +6,8 @@ import {
   hasAnyUser,
   login,
   publicUser,
+  requestPasswordReset,
+  updateOwnCmsTheme,
 } from "../services/authService.js";
 import { clearSessionCookie, destroySession, setSessionCookie, SESSION_COOKIE } from "../security/session.js";
 import { asyncHandler, HttpError } from "../utils/http.js";
@@ -23,6 +25,16 @@ export const loginController: RequestHandler = asyncHandler((req, res) => {
 export const changePasswordController: RequestHandler = asyncHandler((req, res) => {
   const updated = changeOwnPassword(req.auth!.user, req.body ?? {});
   res.json({ message: "Senha alterada com sucesso.", user: publicUser(updated) });
+});
+
+export const updateCmsThemeController: RequestHandler = asyncHandler((req, res) => {
+  const updated = updateOwnCmsTheme(req.auth!.user, req.body ?? {});
+  res.json({ user: publicUser(updated) });
+});
+
+export const requestPasswordResetController: RequestHandler = asyncHandler((req, res) => {
+  requestPasswordReset(req.body ?? {});
+  res.json({ message: "Se o acesso estiver cadastrado, sua solicitação foi enviada ao administrador." });
 });
 
 export const logoutController: RequestHandler = asyncHandler((req, res) => {

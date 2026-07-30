@@ -5,6 +5,7 @@ import {
   CheckCircle,
   DotsThreeVertical,
   IdentificationBadge,
+  Key,
   PencilSimple,
   ShieldCheck,
   Trash,
@@ -45,6 +46,7 @@ interface AdminUser {
   protected?: boolean;
   isSupreme?: boolean;
   passwordChangeRequired?: boolean;
+  passwordResetRequestedAt?: string;
   permissions?: ("createUsers" | "deleteUsers")[];
 }
 
@@ -102,6 +104,9 @@ export default function UsuariosPage() {
   const [editingId, setEditingId] = useState("");
   const [editing, setEditing] = useState<Partial<AdminUser>>({});
   const [permissionsMenuId, setPermissionsMenuId] = useState("");
+  const [resettingId, setResettingId] = useState("");
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [confirmTemporaryPassword, setConfirmTemporaryPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [mutatingId, setMutatingId] = useState("");
   const [status, setStatus] = useState<"" | "success" | "error">("");
@@ -224,7 +229,7 @@ export default function UsuariosPage() {
     setCurrentUser(response.data?.user ?? currentUser);
     invalidateAdminResource([adminResourceKeys.users, adminResourceKeys.dashboard]);
     setStatus("success");
-    setStatusMessage("Usuário criado com sucesso.");
+    setStatusMessage("Usuário criado. No primeiro acesso, a pessoa precisará criar a própria senha.");
     setForm(EMPTY_FORM);
     await refresh();
     await loadUsers();
@@ -305,6 +310,40 @@ export default function UsuariosPage() {
     setStatus("success");
     setStatusMessage("Permissões atualizadas com sucesso.");
     invalidateAdminResource([adminResourceKeys.users]);
+    await refresh();
+    await loadUsers();
+  }
+
+  async function resetUserPassword(user: AdminUser) {
+    if (temporaryPassword !== confirmTemporaryPassword) {
+      setStatus("error");
+      setStatusMessage("As senhas temporárias não conferem.");
+      return;
+    }
+    if (getPasswordChecks(temporaryPassword).some((check) => !check.valid)) {
+      setStatus("error");
+      setStatusMessage("A senha temporária ainda não atende aos requisitos mínimos.");
+      return;
+    }
+
+    setMutatingId(user.id);
+    const response = await apiRequest<UsersResponse>(`${api.admin.users}/${user.id}`, {
+      method: "PUT",
+      body: JSON.stringify({ password: temporaryPassword, confirmPassword: confirmTemporaryPassword }),
+    });
+    setMutatingId("");
+    if (!response.success) {
+      setStatus("error");
+      setStatusMessage(response.error ?? "Falha ao redefinir a senha.");
+      return;
+    }
+    setUsers(response.data?.users ?? users);
+    setResettingId("");
+    setTemporaryPassword("");
+    setConfirmTemporaryPassword("");
+    setStatus("success");
+    setStatusMessage(`Senha temporária definida para ${user.email}. No próximo acesso, a pessoa precisará criar uma nova senha.`);
+    invalidateAdminResource([adminResourceKeys.users, adminResourceKeys.dashboard]);
     await refresh();
     await loadUsers();
   }
@@ -517,7 +556,7 @@ export default function UsuariosPage() {
             tooltip="Lista de usuários internos autorizados no CMS, com status e função de acesso."
           />
 
-          <div className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-2">
             {users.length > 0 ? (
               (userPages[usersPage] ?? []).map((user) => {
                 const editingThis = editingId === user.id;
@@ -551,19 +590,24 @@ export default function UsuariosPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                      {user.passwordResetRequestedAt ? (
+                        <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">
+                          Redefinição solicitada
+                        </span>
+                      ) : null}
                       {user.protected ? (
                         <span className="rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">
                           Supremo
                         </span>
                       ) : null}
                       <span
-                        className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-[11px] font-bold uppercase tracking-[0.14em] ${
+                        className={`inline-flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[11px] font-bold uppercase tracking-[0.14em] ${
                           user.active
                             ? "border-emerald-500/15 bg-emerald-500/10 text-emerald-700"
                             : "border-slate-200 bg-slate-100 text-slate-500"
                         }`}
                       >
-                        <span className={`h-1.5 w-1.5 rounded-full ${user.active ? "bg-emerald-500" : "bg-slate-400"}`} />
+                        {user.active ? <CheckCircle size={13} weight="fill" /> : <X size={13} weight="bold" />}
                         {user.active ? "Ativo" : "Inativo"}
                       </span>
                       <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[var(--primary)]/10 bg-[var(--primary)]/[0.08] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
@@ -662,6 +706,24 @@ export default function UsuariosPage() {
                     </div>
                   ) : null}
 
+                  {resettingId === user.id ? (
+                    <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3">
+                      <p className="text-xs font-semibold text-[var(--foreground)]">Definir senha temporária</p>
+                      <p className="mt-1 text-xs leading-5 text-[var(--color-muted-raw)]">A pessoa deverá trocar esta senha no próximo acesso.</p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <input type="password" value={temporaryPassword} onChange={(event) => setTemporaryPassword(event.target.value)} autoComplete="new-password" placeholder="Senha temporária" maxLength={72} className={developerInputClassName} />
+                        <input type="password" value={confirmTemporaryPassword} onChange={(event) => setConfirmTemporaryPassword(event.target.value)} autoComplete="new-password" placeholder="Confirmar senha" maxLength={72} className={developerInputClassName} />
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button type="button" onClick={() => void resetUserPassword(user)} disabled={mutatingId === user.id} className={developerPrimaryButtonClassName}>
+                          <Key size={16} weight="bold" />
+                          {mutatingId === user.id ? "Redefinindo..." : "Salvar senha temporária"}
+                        </button>
+                        <button type="button" onClick={() => { setResettingId(""); setTemporaryPassword(""); setConfirmTemporaryPassword(""); }} className={developerSecondaryButtonClassName}>Cancelar</button>
+                      </div>
+                    </div>
+                  ) : null}
+
                   <div className="mt-3 flex flex-wrap gap-2">
                     {editingThis ? (
                       <>
@@ -697,6 +759,20 @@ export default function UsuariosPage() {
                         >
                           <PencilSimple size={16} weight="bold" />
                           Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setResettingId((current) => current === user.id ? "" : user.id);
+                            setTemporaryPassword("");
+                            setConfirmTemporaryPassword("");
+                          }}
+                          disabled={!isSupreme || user.protected}
+                          className={developerGhostButtonClassName}
+                          title={user.protected ? "A conta suprema não recebe senha temporária." : !isSupreme ? "Ação restrita ao usuário supremo." : "Definir senha temporária"}
+                        >
+                          <Key size={16} weight="bold" />
+                          Redefinir senha
                         </button>
                         <button
                           type="button"

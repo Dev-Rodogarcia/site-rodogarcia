@@ -6,7 +6,11 @@ export interface User {
   createdAt: string;
   passwordChangeRequired?: boolean;
   permissions?: UserPermission[];
+  cmsTheme?: CmsTheme;
+  passwordResetRequestedAt?: string;
 }
+
+export type CmsTheme = "light" | "dark";
 
 export type UserPermission = "createUsers" | "deleteUsers";
 
@@ -21,7 +25,7 @@ export interface Session {
 export interface AuthSession {
   authenticated: boolean;
   csrfToken: string;
-  user?: Pick<User, "id" | "email" | "name" | "role" | "passwordChangeRequired" | "permissions">;
+  user?: Pick<User, "id" | "email" | "name" | "role" | "passwordChangeRequired" | "permissions" | "cmsTheme">;
   expiresAt?: number;
   setupRequired?: boolean;
 }
@@ -42,6 +46,6 @@ export interface RegisterRequest {
 export interface AuthResponse {
   success: boolean;
   message?: string;
-  user?: Pick<User, "id" | "email" | "name" | "role" | "passwordChangeRequired" | "permissions">;
+  user?: Pick<User, "id" | "email" | "name" | "role" | "passwordChangeRequired" | "permissions" | "cmsTheme">;
   csrfToken?: string;
 }

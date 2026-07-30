@@ -41,7 +41,8 @@ export default function ImprovementForm() {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!profile) return;
-    const payload = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const payload = new FormData(form);
     payload.set("profile", profile);
     attachments.forEach((file) => payload.append("attachments", file));
     setStatus("loading");
@@ -52,7 +53,7 @@ export default function ImprovementForm() {
       if (!response.ok) throw new Error(data.error ?? "Não foi possível enviar sua sugestão.");
       setStatus("success");
       setMessage(data.message ?? "Sua sugestão foi recebida. Obrigado por contribuir.");
-      event.currentTarget.reset();
+      form.reset();
       setAttachments([]);
       setPhone("");
     } catch (error) {

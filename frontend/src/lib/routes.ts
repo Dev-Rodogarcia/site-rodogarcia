@@ -81,10 +81,12 @@ export const admin = {
 export const api = {
   auth: {
     login: "/api/auth/login",
+    passwordResetRequest: "/api/auth/password-reset-request",
     logout: "/api/auth/logout",
     register: "/api/auth/register",
     session: "/api/auth/session",
     changePassword: "/api/auth/change-password",
+    cmsTheme: "/api/auth/cms-theme",
   },
   admin: {
     content: "/api/admin/content",
@@ -164,6 +166,7 @@ export const api = {
 } as const;
 
 export const external = {
+  developerProfile: "https://www.linkedin.com/in/dev-lucasandrade/",
   tracking: "https://rodogarcia.eslcloud.com.br/recipient_tracking",
   whatsappCommercial: "https://wa.me/5511993139536",
   whatsappQuoteFractional: "https://wa.me/5514991053933",
@@ -205,11 +208,16 @@ export const headerNavigation = [
 ] as const satisfies readonly NavigationItem[];
 
 export const drawerNavigation = [
-  ...headerNavigation,
   { href: site.careers, label: "Carreiras", key: "careers" },
-  { href: site.quote, label: "Cotação", key: "quote" },
   { href: site.collections, label: "Coletas", key: "collections" },
+  { href: site.contact, label: "Contato", key: "contact" },
+  { href: site.quote, label: "Cotação", key: "quote" },
+  { href: site.business, label: "Empresas", key: "business" },
   { href: site.improvements, label: "Melhoria contínua", key: "improvements" },
+  { href: site.services, label: "Serviços", key: "services" },
+  { href: site.about, label: "Sobre", key: "about" },
+  { href: site.voice, label: "Sua Voz", key: "voice" },
+  { href: site.home, label: "Início", key: "home" },
 ] as const satisfies readonly NavigationItem[];
 
 export const adminNavigationGroups = [
@@ -222,36 +230,48 @@ export const adminNavigationGroups = [
     label: "Páginas",
     key: "pages",
     items: [
+      { href: admin.careersPage, label: "Página Carreiras", key: "careers-page" },
+      { href: admin.collectionsPage, label: "Página Coletas", key: "collections-page" },
+      { href: admin.contactPage, label: "Página Contato", key: "contact-page" },
+      { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
+      { href: admin.businessPage, label: "Página Empresas", key: "business-page" },
       { href: admin.home, label: "Página Inicial", key: "home" },
+      { href: admin.improvements, label: "Página Melhoria", key: "improvements" },
       { href: admin.services, label: "Página Serviços", key: "services" },
       { href: admin.aboutPage, label: "Página Sobre", key: "about-page" },
-      { href: admin.businessPage, label: "Página Empresas", key: "business-page" },
-      { href: admin.contactPage, label: "Página Contato", key: "contact-page" },
-      { href: admin.careersPage, label: "Trabalho Con.", key: "careers-page" },
-      { href: admin.quotePage, label: "Página Cotação", key: "quote-page" },
-      { href: admin.collectionsPage, label: "Página Coletas", key: "collections-page" },
-      { href: admin.improvements, label: "Melhoria contínua", key: "improvements" },
-      { href: admin.footerLinks, label: "FOOTER LINKS", key: "footer-links" },
-      { href: admin.units, label: "Base de unidades", key: "units" },
     ],
   },
   {
-    label: "Mídia e automações",
-    key: "automation",
+    label: "Estrutura do site",
+    key: "site-structure",
     items: [
+      { href: admin.footerLinks, label: "Rodapé", key: "footer-links" },
+      { href: admin.units, label: "Unidades", key: "units" },
+    ],
+  },
+  {
+    label: "Ferramentas",
+    key: "tools",
+    items: [
+      { href: admin.analytics, label: "Analytics", key: "analytics" },
       { href: admin.images, label: "Imagens", key: "images" },
       { href: admin.popup, label: "Popup de saída", key: "popup" },
-      { href: admin.cookies, label: "LGPD/Cookies", key: "cookies" },
-      { href: admin.cookieMonitoring, label: "Consentimentos", key: "cookie-monitoring" },
-      { href: admin.analytics, label: "Analytics", key: "analytics" },
       { href: admin.tracking, label: "Rastreamento", key: "tracking" },
-      { href: admin.leads, label: "Leads", key: "leads" },
       { href: admin.seo, label: "SEO", key: "seo" },
     ],
   },
   {
-    label: "Segurança",
-    key: "security",
+    label: "Registros e privacidade",
+    key: "records-privacy",
+    items: [
+      { href: admin.cookieMonitoring, label: "Consentimentos", key: "cookie-monitoring" },
+      { href: admin.leads, label: "Leads", key: "leads" },
+      { href: admin.cookies, label: "LGPD e cookies", key: "cookies" },
+    ],
+  },
+  {
+    label: "Administração",
+    key: "administration",
     items: [{ href: admin.users, label: "Usuários", key: "users" }],
   },
 ] as const satisfies readonly {

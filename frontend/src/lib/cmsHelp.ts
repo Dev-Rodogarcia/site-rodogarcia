@@ -174,6 +174,7 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Quem pode criar", value: "O usuário supremo pode criar sempre. Um administrador comum só pode criar quando o supremo tiver marcado a permissão “Criar usuários” no menu de três pontos da conta." },
       { label: "Onde aparece", value: "O acesso é usado na tela /auth/entrar e, após a troca de senha, no painel /developer." },
       { label: "Senha temporária", value: "A senha definida aqui serve apenas para o primeiro login. O painel bloqueia o uso até que a pessoa informe uma nova senha forte.", technical: true },
+      { label: "Redefinição solicitada", value: "Quando uma pessoa pedir ajuda pelo link em /auth/entrar, o usuário supremo verá o aviso no card dela em /developer/usuarios. Ao definir uma nova senha temporária, o aviso é concluído e a pessoa precisará trocá-la no próximo acesso." },
       { label: "Após salvar", value: "A nova conta fica ativa e passa a exigir a troca da senha no próximo login." },
     ],
   },

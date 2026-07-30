@@ -259,7 +259,7 @@ export default function AnalyticsPage() {
     totalPages: topPagesTotalPages,
     nextPage: nextTopPagesPage,
     prevPage: prevTopPagesPage,
-  } = useCarouselPagination(topPages, 5);
+  } = useCarouselPagination(topPages, 8);
   const {
     pages: eventEntriesPages,
     currentPage: eventEntriesPage,
@@ -424,7 +424,7 @@ export default function AnalyticsPage() {
                 description={`Atualizado em ${formatDateTime(stats.stats.generatedAt ?? Date.now())}.`}
               />
 
-              <div className="flex-1 overflow-hidden">
+              <div className="overflow-hidden">
                 <div
                   className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${topPagesPage * 100}%)` }}
@@ -458,7 +458,7 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               </div>
-              <div className="mt-auto"><DeveloperCarouselPagination currentPage={topPagesPage} totalPages={topPagesTotalPages} onNext={nextTopPagesPage} onPrev={prevTopPagesPage} compact /></div>
+              <div className="mt-5"><DeveloperCarouselPagination currentPage={topPagesPage} totalPages={topPagesTotalPages} onNext={nextTopPagesPage} onPrev={prevTopPagesPage} compact /></div>
             </DeveloperCard>
 
             <DeveloperCard className="flex h-full flex-col p-5 sm:p-6">

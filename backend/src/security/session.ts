@@ -38,7 +38,8 @@ export function setSessionCookie(res: Response, session: Session): void {
     httpOnly: true,
     secure: env.isProduction,
     sameSite: "strict",
-    maxAge: SESSION_TTL_MS,
+    // Sem Max-Age/Expires: o navegador descarta o identificador ao encerrar a sessão.
+    // A validade de oito horas continua sendo aplicada no servidor como defesa adicional.
     path: "/",
   });
 }

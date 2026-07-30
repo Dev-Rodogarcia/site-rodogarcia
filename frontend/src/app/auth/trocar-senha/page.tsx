@@ -61,7 +61,7 @@ export default function ChangePasswordPage() {
         setServerError(data.error ?? "Não foi possível alterar a senha.");
         return;
       }
-      window.location.href = admin.root;
+      window.location.href = `${admin.root}?passwordChanged=1`;
     } catch {
       setServerError("Erro de conexão. Tente novamente.");
     } finally {

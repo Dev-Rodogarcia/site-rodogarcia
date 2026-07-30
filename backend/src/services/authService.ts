@@ -29,6 +29,7 @@ export function publicUser(user: UserRecord) {
     isOwner: user.isOwner === true,
     passwordChangeRequired: isPasswordChangeRequired(user),
     permissions: user.permissions ?? [],
+    cmsTheme: user.cmsTheme,
   };
 }
 
@@ -148,7 +149,8 @@ function registerFailedLogin(req: Request, email: string) {
   if (email) registerHit("login:email", email, windowMs);
 }
 
-export function listUsers() {
+export function listUsers(actor?: UserRecord) {
+  const canViewPasswordResetRequests = isSupremeUser(actor);
   return userRepository
     .list()
     .map((user) => ({
@@ -156,6 +158,7 @@ export function listUsers() {
       createdAt: user.createdAt,
       active: user.active !== false,
       protected: isSupremeUser(user),
+      passwordResetRequestedAt: canViewPasswordResetRequests ? user.passwordResetRequestedAt : undefined,
     }))
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
 }
@@ -182,6 +185,18 @@ export function login(req: Request) {
 
   const session = createSession(user.id);
   return { user, session };
+}
+
+/**
+ * A resposta é sempre genérica para não revelar se um endereço possui conta.
+ * O pedido é visível apenas para o usuário supremo na gestão de acessos.
+ */
+export function requestPasswordReset(params: { email?: unknown }) {
+  const email = parseUserEmail(params.email, true)!;
+  const user = userRepository.findByEmail(email);
+  if (user && user.active !== false) {
+    userRepository.update(user.id, { passwordResetRequestedAt: new Date().toISOString() });
+  }
 }
 
 function createUserRecord(
@@ -303,6 +318,7 @@ export function updateUser(
     patch.passwordHash = hashPassword(password);
     // A password defined by the account owner is temporary until its holder replaces it.
     patch.mustChangePassword = isSupremeUser(target) ? false : true;
+    patch.passwordResetRequestedAt = undefined;
   }
 
   const updated = userRepository.update(target.id, patch);
@@ -343,6 +359,17 @@ export function changeOwnPassword(
     passwordHash: hashPassword(password),
     mustChangePassword: false,
   });
+  if (!updated) throw new HttpError(404, "Usuário não encontrado.");
+  return updated;
+}
+
+export function updateOwnCmsTheme(user: UserRecord, params: { theme?: unknown }) {
+  const theme = params.theme;
+  if (theme !== "light" && theme !== "dark") {
+    throw new HttpError(422, "Tema do CMS inválido.");
+  }
+
+  const updated = userRepository.update(user.id, { cmsTheme: theme });
   if (!updated) throw new HttpError(404, "Usuário não encontrado.");
   return updated;
 }
