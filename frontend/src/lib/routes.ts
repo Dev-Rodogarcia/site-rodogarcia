@@ -64,6 +64,7 @@ export const admin = {
   quotePage: "/developer/cotacao",
   collectionsPage: "/developer/coletas",
   improvements: "/developer/melhorias",
+  headerNavigation: "/developer/navegacao",
   footerLinks: "/developer/footer-links",
   units: "/developer/unidades",
   popup: "/developer/popup-exit",
@@ -99,6 +100,7 @@ export const api = {
     homeSection3: "/api/admin/home/section-3",
     homeQuickActions: "/api/admin/home/quick-actions",
     footerLinks: "/api/admin/footer-links",
+    headerNavigation: "/api/admin/header-navigation",
     footerLinksSection: (sectionKey: string) =>
       `/api/admin/footer-links/${sectionKey}`,
     homeRegionalPresence: "/api/admin/home/regional-presence",
@@ -245,6 +247,7 @@ export const adminNavigationGroups = [
     label: "Estrutura do site",
     key: "site-structure",
     items: [
+      { href: admin.headerNavigation, label: "Navegação", key: "header-navigation" },
       { href: admin.footerLinks, label: "Rodapé", key: "footer-links" },
       { href: admin.units, label: "Unidades", key: "units" },
     ],

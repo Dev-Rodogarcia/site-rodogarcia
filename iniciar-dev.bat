@@ -39,6 +39,12 @@ echo [Rodogarcia DEV] Encerrando processos nas portas 4012 e 5012...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(4012,5012); Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $ports -contains $_.LocalPort } | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { try { Stop-Process -Id $_ -Force -ErrorAction Stop } catch {} }" >nul 2>&1
 timeout /t 1 /nobreak >nul
 
+rem O cache de rotas do Next e gerado no desenvolvimento e pode ficar inconsistente apos interrupcoes.
+if exist "frontend\.next" (
+  echo [Rodogarcia DEV] Limpando cache de rotas do frontend...
+  rmdir /s /q "frontend\.next"
+)
+
 if not exist "backend\node_modules" (
   echo [Rodogarcia DEV] Instalando dependencias do backend...
   pushd backend
@@ -55,9 +61,10 @@ if not exist "frontend\node_modules" (
   popd
 )
 
-echo [Rodogarcia DEV] Abrindo backend e frontend em janelas separadas...
-start "Rodogarcia Backend DEV" cmd /k "cd /d ""%~dp0backend"" && npm run dev"
-start "Rodogarcia Frontend DEV" cmd /k "cd /d ""%~dp0frontend"" && npm run dev"
+echo [Rodogarcia DEV] Iniciando backend e frontend neste terminal...
+rem /b mantém os dois processos no console atual (inclusive no terminal integrado do VS Code).
+start "Rodogarcia Backend DEV" /b cmd /d /c "cd /d ""%~dp0backend"" && npm run dev"
+start "Rodogarcia Frontend DEV" /b cmd /d /c "cd /d ""%~dp0frontend"" && npm run dev"
 
 echo.
 echo [Rodogarcia DEV] Backend:  http://127.0.0.1:4012

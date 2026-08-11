@@ -367,7 +367,7 @@ export default function ImagensPage() {
               />
             </DeveloperField>
 
-            <div className="rounded-[24px] border border-[var(--border)] bg-white/68 p-4">
+            <div>
               {previewUrl ? (
                 <button
                   type="button"
@@ -449,7 +449,7 @@ export default function ImagensPage() {
               </div>
             ) : null}
 
-            <button type="button" onClick={handleUpload} disabled={uploading} className={developerPrimaryButtonClassName}>
+            <button type="button" onClick={handleUpload} disabled={uploading} className={`${developerPrimaryButtonClassName} mt-1`}>
               <UploadSimple size={18} weight="bold" />
               {uploading ? "Enviando..." : "Enviar mídia"}
             </button>

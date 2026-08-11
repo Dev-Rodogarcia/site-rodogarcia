@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Briefcase, Clock, MapPinLine } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, Briefcase, Clock, MapPinLine } from "@phosphor-icons/react";
 import type { CareersPageJob } from "@/types/content";
-import { cn } from "@/lib/utils";
 
 function isExternalUrl(url: string) {
   return url.startsWith("http") || url.startsWith("mailto:") || url.startsWith("tel:");
@@ -17,7 +16,10 @@ export function CareersJobsList({ jobs }: { jobs: CareersPageJob[] }) {
   );
   const [page, setPage] = useState(0);
   const totalPages = Math.max(1, Math.ceil(activeJobs.length / 3));
-  const currentJobs = activeJobs.slice(page * 3, page * 3 + 3);
+  const currentPage = Math.min(page, totalPages - 1);
+  const firstJob = currentPage * 3 + 1;
+  const lastJob = Math.min((currentPage + 1) * 3, activeJobs.length);
+  const currentJobs = activeJobs.slice(currentPage * 3, currentPage * 3 + 3);
 
   if (activeJobs.length === 0) {
     return (
@@ -79,25 +81,30 @@ export function CareersJobsList({ jobs }: { jobs: CareersPageJob[] }) {
         })}
       </div>
 
-      {totalPages > 1 ? (
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
-          {Array.from({ length: totalPages }).map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setPage(index)}
-              className={cn(
-                "min-h-10 rounded-full border px-4 text-sm font-semibold transition-all",
-                page === index
-                  ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                  : "border-[var(--border)] bg-white/80 text-[var(--foreground)] hover:bg-white"
-              )}
-            >
-              Página {index + 1}
-            </button>
-          ))}
+      <nav aria-label="Paginação de vagas" className="mt-10 flex flex-col gap-4 border-t border-[var(--border)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-[var(--color-muted-raw)]" aria-live="polite">
+          Mostrando <span className="font-semibold text-[var(--foreground)]">{firstJob}–{lastJob}</span> de <span className="font-semibold text-[var(--foreground)]">{activeJobs.length} {activeJobs.length === 1 ? "vaga" : "vagas"}</span>
+          <span className="mx-2 text-[var(--border)]">•</span>Página {currentPage + 1} de {totalPages}
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage(currentPage - 1)}
+            disabled={currentPage === 0}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--primary)]/35 hover:text-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            <ArrowLeft size={16} weight="bold" />Anterior
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage(currentPage + 1)}
+            disabled={currentPage >= totalPages - 1}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[var(--primary)] bg-[var(--primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-strong)] disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            Próxima<ArrowRight size={16} weight="bold" />
+          </button>
         </div>
-      ) : null}
+      </nav>
     </>
   );
 }

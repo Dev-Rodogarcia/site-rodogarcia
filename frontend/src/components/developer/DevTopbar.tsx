@@ -59,7 +59,7 @@ export default function DevTopbar({ onOpenNavigation, darkTheme, onToggleTheme }
           <div className="flex min-w-0 flex-wrap items-stretch gap-2">
             {stats.map((stat) => (
               <div key={stat.label} className="flex h-[54px] w-fit items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-3 shadow-sm backdrop-blur-md">
-                <p className="max-w-[62px] text-[9px] font-semibold uppercase leading-3 tracking-[0.14em] text-slate-300">
+                <p className="shrink-0 whitespace-nowrap text-[9px] font-semibold uppercase leading-3 tracking-[0.14em] text-slate-300">
                   {stat.label}
                 </p>
                 <p className="shrink-0 text-xl font-bold leading-none tracking-[-0.04em] text-sky-200">

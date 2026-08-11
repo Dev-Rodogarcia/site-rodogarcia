@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import {
   Briefcase,
-  ChatCircleDots,
   CheckCircle,
-  EnvelopeSimple,
   ShieldCheck,
   Trophy,
   UsersThree,
@@ -17,6 +15,7 @@ import {
   SectionHeader,
 } from "@/components/internal/PageContent";
 import { CareersJobsList } from "@/components/internal/CareersJobsList";
+import { CareersApplicationSelector } from "@/components/internal/CareersApplicationSelector";
 import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { external, seo, site } from "@/lib/routes";
@@ -87,7 +86,7 @@ const PROCESS_STEPS = [
   {
     step: "01",
     title: "Candidatura",
-    description: "Envie seu currículo por e-mail, com a vaga de interesse no assunto e telefone para retorno.",
+    description: "Escolha a filial de interesse e envie seu currículo por e-mail, com a vaga no assunto e telefone para retorno.",
   },
   {
     step: "02",
@@ -208,6 +207,7 @@ export default async function TrabalheConoscoPage() {
   const content = await fetchPublicContent();
   const careersPage = content.data?.careersPage ?? FALLBACK_CAREERS_PAGE;
   const cultureImage = careersPage.cultureImage;
+  const units = content.data?.units ?? [];
 
   return (
     <PageShell>
@@ -237,7 +237,7 @@ export default async function TrabalheConoscoPage() {
                 35 anos de história, operação nacional e um time que cresce com método. Se você quer mais do que uma vaga, a Rodogarcia tem o ambiente certo.
               </p>
 
-              <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
+              <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
                 <ActionLink
                   action={{
                     label: careersPage.hero.buttons[0]?.label || "Ver vagas abertas",
@@ -350,110 +350,35 @@ export default async function TrabalheConoscoPage() {
       </PageSection>
 
       {/* SEÇÃO 5 — azul escuro: candidatura direta */}
-      <section id="candidatura" className="relative overflow-hidden bg-slate-950 py-24 sm:py-32 scroll-mt-28">
+      <section id="candidatura" className="relative overflow-hidden bg-slate-950 py-16 sm:py-20 scroll-mt-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
-        
-        <PageContainer className="relative">
-          <div className="grid gap-16 lg:grid-cols-2 lg:gap-12 xl:gap-20 items-center">
-            {/* Esquerda: CTA e Instruções */}
-            <div className="flex flex-col items-start text-left">
-              <span className="inline-flex items-center rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-300 backdrop-blur-sm">
-                Candidatura direta
-              </span>
-              
-              <h2 className="mt-8 text-[clamp(2.2rem,4vw,3.2rem)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
-                Sem formulário longo: envie seu perfil do jeito mais simples.
-              </h2>
-              
-              <p className="mt-6 text-[15px] leading-8 text-slate-300 sm:text-base">
-                O caminho aqui é direto. Mande seu currículo por e-mail com a vaga no assunto ou fale com o time para orientação rápida.
-              </p>
 
-              <div className="mt-12 grid w-full grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4">
-                <ActionLink
-                  action={{
-                    label: careersPage.directApplication.buttons[0]?.label || "Enviar curriculo por e-mail",
-                    href: careersPage.directApplication.buttons[0]?.url || external.careersEmailWithSubject,
-                    external: careersPage.directApplication.buttons[0]?.external,
-                  }}
-                  className="min-h-[60px] w-full min-w-0 flex-1 justify-center border-none bg-sky-500 text-[15px] text-white shadow-[0_12px_32px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:shadow-[0_20px_48px_rgba(14,165,233,0.35)] focus-visible:ring-sky-500/30 sm:w-auto"
-                />
+        <PageContainer className="relative">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-300 backdrop-blur-sm">
+                Candidatura direta
+            </span>
+            <h2 className="mt-5 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-tight tracking-[-0.04em] text-white">
+              Envie seu currículo para a filial desejada.
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-7 text-slate-300 sm:text-base">
+              Selecione a filial e abra seu e-mail já direcionado para ela.
+            </p>
+
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-5 text-left shadow-xl backdrop-blur-sm sm:p-6">
+              <CareersApplicationSelector units={units} />
+              <div className="mt-4 border-t border-white/10 pt-4">
                 <ActionLink
                   action={{
                     label: careersPage.directApplication.buttons[1]?.label || "Abrir contato",
                     href: careersPage.directApplication.buttons[1]?.url || site.contact,
                     external: careersPage.directApplication.buttons[1]?.external,
-                    variant: "secondary",
+                    variant: "ghost",
                   }}
-                  className="min-h-[60px] w-full min-w-0 flex-1 justify-center border border-slate-700 bg-transparent text-[15px] text-white hover:border-slate-500 hover:bg-slate-800 focus-visible:ring-slate-700/50 sm:w-auto"
+                  tone="dark"
+                  className="min-h-9 px-0 py-1 text-sm text-sky-300 hover:text-white"
                 />
-              </div>
-
-              <div className="mt-16 grid w-full gap-6 border-t border-white/10 pt-8 md:grid-cols-3">
-                {[
-                  {
-                    label: "O que enviar",
-                    detail: "Currículo em PDF ou LinkedIn, telefone para retorno e cidade de atuação.",
-                  },
-                  {
-                    label: "Assunto ideal",
-                    detail: "Use o nome da vaga quando houver posição aberta. Para banco de talentos, informe seu perfil geral.",
-                  },
-                  {
-                    label: "Prazo de retorno",
-                    detail: "O RH faz a primeira leitura e pode entrar em contato em até 5 dias úteis.",
-                  },
-                ].map((item) => (
-                  <div key={item.label} className="flex flex-col">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-300">
-                      {item.label}
-                    </p>
-                    <p className="mt-3 text-sm leading-6 text-slate-400">{item.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Direita: O que valorizamos (Card) */}
-            <div className="relative flex w-full flex-col gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-8 sm:p-10 shadow-2xl backdrop-blur-md">
-              <div className="border-b border-white/10 pb-8">
-                <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-300">
-                  <EnvelopeSimple size={16} weight="bold" />
-                  Envio rápido
-                </p>
-                <h3 className="mt-4 text-xl font-bold tracking-tight text-white">
-                  Um canal direto, sem atrito.
-                </h3>
-                <p className="mt-3 text-[15px] leading-7 text-slate-400">
-                  Se o perfil combinar com a operação, o RH puxa os próximos passos sem exigir cadastro longo no site.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-300">
-                  O que valorizamos
-                </p>
-                <div className="mt-6 flex flex-col gap-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-sky-300 ring-1 ring-sky-500/40">
-                      <UsersThree size={18} weight="bold" />
-                    </div>
-                    <p className="text-[15px] leading-7 text-slate-300">Disciplina, colaboração e vontade de evoluir consistentemente.</p>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-sky-300 ring-1 ring-sky-500/40">
-                      <Briefcase size={18} weight="bold" />
-                    </div>
-                    <p className="text-[15px] leading-7 text-slate-300">Perfis que entendem ritmo operacional e responsabilidade com entrega.</p>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-sky-300 ring-1 ring-sky-500/40">
-                      <ChatCircleDots size={18} weight="bold" />
-                    </div>
-                    <p className="text-[15px] leading-7 text-slate-300">Comunicação clara, pontualidade e comprometimento com o time.</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -469,7 +394,7 @@ export default async function TrabalheConoscoPage() {
           <div className="flex flex-col items-center justify-between gap-12 rounded-[2rem] border border-[var(--border)] bg-white/60 p-8 shadow-sm backdrop-blur-md lg:flex-row lg:p-12 xl:p-16">
             
             <div className="flex max-w-2xl flex-col items-start text-left">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--primary)]/10 bg-[var(--primary)]/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)] backdrop-blur-sm">
+              <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[var(--primary)]/10 bg-[var(--primary)]/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)] backdrop-blur-sm sm:px-4 sm:tracking-[0.24em]">
                 Não encontrou a vaga certa?
               </span>
               
@@ -495,12 +420,11 @@ export default async function TrabalheConoscoPage() {
               </ul>
             </div>
             
-            <div className="grid w-full shrink-0 grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4 lg:w-auto lg:flex-col">
+            <div className="grid w-full shrink-0 grid-cols-1 gap-3 sm:flex sm:flex-row sm:gap-4 lg:w-auto lg:flex-col">
               <ActionLink
                 action={{
                   label: careersPage.finalCta.buttons[0]?.label || "Enviar curriculo",
-                  href: careersPage.finalCta.buttons[0]?.url || external.careersEmailWithSubject,
-                  external: careersPage.finalCta.buttons[0]?.external,
+                  href: "#candidatura",
                 }}
                 className="min-h-[64px] w-full min-w-0 shadow-[0_12px_32px_rgba(29,78,216,0.22)] sm:min-w-[260px]"
               />

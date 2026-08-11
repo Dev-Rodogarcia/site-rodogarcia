@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Archive, CheckCircle, File, Image, Lightbulb, Paperclip, User, UsersThree } from "@phosphor-icons/react";
 import { DeveloperCard, DeveloperHero, DeveloperMessage, DeveloperPage, DeveloperSectionHeading, developerSecondaryButtonClassName } from "@/components/developer/ui";
 import { ImprovementGuidanceEditor } from "@/components/developer/ImprovementGuidanceEditor";
+import { DeveloperCmsAccordion } from "@/components/developer/DeveloperCmsAccordion";
+import ImprovementForm from "@/components/forms/ImprovementForm";
 import { adminResourceKeys, invalidateAdminResource, useAdminResource } from "@/hooks/useAdminResource";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { api } from "@/lib/routes";
@@ -19,6 +21,7 @@ function date(value: string) { return new Intl.DateTimeFormat("pt-BR", { dateSty
 
 export default function ImprovementsPage() {
   const [status, setStatus] = useState<ImprovementStatus>("pending");
+  const [internalFormOpen, setInternalFormOpen] = useState(false);
   const { apiRequest } = useApiRequest();
   const { data, loading, error, refresh } = useAdminResource<{ improvements: Improvement[] }>({
     key: adminResourceKeys.improvements(status),
@@ -36,8 +39,15 @@ export default function ImprovementsPage() {
     await refresh();
   }
 
+  async function handleInternalSubmission() {
+    invalidateAdminResource([adminResourceKeys.improvements("pending"), adminResourceKeys.improvements("completed"), adminResourceKeys.improvements("archived")]);
+    if (status === "pending") await refresh();
+  }
+
   return <DeveloperPage><DeveloperHero eyebrow="Melhoria contínua" title="Solicitações recebidas" description="Acompanhe sugestões de usuários do site e colaboradores, mantendo a triagem atualizada." stats={[{ label: statusLabels[status], value: improvements.length }]} />
     <DeveloperCard className="mt-5"><ImprovementGuidanceEditor /></DeveloperCard>
+    <DeveloperCard className="mt-5"><DeveloperCmsAccordion items={[{ id: "internal-improvement" }]} openIndex={internalFormOpen ? 0 : null} onOpenChange={(index) => setInternalFormOpen(index === 0)} getEyebrow={() => "Sugestão interna"} getTitle={() => "Registrar uma melhoria como colaborador"} renderItem={() => <ImprovementForm profile="employee" endpoint={api.admin.improvements} internal onSubmitted={() => void handleInternalSubmission()} />} />
+    </DeveloperCard>
     <DeveloperCard className="mt-5"><DeveloperSectionHeading eyebrow="Triagem" title="Escolha uma lista" description="Pendentes são recebidas para avaliação. Concluídas são arquivadas automaticamente após 60 dias e as arquivadas são excluídas, com seus anexos, 60 dias depois." />
       <div className="mt-4 flex flex-wrap gap-2">{(Object.keys(statusLabels) as ImprovementStatus[]).map((item) => <button type="button" key={item} onClick={() => setStatus(item)} className={cn(developerSecondaryButtonClassName, status === item && "border-[var(--primary)] bg-[var(--primary)] text-white hover:bg-[var(--color-primary-strong)] hover:text-white")}>{statusLabels[item]}</button>)}</div>
     </DeveloperCard>

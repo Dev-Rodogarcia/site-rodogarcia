@@ -5,6 +5,7 @@ import {
   getCmsPage,
   getContent,
   getFooterLinks,
+  getHeaderNavigation,
   getHomePage,
   getServicesPage,
   getItems,
@@ -13,6 +14,7 @@ import {
   reorderItems,
   updateItem,
   updateFooterLinks,
+  updateHeaderNavigation,
   updateHomeSection,
   updateCmsPageSection,
   updateServicesPageSection,
@@ -90,6 +92,14 @@ export const getFooterLinksController: RequestHandler = asyncHandler((req, res) 
   });
 });
 
+export const getHeaderNavigationController: RequestHandler = asyncHandler((req, res) => {
+  res.json({
+    user: publicUser(req.auth!.user),
+    csrfToken: req.auth!.session.csrfToken,
+    headerNavigation: getHeaderNavigation(),
+  });
+});
+
 function updateHomeSectionController(section: HomeSectionKey): RequestHandler {
   return asyncHandler((req, res) => {
     const homePage = updateHomeSection(section, req.body ?? {});
@@ -151,6 +161,12 @@ export const updateFooterLinksSectionController: RequestHandler = asyncHandler((
     target: `footer-links:${sectionKey}`,
   });
   res.json({ message: "FOOTER LINKS atualizado com sucesso.", footerLinks });
+});
+
+export const updateHeaderNavigationController: RequestHandler = asyncHandler((req, res) => {
+  const headerNavigation = updateHeaderNavigation(req.body ?? {});
+  recordAuditAction({ req, action: "content.header_navigation_update", target: "header-navigation" });
+  res.json({ message: "Navegação atualizada com sucesso.", headerNavigation });
 });
 
 export const getSiteTextsController: RequestHandler = asyncHandler((req, res) => {

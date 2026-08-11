@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseImprovement } from "../src/validators/improvement.js";
+import { parseAdminImprovement, parseImprovement } from "../src/validators/improvement.js";
 
 const base = {
   name: "Ana Silva",
@@ -24,5 +24,18 @@ describe("validação de sugestões de melhoria", () => {
   it("normaliza telefone brasileiro e bloqueia quantidade inválida de dígitos", () => {
     expect(parseImprovement({ ...base, profile: "employee", category: "automation", branch: "Osasco/SP", phone: "(11) 99999-0000" }).phone).toBe("11999990000");
     expect(() => parseImprovement({ ...base, profile: "employee", category: "automation", branch: "Osasco/SP", phone: "11999" })).toThrow("telefone brasileiro válido");
+  });
+
+  it("aceita a sugestão interna sem telefone ou filial", () => {
+    expect(parseAdminImprovement({ ...base, profile: "employee", category: "automation", area: "Operação" })).toMatchObject({
+      profile: "employee",
+      area: "Operação",
+      branch: "",
+      phone: "",
+    });
+  });
+
+  it("rejeita perfil de usuário do site no formulário interno", () => {
+    expect(() => parseAdminImprovement({ ...base, profile: "site_user", category: "site_suggestion" })).toThrow("somente sugestões de colaboradores");
   });
 });

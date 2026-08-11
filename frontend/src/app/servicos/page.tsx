@@ -260,7 +260,7 @@ export default async function ServicosPage() {
             passo.
           </p>
 
-          <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:justify-center">
+          <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:justify-center">
             <FinalQuoteCta href={quoteUrl} />
 
             <a

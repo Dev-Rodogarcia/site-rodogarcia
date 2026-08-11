@@ -376,8 +376,8 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                 description="Selecione uma seção fixa para editar seu conteúdo com mais foco."
               />
 
-              <div className="grid gap-2 rounded-[22px] border border-[var(--border)]/80 bg-white/70 p-2 sm:grid-cols-3">
-                {aboutSections.map((section) => {
+              <div className="grid gap-2 rounded-[18px] border border-[var(--border)]/80 bg-white/70 p-1.5 sm:grid-cols-3">
+                {aboutSections.map((section, index) => {
                   const isActive = section.key === activeAboutSection;
                   return (
                     <button
@@ -385,16 +385,19 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
                       type="button"
                       onClick={() => setActiveAboutSection(section.key)}
                       className={cn(
-                        "rounded-[18px] border px-4 py-3 text-left transition-all duration-200",
+                        "rounded-[14px] border px-3 py-2 text-left transition-all duration-200",
                         "hover:-translate-y-0.5 hover:border-[var(--primary)]/35 hover:bg-white",
                         isActive
                           ? "border-[var(--primary)]/38 bg-[linear-gradient(145deg,rgba(255,255,255,0.96)_0%,rgba(219,234,254,0.9)_100%)] shadow-[0_14px_34px_rgba(29,78,216,0.12)]"
                           : "border-transparent bg-transparent text-[var(--color-muted-raw)]"
                       )}
                     >
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.16em]">Seção fixa</span>
-                      <span className="mt-1 block text-sm font-semibold text-[var(--foreground)]">{section.label}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[var(--color-muted-raw)]">{section.description}</span>
+                      <span className="sr-only">Seção fixa</span>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className={cn("inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold", isActive ? "bg-[var(--primary)] text-white" : "bg-slate-200/80 text-slate-600")}>{index + 1}</span>
+                        <span className="shrink-0 text-sm font-semibold text-[var(--foreground)]">{section.label}</span>
+                        <span className="truncate text-xs text-[var(--color-muted-raw)]">{section.description}</span>
+                      </span>
                     </button>
                   );
                 })}
@@ -461,7 +464,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               <DeveloperSectionHeading eyebrow="Cultura e benefícios" title="Foto da seção" description="Somente imagem e texto alternativo." />
               <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("cultureImage", page.cultureImage); }}>
                 <div className="rounded-[22px] border border-slate-200 bg-slate-50/76 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-                  <div className="grid gap-4 xl:grid-cols-[250px_minmax(0,1fr)] xl:items-start">
+                  <div className="grid gap-4 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start">
                     <DeveloperMediaPreview value={page.cultureImage.src} previewAlt={page.cultureImage.alt} mediaType="image" compact />
                   <div className="space-y-4">
                     <DeveloperMediaField label="Imagem" mediaType="image" required value={page.cultureImage.src} onChange={(src) => update((draft) => { draft.cultureImage.src = src; })} previewAlt={page.cultureImage.alt} showPreview={false} />
@@ -583,9 +586,9 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("hero", current.hero); }}>
           <div className={priorityPanelClassName}>
             <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">Mídia principal <span className="text-[var(--primary)]">*</span></p>
-            <div className="grid gap-4 xl:grid-cols-[minmax(220px,0.62fr)_minmax(0,1.9fr)] xl:items-start">
+            <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
               <DeveloperMediaPreview value={current.hero.media.src} previewAlt={current.hero.media.alt} mediaType="image" compact />
-              <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
+              <div className="grid gap-4">
                 <DeveloperMediaField
                   label="Arquivo selecionado"
                   mediaType="image"
@@ -624,9 +627,9 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("compliance", current.compliance); }}>
           <div className={priorityPanelClassName}>
             <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">Imagem principal <span className="text-[var(--primary)]">*</span></p>
-            <div className="grid gap-4 xl:grid-cols-[minmax(220px,0.62fr)_minmax(0,1.9fr)] xl:items-start">
+            <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
               <DeveloperMediaPreview value={current.compliance.image.src} previewAlt={current.compliance.image.alt} mediaType="image" compact />
-              <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
+              <div className="grid gap-4">
                 <DeveloperMediaField label="Arquivo selecionado" mediaType="image" required value={current.compliance.image.src} onChange={(src) => update((draft) => { draft.compliance.image.src = src; })} previewAlt={current.compliance.image.alt} showPreview={false} equalControlWidths />
                 <TextInput label="Texto alternativo" value={current.compliance.image.alt} maxLength={160} onChange={(value) => update((draft) => { draft.compliance.image.alt = value; })} />
               </div>

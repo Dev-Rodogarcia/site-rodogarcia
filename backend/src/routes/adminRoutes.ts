@@ -13,6 +13,7 @@ import {
   getCmsPageController,
   getContentController,
   getFooterLinksController,
+  getHeaderNavigationController,
   getHomeController,
   getServicesPageController,
   getSiteTextsController,
@@ -21,6 +22,7 @@ import {
   reorderEntityController,
   updateEntityController,
   updateFooterLinksSectionController,
+  updateHeaderNavigationController,
   updateUserController,
   updateHomeHeroController,
   updateHomeSection1Controller,
@@ -37,7 +39,7 @@ import {
   updateSiteTextsController,
 } from "../controllers/cmsController.js";
 import { listUnifiedLeadsController } from "../controllers/leadsController.js";
-import { downloadImprovementAttachmentController, listImprovementsController, updateImprovementStatusController } from "../controllers/improvementController.js";
+import { createAdminImprovementController, downloadImprovementAttachmentController, listImprovementsController, updateImprovementStatusController } from "../controllers/improvementController.js";
 import {
   deleteImageController,
   getMediaSlotsController,
@@ -63,6 +65,10 @@ export const adminRouter = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 64 * 1024 * 1024, files: 1 },
+});
+const improvementUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 5 },
 });
 
 adminRouter.use(requireAdmin);
@@ -163,6 +169,14 @@ adminRouter.put(
   requireCsrf,
   updateFooterLinksSectionController
 );
+adminRouter.get("/header-navigation", getHeaderNavigationController);
+adminRouter.put(
+  "/header-navigation",
+  requireAllowedOrigin,
+  requireJson,
+  requireCsrf,
+  updateHeaderNavigationController
+);
 adminRouter.get("/site-texts", getSiteTextsController);
 adminRouter.post(
   "/site-texts",
@@ -227,6 +241,7 @@ adminRouter.post(
 
 adminRouter.get("/leads", listUnifiedLeadsController);
 adminRouter.get("/improvements", listImprovementsController);
+adminRouter.post("/improvements", requireAllowedOrigin, requireCsrf, improvementUpload.array("attachments", 5), createAdminImprovementController);
 adminRouter.get("/improvements/:id/attachments/:attachmentId", downloadImprovementAttachmentController);
 adminRouter.patch("/improvements/:id", requireAllowedOrigin, requireJson, requireCsrf, updateImprovementStatusController);
 adminRouter.get("/tracking-events", listTrackingEventsController);

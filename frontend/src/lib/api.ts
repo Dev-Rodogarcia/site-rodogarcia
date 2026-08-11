@@ -7,6 +7,7 @@ import type {
   CollectionsPageContent,
   ContactPageContent,
   FooterLinksContent,
+  HeaderNavigationContent,
   HomePageContent,
   ImprovementsPageContent,
   OperationalUnit,
@@ -39,6 +40,7 @@ export interface PublicContentResponse {
   collectionsPage: CollectionsPageContent;
   improvementsPage: ImprovementsPageContent;
   footerLinks: FooterLinksContent;
+  headerNavigation: HeaderNavigationContent;
   units: OperationalUnit[];
   siteTexts: Record<string, string>;
 }

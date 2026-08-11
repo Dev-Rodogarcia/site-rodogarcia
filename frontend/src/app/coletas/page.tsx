@@ -78,7 +78,7 @@ export default async function CollectionsPage() {
                 <span className="mt-1 block text-white">com mais clareza.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-[44rem] text-sm leading-7 text-white/68 sm:text-base">Informe a operação, valide a nota fiscal e receba o número da coleta registrada. Se o cadastro exigir atendimento, nós direcionamos o próximo passo.</p>
-              <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
+              <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
                 {collectionsPage.hero.buttons.slice(0, 2).map((button, index) => (
                   <ActionLink key={`${button.label}-${button.url}`} action={{ label: button.label, href: button.url, variant: index === 1 ? "secondary" : "primary" }} tone="dark" className="w-full min-w-0 sm:w-auto" />
                 ))}

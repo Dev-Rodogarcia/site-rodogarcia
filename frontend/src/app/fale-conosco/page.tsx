@@ -323,7 +323,7 @@ export default async function FaleConoscoPage() {
               </ul>
             </div>
 
-            <div className="grid w-full shrink-0 grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4 lg:w-auto lg:flex-col">
+            <div className="grid w-full shrink-0 grid-cols-1 gap-3 sm:flex sm:flex-row sm:gap-4 lg:w-auto lg:flex-col">
               <ActionLink
                 action={{
                   label: contactPage.finalCta.buttons[0]?.label || "Solicitar cotação",

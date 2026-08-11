@@ -348,20 +348,22 @@ export default function AnalyticsPage() {
         ]}
         actions={
           <div className="flex items-stretch gap-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 shadow-[0_6px_14px_rgba(15,23,42,0.03)]">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-raw)]">
-                Período (dias)
-              </span>
+            <div className="flex h-[54px] items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 shadow-sm backdrop-blur-md">
+              <label htmlFor="analytics-period" className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+                Período
+              </label>
               <input
+                id="analytics-period"
                 type="number"
                 min={1}
                 max={120}
                 value={daysInput}
                 onChange={(event) => setDaysInput(Number(event.target.value) || 30)}
-                className="mt-1.5 h-8 w-20 rounded-lg border border-[var(--border)] bg-white px-2.5 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--primary)]/30"
+                aria-label="Período em dias"
+                className="h-8 w-16 rounded-lg border border-white/10 bg-slate-900/70 px-2 text-sm font-medium text-sky-100 outline-none transition-colors focus:border-sky-300/60 focus:ring-2 focus:ring-sky-300/15"
               />
             </div>
-            <button type="button" onClick={handleRefresh} className={cn(developerSecondaryButtonClassName, "min-h-[76px] px-4 py-2 text-xs")}>
+            <button type="button" onClick={handleRefresh} className={cn(developerSecondaryButtonClassName, "h-[54px] min-h-[54px] px-4 py-2 text-xs")}>
               <Pulse size={15} weight="bold" />
               Atualizar
             </button>

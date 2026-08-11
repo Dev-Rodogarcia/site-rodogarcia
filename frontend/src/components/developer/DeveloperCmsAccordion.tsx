@@ -12,6 +12,7 @@ export function DeveloperCmsAccordion({
   getTitle,
   getEyebrow,
   renderItem,
+  renderActions,
   variant = "default",
   indexOffset = 0,
   compact = false,
@@ -22,6 +23,7 @@ export function DeveloperCmsAccordion({
   getTitle: (item: any, index: number) => string;
   getEyebrow: (item: any, index: number) => string;
   renderItem: (item: any, index: number) => ReactNode;
+  renderActions?: (item: any, index: number) => ReactNode;
   variant?: "default" | "services";
   indexOffset?: number;
   compact?: boolean;
@@ -91,6 +93,7 @@ export function DeveloperCmsAccordion({
                   <CaretDown size={16} weight="bold" />
                 </span>
               </button>
+              {renderActions ? <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">{renderActions(item, index)}</div> : null}
               <DeveloperHelp label={getTitle(item, index)} kind="accordion" />
             </div>
             <div

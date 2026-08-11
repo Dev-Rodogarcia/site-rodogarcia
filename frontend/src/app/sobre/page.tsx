@@ -235,7 +235,7 @@ export default async function SobrePage() {
               {aboutPage.finalCta.description}
             </p>
 
-            <div className="mt-10 grid w-full grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-center sm:gap-5">
+            <div className="mt-10 grid w-full grid-cols-1 gap-3 sm:flex sm:items-center sm:justify-center sm:gap-5">
               <SemanticLink
                 href={aboutPage.finalCta.buttons[0]?.url || site.quote}
                 external={aboutPage.finalCta.buttons[0]?.external}

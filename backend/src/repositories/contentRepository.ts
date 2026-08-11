@@ -1,5 +1,6 @@
 import { storagePaths } from "../config/storagePaths.js";
 import { sanitizeFooterLinks } from "../services/footerLinksContent.js";
+import { sanitizeHeaderNavigation } from "../services/headerNavigationContent.js";
 import { migratePageContent } from "../services/pageContent.js";
 import type { ContentData, HomeFeedback, HomePageContent, ServicesPageContent } from "../types/content.js";
 import { readJsonFile, writeJsonFile } from "../utils/jsonStore.js";
@@ -132,6 +133,10 @@ function serializeContent(content: ContentData) {
     collectionsPage:
       content.collectionsPage && typeof content.collectionsPage === "object"
         ? content.collectionsPage
+        : undefined,
+    headerNavigation:
+      content.headerNavigation && typeof content.headerNavigation === "object"
+        ? content.headerNavigation
         : undefined,
     footerLinks:
       content.footerLinks && typeof content.footerLinks === "object"
@@ -359,6 +364,10 @@ export const contentRepository = {
         data.collectionsPage && typeof data.collectionsPage === "object"
           ? data.collectionsPage
           : undefined,
+      headerNavigation:
+        data.headerNavigation && typeof data.headerNavigation === "object"
+          ? data.headerNavigation
+          : undefined,
       footerLinks:
         data.footerLinks && typeof data.footerLinks === "object"
           ? data.footerLinks
@@ -380,10 +389,12 @@ export const contentRepository = {
       mediaSlots: mediaSlotsRepository.read<Record<string, unknown>>({}),
     });
     migrated.footerLinks = sanitizeFooterLinks(normalized.footerLinks);
+    migrated.headerNavigation = sanitizeHeaderNavigation(normalized.headerNavigation);
 
     if (
       shouldPersistPageMigration(data) ||
       !data.footerLinks ||
+      !data.headerNavigation ||
       !data.homePage?.regionalPresence ||
       !data.homePage?.trackingCta ||
       !Array.isArray(data.homePage?.quickActions) ||

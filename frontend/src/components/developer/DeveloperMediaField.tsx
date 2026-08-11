@@ -387,7 +387,7 @@ export function DeveloperMediaPreview({
 
   return (
     <>
-      <div className={cn("rounded-[24px] border border-slate-200/80 bg-slate-50/76 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]", compact ? "p-3" : "p-4")}>
+      <div className="contents">
         <div className={cn("mx-auto overflow-hidden rounded-[20px] border border-[var(--border)] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.065)]", compact ? "max-w-[220px]" : "max-w-[280px]")}>
           {hasPreview ? (
             <button

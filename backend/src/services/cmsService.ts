@@ -5,6 +5,7 @@ import {
   updateFooterLinksSection,
   type FooterLinkSectionKey,
 } from "./footerLinksContent.js";
+import { getHeaderNavigationContent, validateHeaderNavigation } from "./headerNavigationContent.js";
 import {
   getPageContent,
   pageContentKey,
@@ -1122,6 +1123,18 @@ export function parseFooterLinkSection(value: string | undefined): FooterLinkSec
 
 export function getFooterLinks() {
   return getFooterLinksContent(readContentData());
+}
+
+export function getHeaderNavigation() {
+  return getHeaderNavigationContent(readContentData());
+}
+
+export function updateHeaderNavigation(body: Record<string, unknown>) {
+  const content = readContentData();
+  const navigation = validateHeaderNavigation(body);
+  content.headerNavigation = navigation;
+  writeContentData(content);
+  return navigation;
 }
 
 export function updateFooterLinks(sectionKey: FooterLinkSectionKey, body: Record<string, unknown>) {

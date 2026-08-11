@@ -9,6 +9,7 @@ import type {
   HomePageContent,
   HomeRegionalUnit,
   FooterLinksContent,
+  HeaderNavigationContent,
   ServicesFaq,
   ServicesFinalCta,
   ServicesModule,
@@ -16,6 +17,7 @@ import type {
 } from "../types/content.js";
 import { contentRepository, siteTextsRepository } from "../repositories/contentRepository.js";
 import { getFooterLinksContent } from "./footerLinksContent.js";
+import { getHeaderNavigationContent } from "./headerNavigationContent.js";
 import { getAllPageContent } from "./pageContent.js";
 import { sanitizeHexColor, sanitizeText, sanitizeUrl } from "../utils/sanitize.js";
 import { sanitizeInternalMediaUrl } from "./mediaValidationService.js";
@@ -472,6 +474,7 @@ export function preparePublicContent(content: ContentData) {
     servicesPage: normalizeServicesPage(content),
     ...getAllPageContent(content),
     footerLinks: getFooterLinksContent(content) satisfies FooterLinksContent,
+    headerNavigation: getHeaderNavigationContent(content) satisfies HeaderNavigationContent,
     units,
     siteTexts: readSiteTextsData(),
   };

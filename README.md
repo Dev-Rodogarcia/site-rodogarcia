@@ -41,7 +41,7 @@ Suba os dois servidores:
 cmd /c iniciar-dev.bat
 ```
 
-`iniciar-dev.bat` encerra somente processos DEV e abre backend e frontend em janelas separadas.
+`iniciar-dev.bat` encerra somente processos DEV, limpa o cache gerado do Next e inicia backend e frontend no terminal atual, inclusive no terminal integrado do VS Code.
 
 URLs padrao:
 

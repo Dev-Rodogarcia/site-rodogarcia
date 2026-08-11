@@ -1,13 +1,23 @@
 import type { RequestHandler } from "express";
 import { createImprovement, getImprovementAttachment, listImprovements, updateImprovementStatus } from "../services/improvementService.js";
 import { asyncHandler } from "../utils/http.js";
-import { parseImprovement, parseImprovementStatus } from "../validators/improvement.js";
+import { parseAdminImprovement, parseImprovement, parseImprovementStatus } from "../validators/improvement.js";
 import { sanitizeText } from "../utils/sanitize.js";
+import { recordAuditAction } from "../services/auditService.js";
 
 export const createImprovementController: RequestHandler = asyncHandler((req, res) => {
   const files = Array.isArray(req.files) ? req.files : [];
   const improvement = createImprovement(req, parseImprovement(req.body), files);
   res.status(201).json({ message: "Sua sugestão foi recebida. Obrigado por contribuir.", id: improvement.id });
+});
+
+/** Recebe sugestões enviadas pela equipe autenticada no CMS; somente o perfil de colaborador é aceito. */
+export const createAdminImprovementController: RequestHandler = asyncHandler((req, res) => {
+  const input = parseAdminImprovement(req.body);
+  const files = Array.isArray(req.files) ? req.files : [];
+  const improvement = createImprovement(req, input, files);
+  recordAuditAction({ req, action: "improvement.create", target: improvement.id, metadata: { profile: "employee", category: improvement.category } });
+  res.status(201).json({ message: "Sua sugestão interna foi registrada para triagem.", id: improvement.id });
 });
 
 export const downloadImprovementAttachmentController: RequestHandler = asyncHandler((req, res) => {

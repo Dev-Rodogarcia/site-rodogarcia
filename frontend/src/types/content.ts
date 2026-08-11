@@ -211,6 +211,23 @@ export interface FooterLinkItem extends PageButton {
   order?: number;
 }
 
+export type NavigationHighlightTone = "blue" | "emerald" | "amber" | "violet";
+
+export interface HeaderNavigationItem {
+  id: string;
+  order?: number;
+  group: "principal" | "explorar";
+  label: string;
+  url: string;
+  icon: string;
+  highlightLabel?: string;
+  highlightTone?: NavigationHighlightTone;
+}
+
+export interface HeaderNavigationContent {
+  items: HeaderNavigationItem[];
+}
+
 export interface FooterLinkColumn {
   id: string;
   order?: number;

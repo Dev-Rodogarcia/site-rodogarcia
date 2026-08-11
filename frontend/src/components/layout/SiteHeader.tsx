@@ -20,7 +20,9 @@ import {
 } from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
-import { drawerNavigation, site } from "@/lib/routes";
+import { api, site } from "@/lib/routes";
+import { DEFAULT_HEADER_NAVIGATION } from "@/lib/headerNavigationDefaults";
+import type { HeaderNavigationContent, NavigationHighlightTone } from "@/types/content";
 import { SiteSearchPanel } from "@/components/search/SiteSearchPanel";
 import { useSiteSearch } from "@/components/search/SiteSearchProvider";
 
@@ -61,6 +63,13 @@ const MENU_ICONS: Record<string, MenuIcon> = {
   improvements: Lightbulb,
 };
 
+const HIGHLIGHT_STYLES: Record<NavigationHighlightTone, { inactive: string; active: string; icon: string; label: string }> = {
+  blue: { inactive: "border-blue-100 bg-blue-50 text-[var(--primary)] hover:border-blue-200 hover:bg-blue-100", active: "bg-[var(--primary)] text-white shadow-[0_10px_22px_rgba(29,78,216,0.24)]", icon: "border-blue-200 bg-white text-[var(--primary)]", label: "text-blue-500" },
+  emerald: { inactive: "border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-emerald-200 hover:bg-emerald-100", active: "bg-emerald-600 text-white shadow-[0_10px_22px_rgba(5,150,105,0.24)]", icon: "border-emerald-200 bg-white text-emerald-700", label: "text-emerald-600" },
+  amber: { inactive: "border-amber-100 bg-amber-50 text-amber-700 hover:border-amber-200 hover:bg-amber-100", active: "bg-amber-500 text-white shadow-[0_10px_22px_rgba(245,158,11,0.24)]", icon: "border-amber-200 bg-white text-amber-700", label: "text-amber-600" },
+  violet: { inactive: "border-violet-100 bg-violet-50 text-violet-700 hover:border-violet-200 hover:bg-violet-100", active: "bg-violet-600 text-white shadow-[0_10px_22px_rgba(124,58,237,0.24)]", icon: "border-violet-200 bg-white text-violet-700", label: "text-violet-600" },
+};
+
 function matchesRoute(pathname: string, href: string) {
   if (href === site.home) return pathname === site.home;
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -78,6 +87,7 @@ export function SiteHeader() {
   } = useSiteSearch();
   const isHidden = useScrollDirection();
   const pathname = usePathname();
+  const [navigation, setNavigation] = useState<HeaderNavigationContent>(DEFAULT_HEADER_NAVIGATION);
   const hasDarkHero = DARK_HERO_ROUTES.some((route) => matchesRoute(pathname, route));
   const hasSolidChrome = isScrolled || searchOpen;
   const isOverlay = !hasSolidChrome;
@@ -99,6 +109,17 @@ export function SiteHeader() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    fetch(api.public.content)
+      .then((response) => response.ok ? response.json() : null)
+      .then((body: { headerNavigation?: HeaderNavigationContent } | null) => {
+        if (active && body?.headerNavigation?.items?.length) setNavigation(body.headerNavigation);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   /* Ctrl+K / Cmd+K shortcut to open search */
   useEffect(() => {
@@ -149,8 +170,8 @@ export function SiteHeader() {
     return pathname.startsWith(href);
   };
   const navigationGroups = [
-    { label: "Principal", items: drawerNavigation.filter((item) => item.href === site.home) },
-    { label: "Explorar", items: drawerNavigation.filter((item) => item.href !== site.home).toSorted((a, b) => a.label.localeCompare(b.label, "pt-BR")) },
+    { label: "Principal", items: navigation.items.filter((item) => item.group === "principal") },
+    { label: "Explorar", items: navigation.items.filter((item) => item.group === "explorar") },
   ];
 
   const iconButtonClassName = [
@@ -293,17 +314,17 @@ export function SiteHeader() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-4" aria-label="Navegação principal">
-          {navigationGroups.map((group) => <section key={group.label}><p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{group.label}</p><div className="flex flex-col gap-1">{group.items.map(({ href, label, key }) => {
-            const Icon = MENU_ICONS[key] ?? Info;
-            const active = isActive(href);
-            const isImprovement = key === "improvements";
-            return <Link key={href} href={href} onClick={() => setDrawerOpen(false)} className={[
+          {navigationGroups.filter((group) => group.items.length > 0).map((group) => <section key={group.label}><p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{group.label}</p><div className="flex flex-col gap-1">{group.items.map(({ id, url, label, icon, highlightLabel, highlightTone }) => {
+            const Icon = MENU_ICONS[icon] ?? Info;
+            const active = isActive(url);
+            const highlight = highlightLabel ? HIGHLIGHT_STYLES[highlightTone ?? "blue"] : null;
+            return <Link key={id} href={url} onClick={() => setDrawerOpen(false)} className={[
               "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-              isImprovement ? active ? "bg-[var(--primary)] text-white shadow-[0_10px_22px_rgba(29,78,216,0.24)]" : "border border-blue-100 bg-blue-50 text-[var(--primary)] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-100" : active ? "bg-[var(--color-primary-soft)] text-[var(--primary)]" : "text-[var(--foreground)] hover:bg-black/5",
+              highlight ? active ? highlight.active : highlight.inactive : active ? "bg-[var(--color-primary-soft)] text-[var(--primary)]" : "text-[var(--foreground)] hover:bg-black/5",
             ].join(" ")}><span className={[
               "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
-              isImprovement ? active ? "border-white/20 bg-white/16 text-white" : "border-blue-200 bg-white text-[var(--primary)]" : active ? "border-[var(--primary)]/15 bg-white/70 text-[var(--primary)]" : "border-slate-200/70 bg-slate-50 text-slate-500",
-            ].join(" ")} aria-hidden="true"><Icon size={17} weight={active || isImprovement ? "fill" : "duotone"} /></span><span className="min-w-0 leading-none">{label}</span>{isImprovement ? <span className={active ? "ml-auto text-[9px] font-bold uppercase tracking-[0.14em] text-white/78" : "ml-auto text-[9px] font-bold uppercase tracking-[0.14em] text-blue-500"}>Novo</span> : null}</Link>;
+              highlight ? active ? "border-white/20 bg-white/16 text-white" : highlight.icon : active ? "border-[var(--primary)]/15 bg-white/70 text-[var(--primary)]" : "border-slate-200/70 bg-slate-50 text-slate-500",
+            ].join(" ")} aria-hidden="true"><Icon size={17} weight={active || Boolean(highlight) ? "fill" : "duotone"} /></span><span className="min-w-0 leading-none">{label}</span>{highlightLabel ? <span className={active ? "ml-auto text-[9px] font-bold uppercase tracking-[0.14em] text-white/78" : `ml-auto text-[9px] font-bold uppercase tracking-[0.14em] ${highlight!.label}`}>{highlightLabel}</span> : null}</Link>;
           })}</div></section>)}
         </nav>
 

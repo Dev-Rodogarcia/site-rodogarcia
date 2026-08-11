@@ -77,6 +77,15 @@ function SidebarScrollArea({
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
 
+  function scrollByPage(direction: -1 | 1) {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+    scrollElement.scrollBy({
+      top: direction * Math.max(180, Math.round(scrollElement.clientHeight * 0.7)),
+      behavior: "smooth",
+    });
+  }
+
   useEffect(() => {
     const scrollElement = scrollRef.current;
     if (!scrollElement) return;
@@ -122,17 +131,27 @@ function SidebarScrollArea({
 
       {canScrollUp ? (
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-16 items-start justify-center bg-[linear-gradient(to_bottom,rgba(2,6,23,0.98)_0%,rgba(2,6,23,0.9)_30%,rgba(2,6,23,0.5)_66%,rgba(2,6,23,0)_100%)] pt-2">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)]">
+          <button
+            type="button"
+            onClick={() => scrollByPage(-1)}
+            aria-label="Rolar menu para cima"
+            className="pointer-events-auto inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)] outline-none transition hover:border-sky-300/50 hover:bg-slate-900 focus-visible:ring-2 focus-visible:ring-sky-400"
+          >
             <CaretUp size={expanded ? 14 : 12} weight="bold" />
-          </span>
+          </button>
         </div>
       ) : null}
 
       {canScrollDown ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-16 items-end justify-center bg-[linear-gradient(to_top,rgba(2,6,23,0.98)_0%,rgba(2,6,23,0.9)_30%,rgba(2,6,23,0.5)_66%,rgba(2,6,23,0)_100%)] pb-2">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)]">
+          <button
+            type="button"
+            onClick={() => scrollByPage(1)}
+            aria-label="Rolar menu para baixo"
+            className="pointer-events-auto inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-sky-200 shadow-[0_8px_18px_rgba(2,6,23,0.35)] outline-none transition hover:border-sky-300/50 hover:bg-slate-900 focus-visible:ring-2 focus-visible:ring-sky-400"
+          >
             <CaretDown size={expanded ? 14 : 12} weight="bold" />
-          </span>
+          </button>
         </div>
       ) : null}
     </div>

@@ -199,7 +199,7 @@ export default async function ParaEmpresasPage() {
                 Estrutura operacional para empresas que precisam crescer sem perder o controle. Cobertura nacional, compliance e atendimento consultivo em uma única frente.
               </p>
 
-              <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
+              <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
                 <ActionLink
                   action={{ label: "Solicitar cotação", href: site.quote }}
                   tone="dark"
@@ -301,7 +301,7 @@ export default async function ParaEmpresasPage() {
                 ))}
               </ul>
 
-              <div className="mt-12 grid w-full grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4">
+              <div className="mt-12 grid w-full grid-cols-1 gap-3 sm:flex sm:flex-row sm:gap-4">
                 <ActionLink
                   action={{
                     label: scaleButtons[0]?.label || "Solicitar cotação",

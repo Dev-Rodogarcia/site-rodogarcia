@@ -32,8 +32,8 @@ export async function SiteFooter() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.15),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
       <div className="relative mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-10">
-        <div className="grid grid-cols-1 gap-8 border-b border-white/10 pb-12 sm:grid-cols-2 sm:gap-10 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]">
-          <div className="flex flex-col gap-5 sm:col-span-2 lg:col-span-1">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 border-b border-white/10 pb-12 sm:gap-10 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]">
+          <div className="col-span-2 flex flex-col gap-5 border-b border-white/10 pb-8 sm:col-span-2 lg:col-span-1 lg:border-b-0 lg:pb-0">
             <Link href={site.home} aria-label="Rodogarcia - Página inicial">
               <Image
                 src="/logo.svg"
@@ -76,6 +76,7 @@ export async function SiteFooter() {
 
           <FooterColumn
             title={footer.socialTitle}
+            className="col-span-2 sm:col-span-1"
             listClassName="grid grid-cols-2 gap-3 lg:grid-cols-1 lg:gap-2.5"
           >
             {socialLinks.map((link) => {
@@ -134,7 +135,7 @@ function FooterColumn({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-t border-white/10 pt-6 sm:border-t-0 sm:pt-0",
+        "flex min-w-0 flex-col gap-3 pt-0 lg:pt-0",
         className
       )}
     >

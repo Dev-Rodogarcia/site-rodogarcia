@@ -60,7 +60,7 @@ export default function FinalQuoteCtaSection() {
               que sua operação precisa.
             </p>
 
-            <div className="mt-8 grid w-full grid-cols-2 gap-3 px-2 sm:flex sm:w-auto sm:items-center sm:justify-center sm:px-0">
+            <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:items-center sm:justify-center sm:px-0">
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }} className="min-w-0 sm:w-auto">
                 <Link
                   href={site.quote}
