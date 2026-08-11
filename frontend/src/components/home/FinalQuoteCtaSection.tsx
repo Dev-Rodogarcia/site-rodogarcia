@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, ChatCircleDots, CheckCircle } from "@phosphor-icons/react";
 import { site } from "@/lib/routes";
 
@@ -13,54 +12,21 @@ const BENEFITS = [
 ] as const;
 
 export default function FinalQuoteCtaSection() {
-  const containerRef = useRef<HTMLElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["end 400px", "end 0px"],
-  });
-
-  const filter = useTransform(
-    scrollYProgress,
-    [0, 0.25, 0.5, 0.75, 1],
-    ["blur(0px)", "blur(1px)", "blur(4px)", "blur(12px)", "blur(24px)"]
-  );
-
-  const opacity = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    [1, 0.9, 0.6]
-  );
-
   return (
-    <motion.section
-      ref={containerRef}
-      style={{ filter, opacity, willChange: "filter, opacity" }}
-      className="relative py-12 sm:py-16"
+    <section
+      className="relative py-10 sm:py-12"
       aria-labelledby="final-cta-title"
     >
       <div className="mx-auto max-w-[1440px] px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-[34px] border border-[var(--border)] bg-white px-6 py-8 shadow-[0_20px_48px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 lg:px-10"
-        >
-          <div className="mx-auto max-w-[760px] text-center">
-            <h2
-              id="final-cta-title"
-              className="text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[0.98] tracking-[-0.05em] text-[var(--foreground)]"
-            >
-              Solicite sua cotação com quem entende da operação.
-            </h2>
+        <div className="rounded-[28px] bg-slate-950 px-6 py-7 text-white shadow-[0_20px_48px_rgba(15,23,42,0.16)] sm:px-8 lg:px-10">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-10">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-sky-300">Cotação rápida</p>
+              <h2 id="final-cta-title" className="mt-2 text-[clamp(1.8rem,3vw,2.7rem)] font-bold leading-[1.02] tracking-[-0.045em]">Vamos calcular sua carga?</h2>
+              <p className="mt-3 max-w-[58ch] text-sm leading-6 text-white/65 sm:text-base">Preencha os dados para cotar agora ou fale com um especialista.</p>
+            </div>
 
-            <p className="mt-4 text-sm leading-7 text-[var(--color-muted-raw)] sm:text-base">
-              Envie os dados da carga e receba um retorno comercial alinhado ao
-              que sua operação precisa.
-            </p>
-
-            <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:items-center sm:justify-center sm:px-0">
+            <div className="grid grid-cols-1 gap-3 sm:flex sm:items-center lg:flex-col lg:items-stretch">
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }} className="min-w-0 sm:w-auto">
                 <Link
                   href={site.quote}
@@ -81,22 +47,17 @@ export default function FinalQuoteCtaSection() {
                 </Link>
               </motion.div>
             </div>
-
-            <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-[var(--color-muted-raw)]">
-              {BENEFITS.map((benefit) => (
-                <li key={benefit} className="inline-flex items-center gap-2">
-                  <CheckCircle
-                    size={16}
-                    weight="fill"
-                    className="text-[var(--primary)]"
-                  />
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
           </div>
-        </motion.div>
+          <ul className="mt-5 grid gap-1.5 border-t border-white/10 pt-4 text-xs text-white/70 sm:mt-6 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:pt-5 sm:text-sm sm:text-white/60">
+            {BENEFITS.map((benefit) => (
+              <li key={benefit} className="inline-flex items-center gap-2 rounded-lg bg-white/[0.06] px-3 py-2 sm:rounded-none sm:bg-transparent sm:p-0">
+                <CheckCircle size={16} weight="fill" className="text-sky-300" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

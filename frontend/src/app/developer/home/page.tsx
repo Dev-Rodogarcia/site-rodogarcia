@@ -1064,7 +1064,7 @@ export default function DeveloperHomePage() {
       <DeveloperHero
         eyebrow="Home — Página Inicial"
         title="Editor completo da Home."
-        description="Edite os blocos principais da página inicial em um único lugar, com limites claros e dados padronizados."
+        description="Edite os blocos principais da página."
         stats={[
           { label: "Hero", value: summary.hero },
           { label: "Atalhos", value: summary.quickActions },

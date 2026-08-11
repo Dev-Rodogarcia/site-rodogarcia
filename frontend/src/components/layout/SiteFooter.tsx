@@ -92,11 +92,25 @@ export async function SiteFooter() {
           </FooterColumn>
         </div>
 
-        <div className="flex flex-col gap-3 pt-8 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            &copy; {CURRENT_YEAR} {footer.copyrightText}
-          </span>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+        <div className="flex flex-col gap-4 pt-6 text-xs text-white/40 sm:hidden">
+          <span className="max-w-[32ch] leading-5">&copy; {CURRENT_YEAR} {footer.copyrightText}</span>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 border-y border-white/10 py-3">
+            {bottomLinks.map((link) => (
+              <FooterInlineLink key={link.id} href={link.url} external={link.external}>
+                {link.label}
+              </FooterInlineLink>
+            ))}
+            <CookieSettingsButton />
+          </div>
+          <div className="flex flex-col gap-1 leading-5">
+            <span>{footer.locationText}</span>
+            <a href={footer.creditUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-white/56 transition-colors hover:text-white/80">{footer.creditText}</a>
+          </div>
+        </div>
+
+        <div className="hidden pt-8 text-xs text-white/40 sm:flex sm:items-center sm:justify-between">
+          <span>&copy; {CURRENT_YEAR} {footer.copyrightText}</span>
+          <div className="flex flex-row flex-wrap items-center gap-4">
             {bottomLinks.map((link) => (
               <FooterInlineLink key={link.id} href={link.url} external={link.external}>
                 {link.label}
@@ -104,16 +118,7 @@ export async function SiteFooter() {
             ))}
             <CookieSettingsButton />
             <span>{footer.locationText}</span>
-            <span>
-              <a
-                href={footer.creditUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-white/56 transition-colors hover:text-white/80"
-              >
-                {footer.creditText}
-              </a>
-            </span>
+            <a href={footer.creditUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-white/56 transition-colors hover:text-white/80">{footer.creditText}</a>
           </div>
         </div>
       </div>

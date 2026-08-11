@@ -174,7 +174,7 @@ export default function CookiesPage() {
       <DeveloperHero
         eyebrow="LGPD / Cookies"
         title="Consentimento claro em todos os dispositivos."
-        description="Configure o banner, as regras de coleta e as categorias que o visitante controla."
+        description="Configure banner e categorias de cookies."
         stats={[
           { label: "Categorias", value: form.categories.length },
           { label: "Versão", value: form.version },

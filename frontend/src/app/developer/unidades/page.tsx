@@ -214,7 +214,7 @@ export default function UnidadesPage() {
       <DeveloperHero
         eyebrow="Conteudo - Unidades"
         title="Editor de unidades, filiais e pontos de apoio."
-        description="Base operacional usada como referência no editor da Home. A publicação no mapa ocorre ao selecionar e salvar a unidade em Página Inicial."
+        description="Gerencie unidades usadas na Home."
         stats={[
           { label: "Unidades", value: items.length },
           { label: "Ativas", value: items.filter((item) => item.active).length },

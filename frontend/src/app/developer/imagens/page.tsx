@@ -317,7 +317,7 @@ export default function ImagensPage() {
       <DeveloperHero
         eyebrow="Mídia - Biblioteca"
         title="Biblioteca, otimização e slots de imagens."
-        description="Envie imagens ou vídeos, substitua referências e controle slots usados pelo site."
+        description="Envie mídias e controle os slots do site."
         stats={[
           { label: "Total", value: summary.total },
           { label: "Uploads", value: summary.uploads },

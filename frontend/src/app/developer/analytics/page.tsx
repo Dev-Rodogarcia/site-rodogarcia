@@ -337,7 +337,7 @@ export default function AnalyticsPage() {
       <DeveloperHero
         eyebrow="Automações - Analytics"
         title="Leitura de comportamento e configuração."
-        description="Visão adaptada ao analytics do projeto atual: estatísticas, heatmap, auditoria e configurações principais."
+        description="Estatísticas e configurações de analytics."
         stats={[
           { label: "Visitantes", value: visitors },
           { label: "Sessões", value: sessions },

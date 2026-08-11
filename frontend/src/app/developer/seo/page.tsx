@@ -134,7 +134,7 @@ export default function SeoPage() {
       <DeveloperHero
         eyebrow="SEO"
         title="Controle de metadados por página."
-        description="Edite títulos, descrições, indexação, canonical e preview social sem alterar código."
+        description="Edite metadados e preview social."
         stats={[
           { label: "Páginas", value: pages.length },
           { label: "Score médio", value: `${avgScore}%` },

@@ -141,7 +141,8 @@ export default function PostHeroInteractiveShowcase({
             </div>
           </div>
 
-          <div className="divide-y divide-[var(--border)]">
+          <div>
+            <div className="divide-y divide-[var(--border)]">
             {items.map((item, index) => {
               const isActive = index === current;
               return (
@@ -179,17 +180,17 @@ export default function PostHeroInteractiveShowcase({
                 </button>
               );
             })}
+            </div>
+            <div className="mt-8 flex justify-center">
+              <Link
+                href={section.ctaUrl}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)]"
+              >
+                <span>{section.ctaLabel}</span>
+                <ArrowUpRightIcon />
+              </Link>
+            </div>
           </div>
-        </div>
-
-        <div className="mt-10 flex justify-center">
-          <Link
-            href={section.ctaUrl}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)]"
-          >
-            <span>{section.ctaLabel}</span>
-            <ArrowUpRightIcon />
-          </Link>
         </div>
       </div>
     </section>

@@ -42,13 +42,14 @@ export function QuoteOtherChannelsSection({ channels }: { channels: QuoteOtherCh
 
   return (
     <>
-      <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-x-8 border-y border-white/10 sm:grid-cols-2">
         {pageItems.map((item) => {
           const Icon = ICONS[item.icon] ?? ChatCircleDots;
           const external = item.button.external || isExternalUrl(item.button.url);
           const buttonClassName =
-            "inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl px-6 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-0.5";
-          const buttonStyle = { backgroundColor: item.buttonColor || "#0f172a" };
+            "inline-flex min-h-10 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-200 hover:-translate-y-0.5 sm:w-auto";
+          const buttonColor = item.buttonColor && item.buttonColor !== "#0f172a" ? item.buttonColor : "#2563eb";
+          const buttonStyle = { backgroundColor: buttonColor };
           const button = external ? (
             <a
               href={item.button.url}
@@ -66,20 +67,22 @@ export function QuoteOtherChannelsSection({ channels }: { channels: QuoteOtherCh
           );
 
           return (
-            <div key={item.id} className="flex flex-col gap-4">
+            <div key={item.id} className="border-b border-white/10 py-5 last:border-b-0 sm:py-6">
+              <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
               <span
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10"
                 style={{ color: item.iconColor || "#38bdf8" }}
               >
-                <Icon size={22} weight="duotone" />
+                <Icon size={20} weight="duotone" />
               </span>
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
                   {item.title}
                 </h3>
-                <p className="mt-1.5 text-sm leading-7 text-white/58">{item.description}</p>
+                <p className="mt-1 text-sm leading-5 text-white/58">{item.description}</p>
               </div>
               {button}
+              </div>
             </div>
           );
         })}

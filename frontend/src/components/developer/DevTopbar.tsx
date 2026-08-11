@@ -32,7 +32,7 @@ export default function DevTopbar({ onOpenNavigation, darkTheme, onToggleTheme }
       {/* Efeito de profundidade e brilho do vidro */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-white/0 via-white/25 to-white/0 opacity-50" />
 
-      <div className="relative grid gap-3 px-4 py-3 sm:px-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-5 lg:px-6">
+      <div className="relative grid gap-3 px-4 py-3 sm:px-5 lg:grid-cols-[minmax(280px,1fr)_auto] lg:items-center lg:gap-5 lg:px-6">
         <button
           type="button"
           onClick={onOpenNavigation}
@@ -52,7 +52,7 @@ export default function DevTopbar({ onOpenNavigation, darkTheme, onToggleTheme }
             </h1>
             <DeveloperHelp label={title} kind="page" />
           </div>
-          {description ? <p className="mt-1 max-w-[78ch] text-xs leading-5 text-slate-300 sm:text-[13px]">{description}</p> : null}
+          {description ? <p className="mt-1 max-w-[62ch] truncate text-xs leading-5 text-slate-300 sm:text-[13px]" title={description}>{description}</p> : null}
         </div>
 
         <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
@@ -73,9 +73,9 @@ export default function DevTopbar({ onOpenNavigation, darkTheme, onToggleTheme }
               </div>
             ) : null}
           </div>
-          <div className="mx-1.5 hidden h-10 w-px shrink-0 bg-white/15 sm:block" aria-hidden="true" />
+          <div className="mx-1.5 hidden h-10 w-px shrink-0 bg-white/15 min-[1600px]:block" aria-hidden="true" />
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <div className="flex h-[54px] flex-col items-end justify-center rounded-lg border border-white/10 bg-white/5 px-3 text-right shadow-sm backdrop-blur-md transition-colors duration-200 hover:border-white/20 hover:bg-white/[0.07]">
+            <div className="hidden h-[54px] flex-col items-end justify-center rounded-lg border border-white/10 bg-white/5 px-3 text-right shadow-sm backdrop-blur-md transition-colors duration-200 hover:border-white/20 hover:bg-white/[0.07] min-[1600px]:flex">
               <p className="max-w-[180px] truncate text-sm font-medium text-white/95 lg:max-w-[220px]">
                 {session?.user?.email ?? "Acesso interno"}
               </p>

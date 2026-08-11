@@ -161,11 +161,8 @@ export default async function HomePage() {
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
             Compliance e qualidade
           </span>
-          <h2 className="hidden">
-            Reconhecimento operacional que reforça segurança e padrão.
-          </h2>
-          <h2 className="mt-5 text-[clamp(1.4rem,2.2vw,2rem)] font-extrabold leading-tight tracking-[-0.03em] text-[var(--foreground)]">
-            Credenciais operacionais.
+          <h2 className="mt-3 max-w-[26ch] text-[clamp(1.5rem,2.4vw,2.15rem)] font-extrabold leading-tight tracking-[-0.035em] text-[var(--foreground)]">
+            Certificações que reforçam nossa operação.
           </h2>
         </div>
 
@@ -182,18 +179,16 @@ export default async function HomePage() {
               {[...certs, ...certs].map((cert, index) => (
                 <div
                   key={`${cert.title}-${index}`}
-                  className="group/card flex w-[160px] shrink-0 flex-col items-center justify-center gap-4 transition-all duration-500 hover:-translate-y-1 sm:w-[190px] lg:w-[200px]"
+                  className="group/card flex w-[170px] shrink-0 flex-col items-center justify-center gap-3 transition-all duration-500 hover:-translate-y-1 sm:w-[200px] lg:w-[220px]"
                   aria-hidden={index >= CERTS.length ? true : undefined}
                 >
-                  <div className="flex h-[90px] w-full items-center justify-center rounded-[20px] bg-white shadow-[0_4px_20px_rgba(15,23,42,0.03)] ring-1 ring-slate-900/5 transition-all duration-500 group-hover/card:shadow-[0_12px_30px_rgba(29,78,216,0.08)] group-hover/card:ring-[var(--primary)]/10">
-                    <img
-                      src={cert.src}
-                      alt={index < CERTS.length ? cert.alt : ""}
-                      className="max-h-[46px] max-w-[110px] object-contain opacity-60 mix-blend-luminosity transition-all duration-500 group-hover/card:scale-[1.08] group-hover/card:opacity-100 group-hover/card:mix-blend-normal lg:max-h-[52px]"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
+                  <img
+                    src={cert.src}
+                    alt={index < CERTS.length ? cert.alt : ""}
+                    className="h-[72px] max-w-[150px] grayscale object-contain opacity-55 transition-all duration-500 group-hover/card:scale-[1.08] group-hover/card:grayscale-0 group-hover/card:opacity-100 sm:h-[82px] sm:max-w-[170px] lg:h-[88px]"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <span className="text-[13px] font-semibold tracking-[0.02em] text-slate-400 transition-colors duration-500 group-hover/card:text-[var(--primary)]">
                     {cert.title}
                   </span>

@@ -82,7 +82,7 @@ export default function SetoresPage() {
   }
 
   return <DeveloperPage>
-    <DeveloperHero eyebrow="Administração - Setores" title="Setores e privilégios de acesso." description="Crie setores e defina as áreas do CMS disponíveis para cada um. Ao cadastrar um administrador, basta selecionar o setor correspondente." stats={[{ label: "Setores", value: sectors.length }, { label: "Ativos", value: sectors.filter((sector) => sector.active).length }]} />
+    <DeveloperHero eyebrow="Administração - Setores" title="Setores e privilégios de acesso." description="Defina setores e acessos do CMS." stats={[{ label: "Setores", value: sectors.length }, { label: "Ativos", value: sectors.filter((sector) => sector.active).length }]} />
     <section className={developerSplitLayoutClassName}>
       <div ref={formPanelRef} className="scroll-mt-5">
       <DeveloperCard className={`transition-shadow duration-300 ${formHighlighted ? "ring-2 ring-[var(--primary)]/40 ring-offset-2 ring-offset-[var(--background)]" : ""}`}>

@@ -382,7 +382,7 @@ export default function FooterLinksCmsPage() {
       <DeveloperHero
         eyebrow="FOOTER LINKS"
         title="Links e páginas do rodapé."
-        description="Controle central do footer global, Termos de Uso, Central de Ajuda e Privacidade."
+        description="Controle do rodapé e páginas institucionais."
         stats={stats}
         actions={
           <Link href={site.home} className={developerSecondaryButtonClassName}>

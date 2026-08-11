@@ -131,12 +131,12 @@ export default async function CotacaoPage() {
           <div className="relative space-y-10">
             <SectionHeader eyebrow="Precisa de ajuda?" title="Também atendemos pelos canais comerciais." description="Os formulários são o caminho principal. Estes canais continuam disponíveis para orientações e operações especiais." theme="dark" align="center" />
             {quotePage.otherChannels.length > 0 ? <QuoteOtherChannelsSection channels={quotePage.otherChannels} /> : null}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid border-y border-white/10 md:grid-cols-2 md:divide-x md:divide-white/10">
               {quotePage.directChannels.map((channel) => (
-                <SemanticLink key={channel.id} href={channel.button.url} external={channel.button.external} className="rounded-3xl border border-white/10 bg-white/6 p-5 text-white transition-colors hover:bg-white/10">
+                <SemanticLink key={channel.id} href={channel.button.url} external={channel.button.external} className="group border-b border-white/10 px-1 py-5 text-white transition-colors hover:bg-white/[0.03] md:border-b-0 md:px-6 md:first:pl-1 md:last:pr-1">
                   <p className="text-lg font-semibold tracking-[-0.03em] text-white">{channel.title}</p>
                   <p className="mt-2 text-sm leading-6 text-white/64">{channel.description}</p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-200"><PhoneCall size={17} weight="bold" />{channel.button.label}</span>
+                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sky-200 transition-transform group-hover:translate-x-1"><PhoneCall size={17} weight="bold" />{channel.button.label}</span>
                 </SemanticLink>
               ))}
             </div>

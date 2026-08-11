@@ -286,7 +286,7 @@ export default function PopupExitPage() {
       <DeveloperHero
         eyebrow="Automações - Exit popup"
         title="Configuração e análise do popup de saída."
-        description="O módulo agora usa as APIs reais do app atual para texto, exibição, eventos e leads capturados."
+        description="Texto, exibição, eventos e leads."
         stats={[
           { label: "Popup exibido", value: analytics?.totals.popup_shown ?? 0 },
           { label: "Conversão", value: `${(analytics?.conversionRate ?? 0).toFixed(1)}%` },
@@ -437,14 +437,14 @@ export default function PopupExitPage() {
                 <DeveloperImageField
                   label="Arquivo da imagem"
                   value={config.image ?? ""}
-                  showPreview={false}
+                  showPreview
                   onChange={(image) => setValue("image", image)}
                 />
               </div>
             </div>
           </DeveloperCard>
 
-          <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+          <div className="grid gap-6 min-[1600px]:grid-cols-2 min-[1600px]:items-start">
             <DeveloperCard>
               <DeveloperSectionHeading
                 eyebrow="Desktop"
@@ -482,7 +482,7 @@ export default function PopupExitPage() {
                 <DeveloperImageField
                   label="Imagem desktop"
                   value={config.desktop?.image ?? ""}
-                  showPreview={false}
+                  showPreview
                   onChange={(image) =>
                     setConfig((current) => ({
                       ...current,
@@ -544,7 +544,7 @@ export default function PopupExitPage() {
                 <DeveloperImageField
                   label="Imagem mobile"
                   value={config.mobile?.image ?? ""}
-                  showPreview={false}
+                  showPreview
                   className="sm:col-span-2"
                   onChange={(image) =>
                     setConfig((current) => ({

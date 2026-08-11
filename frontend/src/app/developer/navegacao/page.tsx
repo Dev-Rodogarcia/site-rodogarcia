@@ -59,7 +59,7 @@ export default function HeaderNavigationCmsPage() {
   };
 
   return <DeveloperPage>
-    <DeveloperHero eyebrow="Estrutura do site" title="Navegação" description="Organize os links do menu lateral que o visitante abre pelo cabeçalho." stats={[{ label: "Itens", value: content.items.length }]} />
+    <DeveloperHero eyebrow="Estrutura do site" title="Navegação" description="Organize os links do menu lateral." stats={[{ label: "Itens", value: content.items.length }]} />
     <DeveloperCard>
       <DeveloperSectionHeading title="Barra de navegação" description="Defina nome, destino, grupo e destaque. Os controles Subir e Descer no cabeçalho organizam a ordem, mesmo com o item fechado." />
       {message ? <div className="mb-5" aria-live="polite"><DeveloperMessage tone={message.type}>{message.text}</DeveloperMessage></div> : null}

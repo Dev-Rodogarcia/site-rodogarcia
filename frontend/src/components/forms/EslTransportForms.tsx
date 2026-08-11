@@ -160,7 +160,7 @@ const fieldHelp: Record<string, string> = {
   "Cidade de destino": "Informe a cidade para onde a carga seguirá.",
   "UF de destino": "Informe a sigla do estado de destino, com duas letras.",
   "Peso real (kg)": "Informe o peso total real da mercadoria em quilogramas. Para calcular a cotação, a API recebe o maior valor entre este peso e o peso taxado.",
-  "Metro cúbico (m³)": "Calculado automaticamente: quantidade × altura × largura × comprimento.",
+  "Volume (m³)": "Calculado automaticamente: quantidade × altura × largura × comprimento.",
   "Peso taxado (kg)": "Calculado automaticamente em quilogramas: metro cúbico × 300. Para calcular a cotação, a API recebe o maior valor entre este peso e o peso real.",
   "Altura (m)": "Informe a altura de uma unidade em metros. Junto com quantidade, largura e comprimento, ela calcula o metro cúbico automaticamente. Com 3 m ou mais, a cotação usa a tabela PADRÃO - 3 METROS.",
   "Largura (m)": "Informe a largura de uma unidade em metros. Junto com quantidade, altura e comprimento, ela calcula o metro cúbico automaticamente. Com 3 m ou mais, a cotação usa a tabela PADRÃO - 3 METROS.",
@@ -725,7 +725,7 @@ export function EslQuoteForm({
       </div>
 
       <Fieldset title="Empresas envolvidas" description="Informe o CNPJ da empresa responsável pela operação. A filial Rodogarcia é identificada automaticamente pela cidade de origem." className="lg:col-span-12">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
           <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
           <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
@@ -752,7 +752,7 @@ export function EslQuoteForm({
             <Field label="Comprimento (m)" required><input value={values.length} onChange={(event) => updateDimensions("length", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="2,5" className={fieldClassName} /></Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Field label="Metro cúbico (m³)" required><input value={values.cubicVolume} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
+            <Field label="Volume (m³)" required><input value={values.cubicVolume} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
             <Field label="Peso taxado (kg)"><input value={taxedWeight === null ? "" : String(Number(taxedWeight.toFixed(2)))} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
             <Field label="Peso real (kg)" required><input value={values.realWeight} onChange={input("realWeight")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="20" className={fieldClassName} /></Field>
             <Field label="Valor da NF (R$)" required><input value={values.invoiceValue} onChange={input("invoiceValue")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="200" className={fieldClassName} /></Field>

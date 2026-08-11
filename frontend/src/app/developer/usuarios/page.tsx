@@ -373,7 +373,7 @@ export default function UsuariosPage() {
       <DeveloperHero
         eyebrow="Segurança - Usuários"
         title="Criação de usuários do CMS."
-        description="Cadastre acessos internos e, como usuário supremo, defina quem pode criar ou excluir outras contas."
+        description="Cadastre e gerencie acessos internos."
         stats={[
           { label: "Usuários", value: users.length },
           { label: "Admins ativos", value: adminCount },

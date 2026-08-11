@@ -80,7 +80,7 @@ export default function LeadsPage() {
       <DeveloperHero
         eyebrow="Leads"
         title="Base central de contatos capturados."
-        description="Popup, contato e cotação aparecem em uma lista única, com busca e origem."
+        description="Popup, contato e cotação em uma lista."
         stats={[
           { label: "Total", value: total },
           { label: "Popup", value: sourceSummary["exit-intent-popup"] ?? sourceSummary["exit-intent"] ?? 0 },

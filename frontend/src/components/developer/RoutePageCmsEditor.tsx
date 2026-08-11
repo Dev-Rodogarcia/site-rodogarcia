@@ -35,37 +35,37 @@ const PAGE_META: Record<
     eyebrow: "Página Sobre",
     title: "Página Sobre.",
     publicHref: site.about,
-    description: "Hero, governanca/compliance e CTA final da rota /sobre.",
+    description: "Hero, governança e CTA final.",
   },
   business: {
     eyebrow: "Página Para Empresas",
     title: "Página Para Empresas.",
     publicHref: site.business,
-    description: "Apenas botões do CTA de escala e FAQ da rota /para-empresas.",
+    description: "CTA e FAQ da página.",
   },
   contact: {
     eyebrow: "Página Fale Conosco",
     title: "Página Fale Conosco.",
     publicHref: site.contact,
-    description: "Canais, blocos informativos e CTAs da rota /fale-conosco.",
+    description: "Canais, informações e CTAs.",
   },
   careers: {
     eyebrow: "Página Trabalhe Conosco",
     title: "Página Trabalhe Conosco.",
     publicHref: site.careers,
-    description: "Botões, imagem de cultura, vagas e CTAs da rota /trabalhe-conosco.",
+    description: "Vagas, cultura e CTAs.",
   },
   quote: {
     eyebrow: "Página Cotação",
     title: "Página Cotação.",
     publicHref: site.quote,
-    description: "Botões, popups, canais, destino de aprovação e orientações em acordeão da rota /cotacao.",
+    description: "Botões, canais e orientações.",
   },
   collections: {
     eyebrow: "Página Coletas",
     title: "Página Coletas.",
     publicHref: site.collections,
-    description: "Botões do hero e orientações em acordeão da rota /coletas. O popup de origem não atendida é configurado em Cotação.",
+    description: "Botões e orientações da coleta.",
   },
 };
 

@@ -266,7 +266,7 @@ export default function BrazilMap({ units }: BrazilMapProps) {
         </p>
       </div>
 
-      <div className="mt-10 grid w-full grid-cols-1 items-stretch gap-8 xl:grid-cols-[minmax(340px,400px)_minmax(440px,520px)] xl:justify-center xl:gap-8 2xl:gap-10">
+      <div className="mt-10 grid w-full grid-cols-1 items-stretch gap-8 lg:grid-cols-[minmax(340px,400px)_minmax(440px,520px)] lg:justify-center lg:gap-8 2xl:gap-10">
         <aside className="min-w-0">
           <div className="h-[560px] rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,248,252,0.98)_100%)] p-6 shadow-[0_22px_48px_rgba(15,23,42,0.16)] sm:p-7">
             <div className="flex items-start justify-between gap-3">

@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { Archive, CheckCircle, File, Image, Lightbulb, Paperclip, User, UsersThree } from "@phosphor-icons/react";
 import { DeveloperCard, DeveloperHero, DeveloperMessage, DeveloperPage, DeveloperSectionHeading, developerSecondaryButtonClassName } from "@/components/developer/ui";
+import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import { ImprovementGuidanceEditor } from "@/components/developer/ImprovementGuidanceEditor";
 import { DeveloperCmsAccordion } from "@/components/developer/DeveloperCmsAccordion";
 import ImprovementForm from "@/components/forms/ImprovementForm";
 import { adminResourceKeys, invalidateAdminResource, useAdminResource } from "@/hooks/useAdminResource";
 import { useApiRequest } from "@/hooks/useApiRequest";
-import { api } from "@/lib/routes";
+import { api, site } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 type ImprovementStatus = "pending" | "completed" | "archived";
@@ -50,7 +51,8 @@ export default function ImprovementsPage() {
     if (status === "pending") await refresh();
   }
 
-  return <DeveloperPage><DeveloperHero eyebrow="Melhoria contínua" title="Solicitações recebidas" description="Acompanhe sugestões de usuários do site e colaboradores, mantendo a triagem atualizada." stats={[{ label: statusLabels[status], value: improvements.length }]} />
+  return <DeveloperPage><DeveloperHero eyebrow="Melhoria contínua" title="Solicitações recebidas" description="Acompanhe e organize sugestões recebidas." stats={[{ label: statusLabels[status], value: improvements.length }]} />
+    <div className="mt-5"><DeveloperResponsivePreview href={site.improvements} title="Preview da página de melhoria" /></div>
     <DeveloperCard className="mt-5"><ImprovementGuidanceEditor /></DeveloperCard>
     <DeveloperCard className="mt-5"><DeveloperCmsAccordion items={[{ id: "internal-improvement" }]} openIndex={internalFormOpen ? 0 : null} onOpenChange={(index) => setInternalFormOpen(index === 0)} getEyebrow={() => "Sugestão interna"} getTitle={() => "Registrar uma melhoria como colaborador"} renderItem={() => <ImprovementForm profile="employee" endpoint={api.admin.improvements} internal onSubmitted={() => void handleInternalSubmission()} />} />
     </DeveloperCard>

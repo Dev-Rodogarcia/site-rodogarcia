@@ -112,7 +112,7 @@ export default function TrackingPage() {
       <DeveloperHero
         eyebrow="Rastreamento"
         title="Eventos, logs e auditoria."
-        description="Base interna para entender comportamento, popup, cookies, leads e ações administrativas."
+        description="Eventos, popup, cookies e ações."
         stats={[
           { label: "Eventos", value: data?.summary.total ?? 0 },
           { label: "Tipos", value: eventTypes.length },

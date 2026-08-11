@@ -123,6 +123,14 @@ function isMobileDevice() {
   return touch && narrow;
 }
 
+function isMobilePopupLayout() {
+  if (typeof window === "undefined") return false;
+  const previewViewport = new URLSearchParams(window.location.search).get("viewport");
+  if (previewViewport === "mobile") return true;
+  if (previewViewport === "desktop" || previewViewport === "tablet") return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
 function isCmsPopupPreview() {
   if (typeof window === "undefined") return false;
   const params = new URLSearchParams(window.location.search);
@@ -177,6 +185,7 @@ export default function ExitPopup() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [mobileLayout, setMobileLayout] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -213,6 +222,14 @@ export default function ExitPopup() {
   }, [closing, formStatus]);
 
   const handleEscape = useCallback(() => closePopup("esc"), [closePopup]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const syncLayout = () => setMobileLayout(isMobilePopupLayout());
+    syncLayout();
+    media.addEventListener("change", syncLayout);
+    return () => media.removeEventListener("change", syncLayout);
+  }, []);
 
   useEffect(() => {
     const syncConsent = (event?: Event) => {
@@ -477,18 +494,23 @@ export default function ExitPopup() {
   }
 
   if (!config || !rendered) return null;
-  const mobile = isMobileDevice();
-  const modeConfig = mobile ? config.mobile : config.desktop;
+  const modeConfig = mobileLayout ? config.mobile : config.desktop;
   const popupTitle = modeConfig?.title || config.title;
   const popupDescription = modeConfig?.description || config.description;
   const popupImage = modeConfig?.image || config.image;
-  const popupBadge = mobile ? config.mobile?.sheetTitle || config.badgeText : config.badgeText;
+  const popupBadge = mobileLayout ? config.mobile?.sheetTitle || config.badgeText : config.badgeText;
+  const sideBySideDetails = config.enableName && config.enablePhone;
+  const cmsPreview = isCmsPopupPreview();
 
   return (
     <div
       className={[
         "fixed inset-0 z-[9999] flex",
-        mobile ? "items-end justify-center p-3 pb-0 sm:p-5" : "items-center justify-center p-4 sm:p-6",
+        mobileLayout
+          ? cmsPreview
+            ? "items-center justify-center p-4"
+            : "items-end justify-center p-0"
+          : "items-center justify-center p-4 sm:p-6",
       ].join(" ")}
     >
       <div
@@ -508,12 +530,14 @@ export default function ExitPopup() {
         aria-describedby="rg-popup-description"
         tabIndex={-1}
         className={[
-          "relative w-full overflow-hidden border border-[var(--border)] bg-[var(--color-surface)] shadow-[0_24px_60px_rgba(2,6,23,0.18)] backdrop-blur-md",
+          "relative w-full overflow-hidden border border-white/20 bg-[#f3f6fb] shadow-[0_24px_60px_rgba(2,6,23,0.22)]",
           "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
           closing ? "translate-y-2 scale-[0.97] opacity-0" : "translate-y-0 scale-100 opacity-100",
-          mobile
-            ? "max-h-[92dvh] max-w-[680px] overflow-y-auto rounded-t-[22px] px-5 pb-5 pt-6 sm:rounded-[22px] sm:p-6"
-            : "max-w-[520px] rounded-[22px] p-6 sm:p-7",
+          mobileLayout
+            ? cmsPreview
+              ? "max-h-[86dvh] max-w-[360px] overflow-y-auto rounded-[28px]"
+              : "max-h-[90dvh] max-w-[680px] overflow-y-auto rounded-t-[28px]"
+            : "max-w-[780px] rounded-[24px]",
         ].join(" ")}
       >
         <button
@@ -521,39 +545,64 @@ export default function ExitPopup() {
           onClick={() => closePopup("button")}
           aria-label="Fechar popup"
           ref={closeButtonRef}
-          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--color-surface-strong)] text-[var(--color-muted-raw)] shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-colors duration-200 hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-500 shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition-colors duration-200 hover:bg-white hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
         >
           <X size={18} weight="bold" aria-hidden="true" />
         </button>
 
-        <div className="relative space-y-5">
-          {popupImage ? (
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--color-surface-2)]">
+        <div
+          className={[
+            "relative",
+            mobileLayout
+              ? ""
+              : "grid grid-cols-[minmax(220px,0.85fr)_minmax(0,1.15fr)]",
+          ].join(" ")}
+        >
+          <div
+            className={mobileLayout
+              ? "overflow-hidden bg-[#0b2247]"
+              : "min-h-full overflow-hidden bg-[#0b2247]"}
+          >
+            {popupImage ? (
               <img
                 src={popupImage}
                 alt=""
-                className={`${mobile ? "h-32" : "h-40"} w-full object-cover`}
+                className={`${mobileLayout ? "h-44" : "h-full min-h-[390px]"} w-full object-cover`}
               />
-            </div>
-          ) : null}
+            ) : (
+              <div
+                aria-hidden="true"
+                className={`${mobileLayout ? "h-44 items-center justify-center px-5 py-4 text-center" : "min-h-[390px] justify-end p-7"} flex h-full flex-col bg-[radial-gradient(circle_at_24%_16%,rgba(99,151,221,0.55),transparent_30%),radial-gradient(circle_at_82%_86%,rgba(37,89,184,0.48),transparent_38%),linear-gradient(145deg,#07162f_0%,#0c2855_58%,#174695_100%)] text-white`}
+              >
+                <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-sky-200/80">Rodogarcia</span>
+                <span className="mt-1 max-w-[15ch] text-lg font-bold leading-tight tracking-[-0.03em]">Vamos simplificar sua operação.</span>
+              </div>
+            )}
+          </div>
+
+          <div
+            className={mobileLayout
+              ? "space-y-3 bg-[linear-gradient(145deg,#f8fbff_0%,#f1f5fb_100%)] px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 text-center"
+              : "min-w-0 space-y-4.5 bg-[linear-gradient(145deg,#f8fbff_0%,#f1f5fb_100%)] p-7"}
+          >
 
           {popupBadge ? (
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--primary)]/14 bg-[var(--color-primary-soft)] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+            <span className={`${mobileLayout ? "mx-auto" : ""} inline-flex w-fit items-center gap-2 rounded-full border border-[var(--primary)]/14 bg-[var(--color-primary-soft)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--primary)]`}>
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" aria-hidden="true" />
               {popupBadge}
             </span>
           ) : null}
 
-          <div className="pr-9">
+          <div className={mobileLayout ? "" : "pr-8"}>
           <h2
             id="rg-popup-title"
-              className="text-[clamp(1.65rem,4vw,2.25rem)] font-extrabold leading-[1.02] tracking-[-0.04em] text-[var(--foreground)]"
+              className={`${mobileLayout ? "text-[1.7rem]" : "text-[clamp(1.75rem,3vw,2.2rem)]"} font-extrabold leading-[1.06] tracking-[-0.04em] text-[var(--foreground)]`}
           >
             {popupTitle}
           </h2>
             <p
               id="rg-popup-description"
-              className="mt-3 text-[15px] leading-7 text-[var(--color-muted-raw)]"
+              className="mt-2 text-sm leading-6 text-[var(--color-muted-raw)]"
             >
             {popupDescription}
           </p>
@@ -564,29 +613,30 @@ export default function ExitPopup() {
             {config.successMessage}
           </p>
         ) : (
-            <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
-            {config.enableName && (
-              <input
-                type="text"
-                placeholder="Seu nome"
-                  aria-label="Seu nome"
-                  ref={firstFieldRef}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={80}
-                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
-              />
-            )}
+            <form onSubmit={handleSubmit} className="space-y-3" noValidate>
+              <div className={`grid gap-2.5 ${sideBySideDetails ? "grid-cols-2" : ""}`}>
             {config.enableEmail && (
               <input
                 type="email"
                 placeholder="Seu e-mail"
                   aria-label="Seu e-mail"
-                  ref={!config.enableName ? firstFieldRef : undefined}
+                ref={firstFieldRef}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 maxLength={160}
-                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
+                  className={`h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-3.5 text-left text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20 ${sideBySideDetails ? "col-span-2" : ""}`}
+              />
+            )}
+            {config.enableName && (
+              <input
+                type="text"
+                placeholder="Seu nome"
+                  aria-label="Seu nome"
+                  ref={!config.enableEmail ? firstFieldRef : undefined}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={80}
+                  className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-3.5 text-left text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
               />
             )}
             {config.enablePhone && (
@@ -594,16 +644,17 @@ export default function ExitPopup() {
                 type="tel"
                 placeholder="Seu telefone"
                   aria-label="Seu telefone"
-                  ref={!config.enableName && !config.enableEmail ? firstFieldRef : undefined}
+                ref={!config.enableEmail && !config.enableName ? firstFieldRef : undefined}
                 value={phone}
                 onChange={(e) => {
                   maskPhone(e);
                   setPhone(e.target.value);
                 }}
                 maxLength={20}
-                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-4 text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
+                  className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-3.5 text-left text-sm font-medium text-[var(--foreground)] outline-none transition-colors duration-200 placeholder:text-[var(--color-muted-raw)] hover:border-[var(--color-border-strong)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/20"
               />
             )}
+              </div>
 
             {formStatus === "error" && (
                 <p className="rounded-[14px] border border-red-500/15 bg-red-500/10 px-3 py-2 text-xs font-semibold leading-5 text-red-500" aria-live="polite">
@@ -611,25 +662,26 @@ export default function ExitPopup() {
                 </p>
             )}
 
-              <div className="flex flex-col gap-2.5 pt-1">
+              <div className="flex flex-col items-center gap-1.5 pt-1">
               <button
                 type="submit"
                 disabled={formStatus === "loading"}
                   aria-busy={formStatus === "loading"}
-                  className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-[var(--primary)] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_26px_rgba(29,78,216,0.24)] transition-colors duration-200 hover:bg-[var(--color-primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                  className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--primary)] px-6 text-sm font-bold text-white shadow-[0_10px_20px_rgba(29,78,216,0.2)] transition-colors duration-200 hover:bg-[var(--color-primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
               >
                 {formStatus === "loading" ? "Enviando..." : config.buttonText}
               </button>
               <button
                 type="button"
                 onClick={() => closePopup("cancel")}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--color-surface-strong)] px-5 py-2.5 text-sm font-bold text-[var(--color-foreground-soft)] transition-colors duration-200 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
+                  className="inline-flex min-h-8 items-center justify-center px-3 py-1 text-xs font-semibold text-[var(--color-muted-raw)] underline-offset-4 transition-colors duration-200 hover:text-[var(--foreground)] hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20"
               >
                 {config.closeText}
               </button>
             </div>
           </form>
         )}
+          </div>
         </div>
       </div>
     </div>

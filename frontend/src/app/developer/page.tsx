@@ -379,7 +379,7 @@ export default function DeveloperDashboardPage() {
       <DeveloperHero
         eyebrow="Painel Rodogarcia"
         title="Visão executiva do CMS."
-        description="A área developer foi reorganizada para refletir o CMS estático com rotas reais do app atual, sem header e sem footer público."
+        description="Visão geral das operações do CMS."
         stats={[
           { label: "Módulos ativos", value: quickLinks.length },
           { label: "Últimos 30 dias", value: data?.analytics.uniqueSessions ?? 0 },

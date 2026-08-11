@@ -108,7 +108,7 @@ export default function CookieMonitoringPage() {
       <DeveloperHero
         eyebrow="LGPD - Monitoramento"
         title="Monitoramento de Cookies e Consentimento"
-        description="Registros anonimizados de aceite, recusa, preferências e revogação."
+        description="Aceites, recusas e preferências."
         stats={[
           { label: "Total", value: total },
           { label: "Aceitos na página", value: summary.accepted ?? 0 },

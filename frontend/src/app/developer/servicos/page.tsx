@@ -245,7 +245,7 @@ export default function DeveloperServicesPage() {
       <DeveloperHero
         eyebrow="Serviços"
         title="Página Serviços."
-        description="Edite somente as seções controladas pelo CMS em /servicos. O Hero permanece fora deste painel."
+        description="Edite as seções disponíveis no CMS."
         stats={[
           { label: "Módulos", value: summary.modules },
           { label: "FAQ", value: summary.faq },
