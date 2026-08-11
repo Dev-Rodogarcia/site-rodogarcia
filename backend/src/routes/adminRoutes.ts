@@ -57,9 +57,12 @@ import {
   listTrackingEventsController,
 } from "../controllers/trackingController.js";
 import { requireAdmin } from "../security/auth.js";
+import { requireCmsPermission } from "../security/cmsAccess.js";
+import type { CmsPermission } from "../types/auth.js";
 import { requireCsrf } from "../security/csrf.js";
 import { requireAllowedOrigin } from "../security/origin.js";
 import { requireJson } from "../validators/common.js";
+import { createAccessProfileController, deleteAccessProfileController, listAccessProfilesController, updateAccessProfileController } from "../controllers/cmsAccessController.js";
 
 export const adminRouter = Router();
 const upload = multer({
@@ -71,7 +74,41 @@ const improvementUpload = multer({
   limits: { fileSize: 8 * 1024 * 1024, files: 5 },
 });
 
-adminRouter.use(requireAdmin);
+function permissionForRequest(path: string): CmsPermission | null {
+  if (path.startsWith("/access-profiles") || path.startsWith("/users")) return "users";
+  if (path.startsWith("/home")) return "home";
+  if (path.startsWith("/services-page")) return "services";
+  if (path.startsWith("/pages/careers")) return "careers-page";
+  if (path.startsWith("/pages/collections")) return "collections";
+  if (path.startsWith("/pages/contact")) return "contact-page";
+  if (path.startsWith("/pages/quote")) return "quote-page";
+  if (path.startsWith("/pages/business")) return "business-page";
+  if (path.startsWith("/pages/about")) return "about-page";
+  if (path.startsWith("/pages/improvements")) return "improvements";
+  if (path.startsWith("/footer-links")) return "footer-links";
+  if (path.startsWith("/header-navigation")) return "header-navigation";
+  if (path.startsWith("/site-texts")) return "home";
+  if (path.startsWith("/images") || path.startsWith("/media-")) return "images";
+  if (path.startsWith("/seo")) return "seo";
+  if (path.startsWith("/consent-settings") || path.startsWith("/cookie-consents")) return "cookies";
+  if (path.startsWith("/leads")) return "leads";
+  if (path.startsWith("/improvements")) return "improvements";
+  if (path.startsWith("/tracking") || path.startsWith("/audit-log")) return "tracking";
+  if (path.startsWith("/content")) return "dashboard";
+  if (path.startsWith("/units")) return "units";
+  return null;
+}
+adminRouter.use(requireAdmin, (req, res, next) => {
+  if (req.path.startsWith("/access-profiles")) return next();
+  const permission = permissionForRequest(req.path);
+  if (!permission) { res.status(403).json({ error: "Recurso administrativo sem permissão cadastrada." }); return; }
+  return requireCmsPermission(permission)(req, res, next);
+});
+
+adminRouter.get("/access-profiles", listAccessProfilesController);
+adminRouter.post("/access-profiles", requireAllowedOrigin, requireJson, requireCsrf, createAccessProfileController);
+adminRouter.put("/access-profiles/:id", requireAllowedOrigin, requireJson, requireCsrf, updateAccessProfileController);
+adminRouter.delete("/access-profiles/:id", requireAllowedOrigin, requireCsrf, deleteAccessProfileController);
 
 adminRouter.get("/content", getContentController);
 adminRouter.get("/home", getHomeController);

@@ -1,6 +1,7 @@
 import type { Request } from "express";
 import { env } from "../config/env.js";
 import { userRepository } from "../repositories/userRepository.js";
+import { cmsAccessProfileRepository } from "../repositories/cmsAccessProfileRepository.js";
 import { USER_PERMISSIONS, type UserPermission, type UserRecord } from "../types/auth.js";
 import { generateId } from "../utils/ids.js";
 import { sanitizeEmail, sanitizeText } from "../utils/sanitize.js";
@@ -18,6 +19,7 @@ import {
   getRateLimitState,
   registerHit,
 } from "../security/rateLimit.js";
+import { effectiveCmsPermissions, parseCmsOverrides, parseCmsPermissions } from "../security/cmsAccess.js";
 
 export function publicUser(user: UserRecord) {
   return {
@@ -29,6 +31,9 @@ export function publicUser(user: UserRecord) {
     isOwner: user.isOwner === true,
     passwordChangeRequired: isPasswordChangeRequired(user),
     permissions: user.permissions ?? [],
+    accessProfileId: user.accessProfileId ?? "",
+    cmsPermissions: effectiveCmsPermissions(user),
+    cmsPermissionOverrides: user.cmsPermissionOverrides ?? [],
     cmsTheme: user.cmsTheme,
   };
 }
@@ -55,6 +60,9 @@ interface CreateUserParams {
   confirmPassword?: unknown;
   role?: unknown;
   permissions?: unknown;
+  accessProfileId?: unknown;
+  cmsPermissions?: unknown;
+  cmsPermissionOverrides?: unknown;
 }
 
 function parseUserPermissions(value: unknown): UserPermission[] | undefined {
@@ -128,6 +136,17 @@ function assertUserPermission(actor: UserRecord | null | undefined, permission: 
   if (!hasUserPermission(actor, permission)) {
     throw new HttpError(403, "Você não tem permissão para gerenciar usuários desta forma.");
   }
+}
+
+function parseAccessProfileId(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  const id = sanitizeText(value, 120);
+  if (!id) return undefined;
+  const profile = cmsAccessProfileRepository.findById(id);
+  if (!profile || profile.active === false) {
+    throw new HttpError(422, "Perfil-base de acesso inválido ou inativo.");
+  }
+  return id;
 }
 
 function assertLoginRateLimit(req: Request, email: string) {
@@ -210,6 +229,9 @@ function createUserRecord(
     typeof params.confirmPassword === "string" ? params.confirmPassword : password;
   const role = parseUserRole(params.role, true)!;
   const permissions = parseUserPermissions(params.permissions) ?? [];
+  const cmsPermissions = parseCmsPermissions(params.cmsPermissions);
+  const cmsPermissionOverrides = parseCmsOverrides(params.cmsPermissionOverrides);
+  const accessProfileId = parseAccessProfileId(params.accessProfileId);
   if (role !== "admin" && permissions.length > 0) {
     throw new HttpError(422, "Permissões de usuários exigem perfil de administrador.");
   }
@@ -240,13 +262,18 @@ function createUserRecord(
     isOwner: isInitialOwner,
     mustChangePassword: isInitialOwner ? false : true,
     permissions: isInitialOwner ? [] : permissions,
+    accessProfileId: isInitialOwner ? undefined : accessProfileId || undefined,
+    cmsPermissions: isInitialOwner ? undefined : (cmsPermissions ?? []),
+    cmsPermissionOverrides: isInitialOwner ? undefined : cmsPermissionOverrides,
     createdAt: nowIso,
     passwordHash: hashPassword(password),
   });
 }
 
 export function createUser(params: CreateUserParams, actor?: UserRecord) {
-  if (userRepository.hasAny()) assertUserPermission(actor, "createUsers");
+  if (userRepository.hasAny() && (!actor || actor.role !== "admin" || actor.active === false)) {
+    throw new HttpError(403, "Acesso administrativo obrigatório para criar usuários.");
+  }
   return createUserRecord(params, false);
 }
 
@@ -260,6 +287,9 @@ export function updateUser(
     password?: unknown;
     confirmPassword?: unknown;
     permissions?: unknown;
+    accessProfileId?: unknown;
+    cmsPermissions?: unknown;
+    cmsPermissionOverrides?: unknown;
   },
   actor: UserRecord
 ) {
@@ -270,6 +300,9 @@ export function updateUser(
   const requestedRole = parseUserRole(params.role, false);
   const requestedActive = parseUserActive(params.active);
   const requestedPermissions = parseUserPermissions(params.permissions);
+  const requestedCmsPermissions = parseCmsPermissions(params.cmsPermissions);
+  const requestedCmsOverrides = parseCmsOverrides(params.cmsPermissionOverrides);
+  const requestedAccessProfileId = parseAccessProfileId(params.accessProfileId);
   if (isSupremeUser(target)) {
     if (
       (requestedRole !== undefined && requestedRole !== "admin") ||
@@ -300,6 +333,9 @@ export function updateUser(
   } else if (requestedRole === "user") {
     patch.permissions = [];
   }
+  if (requestedCmsPermissions !== undefined) patch.cmsPermissions = requestedCmsPermissions;
+  if (requestedCmsOverrides !== undefined) patch.cmsPermissionOverrides = requestedCmsOverrides;
+  if (requestedAccessProfileId !== undefined) patch.accessProfileId = requestedAccessProfileId || undefined;
 
   if (params.password !== undefined && typeof params.password !== "string") {
     throw new HttpError(422, "A senha deve ser uma string.");
@@ -326,7 +362,8 @@ export function updateUser(
   if (
     patch.passwordHash ||
     (patch.active !== undefined && patch.active !== (target.active !== false)) ||
-    (patch.role !== undefined && patch.role !== target.role)
+    (patch.role !== undefined && patch.role !== target.role) ||
+    patch.cmsPermissions !== undefined || patch.cmsPermissionOverrides !== undefined || patch.accessProfileId !== undefined
   ) {
     sessionRepository.deleteByUserId(target.id);
   }

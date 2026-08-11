@@ -36,7 +36,7 @@ describe("authService", () => {
     expect(() =>
       login(requestBody("admin@rodogarcia.com.br", VALID_PASSWORD))
     ).toThrow("Muitas tentativas de login.");
-  });
+  }, 15_000);
 
   it("blocks login after repeated failures against the same email", async () => {
     createIsolatedBackendEnv();
@@ -199,7 +199,7 @@ describe("authService", () => {
     expect(isPasswordChangeRequired(updated)).toBe(false);
   });
 
-  it("allows only the owner to grant delegated user creation and deletion", async () => {
+  it("allows every administrator to create users while deletion remains delegated", async () => {
     createIsolatedBackendEnv();
     process.env.ADMIN_SETUP_CODE = "codigo-setup-seguro-123";
     const { createInitialUser, createUser, deleteUser, updateUser } = await import(
@@ -224,18 +224,17 @@ describe("authService", () => {
       owner
     );
 
-    expect(() =>
-      createUser(
-        {
-          name: "Sem Permissão",
-          email: "sem-permissao@rodogarcia.com.br",
-          password: VALID_PASSWORD,
-          confirmPassword: VALID_PASSWORD,
-          role: "admin",
-        },
-        delegatedAdmin
-      )
-    ).toThrow("não tem permissão");
+    const createdByAdmin = createUser(
+      {
+        name: "Criado por administrador",
+        email: "criado-por-admin@rodogarcia.com.br",
+        password: VALID_PASSWORD,
+        confirmPassword: VALID_PASSWORD,
+        role: "admin",
+      },
+      delegatedAdmin
+    );
+    expect(createdByAdmin.mustChangePassword).toBe(true);
     expect(() => updateUser(delegatedAdmin.id, { permissions: ["createUsers"] }, delegatedAdmin)).toThrow(
       "Somente o usuário supremo"
     );

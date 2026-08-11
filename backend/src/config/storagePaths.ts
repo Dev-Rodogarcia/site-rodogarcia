@@ -46,6 +46,10 @@ export const storagePaths = {
     "USERS_STORE_PATH",
     path.join(privateRoot, "users.json")
   ),
+  cmsAccessProfiles: resolveStoragePath(
+    "CMS_ACCESS_PROFILES_STORE_PATH",
+    path.join(privateRoot, "cms-access-profiles.json")
+  ),
   sessions: resolveStoragePath(
     "SESSIONS_STORE_PATH",
     path.join(privateRoot, "sessions.json")

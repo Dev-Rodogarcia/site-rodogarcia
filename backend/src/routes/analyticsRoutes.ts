@@ -7,6 +7,7 @@ import {
   updateAnalyticsConfigController,
 } from "../controllers/analyticsController.js";
 import { requireAdmin } from "../security/auth.js";
+import { requireCmsPermission } from "../security/cmsAccess.js";
 import { requireCsrf } from "../security/csrf.js";
 import { requireAllowedOrigin } from "../security/origin.js";
 import { requireJson } from "../validators/common.js";
@@ -20,13 +21,14 @@ analyticsRouter.post(
   createAnalyticsEventController
 );
 analyticsRouter.get("/public-config", getPublicAnalyticsConfigController);
-analyticsRouter.get("/stats", requireAdmin, getAnalyticsStatsController);
-analyticsRouter.get("/config", requireAdmin, getAnalyticsConfigController);
+analyticsRouter.get("/stats", requireAdmin, requireCmsPermission("analytics"), getAnalyticsStatsController);
+analyticsRouter.get("/config", requireAdmin, requireCmsPermission("analytics"), getAnalyticsConfigController);
 analyticsRouter.post(
   "/config",
   requireAllowedOrigin,
   requireJson,
   requireAdmin,
+  requireCmsPermission("analytics"),
   requireCsrf,
   updateAnalyticsConfigController
 );

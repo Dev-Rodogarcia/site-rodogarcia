@@ -42,8 +42,8 @@ interface DeveloperHeroProps {
 
 const EMPTY_DEVELOPER_HERO_STATS: DeveloperPageHeaderStat[] = [];
 
-export function DeveloperPage({ children }: { children: ReactNode }) {
-  return <div className={developerPageClassName}>{children}</div>;
+export function DeveloperPage({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn(developerPageClassName, className)}>{children}</div>;
 }
 
 export function DeveloperHero({

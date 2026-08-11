@@ -7,6 +7,8 @@ import { DeveloperPageHeaderProvider } from "./DeveloperPageHeaderContext";
 import { api, external } from "@/lib/routes";
 import { useSession } from "@/hooks/useSession";
 import { useApiRequest } from "@/hooks/useApiRequest";
+import { usePathname } from "next/navigation";
+import { permissionForAdminPath } from "@/lib/cmsAccess";
 
 const SIDEBAR_STORAGE_KEY = "developer.sidebar.expanded";
 
@@ -20,6 +22,9 @@ export default function DeveloperShell({
   const [darkTheme, setDarkTheme] = useState(false);
   const { session, loading: sessionLoading } = useSession();
   const { apiRequest } = useApiRequest();
+  const pathname = usePathname();
+  const requiredPermission = permissionForAdminPath(pathname);
+  const accessDenied = Boolean(requiredPermission && session?.authenticated && !session.user?.cmsPermissions?.includes(requiredPermission));
 
   useEffect(() => {
     const storedValue = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
@@ -76,7 +81,7 @@ export default function DeveloperShell({
             >
               <div className="flex min-h-full flex-col">
                 <DevTopbar onOpenNavigation={() => setMobileOpen(true)} darkTheme={darkTheme} onToggleTheme={toggleTheme} />
-                <div className="flex-1">{children}</div>
+                <div className="flex-1">{accessDenied ? <div className="mx-auto max-w-xl px-6 py-20 text-center"><h1 className="text-2xl font-bold text-[var(--foreground)]">Acesso não permitido</h1><p className="mt-3 text-sm text-[var(--color-muted-raw)]">Sua conta não tem permissão para esta área.</p></div> : children}</div>
                 <footer className="mt-auto w-full border-t border-[rgba(15,23,42,0.08)] bg-white/66 px-4 py-3 text-xs text-[var(--color-muted-raw)] backdrop-blur-sm sm:px-5 lg:px-6">
                   <a
                     href={external.developerProfile}

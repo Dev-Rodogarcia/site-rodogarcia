@@ -69,6 +69,7 @@ export const admin = {
   units: "/developer/unidades",
   popup: "/developer/popup-exit",
   users: "/developer/usuarios",
+  sectors: "/developer/setores",
   images: "/developer/imagens",
   analytics: "/developer/analytics",
   seo: "/developer/seo",
@@ -114,6 +115,8 @@ export const api = {
     pageSection: (pageKey: string, sectionKey: string) =>
       `/api/admin/pages/${pageKey}/${sectionKey}`,
     users: "/api/admin/users",
+    accessProfiles: "/api/admin/access-profiles",
+    accessProfile: (id: string) => `/api/admin/access-profiles/${id}`,
     replaceImageReference: "/api/admin/images/replace-reference",
     mediaSlots: "/api/admin/media-slots",
     seoSettings: "/api/admin/seo-settings",
@@ -275,7 +278,10 @@ export const adminNavigationGroups = [
   {
     label: "Administração",
     key: "administration",
-    items: [{ href: admin.users, label: "Usuários", key: "users" }],
+    items: [
+      { href: admin.users, label: "Usuários", key: "users" },
+      { href: admin.sectors, label: "Setores e acessos", key: "access-profiles" },
+    ],
   },
 ] as const satisfies readonly {
   label: string;

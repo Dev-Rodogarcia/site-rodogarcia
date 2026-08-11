@@ -57,6 +57,7 @@ const CMS_PAGE_NAMES: Record<string, string> = {
   "/developer/trabalhe-conosco": "Trabalhe Conosco",
   "/developer/unidades": "Unidades",
   "/developer/usuarios": "Usuários",
+  "/developer/setores": "Setores e acessos",
   "/developer/vagas": "Vagas",
 };
 
@@ -113,6 +114,7 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
   "/developer/trabalhe-conosco": { destination: "/trabalhe-conosco", action: "edita cultura, vagas e chamadas de carreira", example: "Atualize a foto de cultura para ela aparecer na página de carreiras." },
   "/developer/unidades": { destination: "as unidades exibidas no site", action: "edita endereço, contatos e dados de cada unidade", example: "Atualize o telefone de Campinas para o visitante ver o novo contato." },
   "/developer/usuarios": { destination: "as contas internas do CMS, sem alterar o site", action: "cria e administra acessos ao painel", example: "Crie uma conta para operacao@rodo... e escolha o perfil permitido." },
+  "/developer/setores": { destination: "as permissões internas do CMS, sem alterar o site", action: "cria setores e define quais áreas do painel cada setor pode usar", example: "Crie o setor Recursos Humanos e libere somente Página Carreiras e Imagens." },
   "/developer/vagas": { destination: "as vagas de /trabalhe-conosco", action: "edita oportunidades de trabalho", example: "Crie a vaga “Motorista Carreteiro” para ela aparecer na página de carreiras." },
 };
 
@@ -174,7 +176,8 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
     title: "Criar usuário",
     summary: "Aqui você cria um acesso ao CMS e define uma senha temporária. A pessoa precisará criar a própria senha no primeiro login antes de acessar o painel.",
     details: [
-      { label: "Quem pode criar", value: "O usuário supremo pode criar sempre. Um administrador comum só pode criar quando o supremo tiver marcado a permissão “Criar usuários” no menu de três pontos da conta." },
+      { label: "Quem pode criar", value: "Qualquer administrador autenticado pode criar contas com senha temporária." },
+      { label: "Setor de acesso", value: "Ao criar um administrador, escolha um setor. O setor determina as telas que essa pessoa poderá visualizar e alterar; ele pode ser criado ou ajustado em /developer/setores por qualquer administrador autenticado." },
       { label: "Onde aparece", value: "O acesso é usado na tela /auth/entrar e, após a troca de senha, no painel /developer." },
       { label: "Senha temporária", value: "A senha definida aqui serve apenas para o primeiro login. O painel bloqueia o uso até que a pessoa informe uma nova senha forte.", technical: true },
       { label: "Redefinição solicitada", value: "Quando uma pessoa pedir ajuda pelo link em /auth/entrar, o usuário supremo verá o aviso no card dela em /developer/usuarios. Ao definir uma nova senha temporária, o aviso é concluído e a pessoa precisará trocá-la no próximo acesso." },

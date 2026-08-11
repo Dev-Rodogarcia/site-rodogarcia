@@ -30,6 +30,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { adminNavigationGroups, api, auth, site } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { permissionForAdminPath } from "@/lib/cmsAccess";
+import { useSession } from "@/hooks/useSession";
 
 interface DevSidebarProps {
   mobileOpen: boolean;
@@ -259,6 +261,7 @@ export default function DevSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { apiRequest } = useApiRequest();
+  const { session } = useSession();
   const [loggingOut, setLoggingOut] = useState(false);
   const [activatingHref, setActivatingHref] = useState<string | null>(null);
 
@@ -332,7 +335,13 @@ export default function DevSidebar({
 
         <SidebarScrollArea expanded={navigationExpanded}>
           <div className={cn("flex flex-col transition-[gap] duration-500 ease-[cubic-bezier(0.2,0,0,1)]", navigationExpanded ? "gap-3" : "gap-2")}>
-            {adminNavigationGroups.map((group, groupIndex) => (
+            {adminNavigationGroups.map((group, groupIndex) => {
+              const visibleItems = group.items.filter((item) => {
+                const permission = permissionForAdminPath(item.href);
+                return !permission || !session?.user?.cmsPermissions || session.user.cmsPermissions.includes(permission);
+              });
+              if (visibleItems.length === 0) return null;
+              return (
               <div
                 key={group.key}
                 className={cn(
@@ -345,7 +354,7 @@ export default function DevSidebar({
                     {group.label}
                   </p>
                 ) : null}
-                {group.items.map((item) => {
+                {visibleItems.map((item) => {
                   const Icon = iconMap[item.key] ?? Stack;
                   return (
                     <SidebarItem
@@ -370,7 +379,8 @@ export default function DevSidebar({
                   />
                 ) : null}
               </div>
-            ))}
+              );
+            })}
           </div>
         </SidebarScrollArea>
 

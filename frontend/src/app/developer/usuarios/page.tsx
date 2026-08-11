@@ -21,6 +21,7 @@ import {
   useAdminResource,
 } from "@/hooks/useAdminResource";
 import { api } from "@/lib/routes";
+import type { CmsPermission } from "@/lib/cmsAccess";
 import {
   DeveloperCard,
   DeveloperField,
@@ -30,8 +31,6 @@ import {
   DeveloperPage,
   DeveloperSectionHeading,
   developerInputClassName,
-  developerDangerButtonClassName,
-  developerGhostButtonClassName,
   developerPrimaryButtonClassName,
   developerSecondaryButtonClassName,
 } from "@/components/developer/ui";
@@ -41,6 +40,8 @@ interface AdminUser {
   email: string;
   name?: string;
   role: "admin" | "user";
+  cmsPermissions: CmsPermission[];
+  accessProfileId?: string;
   createdAt: string;
   active: boolean;
   protected?: boolean;
@@ -55,12 +56,23 @@ interface UsersResponse {
   users?: AdminUser[];
 }
 
+interface AccessProfile {
+  id: string;
+  name: string;
+  active: boolean;
+}
+
+interface AccessProfilesResponse {
+  profiles?: AccessProfile[];
+}
+
 interface UserFormState {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
   role: "admin" | "user";
+  accessProfileId: string;
 }
 
 const EMPTY_FORM: UserFormState = {
@@ -69,6 +81,7 @@ const EMPTY_FORM: UserFormState = {
   password: "",
   confirmPassword: "",
   role: "admin",
+  accessProfileId: "",
 };
 
 const USERS_PER_PAGE = 4;
@@ -154,8 +167,14 @@ export default function UsuariosPage() {
   const adminCount = users.filter((user) => user.role === "admin" && user.active).length;
   const activeCount = users.filter((user) => user.active).length;
   const isSupreme = Boolean(currentUser?.isSupreme || currentUser?.protected);
-  const canCreateUsers = isSupreme || Boolean(currentUser?.permissions?.includes("createUsers"));
+  const canCreateUsers = currentUser?.role === "admin";
   const canDeleteUsers = isSupreme || Boolean(currentUser?.permissions?.includes("deleteUsers"));
+  const { data: accessProfilesData } = useAdminResource<AccessProfilesResponse>({
+    key: "admin:access-profiles-for-users",
+    fetcher: (request) => request<AccessProfilesResponse>(api.admin.accessProfiles),
+    enabled: canCreateUsers,
+  });
+  const activeProfiles = (accessProfilesData?.profiles ?? []).filter((profile) => profile.active);
   const {
     pages: userPages,
     currentPage: usersPage,
@@ -214,6 +233,7 @@ export default function UsuariosPage() {
         password: form.password,
         confirmPassword: form.confirmPassword,
         role: form.role,
+        accessProfileId: isSupreme && form.role === "admin" ? form.accessProfileId : "",
       }),
     });
 
@@ -373,24 +393,18 @@ export default function UsuariosPage() {
         </div>
       ) : null}
 
-      <section className="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(340px,440px)_minmax(0,1fr)]">
+      <section className="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(480px,560px)_minmax(0,1fr)]">
         <DeveloperCard className="p-5 xl:sticky xl:top-5">
           <DeveloperSectionHeading
             eyebrow="Novo acesso"
             title="Criar usuário"
-            description="Defina uma senha temporária forte. No primeiro acesso, o novo usuário precisará criar a própria senha antes de entrar no painel."
+            description="Cadastre os dados, defina a senha temporária e então escolha o acesso que a pessoa terá no CMS."
             tooltip="Usuário interno é uma conta criada para operar o CMS. Exemplo: admin@empresa.com.br."
           />
 
-          {!canCreateUsers ? (
-            <div className="mb-5">
-              <DeveloperMessage tone="info">
-                Sua conta pode visualizar os acessos, mas não tem permissão para criar usuários.
-              </DeveloperMessage>
-            </div>
-          ) : null}
-
+          {!canCreateUsers ? <DeveloperMessage tone="info">Sua conta pode visualizar os acessos, mas não tem permissão para criar usuários.</DeveloperMessage> : (
           <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="grid gap-4 sm:grid-cols-2">
             <DeveloperField label="Nome" required>
               <input
                 value={form.name}
@@ -417,54 +431,10 @@ export default function UsuariosPage() {
                 className={developerInputClassName}
               />
             </DeveloperField>
-
-            <DeveloperField
-              label="Perfil de acesso"
-              required
-              hint="Admin acessa o painel. A gestão de acessos continua exclusiva da conta suprema."
-              tooltip="Define o acesso ao CMS; este perfil não concede a um administrador comum permissão para gerenciar usuários."
-            >
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  {
-                    value: "admin" as const,
-                    label: "Administrador",
-                    description: "Pode acessar o CMS, sem gerenciar outros usuários.",
-                  },
-                  {
-                    value: "user" as const,
-                    label: "Usuário",
-                    description: "Conta comum, sem permissão de admin no painel atual.",
-                  },
-                ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex min-h-[78px] items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/78 px-3.5 py-3 text-sm"
-                  >
-                    <input
-                      type="radio"
-                      name="role"
-                      checked={form.role === option.value}
-                      onChange={() =>
-                        setForm((current) => ({ ...current, role: option.value }))
-                      }
-                      className="mt-1 h-4 w-4 accent-[var(--primary)]"
-                    />
-                    <span>
-                      <span className="block font-semibold text-[var(--foreground)]">
-                        {option.label}
-                      </span>
-                      <span className="mt-1 block text-xs leading-5 text-[var(--color-muted-raw)]">
-                        {option.description}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </DeveloperField>
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <DeveloperField label="Senha" required>
+              <DeveloperField label="Senha temporária" required>
                 <input
                   type="password"
                   value={form.password}
@@ -501,7 +471,10 @@ export default function UsuariosPage() {
 
             <div className="rounded-[18px] border border-slate-200 bg-slate-50/78 p-3.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                Requisitos da senha
+                Requisitos da senha temporária
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[var(--color-muted-raw)]">
+                No primeiro acesso, a pessoa deverá criar a própria senha antes de entrar no painel.
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {passwordChecks.map((check) => (
@@ -520,6 +493,64 @@ export default function UsuariosPage() {
               </div>
             </div>
 
+            <DeveloperField
+              label="Perfil de acesso"
+              required
+              hint="Escolha o tipo de conta que será criado."
+              tooltip="Administrador acessa o CMS. Usuário comum não acessa o painel administrativo."
+            >
+              <div className="grid gap-2 sm:grid-cols-2">
+                {[
+                  {
+                    value: "admin" as const,
+                    label: "Administrador",
+                    description: "Pode acessar o CMS, sem gerenciar outros usuários.",
+                  },
+                  {
+                    value: "user" as const,
+                    label: "Usuário",
+                    description: "Conta comum, sem permissão de admin no painel atual.",
+                  },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex min-h-14 items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/78 px-3 py-2 text-sm"
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      checked={form.role === option.value}
+                      onChange={() =>
+                        setForm((current) => ({ ...current, role: option.value }))
+                      }
+                      className="h-4 w-4 shrink-0 accent-[var(--primary)]"
+                    />
+                    <span>
+                      <span className="block font-semibold text-[var(--foreground)]">
+                        {option.label}
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-4 text-[var(--color-muted-raw)]">
+                        {option.description}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </DeveloperField>
+
+            {form.role === "admin" ? (
+              <DeveloperField
+                label="Setor de acesso"
+                required
+                hint="O setor define as telas que esta pessoa poderá ver e alterar. Você pode criar ou ajustar setores em Setores e acessos."
+              >
+                <select value={form.accessProfileId} onChange={(event) => setForm((current) => ({ ...current, accessProfileId: event.target.value }))} required className={developerInputClassName}>
+                  <option value="">Selecione um setor</option>
+                  {activeProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
+                </select>
+              </DeveloperField>
+            ) : null}
+
             {status ? (
               <DeveloperMessage tone={status === "success" ? "success" : "error"}>
                 {statusMessage}
@@ -529,7 +560,7 @@ export default function UsuariosPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
-                disabled={saving || !canCreateUsers}
+                disabled={saving}
                 className={developerPrimaryButtonClassName}
               >
                 <UserCirclePlus size={18} weight="bold" />
@@ -546,9 +577,10 @@ export default function UsuariosPage() {
               </button>
             </div>
           </form>
+          )}
         </DeveloperCard>
 
-        <DeveloperCard className="self-start p-5 sm:p-6">
+        <DeveloperCard className="self-start p-5">
           <DeveloperSectionHeading
             eyebrow="Acessos cadastrados"
             title="Usuários do painel"
@@ -556,7 +588,7 @@ export default function UsuariosPage() {
             tooltip="Lista de usuários internos autorizados no CMS, com status e função de acesso."
           />
 
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-2">
             {users.length > 0 ? (
               (userPages[usersPage] ?? []).map((user) => {
                 const editingThis = editingId === user.id;
@@ -565,43 +597,42 @@ export default function UsuariosPage() {
                 return (
                 <article
                   key={user.id}
-                  className="rounded-[18px] border border-slate-200 bg-slate-50/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
+                  className="rounded-xl border border-slate-200 bg-slate-50/72 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
                 >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex min-w-0 gap-3">
-                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                  <div className="grid gap-2.5 lg:grid-cols-[minmax(280px,1fr)_auto_auto] lg:items-center">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary)]">
                         {user.role === "admin" ? (
-                          <ShieldCheck size={22} weight="duotone" />
+                          <ShieldCheck size={20} weight="duotone" />
                         ) : (
-                          <IdentificationBadge size={22} weight="duotone" />
+                          <IdentificationBadge size={20} weight="duotone" />
                         )}
                       </span>
                       <div className="min-w-0">
-                        <h3 className="truncate text-base font-semibold tracking-[-0.02em] text-[var(--foreground)]">
+                        <h3 className="text-sm font-semibold tracking-[-0.02em] text-[var(--foreground)]">
                           {user.name || "Usuário sem nome"}
                         </h3>
-                        <p className="mt-1 truncate text-sm text-[var(--color-muted-raw)]">
-                          {user.email}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--color-muted-raw)]">
-                          Criado em {formatDate(user.createdAt)}
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-[var(--color-muted-raw)]">
+                          <span className="truncate">{user.email}</span>
+                          <span className="hidden text-slate-300 sm:inline" aria-hidden="true">•</span>
+                          <span className="text-xs whitespace-nowrap">Criado em {formatDate(user.createdAt)}</span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                    <div className="flex flex-wrap items-center gap-1.5 lg:justify-end">
                       {user.passwordResetRequestedAt ? (
-                        <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">
+                        <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">
                           Redefinição solicitada
                         </span>
                       ) : null}
                       {user.protected ? (
-                        <span className="rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">
+                        <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-700">
                           Supremo
                         </span>
                       ) : null}
                       <span
-                        className={`inline-flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[11px] font-bold uppercase tracking-[0.14em] ${
+                        className={`inline-flex h-7 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
                           user.active
                             ? "border-emerald-500/15 bg-emerald-500/10 text-emerald-700"
                             : "border-slate-200 bg-slate-100 text-slate-500"
@@ -610,7 +641,7 @@ export default function UsuariosPage() {
                         {user.active ? <CheckCircle size={13} weight="fill" /> : <X size={13} weight="bold" />}
                         {user.active ? "Ativo" : "Inativo"}
                       </span>
-                      <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[var(--primary)]/10 bg-[var(--primary)]/[0.08] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+                      <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[var(--primary)]/10 bg-[var(--primary)]/[0.08] px-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
                         {user.role === "admin" ? <ShieldCheck size={13} weight="fill" /> : <IdentificationBadge size={13} weight="fill" />}
                         {user.role === "admin" ? "Admin" : "Usuário"}
                       </span>
@@ -658,6 +689,76 @@ export default function UsuariosPage() {
                           ) : null}
                         </div>
                       ) : null}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 lg:justify-end">
+                      {editingThis ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => void saveUser(user)}
+                            disabled={mutatingId === user.id}
+                            className={developerPrimaryButtonClassName}
+                          >
+                            <CheckCircle size={16} weight="bold" />
+                            {mutatingId === user.id ? "Salvando..." : "Salvar"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingId("");
+                              setEditing({});
+                            }}
+                            className={developerSecondaryButtonClassName}
+                          >
+                            <X size={16} weight="bold" />
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => beginEdit(user)}
+                            disabled={locked}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                            title={locked ? "Edição restrita ao usuário supremo." : "Editar usuário"}
+                          >
+                            <PencilSimple size={16} weight="bold" />
+                            <span className="sr-only">Editar</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setResettingId((current) => current === user.id ? "" : user.id);
+                              setTemporaryPassword("");
+                              setConfirmTemporaryPassword("");
+                            }}
+                            disabled={!isSupreme || user.protected}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                            title={user.protected ? "A conta suprema não recebe senha temporária." : !isSupreme ? "Ação restrita ao usuário supremo." : "Definir senha temporária"}
+                          >
+                            <Key size={16} weight="bold" />
+                            <span className="sr-only">Redefinir senha</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void removeUser(user)}
+                            disabled={user.protected || !canDeleteUsers || mutatingId === user.id}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 bg-red-50 text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            title={
+                              user.protected
+                                ? "O usuário supremo não pode ser excluído."
+                                : !canDeleteUsers
+                                  ? "Sua conta não tem permissão para excluir usuários."
+                                  : "Excluir usuário"
+                            }
+                          >
+                            <Trash size={16} weight="bold" />
+                            <span className="sr-only">Excluir</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -724,75 +825,6 @@ export default function UsuariosPage() {
                     </div>
                   ) : null}
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {editingThis ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => void saveUser(user)}
-                          disabled={mutatingId === user.id}
-                          className={developerPrimaryButtonClassName}
-                        >
-                          <CheckCircle size={16} weight="bold" />
-                          {mutatingId === user.id ? "Salvando..." : "Salvar"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingId("");
-                            setEditing({});
-                          }}
-                          className={developerSecondaryButtonClassName}
-                        >
-                          <X size={16} weight="bold" />
-                          Cancelar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => beginEdit(user)}
-                          disabled={locked}
-                          className={developerGhostButtonClassName}
-                          title={locked ? "Edição restrita ao usuário supremo." : "Editar usuário"}
-                        >
-                          <PencilSimple size={16} weight="bold" />
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setResettingId((current) => current === user.id ? "" : user.id);
-                            setTemporaryPassword("");
-                            setConfirmTemporaryPassword("");
-                          }}
-                          disabled={!isSupreme || user.protected}
-                          className={developerGhostButtonClassName}
-                          title={user.protected ? "A conta suprema não recebe senha temporária." : !isSupreme ? "Ação restrita ao usuário supremo." : "Definir senha temporária"}
-                        >
-                          <Key size={16} weight="bold" />
-                          Redefinir senha
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void removeUser(user)}
-                          disabled={user.protected || !canDeleteUsers || mutatingId === user.id}
-                          className={developerDangerButtonClassName}
-                          title={
-                            user.protected
-                              ? "O usuário supremo não pode ser excluído."
-                              : !canDeleteUsers
-                                ? "Sua conta não tem permissão para excluir usuários."
-                                : "Excluir usuário"
-                          }
-                        >
-                          <Trash size={16} weight="bold" />
-                          Excluir
-                        </button>
-                      </>
-                    )}
-                  </div>
                 </article>
                 );
               })
