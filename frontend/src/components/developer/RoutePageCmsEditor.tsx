@@ -91,7 +91,7 @@ const editableSectionClassName =
 
 const aboutSections = [
   { key: "hero", label: "Hero", description: "Abertura da página" },
-  { key: "compliance", label: "Governança", description: "Compliance e certificado" },
+  { key: "compliance", label: "Governança", description: "Compliance e carrossel de certificados" },
   { key: "finalCta", label: "CTA final", description: "Encerramento e ações" },
 ] as const;
 
@@ -622,29 +622,48 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
         <div className="mb-5 rounded-[18px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.62)_0%,rgba(255,255,255,0.86)_70%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Seção fixa 2</p>
           <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">Governança</h3>
-          <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">Conteúdo da seção de governança e compliance exibida em /sobre.</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">Título da seção e certificados exibidos no carrossel de /sobre.</p>
         </div>
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("compliance", current.compliance); }}>
           <div className={priorityPanelClassName}>
-            <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">Imagem principal <span className="text-[var(--primary)]">*</span></p>
-            <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
-              <DeveloperMediaPreview value={current.compliance.image.src} previewAlt={current.compliance.image.alt} mediaType="image" compact />
-              <div className="grid gap-4">
-                <DeveloperMediaField label="Arquivo selecionado" mediaType="image" required value={current.compliance.image.src} onChange={(src) => update((draft) => { draft.compliance.image.src = src; })} previewAlt={current.compliance.image.alt} showPreview={false} equalControlWidths />
-                <TextInput label="Texto alternativo" value={current.compliance.image.alt} maxLength={160} onChange={(value) => update((draft) => { draft.compliance.image.alt = value; })} />
+            <TextInput label="Título da seção" value={current.compliance.title} maxLength={220} onChange={(value) => update((draft) => { draft.compliance.title = value; })} />
+          </div>
+          <div className="flex justify-end">
+            <button type="button" className={developerSecondaryButtonClassName} disabled={(current.compliance.certifications?.length ?? 0) >= 12} onClick={() => update((draft) => { draft.compliance.certifications.push({ title: "", description: "", image: { src: "", alt: "" }, certificateUrl: "" }); })}>
+              <Plus size={16} weight="bold" /> Adicionar certificado
+            </button>
+          </div>
+          <DeveloperCmsAccordion
+            items={current.compliance.certifications ?? []}
+            openIndex={openIndex}
+            onOpenChange={setOpenIndex}
+            getEyebrow={(_, index) => `Certificado ${index + 1}`}
+            getTitle={(item) => item.title || "Certificado sem título"}
+            variant="services"
+            renderItem={(item, index) => (
+              <div className="space-y-5">
+                <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
+                  <DeveloperMediaPreview value={item.image?.src ?? ""} previewAlt={item.image?.alt ?? ""} mediaType="image" compact />
+                  <div className="grid gap-4">
+                    <DeveloperMediaField label="Arquivo do certificado" mediaType="image" required value={item.image?.src ?? ""} onChange={(src) => update((draft) => { draft.compliance.certifications[index].image.src = src; })} previewAlt={item.image?.alt ?? ""} showPreview={false} equalControlWidths />
+                    <TextInput label="Texto alternativo" value={item.image?.alt ?? ""} maxLength={160} onChange={(value) => update((draft) => { draft.compliance.certifications[index].image.alt = value; })} />
+                  </div>
+                </div>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <TextInput label="Título do certificado" value={item.title ?? ""} maxLength={180} onChange={(value) => update((draft) => { draft.compliance.certifications[index].title = value; })} />
+                  <TextInput label="Descrição" value={item.description ?? ""} maxLength={320} textarea onChange={(value) => update((draft) => { draft.compliance.certifications[index].description = value; })} />
+                  <DeveloperField label="Link externo do certificado">
+                    <input value={item.certificateUrl ?? ""} onChange={(event) => update((draft) => { draft.compliance.certifications[index].certificateUrl = event.target.value; })} className={developerInputClassName} />
+                  </DeveloperField>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" className={developerGhostButtonClassName} onClick={() => update((draft) => { const list = draft.compliance.certifications; if (index > 0) [list[index - 1], list[index]] = [list[index], list[index - 1]]; })}><SortAscending size={16} weight="bold" />Subir</button>
+                  <button type="button" className={developerGhostButtonClassName} onClick={() => update((draft) => { const list = draft.compliance.certifications; if (index < list.length - 1) [list[index + 1], list[index]] = [list[index], list[index + 1]]; })}><SortAscending size={16} weight="bold" className="rotate-180" />Descer</button>
+                  <button type="button" className={developerDangerButtonClassName} disabled={(current.compliance.certifications?.length ?? 0) <= 1} onClick={() => update((draft) => { draft.compliance.certifications.splice(index, 1); })}><Trash size={16} weight="bold" />Remover</button>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className={cn(priorityPanelClassName, "grid gap-5 md:grid-cols-2")}>
-            <TextInput label="Título" value={current.compliance.title} maxLength={220} onChange={(value) => update((draft) => { draft.compliance.title = value; })} />
-            <TextInput label="Descrição" value={current.compliance.description} maxLength={320} textarea onChange={(value) => update((draft) => { draft.compliance.description = value; })} />
-          </div>
-          <div className={cn(panelClassName, "grid gap-5 border-slate-300/85 bg-slate-100/90 md:grid-cols-2")}>
-            <TextInput label="Texto do certificado" value={current.compliance.certificateText} maxLength={180} onChange={(value) => update((draft) => { draft.compliance.certificateText = value; })} />
-            <DeveloperField label="Link externo do certificado">
-              <input value={current.compliance.certificateUrl ?? ""} onChange={(event) => update((draft) => { draft.compliance.certificateUrl = event.target.value; })} className={developerInputClassName} />
-            </DeveloperField>
-          </div>
+            )}
+          />
           <SaveButton saving={saving === "compliance"}>Salvar governança</SaveButton>
         </form>
       </article>

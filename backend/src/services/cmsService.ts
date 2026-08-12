@@ -192,6 +192,19 @@ function validateCmsPagePayload(
       const requiredError = requiredFields(payload, ["title", "description", "certificateText"], "Sobre / Governança") ||
         validateMedia(payload.image, "Sobre / Governança");
       if (requiredError) return requiredError;
+      const certifications = arrayPayload(payload.certifications);
+      if (certifications.length < 1 || certifications.length > 12) {
+        return "Sobre / Governança: informe entre 1 e 12 certificados.";
+      }
+      const invalidCertification = certifications.findIndex((item) =>
+        !hasRequiredText(item.title) ||
+        !hasRequiredText(item.description) ||
+        Boolean(validateMedia(item.image, "Sobre / Governança")) ||
+        (hasRequiredText(item.certificateUrl) && !sanitizeUrl(item.certificateUrl))
+      );
+      if (invalidCertification >= 0) {
+        return `Sobre / Governança: revise os dados do certificado ${invalidCertification + 1}.`;
+      }
       if (hasRequiredText(payload.certificateUrl) && !sanitizeUrl(payload.certificateUrl)) {
         return "Sobre / Governança: informe um link de certificado válido.";
       }

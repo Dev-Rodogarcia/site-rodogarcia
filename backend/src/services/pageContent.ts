@@ -167,6 +167,15 @@ const DEFAULT_ABOUT_PAGE: AboutPageContent = {
       "Certificações, licenças e controles sustentam operações com mais segurança, rastreabilidade e previsibilidade.",
     certificateText: "SASSMAQ, ISO 9001 e licenças operacionais ativas.",
     certificateUrl: "",
+    certifications: [
+      { title: "ISO 9001", description: "Gestão da qualidade aplicada em cada camada da operação.", image: { src: "/certificados/LOGO ISO 9001.svg", alt: "Certificado ISO 9001" } },
+      { title: "SASSMAQ", description: "Segurança, saúde e meio ambiente em processos sensíveis.", image: { src: "/certificados/certificado-sassmaq.webp", alt: "Certificado SASSMAQ" } },
+      { title: "EcoVadis", description: "Maturidade em sustentabilidade e responsabilidade corporativa.", image: { src: "/certificados/ecovadis.webp", alt: "Certificação EcoVadis" } },
+      { title: "Licença PF", description: "Autorização para operações que exigem controles adicionais.", image: { src: "/certificados/pf.webp", alt: "Licença Polícia Federal" } },
+      { title: "Polícia Civil SP", description: "Habilitação estadual alinhada a operações com governança ampliada.", image: { src: "/certificados/pc-sp.webp", alt: "Licença Polícia Civil de São Paulo" } },
+      { title: "Exército Brasileiro", description: "Autorização conectada a rotinas com requisitos extras de controle.", image: { src: "/certificados/exercito-br.webp", alt: "Certificado Exército Brasileiro" } },
+      { title: "IBAMA", description: "Conformidade e controle rigoroso em operações com impacto e regulamentação ambiental.", image: { src: "/certificados/ibama.webp", alt: "Certificado IBAMA" } },
+    ],
   },
   finalCta: {
     title: "Estruture sua operação com a Rodogarcia.",
@@ -534,6 +543,24 @@ export function sanitizeAboutPage(payload: unknown): AboutPageContent {
   const hero = isRecord(source.hero) ? source.hero : {};
   const compliance = isRecord(source.compliance) ? source.compliance : {};
   const finalCta = isRecord(source.finalCta) ? source.finalCta : {};
+  const certificationFallback = {
+    title: sanitizeText(compliance.certificateText, 180) || DEFAULT_ABOUT_PAGE.compliance.certificateText,
+    description: sanitizeText(compliance.description, 320) || DEFAULT_ABOUT_PAGE.compliance.description,
+    image: sanitizeMedia(compliance.image, DEFAULT_ABOUT_PAGE.compliance.image),
+    certificateUrl: sanitizeUrl(compliance.certificateUrl),
+  };
+  const certificationItems = arrayPayload(compliance.certifications);
+  const certifications = certificationItems.length
+    ? certificationItems.slice(0, 12).map((item, index) => {
+        const fallback = DEFAULT_ABOUT_PAGE.compliance.certifications[index] ?? certificationFallback;
+        return {
+          title: sanitizeText(item.title, 180) || fallback.title,
+          description: sanitizeText(item.description, 320) || fallback.description,
+          image: sanitizeMedia(item.image, fallback.image),
+          certificateUrl: sanitizeUrl(item.certificateUrl),
+        };
+      })
+    : DEFAULT_ABOUT_PAGE.compliance.certifications;
   return {
     hero: {
       title: sanitizeText(hero.title, 320) || DEFAULT_ABOUT_PAGE.hero.title,
@@ -550,6 +577,7 @@ export function sanitizeAboutPage(payload: unknown): AboutPageContent {
         sanitizeText(compliance.certificateText, 180) ||
         DEFAULT_ABOUT_PAGE.compliance.certificateText,
       certificateUrl: sanitizeUrl(compliance.certificateUrl),
+      certifications,
     },
     finalCta: {
       title: sanitizeText(finalCta.title, 320) || DEFAULT_ABOUT_PAGE.finalCta.title,

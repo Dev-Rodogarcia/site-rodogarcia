@@ -14,6 +14,12 @@ interface ComplianceContent {
   description: string;
   certificateText: string;
   certificateUrl?: string;
+  certifications?: Array<{
+    title: string;
+    description: string;
+    image: { src: string; alt: string };
+    certificateUrl?: string;
+  }>;
 }
 
 interface CertificationItem {
@@ -80,7 +86,15 @@ export function ComplianceSection({ content }: { content?: ComplianceContent }) 
           url: content.certificateUrl,
         }
       : null;
-  const certifications = cmsCertification
+  const certifications = content?.certifications?.length
+    ? content.certifications.map((item) => ({
+        title: item.title,
+        description: item.description,
+        image: item.image.src,
+        alt: item.image.alt || item.title,
+        url: item.certificateUrl,
+      }))
+    : cmsCertification
     ? [
         cmsCertification,
         ...CERTIFICATIONS.filter((item) => item.image !== cmsCertification.image),

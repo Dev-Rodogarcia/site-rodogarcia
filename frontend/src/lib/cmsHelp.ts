@@ -109,7 +109,7 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
   "/developer/seo": { destination: "os resultados de busca e compartilhamentos das páginas públicas", action: "edita títulos, descrições e metadados de busca", example: "Use “Serviços | Rodogarcia” como título da página /servicos no Google." },
   "/developer/servicos": { destination: "/servicos", action: "edita os cards e chamadas dos serviços", example: "Troque a foto do módulo de distribuição para atualizar somente esse card." },
   "/developer/servicos-feedbacks": { destination: "os feedbacks exibidos na seção de Serviços", action: "edita depoimentos e provas sociais", example: "Atualize o depoimento de um cliente sem alterar os cards de serviços." },
-  "/developer/sobre": { destination: "/sobre", action: "edita a apresentação institucional da empresa", example: "Atualize a imagem de governança para ela aparecer na página Sobre." },
+  "/developer/sobre": { destination: "/sobre", action: "edita a apresentação institucional e cada item do carrossel de certificados", example: "Adicione ou reorganize um certificado para alterar a sequência exibida na área de Governança." },
   "/developer/sobre-hero": { destination: "o hero da página /sobre", action: "edita a abertura da página Sobre", example: "Troque o título do hero para atualizar a primeira mensagem da página." },
   "/developer/trabalhe-conosco": { destination: "/trabalhe-conosco", action: "edita cultura, vagas e chamadas de carreira", example: "Atualize a foto de cultura para ela aparecer na página de carreiras." },
   "/developer/unidades": { destination: "as unidades exibidas no site", action: "edita endereço, contatos e dados de cada unidade", example: "Atualize o telefone de Campinas para o visitante ver o novo contato." },

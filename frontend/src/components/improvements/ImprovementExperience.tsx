@@ -56,7 +56,7 @@ export function ImprovementExperience() {
           className={cn(
             "rounded-[30px] border border-emerald-300/20 bg-[linear-gradient(145deg,#0f766e,#12324a)] p-7 text-white shadow-[0_22px_52px_rgba(2,6,23,0.22)] lg:h-[348px]",
             asideLeaving
-              ? "animate-out fade-out-0 slide-out-to-left-8 duration-300 lg:absolute lg:inset-y-0 lg:left-0 lg:z-10 lg:w-[38.7%]"
+              ? "pointer-events-none animate-out fade-out-0 slide-out-to-left-8 duration-300 lg:absolute lg:inset-y-0 lg:left-0 lg:z-0 lg:w-[38.7%]"
               : "animate-in fade-in-0 slide-in-from-left-8 duration-400"
           )}
         >
@@ -66,7 +66,7 @@ export function ImprovementExperience() {
           <div className="mt-7 border-t border-white/15 pt-5"><div className="flex gap-3"><UsersThree size={20} className="mt-0.5 shrink-0 text-emerald-200" /><p className="text-sm leading-6 text-white/82">Colaboradores informam a filial para que a sugestão chegue com o contexto operacional adequado.</p></div></div>
         </aside>
       ) : null}
-      <div className="min-w-0">
+      <div className="relative z-10 min-w-0">
         <ImprovementForm onProfileChange={handleProfileChange} />
       </div>
     </SurfaceSection>

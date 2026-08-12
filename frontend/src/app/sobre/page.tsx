@@ -96,6 +96,15 @@ const FALLBACK_ABOUT_PAGE: AboutPageContent = {
       "Certificações, licenças e controles sustentam operações com mais segurança, rastreabilidade e previsibilidade.",
     certificateText: "SASSMAQ, ISO 9001 e licenças operacionais ativas.",
     certificateUrl: "",
+    certifications: [
+      { title: "ISO 9001", description: "Gestão da qualidade aplicada em cada camada da operação.", image: { src: "/certificados/LOGO ISO 9001.svg", alt: "Certificado ISO 9001" } },
+      { title: "SASSMAQ", description: "Segurança, saúde e meio ambiente em processos sensíveis.", image: { src: "/certificados/certificado-sassmaq.webp", alt: "Certificado SASSMAQ" } },
+      { title: "EcoVadis", description: "Maturidade em sustentabilidade e responsabilidade corporativa.", image: { src: "/certificados/ecovadis.webp", alt: "Certificação EcoVadis" } },
+      { title: "Licença PF", description: "Autorização para operações que exigem controles adicionais.", image: { src: "/certificados/pf.webp", alt: "Licença Polícia Federal" } },
+      { title: "Polícia Civil SP", description: "Habilitação estadual alinhada a operações com governança ampliada.", image: { src: "/certificados/pc-sp.webp", alt: "Licença Polícia Civil de São Paulo" } },
+      { title: "Exército Brasileiro", description: "Autorização conectada a rotinas com requisitos extras de controle.", image: { src: "/certificados/exercito-br.webp", alt: "Certificado Exército Brasileiro" } },
+      { title: "IBAMA", description: "Conformidade e controle rigoroso em operações com impacto e regulamentação ambiental.", image: { src: "/certificados/ibama.webp", alt: "Certificado IBAMA" } },
+    ],
   },
   finalCta: {
     title: "Estruture sua operação com a Rodogarcia.",

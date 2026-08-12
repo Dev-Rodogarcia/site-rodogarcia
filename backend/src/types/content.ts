@@ -370,6 +370,12 @@ export interface AboutPageContent {
     description: string;
     certificateText: string;
     certificateUrl?: string;
+    certifications: Array<{
+      title: string;
+      description: string;
+      image: PageMedia;
+      certificateUrl?: string;
+    }>;
   };
   finalCta: {
     title: string;
