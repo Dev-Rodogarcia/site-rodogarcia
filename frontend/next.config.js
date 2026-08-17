@@ -12,6 +12,7 @@ const backendUrl = normalizeBackendUrl(
     process.env.NEXT_PUBLIC_BACKEND_URL
   )
 );
+const landingBuilderPublicUrl = process.env.LANDING_BUILDER_PUBLIC_URL?.trim().replace(/\/+$/, "") ?? "";
 
 const isProduction = process.env.NODE_ENV === "production";
 const backendOrigin = (() => {
@@ -199,7 +200,8 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    return [
+    return {
+      beforeFiles: [
       {
         source: "/public/uploads/:path*",
         destination: `${backendUrl}/uploads/:path*`,
@@ -216,7 +218,13 @@ const nextConfig = {
         source: "/uploads/:path*",
         destination: `${backendUrl}/uploads/:path*`,
       },
-    ];
+      ],
+      // Só atende caminhos que o site principal não reconheceu; a URL do visitante
+      // permanece no domínio institucional, mas a landing é renderizada pelo projeto isolado.
+      fallback: landingBuilderPublicUrl ? [
+        { source: "/:path*", destination: `${landingBuilderPublicUrl}/:path*` },
+      ] : [],
+    };
   },
 };
 

@@ -13,7 +13,7 @@ export const USER_PERMISSIONS = ["createUsers", "deleteUsers"] as const;
 export type UserPermission = (typeof USER_PERMISSIONS)[number];
 
 export const CMS_PERMISSIONS = [
-  "dashboard", "home", "services", "about-page", "business-page", "contact-page", "careers-page", "collections", "quote-page", "improvements", "header-navigation", "footer-links", "units", "analytics", "images", "popup", "tracking", "seo", "cookie-monitoring", "leads", "cookies", "users",
+  "dashboard", "home", "services", "about-page", "business-page", "contact-page", "careers-page", "collections", "quote-page", "improvements", "header-navigation", "footer-links", "units", "analytics", "images", "popup", "tracking", "seo", "cookie-monitoring", "leads", "cookies", "users", "landing-pages",
 ] as const;
 export type CmsPermission = (typeof CMS_PERMISSIONS)[number];
 export type CmsPermissionOverride = { permission: CmsPermission; effect: "grant" | "deny" };

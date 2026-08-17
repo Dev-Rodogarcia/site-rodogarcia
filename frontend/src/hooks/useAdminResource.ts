@@ -42,6 +42,7 @@ export const adminResourceKeys = {
   improvements: (status: string) => `admin:improvements:${status}`,
   tracking: (query: string) => `admin:tracking:${query}`,
   users: "admin:users",
+  landings: "admin:landings",
 } as const;
 
 function getFreshAdminResource<TData>(key: string, staleTime: number) {

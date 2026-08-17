@@ -33,7 +33,7 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 - Você pode alterar código TypeScript/TSX, CSS, componentes, rotas, controllers, services, repositories, validators, types, testes, docs e exemplos de configuração.
 - Você pode atualizar os JSONs canônicos versionados quando a tarefa envolver conteúdo público inicial, schema de CMS ou defaults de desenvolvimento.
 - Não edite `node_modules`, `.next`, `dist`, caches, artefatos gerados ou arquivos ignorados sem necessidade explícita.
-- A raiz do repositório deve continuar reservada para arquivos globais: `README.md`, `AGENTS.md`, `states.md`, `.env.example`, `docs/`, `scripts/`, `backend/` e `frontend/`.
+- A raiz do repositório deve continuar reservada para arquivos globais e as aplicações: `README.md`, `AGENTS.md`, `states.md`, `.env.example`, `docs/`, `scripts/`, `backend/`, `frontend/` e `landing-builder/`. A futura extração física para `site/` e `cms/` será tratada como migração própria, sem misturar esse risco com a evolução do construtor.
 
 ---
 

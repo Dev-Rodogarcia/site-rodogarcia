@@ -11,7 +11,7 @@ O Rodogarcia nao e uma SPA estatica: o frontend Next.js renderiza Server Compone
 
 Use `iniciar-prod.bat` para validar, compilar e iniciar esses processos pelo PM2. Ele fixa `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=6050` e `BACKEND_INTERNAL_URL=http://127.0.0.1:6050`.
 
-O desenvolvimento usa o par isolado `127.0.0.1:5012` e `127.0.0.1:4012` por `iniciar-dev.bat`. Esse script limpa proxies de producao e o cache gerado `.next`, usa o storage local do repositório e mantém os logs de backend e frontend no mesmo terminal que o iniciou.
+O desenvolvimento usa `127.0.0.1:5012` (frontend), `127.0.0.1:4012` (backend), `127.0.0.1:6110` (backend do Landing Builder) e `127.0.0.1:5112` (frontend público do Landing Builder) por `iniciar-dev.bat`. Esse script limpa proxies de producao e o cache gerado `.next`, usa o storage local do repositório e mantém os logs dos quatro serviços no mesmo terminal que o iniciou. Sem `LANDING_BUILDER_SERVICE_TOKEN`, ele cria um token temporário seguro para a execução atual; um token privado configurado no ambiente deve ser usado quando a integração precisar persistir entre reinicializações.
 
 ## Ambiente
 

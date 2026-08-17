@@ -35,13 +35,13 @@ Configure o ambiente de desenvolvimento:
 Copy-Item .env.development.example .env.development.local
 ```
 
-Suba os dois servidores:
+Suba os serviços de desenvolvimento:
 
 ```powershell
 cmd /c iniciar-dev.bat
 ```
 
-`iniciar-dev.bat` encerra somente processos DEV, limpa o cache gerado do Next e inicia backend e frontend no terminal atual, inclusive no terminal integrado do VS Code.
+`iniciar-dev.bat` encerra somente processos DEV, limpa o cache gerado do Next e inicia backend, frontend, backend e frontend do Landing Builder no terminal atual, inclusive no terminal integrado do VS Code. Sem `LANDING_BUILDER_SERVICE_TOKEN`, ele cria um token temporário seguro, válido apenas durante aquela execução; configure um token próprio para manter a integração estável entre reinicializações.
 
 URLs padrao:
 

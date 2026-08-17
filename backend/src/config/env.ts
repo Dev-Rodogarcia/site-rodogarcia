@@ -105,6 +105,8 @@ const rawJwtSecret = process.env.JWT_SECRET ?? process.env.SESSION_SECRET ?? "";
 const jwtSecret = rawJwtSecret || "dev-only-change-this-rodogarcia-secret";
 const adminSetupCode = process.env.ADMIN_SETUP_CODE ?? "";
 const eslTenant = normalizeEslTenant(process.env.ESL_TENANT);
+const landingBuilderApiUrl = (process.env.LANDING_BUILDER_API_URL ?? "").trim().replace(/\/+$/, "");
+const landingBuilderServiceToken = (process.env.LANDING_BUILDER_SERVICE_TOKEN ?? "").trim();
 
 if (isProduction) {
   const errors: string[] = [];
@@ -156,5 +158,7 @@ export const env = {
   eslTenant,
   eslGraphqlUrl: resolveEslGraphqlUrl(eslTenant, process.env.ESL_GRAPHQL_URL),
   eslGraphqlApiKey: process.env.GRAPHQL_API_KEY?.trim() ?? "",
+  landingBuilderApiUrl,
+  landingBuilderServiceToken,
   isProduction,
 } as const;

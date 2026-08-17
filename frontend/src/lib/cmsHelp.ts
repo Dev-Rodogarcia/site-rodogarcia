@@ -43,6 +43,7 @@ const CMS_PAGE_NAMES: Record<string, string> = {
   "/developer/home-hero": "Home — Hero",
   "/developer/imagens": "Imagens",
   "/developer/leads": "Leads",
+  "/developer/landing-pages": "Landing Pages",
   "/developer/melhorias": "Melhoria Contínua",
   "/developer/lgpd-cookies": "LGPD e Cookies",
   "/developer/monitoramento-cookies": "Monitoramento de Cookies",
@@ -100,6 +101,7 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
   "/developer/home-hero": { destination: "o hero da página inicial /", action: "edita os slides e botões de abertura da Home", example: "Escolha uma nova imagem para o primeiro slide do site." },
   "/developer/imagens": { destination: "a Biblioteca de mídia e os slots de imagem do site", action: "faz upload, organiza mídia e vincula arquivos a áreas do site", example: "Troque a imagem do slot do popup sem mexer nas outras imagens da Biblioteca." },
   "/developer/leads": { destination: "a lista interna de contatos recebidos, sem alterar o site", action: "consulta e filtra leads enviados por formulários", example: "Pesquise um e-mail para localizar o contato enviado pelo formulário." },
+  "/developer/landing-pages": { destination: "as rotas de campanhas, como /nome-da-campanha", action: "cria, edita, pré-visualiza e publica landing pages independentes", example: "Salve uma campanha como rascunho, revise o Hero e publique quando a rota estiver pronta para divulgação." },
   "/developer/melhorias": { destination: "/melhoria-continua e a lista interna de sugestões", action: "registra sugestões internas como colaborador e acompanha os envios de visitantes e colaboradores, incluindo os anexos privados", example: "Abra Sugestão interna, escolha um nome ou e-mail sugerido de um usuário do CMS e registre área, tipo, contexto e impacto. Ela entra em Pendentes; uma concluída segue para Arquivadas após 60 dias." },
   "/developer/lgpd-cookies": { destination: "o banner de cookies mostrado ao visitante", action: "edita os textos e as regras de consentimento", example: "Aumente a versão ao mudar a mensagem que o visitante precisa aceitar." },
   "/developer/monitoramento-cookies": { destination: "os registros internos de consentimento, sem alterar o site", action: "consulta as escolhas de cookies registradas", example: "Filtre por categoria Analytics para conferir os consentimentos relacionados." },
@@ -119,6 +121,30 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
 };
 
 const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
+  "landing-pages.field.nome": {
+    title: "Nome da landing page",
+    summary: "Dê um nome interno para reconhecer esta campanha no painel. Esse nome organiza a lista de Landing Pages e não muda sozinho o endereço público.",
+    example: "Use “Campanha distribuição Sudeste” para localizar a landing antes de publicar.",
+    details: [{ label: "Onde aparece", value: "Na lista interna de Landing Pages do CMS." }, { label: "Após salvar", value: "A campanha fica identificada no painel; o visitante verá os títulos configurados no Hero." }],
+  },
+  "landing-pages.field.rota": {
+    title: "Rota da landing page",
+    summary: "Escolha a parte final do endereço da campanha. Depois de publicar, o visitante acessará esta landing pelo domínio institucional seguido desse nome.",
+    example: "Use campanha-distribuicao para publicar em /campanha-distribuicao.",
+    details: [{ label: "Formato", value: "Use letras minúsculas, números e hífens, sem espaços ou barras." }, { label: "Validação", value: "A rota precisa ser única e não pode ser usada por outra landing.", technical: true }, { label: "Após publicar", value: "O proxy do site encaminha a rota para o frontend do Landing Builder." }],
+  },
+  "landing-pages.field.ga4": {
+    title: "Measurement ID GA4",
+    summary: "Informe o código do Google Analytics exclusivo desta campanha. Ele mede somente a landing publicada nesta rota, depois que a pessoa aceitar cookies de analytics.",
+    example: "Cole um código no formato G-ABC123DEF4 criado para esta campanha.",
+    details: [{ label: "Onde aparece", value: "Não é visível ao visitante; é usado pelo Google Analytics da campanha." }, { label: "Validação", value: "O CMS aceita apenas códigos no formato G- seguido por letras e números.", technical: true }, { label: "Consentimento", value: "O script só é carregado após a escolha positiva de analytics." }],
+  },
+  "landing-pages.section.hero": {
+    title: "Hero da landing page",
+    summary: "Os lápis da prévia editam separadamente os contatos, logo, foto, mensagem com botão e cartões do topo da campanha. Cada popup muda somente o bloco que você escolheu.",
+    example: "Use uma foto interna de caminhão como fundo e destaque quatro diferenciais operacionais nos cartões inferiores.",
+    details: [{ label: "Onde aparece", value: "No topo da rota publicada da landing page." }, { label: "Mídia", value: "Logo e foto de fundo aceitam somente caminhos internos da biblioteca do Landing Builder; links externos não são aceitos." }, { label: "Edição visual", value: "Use o lápis de cada bloco na prévia. Ele abre uma janela pequena sem rolar a página e sem mostrar campos de outras áreas." }],
+  },
   "home.field.visibilidade-do-atalho": {
     title: "Visibilidade do atalho",
     summary: "Aqui você decide se este atalho aparece abaixo do hero da página inicial. Ao ocultar o botão de Taxas, os demais atalhos são centralizados automaticamente para a faixa continuar equilibrada.",

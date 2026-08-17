@@ -63,6 +63,7 @@ import { requireCsrf } from "../security/csrf.js";
 import { requireAllowedOrigin } from "../security/origin.js";
 import { requireJson } from "../validators/common.js";
 import { createAccessProfileController, deleteAccessProfileController, listAccessProfilesController, updateAccessProfileController } from "../controllers/cmsAccessController.js";
+import { createLandingPageController, listLandingPagesController, publishLandingPageController, updateLandingPageController } from "../controllers/landingBuilderController.js";
 
 export const adminRouter = Router();
 const upload = multer({
@@ -75,6 +76,7 @@ const improvementUpload = multer({
 });
 
 function permissionForRequest(path: string): CmsPermission | null {
+  if (path.startsWith("/landings")) return "landing-pages";
   if (path.startsWith("/access-profiles") || path.startsWith("/users")) return "users";
   if (path.startsWith("/home")) return "home";
   if (path.startsWith("/services-page")) return "services";
@@ -222,6 +224,12 @@ adminRouter.post(
   requireCsrf,
   updateSiteTextsController
 );
+
+adminRouter.get("/landings", listLandingPagesController);
+adminRouter.post("/landings", requireAllowedOrigin, requireJson, requireCsrf, createLandingPageController);
+adminRouter.put("/landings/:id", requireAllowedOrigin, requireJson, requireCsrf, updateLandingPageController);
+adminRouter.post("/landings/:id/publish", requireAllowedOrigin, requireCsrf, publishLandingPageController);
+adminRouter.post("/landings/:id/unpublish", requireAllowedOrigin, requireCsrf, publishLandingPageController);
 
 adminRouter.get("/images", listImagesController);
 adminRouter.post(

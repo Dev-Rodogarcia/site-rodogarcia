@@ -66,6 +66,7 @@ const iconMap: Record<string, SidebarIcon> = {
   seo: MagnifyingGlass,
   users: UsersThree,
   units: MapPin,
+  "landing-pages": Sparkle,
 };
 
 function SidebarScrollArea({

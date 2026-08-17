@@ -77,6 +77,7 @@ export const admin = {
   leads: "/developer/leads",
   cookies: "/developer/lgpd-cookies",
   cookieMonitoring: "/developer/monitoramento-cookies",
+  landingPages: "/developer/landing-pages",
   prefix: "/developer/",
 } as const;
 
@@ -126,6 +127,10 @@ export const api = {
     improvements: "/api/admin/improvements",
     trackingEvents: "/api/admin/tracking-events",
     auditLog: "/api/admin/audit-log",
+    landings: "/api/admin/landings",
+    landing: (id: string) => `/api/admin/landings/${id}`,
+    publishLanding: (id: string) => `/api/admin/landings/${id}/publish`,
+    unpublishLanding: (id: string) => `/api/admin/landings/${id}/unpublish`,
     entity: (entity: string) => `/api/admin/${entity}`,
     entityItem: (entity: string, id: string) => `/api/admin/${entity}/${id}`,
     reorder: (entity: string) => `/api/admin/${entity}/reorder`,
@@ -260,6 +265,7 @@ export const adminNavigationGroups = [
     key: "tools",
     items: [
       { href: admin.analytics, label: "Analytics", key: "analytics" },
+      { href: admin.landingPages, label: "Landing Pages", key: "landing-pages" },
       { href: admin.images, label: "Imagens", key: "images" },
       { href: admin.popup, label: "Popup de saída", key: "popup" },
       { href: admin.tracking, label: "Rastreamento", key: "tracking" },

@@ -5,6 +5,7 @@
 - Monorepo do site institucional Rodogarcia com frontend público, painel CMS interno e backend API.
 - Frontend: Next.js App Router, React 19, TypeScript, Tailwind CSS v4, shadcn/base-nova, Radix UI, Base UI, Phosphor Icons, lucide-react, Framer Motion, Recharts, React Hook Form e Zod.
 - Backend: Node.js, Express 5, TypeScript ESM, Helmet, CORS, cookie-parser, multer, Sharp, Zod, bcryptjs, jsonwebtoken, dotenv e Vitest.
+- `landing-builder/` é a nova aplicação isolada de campanhas, com `frontend/` Next.js e `backend/` Express/TypeScript. O backend grava o conteúdo canônico em `landing-builder/backend/storage/landings.json`; o frontend público renderiza cada rota publicada em `/:slug`.
 - Persistência atual: arquivos JSON locais em `backend/storage`, com privados em `backend/storage/private` e uploads em `backend/storage/uploads`.
 - Ambiente DEV: backend em `127.0.0.1:4012`, frontend em `127.0.0.1:5012`, CMS em `/auth/entrar` e painel em `/developer`. Ambiente PROD: backend privado em `127.0.0.1:6050`, publicado em `https://sitebackend.rodogarcia.com.br`, e frontend Next privado em `127.0.0.1:6060`, publicado em `https://site.rodogarcia.com.br`.
 - Configuração local usa `.env.development.local` ou `.env.production.local`, a partir de seus respectivos exemplos; `.env` e `.env.example` permanecem como compatibilidade. O backend ainda carrega `.env` da raiz, mas os inicializadores injetam primeiro o arquivo do modo escolhido.
@@ -12,7 +13,13 @@
 
 ## Arquitetura e Padrões
 
-- A raiz do repositório é reservada para arquivos globais, documentação curta, scripts e os diretórios `backend/` e `frontend/`.
+- A raiz do repositório é reservada para arquivos globais, documentação curta, scripts e os diretórios `backend/`, `frontend/` e `landing-builder/`.
+- O CMS atual possui em `/developer/landing-pages` o painel de construção das campanhas. Ele usa o mesmo login e a nova permissão `landing-pages`; o navegador chama somente `/api/admin/landings`, enquanto o backend do CMS comunica-se com o construtor usando `LANDING_BUILDER_API_URL` e `LANDING_BUILDER_SERVICE_TOKEN` privados.
+- O painel de Landings traz prévia visual em Desktop e Mobile. Cada bloco possui um lápis discreto que abre somente seu modal: faixa de contatos, logo, foto de fundo, mensagem/CTA, cartões de destaque, título e descrição da seção abaixo; as cores ficam em um controle próprio na barra do editor, fora da prévia para não competir com os lápis. A faixa de contatos reserva espaço próprio para o lápis e trunca textos longos, evitando sobreposição em telas estreitas. O Hero suporta faixa superior de telefone/e-mail, logo, foto interna, selo, título, descrição, CTA e até quatro cartões; o MVP possui também uma seção genérica abaixo e rodapé fixo. Novas campanhas começam com todas as seções em branco e elementos/textos pretos, além de conteúdo genérico para construção.
+- Em `/developer/landing-pages`, a biblioteca “Suas campanhas” fica em uma faixa horizontal compacta acima do editor visual: vazia, ela exibe somente uma orientação curta; com campanhas, mostra cards em uma linha rolável. Após publicar, “Abrir prévia” abre a rota pública da campanha em outra aba, pelo proxy do site ou pelo frontend isolado do Landing Builder.
+- O `landing-builder` mantém campanhas em rascunho, publicada ou despublicada, aceita cores hexadecimais, valida slugs, URLs de CTA e identificadores de GA4/GTM/Meta/Google Ads. Apenas o GA4 é carregado na landing quando houver Measurement ID válido e o visitante aceitar analytics; os demais IDs permanecem armazenados para integração posterior.
+- Novas landing pages começam com paleta neutra: fundo branco, texto preto e tons de preto/cinza como apoio, sem herdar as cores institucionais da Rodogarcia.
+- Quando `LANDING_BUILDER_PUBLIC_URL` estiver configurada, o fallback de rewrites do site encaminha apenas caminhos não reconhecidos para o frontend isolado; assim rotas institucionais existentes mantêm prioridade e uma campanha pode usar `/nome-da-campanha` no mesmo domínio.
 - O contexto de cada tela do CMS (sobretítulo, título, descrição, indicadores e ações) é registrado por `DeveloperHero` e exibido no `DevTopbar` global. Não há mais um segundo hero/cartão abaixo do cabeçalho, reduzindo a altura recorrente das telas sem perder suas informações.
 - A partir do breakpoint desktop `lg`, o `DevTopbar` usa uma faixa horizontal compacta em todas as páginas: contexto à esquerda e indicadores/ações à direita. A identificação de e-mail da sessão só volta ao cabeçalho em telas mais largas; abaixo de `lg`, o conteúdo empilha para preservar legibilidade e controles utilizáveis.
 - As descrições dos cabeçalhos do CMS foram reduzidas a resumos operacionais curtos; o `DevTopbar` também limita a descrição visível a uma linha, mantendo o texto integral no atributo de título quando necessário.
@@ -193,7 +200,7 @@
 - Ao alterar schema de conteúdo, atualizar tipos backend/frontend, sanitizadores, normalizadores públicos, telas CMS, defaults/migração de leitura, testes e este estado.
 - Ao criar ou renomear rota pública, atualizar `routes.ts`, redirects/rewrites em `next.config.js` quando necessário, sitemap, robots, navegação, footer e SEO CMS.
 - O build do Next executa a checagem TypeScript; o CI também roda typecheck, testes, builds e hardening ponta a ponta antes da entrega.
-- `iniciar-dev.bat` encerra apenas `4012`/`5012`, bloqueia proxies/URLs de backend produtivos, limpa somente o cache gerado `frontend/.next` para reconstruir as rotas do Next e inicia backend e frontend em segundo plano no mesmo console que o chamou (`start /b`), sem abrir janelas externas; assim os dois logs ficam no terminal integrado do VS Code. `iniciar-prod.bat` valida backend e typecheck frontend, encerra `6050`/`6060`, recria `frontend/dist-prod`, executa hardening nessas portas contra esse artefato e então aplica o ecosystem no PM2 com `startOrReload` e `pm2 save`. Nenhum desses scripts deve ser executado automaticamente por IA sem pedido explícito.
+- `iniciar-dev.bat` encerra apenas `4012`/`5012`/`5112`/`6110`, bloqueia proxies/URLs de backend produtivos, define as URLs locais e as variáveis de host/porta exclusivas do Landing Builder e limpa somente o cache gerado `frontend/.next` para reconstruir as rotas do Next. Sem `LANDING_BUILDER_SERVICE_TOKEN`, ele gera um token aleatório temporário, herdado pelos dois backends apenas naquela execução; um token privado configurado mantém a integração estável entre reinicializações. Ele inicia backend, frontend, backend e frontend do Landing Builder em segundo plano no mesmo console que o chamou (`start /b`), sem abrir janelas externas; assim os quatro logs ficam no terminal integrado do VS Code. `iniciar-prod.bat` valida backend e typecheck frontend, encerra `6050`/`6060`, recria `frontend/dist-prod`, executa hardening nessas portas contra esse artefato e então aplica o ecosystem no PM2 com `startOrReload` e `pm2 save`. Nenhum desses scripts deve ser executado automaticamente por IA sem pedido explícito.
 
 ## Verificação Operacional
 
@@ -208,6 +215,15 @@
   - após builds, `node scripts/tests/test-security-hardening.js`
 - Checklist técnico complementar em `docs/checklist-tecnico.md`.
 - Checklist de segurança do CMS em `docs/seguranca-admin-node.md`.
+
+## Tarefas Pendentes
+
+- Configurar o ambiente e deploy do Landing Builder: definir URLs privadas/públicas, o mesmo token forte nos dois backends, portas, processo PM2, backup do storage e `LANDING_BUILDER_PUBLIC_URL`. Depois validar manualmente criação, publicação, proxy por slug e remoção segura da publicação em ambiente isolado antes da produção.
+- Implementar seleção e upload de mídia interna no construtor. O Hero já possui campos validados para caminho interno de logo e foto de fundo, mas ainda não possui biblioteca/upload próprio; quando esse fluxo for entregue, a mídia deve pertencer ao `landing-builder`, passar por validação de assinatura/otimização e não aceitar URLs externas ou referências do storage do site.
+- Evoluir a prévia visual para edição completa: destacar o painel aberto, permitir editar os CTAs diretamente pelos marcadores e fornecer prévia autenticada de rascunhos sem expor landing não publicada. A prévia atual já responde ao texto e cores digitados e navega pelos marcadores Hero, seção inferior e tema.
+- Consolidar o consentimento LGPD das landings com o contrato de consentimento do site antes de habilitar GTM, Meta Pixel, Google Ads ou eventos. O MVP só exibe escolha local para o GA4 específico da landing e não possui formulários de visitantes.
+- Implementar SEO por campanha (title, description, canonical, sitemap e robots) e uma reserva de slugs consultada pelo site antes de liberar campanhas. O proxy opcional já preserva prioridade das rotas existentes, mas ainda não possui registro compartilhado de rotas reservadas.
+- Planejar a extração futura do CMS como trabalho de alta dependência, não como simples movimentação de pastas. Hoje a área administrativa possui 28 rotas, usa o mesmo aplicativo Next do site, e o backend une autenticação por cookie, permissões, conteúdo público, mídia, uploads, analytics e endpoints administrativos. A fase de extração deverá separar responsabilidades, definir as origens e cookies dos novos serviços, migrar scripts `.bat`, PM2, variáveis de ambiente, storage, backups, testes e proxy, sem mudar todos esses itens de uma vez.
 
 ## Auditoria de Segurança e Exposição
 
