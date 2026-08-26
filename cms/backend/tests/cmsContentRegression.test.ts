@@ -1,0 +1,319 @@
+import fs from "node:fs";
+import path from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { createIsolatedBackendEnv } from "./testEnv.js";
+
+const temporaryRoots: string[] = [];
+
+function isolatedBackend() {
+  const env = createIsolatedBackendEnv();
+  temporaryRoots.push(env.root);
+  return env;
+}
+
+function createPublicAsset(publicDir: string, relativePath: string) {
+  const filePath = path.join(publicDir, relativePath);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, "test asset");
+}
+
+afterEach(() => {
+  for (const root of temporaryRoots.splice(0)) {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+describe("CMS content regressions", () => {
+  it("normalizes metadata with the limits required by each event surface", async () => {
+    isolatedBackend();
+    const { sanitizeMetadata } = await import("../src/utils/sanitize.js");
+
+    expect(
+      sanitizeMetadata(
+        { " source\u0000 ": "  campanha  ", ignored: "" },
+        { maxEntries: 1, keyMaxLength: 40, valueMaxLength: 120 }
+      )
+    ).toEqual({ source: "campanha" });
+  });
+
+  it("accepts safe in-page fragments and rejects unsafe URL schemes", async () => {
+    isolatedBackend();
+    const { sanitizeUrl } = await import("../src/utils/sanitize.js");
+
+    expect(sanitizeUrl("#mapa-regional")).toBe("#mapa-regional");
+    expect(sanitizeUrl("#faq:item.2")).toBe("#faq:item.2");
+    expect(sanitizeUrl("javascript:alert(1)")).toBe("");
+    expect(sanitizeUrl("data:text/html,unsafe")).toBe("");
+    expect(sanitizeUrl("//evil.example/path")).toBe("");
+    expect(sanitizeUrl("#1-invalid")).toBe("");
+    expect(sanitizeUrl("#invalid fragment")).toBe("");
+  });
+
+  it("preserves explicitly empty optional collections in footer and quote content", async () => {
+    isolatedBackend();
+    const {
+      sanitizeFooterGlobal,
+      sanitizeFooterPrivacy,
+      sanitizeFooterTerms,
+    } = await import("../src/services/footerLinksContent.js");
+    const { sanitizeQuotePage } = await import("../src/services/pageContent.js");
+
+    const footer = sanitizeFooterGlobal({
+      columns: [],
+      serviceHours: [],
+      socialLinks: [],
+      bottomLinks: [],
+    });
+
+    expect(footer.columns).toEqual([]);
+    expect(footer.serviceHours).toEqual([]);
+    expect(footer.socialLinks).toEqual([]);
+    expect(footer.bottomLinks).toEqual([]);
+    expect(sanitizeFooterTerms({ reading: { blocks: [] } }).reading.blocks).toEqual([]);
+    expect(sanitizeFooterPrivacy({ dataSection: { blocks: [] } }).dataSection.blocks).toEqual([]);
+    expect(sanitizeQuotePage({ otherChannels: [] }).otherChannels).toEqual([]);
+  });
+
+  it("falls back safely when legacy page content references invalid media", async () => {
+    const env = isolatedBackend();
+    createPublicAsset(env.publicDir, "caminhoneiro1.webp");
+    createPublicAsset(env.publicDir, "certificados/certificado-sassmaq.webp");
+    const { sanitizeAboutPage } = await import("../src/services/pageContent.js");
+
+    const page = sanitizeAboutPage({
+      hero: {
+        media: { src: "https://invalid.example/image.png", alt: "Imagem antiga" },
+      },
+    });
+
+    expect(page.hero.media.src).toBe("/caminhoneiro1.webp");
+  });
+
+  it("preserves nested footer lists but rejects an empty required footer field", async () => {
+    isolatedBackend();
+    const {
+      DEFAULT_FOOTER_LINKS,
+      updateFooterLinksSection,
+    } = await import("../src/services/footerLinksContent.js");
+
+    const footer = updateFooterLinksSection(DEFAULT_FOOTER_LINKS, "footer", {
+      ...DEFAULT_FOOTER_LINKS.footer,
+      columns: DEFAULT_FOOTER_LINKS.footer.columns.map((column, index) =>
+        index === 0 ? { ...column, links: [] } : column
+      ),
+    });
+    expect(footer.footer.columns[0]?.links).toEqual([]);
+
+    const help = updateFooterLinksSection(DEFAULT_FOOTER_LINKS, "help", {
+      ...DEFAULT_FOOTER_LINKS.help,
+      contactCard: { ...DEFAULT_FOOTER_LINKS.help.contactCard, channelDescriptions: [] },
+    });
+    expect(help.help.contactCard.channelDescriptions).toEqual([]);
+
+    expect(() => updateFooterLinksSection(DEFAULT_FOOTER_LINKS, "footer", {
+      ...DEFAULT_FOOTER_LINKS.footer,
+      description: "",
+    })).toThrow(/Descrição do rodapé é obrigatório/i);
+  });
+
+  it("persists an explicitly empty quick-action list and rejects invalid active actions", async () => {
+    const env = isolatedBackend();
+    createPublicAsset(env.publicDir, "caminhoneiro1.webp");
+    createPublicAsset(env.publicDir, "certificados/certificado-sassmaq.webp");
+
+    const { getHomePage, updateHomeSection } = await import("../src/services/cmsService.js");
+
+    const updated = updateHomeSection("quickActions", { quickActions: [] });
+    expect(updated.quickActions).toEqual([]);
+    expect(getHomePage().quickActions).toEqual([]);
+
+    expect(() =>
+      updateHomeSection("quickActions", {
+        quickActions: [
+          {
+            id: "invalid-modal",
+            label: "Mapa",
+            icon: "MapPin",
+            type: "modal",
+            href: "javascript:alert(1)",
+            enabled: true,
+          },
+        ],
+      })
+    ).toThrow(/destino|atalho/i);
+
+    expect(() =>
+      updateHomeSection("quickActions", {
+        quickActions: [
+          {
+            id: "invalid-external",
+            label: "Contato",
+            icon: "Phone",
+            type: "external",
+            href: "/fale-conosco",
+            enabled: true,
+          },
+        ],
+      })
+    ).toThrow(/externo/i);
+  });
+
+  it("migrates legacy feedbacks into the Home CMS social proof without companies or logos", async () => {
+    const env = isolatedBackend();
+    fs.writeFileSync(
+      path.join(env.storageRoot, "content.json"),
+      JSON.stringify({
+        homePage: { socialProof: { title: "", feedbacks: [] } },
+        feedbacks: [
+          {
+            id: "legacy-feedback-1",
+            name: "Mariana Araujo",
+            role: "Gerente de Abastecimento",
+            company: "Empresa anterior",
+            testimonial: "A operação passou a ter mais previsibilidade nas entregas.",
+            photo: "/feedbacks/logo-antigo.webp",
+            rating: 5,
+            active: true,
+          },
+        ],
+      })
+    );
+
+    const { getHomePage } = await import("../src/services/cmsService.js");
+    const home = getHomePage();
+
+    expect(home.socialProof).toMatchObject({
+      title: "Experiências em logística, transporte e distribuição.",
+      feedbacks: [
+        {
+          id: "legacy-feedback-1",
+          name: "Mariana Araujo",
+          role: "Gerente de Abastecimento",
+          context: "Distribuição e abastecimento",
+          photo: "",
+          rating: 5,
+        },
+      ],
+    });
+    expect(home.socialProof.feedbacks[0]).not.toHaveProperty("company");
+
+    const persisted = JSON.parse(fs.readFileSync(path.join(env.storageRoot, "content.json"), "utf8"));
+    expect(persisted.homePage.socialProof.feedbacks).toHaveLength(1);
+  });
+
+  it("upgrades incomplete social proof already stored on the Home", async () => {
+    const env = isolatedBackend();
+    fs.writeFileSync(
+      path.join(env.storageRoot, "content.json"),
+      JSON.stringify({
+        homePage: {
+          socialProof: {
+            title: "Marcas gigantes confiam na operação da Rodogarcia.",
+            feedbacks: [
+              {
+                id: "old-home-feedback",
+                name: "Aline Moreira",
+                role: "Coordenadora de Customer Service Logístico",
+                testimonial: "A operação ganhou consistência e menos ruído nas tratativas.",
+                photo: "/feedbacks/hbfuller.webp",
+                rating: 5,
+                active: true,
+              },
+            ],
+          },
+        },
+        feedbacks: [],
+      })
+    );
+
+    const { getHomePage } = await import("../src/services/cmsService.js");
+    const home = getHomePage();
+
+    expect(home.socialProof).toMatchObject({
+      title: "Marcas gigantes confiam na operação da Rodogarcia.",
+      feedbacks: [
+        {
+          id: "old-home-feedback",
+          context: "Distribuição e abastecimento",
+          photo: "",
+        },
+      ],
+    });
+
+    const persisted = JSON.parse(fs.readFileSync(path.join(env.storageRoot, "content.json"), "utf8"));
+    expect(persisted.homePage.socialProof.feedbacks[0]).toMatchObject({
+      context: "Distribuição e abastecimento",
+      photo: "",
+    });
+  });
+
+  it("backfills commercial e-mails in a persisted production-like unit store without replacing configured values", async () => {
+    const env = isolatedBackend();
+    fs.writeFileSync(
+      path.join(env.storageRoot, "content.json"),
+      JSON.stringify({
+        units: [
+          { id: "unit-castro", name: "Castro/PR", additionalEmail: "" },
+          { id: "unit-recife", name: "Recife/PE", additionalEmail: "comercial.local@rodogarcia.com.br" },
+        ],
+        homePage: {
+          regionalPresence: {
+            units: [
+              { id: "unit-castro", linkedUnitId: "unit-castro", additionalEmail: "" },
+              { id: "unit-recife", linkedUnitId: "unit-recife", additionalEmail: "" },
+            ],
+          },
+        },
+      })
+    );
+
+    const { contentRepository } = await import("../src/repositories/contentRepository.js");
+    const content = contentRepository.read();
+    const persisted = JSON.parse(fs.readFileSync(path.join(env.storageRoot, "content.json"), "utf8"));
+
+    expect(content.units.find((unit) => unit.id === "unit-castro")?.additionalEmail).toBe(
+      "comercial.cwb3@rodogarcia.com.br"
+    );
+    expect(content.homePage?.regionalPresence.units.find((unit) => unit.id === "unit-castro")?.additionalEmail).toBe(
+      "comercial.cwb3@rodogarcia.com.br"
+    );
+    expect(content.units.find((unit) => unit.id === "unit-recife")?.additionalEmail).toBe(
+      "comercial.local@rodogarcia.com.br"
+    );
+    expect(persisted.homePage.regionalPresence.units.find((unit: { id: string }) => unit.id === "unit-recife")?.additionalEmail).toBe(
+      "comercial.local@rodogarcia.com.br"
+    );
+  });
+
+  it("derives SEO slug from the canonical route and keeps multiline meta tags", async () => {
+    const env = isolatedBackend();
+    createPublicAsset(env.publicDir, "foto5.webp");
+
+    const { getPublicSeoPage, updateSeoPage } = await import("../src/services/seoService.js");
+    const result = updateSeoPage(undefined, {
+      path: "/servicos",
+      slug: "rota-injetada",
+      title: "Serviços logísticos para empresas",
+      description:
+        "Soluções logísticas nacionais com segurança, previsibilidade e rastreabilidade para empresas.",
+      canonical: "/servicos",
+      metaTags: "  logística nacional  \r\n transporte B2B\n\n  carga segura ",
+    });
+    const page = result.pages.find((item) => item.path === "/servicos");
+
+    expect(page).toMatchObject({
+      path: "/servicos",
+      slug: "servicos",
+      canonical: "/servicos",
+      metaTags: "logística nacional\ntransporte B2B\ncarga segura",
+    });
+    expect(getPublicSeoPage("/servicos")?.slug).toBe("servicos");
+    expect(() => updateSeoPage(undefined, {
+      path: "/servicos",
+      title: "Serviços logísticos para empresas",
+      description:
+        "Soluções logísticas nacionais com segurança, previsibilidade e rastreabilidade para empresas.",
+      canonical: "mailto:contato@example.com",
+    })).toThrow(/Canonical deve ser/i);
+  });
+});

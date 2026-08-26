@@ -1,41 +1,56 @@
-# Operacao de producao
+# Operação de produção
 
-## Fronteiras
+Este documento descreve o rollout manual futuro. A separação de código para `cms/backend` não inicia, reinicia nem publica produção por si só.
 
-O Rodogarcia nao e uma SPA estatica: o frontend Next.js renderiza Server Components, aplica headers e faz rewrites de `/api` e `/uploads`. Em producao, execute dois processos privados:
+## Fronteiras e processos
 
-| Componente | Bind local | Funcao |
+O Rodogarcia não é uma SPA estática: o site Next renderiza Server Components, aplica headers, encaminha `/admin/*` ao painel e roteia APIs pelo mesmo hostname público. Em uma janela autorizada, a equipe responsável opera quatro processos privados:
+
+| Componente | Bind local | Função |
 | --- | --- | --- |
-| Next.js standalone (`frontend/dist-prod/server.js`) | `127.0.0.1:6060` | Site publico, CMS, headers e proxy interno de API/uploads |
-| Express (`node dist/server.js`) | `127.0.0.1:6050` | API, autenticacao, JSON e uploads |
+| Express público (`site/backend/dist/server.js`) | `127.0.0.1:6050` | ESL e consultas públicas de CEP/CNPJ. |
+| Express do CMS (`cms/backend/dist/server.js`) | `127.0.0.1:6051` | Auth, admin, conteúdo, SEO, mídia, uploads, formulários, consentimento, analytics, popup, leads, sessões e scheduler. |
+| Next do site (`site/frontend/dist-prod/server.js`) | `127.0.0.1:6060` | Site público, headers e gateway interno. |
+| Next do CMS (`cms/frontend/dist-prod/server.js`) | `127.0.0.1:6061` | Painel com `basePath: /admin`. |
 
-Use `iniciar-prod.bat` para validar, compilar e iniciar esses processos pelo PM2. Ele fixa `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=6050` e `BACKEND_INTERNAL_URL=http://127.0.0.1:6050`.
+O site em `6060` encaminha `/admin/*` ao painel em `6061`. Também encaminha ao backend do CMS em `6051` as rotas de auth/admin, conteúdo/SEO/mídia, uploads, consentimento, tracking, analytics, popup, formulários, leads e melhorias. ESL, CEP e CNPJ continuam no backend público em `6050`.
 
-O desenvolvimento usa `127.0.0.1:5012` (frontend), `127.0.0.1:4012` (backend), `127.0.0.1:6110` (backend do Landing Builder) e `127.0.0.1:5112` (frontend público do Landing Builder) por `iniciar-dev.bat`. Esse script limpa proxies de producao e o cache gerado `.next`, usa o storage local do repositório e mantém os logs dos quatro serviços no mesmo terminal que o iniciou. Sem `LANDING_BUILDER_SERVICE_TOKEN`, ele cria um token temporário seguro para a execução atual; um token privado configurado no ambiente deve ser usado quando a integração precisar persistir entre reinicializações.
+Não existe hostname ou ingresso público para a API do CMS. O navegador usa `/api/*` e `/uploads/*` no hostname do site; a escolha do destino é interna ao gateway. O hostname `sitebackend.rodogarcia.com.br`, quando usado, aponta somente ao backend público.
+
+## Persistência e escritor único
+
+O volume canônico permanece em `site/backend/storage`; não copie JSON, uploads, sessões ou logs privados para `cms/backend`. A API do CMS aponta para esse volume por `STORAGE_ROOT` ou, quando necessário, `CMS_STORAGE_ROOT`, e é o único escritor das coleções administrativas. O backend público não grava conteúdo, uploads, usuários, sessões, auditoria ou dados de CMS.
+
+Os rate limits também não concorrem: a API do CMS usa `site/backend/storage/private/cms-rate-limits.json`; o backend público mantém apenas seu arquivo de limite operacional. Antes de backup, restore ou alteração manual do storage, pare os writers autorizados na janela de manutenção; nunca exponha `site/backend/storage/private/**` ou uploads por canais públicos.
 
 ## Ambiente
 
 Na VM, crie `.env.production.local` a partir de `.env.production.example`. O arquivo é ignorado pelo Git. Preencha ao menos:
 
-- `FRONTEND_ORIGIN` com a origem HTTPS canônica da interface.
-- `CORS_ORIGINS` com eventuais origens HTTPS adicionais, separadas por vírgula.
-- `ADMIN_SETUP_CODE` e `SESSION_SECRET` ou `JWT_SECRET` com valores aleatórios fortes.
-- `STORAGE_ROOT` e `UPLOADS_DIR` com caminhos absolutos em volume persistente fora do repositório.
-- `TRUST_PROXY=1` quando o Next/tunnel for o salto confiável até o Express.
+- `FRONTEND_ORIGIN` e `CORS_ORIGINS` com origens HTTPS canônicas.
+- `ADMIN_SETUP_CODE`, `SESSION_SECRET` ou `JWT_SECRET` e `ESL_OPERATION_SECRET` com valores fortes e distintos.
+- `STORAGE_ROOT` e `UPLOADS_DIR` com caminhos absolutos no volume persistente.
+- `TRUST_PROXY=1` quando o Next/tunnel for o salto confiável até os Express.
+- `BACKEND_INTERNAL_URL=http://127.0.0.1:6050` para a API pública.
+- `CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:6051` e `CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051` para a API do CMS.
+- `CMS_INTERNAL_URL=http://127.0.0.1:6061` para o painel CMS.
+- `NEXT_PUBLIC_SITE_URL=https://site.rodogarcia.com.br`, variável pública usada somente para links, previews e assets do site.
 
-O boot do backend rejeita automaticamente segredos fracos, placeholders e origens locais ou não HTTPS em produção. O script também faz essa verificação antes de iniciar serviços.
+O `cms/backend` rejeita no boot segredos fracos, placeholders e origens locais ou não HTTPS; o backend público aplica o hardening de origem, mas não recebe segredos de sessão/setup. Variáveis `CMS_*_INTERNAL_URL`, `CMS_BACKEND_PROXY_URL`, secrets e caminhos de storage são privadas; nenhuma delas pode receber prefixo `NEXT_PUBLIC_`.
 
-## PM2
+## DEV manual
 
-O `ecosystem.config.js` versionado inicia `rodogarcia-backend-prod` e `rodogarcia-frontend-prod`, com reinício automático, logs ignorados em `logs/` e bind apenas local nas portas `6050` e `6060`. Ele lê `.env.production.local` no start (ou o caminho relativo informado em `RODOGARCIA_ENV_FILE`), sem versionar segredos no ecosystem.
+O desenvolvimento integrado usa `127.0.0.1:4012` (backend público), `4013` (API CMS), `5012` (site) e `5013` (CMS Next). O responsável inicia esse fluxo manualmente; o endereço normal do painel é `http://127.0.0.1:5012/admin/auth/entrar`, enquanto `5013` serve apenas ao diagnóstico direto do painel.
 
-Instale o PM2 uma única vez na VM com `npm install -g pm2`. Depois de cada publicação, execute `iniciar-prod.bat`; ele recria o artefato, executa o hardening, aplica `pm2 startOrReload ecosystem.config.js --env production --update-env` e salva a lista de processos. O ecosystem também define esse mesmo ambiente como padrão, portanto `pm2 restart ecosystem.config.js --update-env` mantém as portas `6050` e `6060`. Para consultar, use `pm2 status`; para acompanhar logs, use `pm2 logs rodogarcia-backend-prod` ou `pm2 logs rodogarcia-frontend-prod`.
+## PM2 e rollout manual
 
-Antes da primeira publicação, restaure ou copie para o volume os JSONs e uploads autorizados. O `iniciar-prod.bat` executa `node scripts/sync-production-uploads.js --env-file .env.production.local --apply` antes de interromper processos: ele cria `UPLOADS_DIR`, copia somente uploads ausentes da origem local (ou de `PRODUCTION_UPLOADS_SEED_DIR`) e falha se um JSON público referenciar mídia inexistente. Ele nunca sobrescreve nem remove arquivos já persistidos. Use `node scripts/backup-storage.js` antes de migrações e siga `docs/backup-restore-json.md` para restores; não copie storage privado por canais públicos.
+O `ecosystem.config.js` define `rodogarcia-backend-prod`, `rodogarcia-cms-backend-prod`, `rodogarcia-frontend-prod` e `rodogarcia-cms-prod`, todos com bind local. Ele lê `.env.production.local` (ou o caminho em `RODOGARCIA_ENV_FILE`) sem versionar valores sensíveis.
+
+Somente a equipe responsável, em janela autorizada, pode executar o rollout. Antes disso, ela deve criar e conferir backup manual com `node scripts/backup-storage.js`, migrar e conferir o artefato ativo do site em `site/frontend/dist-prod/server.js` (ou aprovar um fluxo inicial explícito), validar os quatro artefatos candidatos e conferir os health checks de `http://127.0.0.1:6050/health`, `http://127.0.0.1:6051/health` e `http://127.0.0.1:6060/admin/auth/entrar`. O fluxo de promoção preserva `*.previous`, deixa candidata falha em `*.failed` e restaura os artefatos anteriores se o start ou health falhar. No primeiro rollout, como ainda não há `cms/backend/dist` anterior, o rollback remove somente a candidata da API CMS e religa os processos que tinham artefato ativo.
 
 ## Cloudflare Tunnel
 
-O arquivo do `cloudflared` pertence à infraestrutura, não ao repositório. O contrato mínimo é encaminhar o hostname público do site ao Next local:
+O arquivo do `cloudflared` pertence à infraestrutura, não ao repositório. O contrato mínimo é:
 
 ```yaml
 ingress:
@@ -45,14 +60,17 @@ ingress:
     service: http://127.0.0.1:6050
 ```
 
-Mantenha `FRONTEND_ORIGIN` e `CORS_ORIGINS` em `https://site.rodogarcia.com.br`; use `https://sitebackend.rodogarcia.com.br` somente em `NEXT_PUBLIC_BACKEND_URL`. O fluxo normal do site continua por `/api` e `/uploads` no hostname do frontend, que o Next reencaminha internamente.
+Não crie ingressos para `6051` ou `6061`. No Cloudflare, não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis; cache longo cobre somente assets com hash. Bloqueie caminhos de desenvolvimento que não fazem parte do Next de produção, como `/src/*`, `/node_modules/*`, `/@vite/*`, `/@react-refresh/*` e `/@fs/*`.
 
-No Cloudflare, não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis. Cache longo deve cobrir somente assets com hash. Bloqueie caminhos de desenvolvimento que não fazem parte do Next de produção, como `/src/*`, `/node_modules/*`, `/@vite/*`, `/@react-refresh/*` e `/@fs/*`.
+## Artefatos e hardening isolado
 
-## Artefato e verificação
+O pré-flight produz quatro artefatos isolados, sem tocar os ativos:
 
-O `npm run build:prod` produz e recria integralmente `frontend/dist-prod` a cada execução. A pasta contém o servidor standalone do Next, `.next/static`, `public` e `build-info.json`; ela é o artefato que `iniciar-prod.bat` inicia. Source maps de navegador permanecem desabilitados e o cabeçalho `X-Powered-By` do Next foi removido.
+| Artefato | Porta de hardening |
+| --- | --- |
+| `site/backend/dist.test` | `4010` |
+| `cms/backend/dist.test` | `5414` |
+| `site/frontend/dist-prod.test` | `5411` |
+| `cms/frontend/dist-prod.test` | `5413` |
 
-Este projeto não pode publicar somente `index.html` e `/assets`: Server Components, rotas dinâmicas, headers, CMS e rewrites para API exigem o servidor Next presente no artefato. O JavaScript entregue ao navegador é necessariamente visível, mas o repositório, arquivos TSX, `.env`, segredos e storage privado não são publicados.
-
-`iniciar-prod.bat` valida backend e frontend antes de parar os processos produtivos. Em seguida, recria `dist-prod`, roda `node scripts/tests/test-security-hardening.js` contra esse artefato na porta privada da API e só então abre a nova versão. Isso evita que o teste deixe o artefato apontando para portas temporárias.
+O hardening só aceita esses diretórios pelas variáveis `SECURITY_TEST_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_FRONTEND_ARTIFACT_DIR` e `SECURITY_TEST_CMS_ARTIFACT_DIR`; ele recusa `.next` e artefatos ativos. Depois do hardening aprovado, os quatro candidatos são gerados como `dist.next` ou `dist-prod.next` nas portas privadas `6050`/`6051`/`6060`/`6061`. Nenhum teste deve apontar para processos ou storage de produção.

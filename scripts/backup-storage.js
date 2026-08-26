@@ -35,7 +35,7 @@ function safeCopy(source, destination) {
   });
 }
 
-const source = path.resolve(repoRoot, argValue("--source", "backend/storage"));
+const source = path.resolve(repoRoot, argValue("--source", "site/backend/storage"));
 const outRoot = path.resolve(repoRoot, argValue("--out", "backups"));
 const name = argValue("--name", `storage-${timestamp()}`);
 const backupRoot = path.join(outRoot, name);

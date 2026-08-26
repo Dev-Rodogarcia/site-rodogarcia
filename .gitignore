@@ -55,27 +55,37 @@ logs/
 *.seed
 
 # Sensitive local persistence
-backend/storage/private/**
-!backend/storage/private/.gitkeep
-backend/storage/popup-config.json
-backend/storage/popup-events.json
-backend/storage/popup-leads.json
-backend/storage/contacts.json
-backend/storage/quotes.json
-backend/storage/leads.json
-backend/storage/seo-settings.json
-backend/storage/consent-settings.json
-backend/storage/media-library.json
-backend/storage/media-slots.json
-backend/storage/**/*.tmp
-backend/storage/**/.tmp-*
+site/backend/storage/private/**
+!site/backend/storage/private/.gitkeep
+site/backend/storage/popup-config.json
+site/backend/storage/popup-events.json
+site/backend/storage/popup-leads.json
+site/backend/storage/contacts.json
+site/backend/storage/quotes.json
+site/backend/storage/leads.json
+site/backend/storage/seo-settings.json
+site/backend/storage/consent-settings.json
+site/backend/storage/media-library.json
+site/backend/storage/media-slots.json
+site/backend/storage/**/*.tmp
+site/backend/storage/**/.tmp-*
 
 # Runtime uploads
-backend/storage/uploads/**
+site/backend/storage/uploads/**
+
+# Isolated application runtime storage
+cms/backend/storage/
+landing-builder/backend/storage/
 
 # Build
 .next/
-frontend/dist-prod/
+.next.test/
+site/backend/dist*/
+cms/backend/dist*/
+site/frontend/dist-prod*/
+cms/frontend/dist-prod*/
+landing-builder/backend/dist*/
+landing-builder/frontend/dist-prod*/
 .turbo/
 .cache/
 .vite/

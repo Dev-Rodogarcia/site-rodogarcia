@@ -1,9 +1,11 @@
 # Site Rodogarcia Transportes
 
-Monorepo separado em dois projetos independentes:
+Monorepo com site público, CMS separado e dois backends por ownership:
 
-- `frontend/`: Next.js, React, TypeScript, UI publica e painel CMS.
-- `backend/`: Node.js, Express, TypeScript, APIs, autenticacao, regras de negocio, storage JSON e seguranca.
+- `site/frontend/`: Next.js, React e TypeScript do site público; encaminha `/admin/*` ao CMS privado.
+- `cms/frontend/`: Next.js, React e TypeScript do painel administrativo, com `basePath: "/admin"`.
+- `cms/backend/`: Express, autenticação, administração, conteúdo, mídia, uploads, sessões e demais dados do CMS.
+- `site/backend/`: Express público para ESL e consultas de CEP/CNPJ.
 
 ## Raiz do repositorio
 
@@ -13,19 +15,26 @@ A raiz fica reservada para arquivos globais:
 - `.env.development.example`, `.env.production.example` e `.env.example`: modelos de ambiente.
 - `docs/`: documentacao tecnica curta.
 - `scripts/`: testes e automacoes globais.
-- `frontend/` e `backend/`: projetos isolados.
+- `site/frontend/`, `site/backend/`, `cms/frontend/` e `cms/backend/`: projetos isolados.
+- `shared/`: contratos e helpers reutilizados por site e CMS, sem dependência de app.
 
-Nao mantenha codigo de app, `node_modules`, builds, backups, guias de agente ou arquivos temporarios na raiz.
+Mantenha a raiz apenas para entradas globais: não deixe código de app, `node_modules`, builds ou arquivos temporários soltos. Backups e logs de operação ficam exclusivamente em `backups/` e `logs/`, ambos ignorados pelo Git.
 
 ## Desenvolvimento Local
 
 Instale as dependencias separadamente:
 
 ```powershell
-cd backend
+cd site\backend
 cmd /c npm install
 
 cd ..\frontend
+cmd /c npm install
+
+cd ..\..\cms\frontend
+cmd /c npm install
+
+cd ..\backend
 cmd /c npm install
 ```
 
@@ -41,52 +50,54 @@ Suba os serviços de desenvolvimento:
 cmd /c iniciar-dev.bat
 ```
 
-`iniciar-dev.bat` encerra somente processos DEV, limpa o cache gerado do Next e inicia backend, frontend, backend e frontend do Landing Builder no terminal atual, inclusive no terminal integrado do VS Code. Sem `LANDING_BUILDER_SERVICE_TOKEN`, ele cria um token temporário seguro, válido apenas durante aquela execução; configure um token próprio para manter a integração estável entre reinicializações.
+O modo DEV é iniciado manualmente pelo responsável. `iniciar-dev.bat` encerra somente os processos DEV do backend público, API CMS, site e painel, limpa os caches gerados do Next e inicia esses quatro serviços no terminal atual. O Landing Builder possui ciclo próprio: este script não instala, interrompe nem inicia seus dois processos; as variáveis `LANDING_BUILDER_*` do ambiente são preservadas apenas para integrar uma instância iniciada separadamente.
 
 URLs padrao:
 
 - Frontend: `http://127.0.0.1:5012`
-- Backend: `http://127.0.0.1:4012`
-- CMS: `http://127.0.0.1:5012/auth/entrar`
+- Backend público: `http://127.0.0.1:4012`
+- API CMS privada: `http://127.0.0.1:4013`
+- CMS pelo gateway: `http://127.0.0.1:5012/admin/auth/entrar`
+- CMS direto, somente para desenvolvimento: `http://127.0.0.1:5013/admin/auth/entrar`
 
 ## Producao local e tunnel
 
-O site nao pode ser exportado como HTML estatico: ele usa Server Components, rewrites para a API e CMS. Em producao, `iniciar-prod.bat` recompila e recria `frontend/dist-prod` com o servidor Next standalone, os assets estaticos e `build-info.json`; o Express permanece em processo separado.
+O site não pode ser exportado como HTML estático: ele usa Server Components, rewrites para as APIs e o CMS. Em produção, há quatro artefatos privados: `site/backend/dist`, `cms/backend/dist`, `site/frontend/dist-prod` e `cms/frontend/dist-prod`.
 
-Copie `.env.production.example` para `.env.production.local`, preencha segredos, origens HTTPS e o volume persistente. Em seguida, execute:
+Copie `.env.production.example` para `.env.production.local`, preencha segredos, origens HTTPS e o volume persistente. A execução é exclusivamente manual pela equipe responsável, em janela autorizada:
 
 ```powershell
 cmd /c iniciar-prod.bat
 ```
 
-O script valida ambiente, typecheck, testes, builds e hardening antes de iniciar os processos privados a partir do artefato atualizado:
+O script executa `npm ci` pelos lockfiles, valida ambiente, typecheck, testes dos dois backends, builds e hardening em artefatos candidatos antes de interromper os processos ativos. Após o pre-flight, promove os candidatos, inicia os processos privados e reverte os artefatos anteriores se o health do gateway falhar. Antes do primeiro rollout da topologia, a equipe precisa migrar e conferir o artefato ativo do site em `site/frontend/dist-prod/server.js` (ou aprovar um fluxo inicial explícito), pois a promoção exige esse rollback. A API CMS pode não ter versão anterior no primeiro rollout; nesse caso o rollback remove somente sua candidata e restaura os processos já existentes:
 
-- Frontend Next: `127.0.0.1:5010`
-- Backend Express: `127.0.0.1:4010`
+- Site Next: `127.0.0.1:6060`
+- Backend público Express: `127.0.0.1:6050`
+- API CMS Express: `127.0.0.1:6051`
+- CMS Next privado: `127.0.0.1:6061`
 
-Publique-os somente por Cloudflare Tunnel ou reverse proxy HTTPS. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
+O Cloudflare publica somente o hostname do site em `6060`; `/admin` é encaminhado internamente para o CMS em `6061`. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
 
 ## Estrutura
 
-- `backend/src/controllers`: entrada HTTP.
-- `backend/src/services`: regras de negocio.
-- `backend/src/repositories`: persistencia JSON.
-- `backend/src/security`: sessao, CSRF, CORS, rate limit e auth.
-- `frontend/src/app/developer`: painel visual do CMS.
-- `frontend/src/app`: rotas publicas e auth.
+- `site/backend/src`: API pública de ESL, CEP/CNPJ e seus limites operacionais.
+- `cms/backend/src/controllers`, `services`, `repositories` e `security`: API administrativa, sessão, CSRF, ACL, mídia/uploads e escritor único do storage administrativo.
+- `site/frontend/src/app`: rotas públicas do site.
+- `cms/frontend/src/app/auth` e `cms/frontend/src/app/developer`: painel CMS sob `/admin`.
 
 ## Persistencia
 
-O storage inicial continua em JSON, agora dentro de `backend/storage`.
-Arquivos privados ficam em `backend/storage/private`.
-O backend ainda carrega `.env` da raiz por compatibilidade. Os inicializadores carregam primeiro `.env.development.local` ou `.env.production.local`, cujos valores prevalecem no processo iniciado.
+O storage inicial continua em JSON, agora dentro de `site/backend/storage`.
+Arquivos privados ficam em `site/backend/storage/private`.
+Não há cópia de storage para `cms/backend`: ele usa o mesmo volume físico e é o único writer de suas coleções. O backend público não grava conteúdo, uploads, sessões ou dados administrativos. Os inicializadores carregam primeiro `.env.development.local` ou `.env.production.local`, cujos valores prevalecem no processo iniciado.
 
 Arquivos novos de operacao:
 
-- `backend/storage/media-library.json`: indice da biblioteca de midia do CMS.
-- `backend/storage/media-slots.json`: slots de midia usados pelo site.
-- `backend/storage/private/cookie-consents.json`: registros LGPD de consentimento.
-- `backend/storage/private/tracking-events.json`: eventos agregados e anonimizados.
+- `site/backend/storage/media-library.json`: indice da biblioteca de midia do CMS.
+- `site/backend/storage/media-slots.json`: slots de midia usados pelo site.
+- `site/backend/storage/private/cookie-consents.json`: registros LGPD de consentimento.
+- `site/backend/storage/private/tracking-events.json`: eventos agregados e anonimizados.
 
 Backups e restore do storage local:
 
@@ -124,7 +135,7 @@ Eventos internos suportados incluem page view, scroll depth, clique, CTA, outbou
 ## Verificacao
 
 ```powershell
-cd backend
+cd site\backend
 cmd /c npm run typecheck
 cmd /c npm run build
 cmd /c npm test
@@ -132,12 +143,21 @@ cmd /c npm test
 cd ..\frontend
 cmd /c npm run typecheck
 cmd /c npm run build
+
+cd ..\..\cms\frontend
+cmd /c npm run typecheck
+cmd /c npm run build
+
+cd ..\backend
+cmd /c npm run typecheck
+cmd /c npm run build
+cmd /c npm test
 ```
 
 Auditoria de dependencias:
 
 ```powershell
-cd backend
+cd site\backend
 cmd /c npm audit --audit-level=moderate
 
 cd ..\frontend
@@ -146,7 +166,14 @@ cmd /c npm audit --audit-level=moderate
 
 O teste de seguranca global sobe servidores em storage temporario:
 
+O hardening só aceita os artefatos isolados preparados pelo pré-flight; ele recusa
+`.next` e artefatos ativos para não atingir dados ou processos de produção.
+
 ```powershell
+$env:SECURITY_TEST_BACKEND_ARTIFACT_DIR = "site/backend/dist.test"
+$env:SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR = "cms/backend/dist.test"
+$env:SECURITY_TEST_FRONTEND_ARTIFACT_DIR = "site/frontend/dist-prod.test"
+$env:SECURITY_TEST_CMS_ARTIFACT_DIR = "cms/frontend/dist-prod.test"
 node scripts/tests/test-security-hardening.js
 ```
 
@@ -154,9 +181,9 @@ node scripts/tests/test-security-hardening.js
 
 Antes de publicar, confirme:
 
-- `JWT_SECRET` ou `SESSION_SECRET` forte, `ADMIN_SETUP_CODE` forte, `FRONTEND_ORIGIN` HTTPS e `CORS_ORIGINS` HTTPS configurados.
+- `JWT_SECRET` ou `SESSION_SECRET` forte, `ADMIN_SETUP_CODE` forte, `ESL_OPERATION_SECRET` forte e distinto, `FRONTEND_ORIGIN` HTTPS e `CORS_ORIGINS` HTTPS configurados.
 - `STORAGE_ROOT` apontando para volume persistente.
 - `UPLOADS_DIR` persistente e servido apenas como arquivo estatico com `nosniff`.
 - Nenhum script de analytics configurado sem banner de consentimento ativo.
 - Backups dos JSON privados antes de migracoes ou deploys grandes.
-- Execucao via `iniciar-prod.bat` ou gerenciador de processos equivalente, sempre com frontend e backend ligados apenas em `127.0.0.1`.
+- Execução manual via `iniciar-prod.bat` ou gerenciador de processos equivalente, sempre com site, painel CMS, API CMS e backend público ligados apenas em `127.0.0.1`; a API e o painel CMS não recebem hostname público próprio.

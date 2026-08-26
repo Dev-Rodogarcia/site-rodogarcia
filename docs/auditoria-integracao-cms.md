@@ -4,7 +4,7 @@ Data: 14/07/2026
 
 ## Resultado executivo
 
-Foram rastreados 387 contratos entre CMS, backend, storage JSON, APIs e frontend:
+Foram rastreados 387 contratos entre CMS, API CMS, storage JSON, APIs e site público:
 
 | Indicador | Resultado |
 | --- | ---: |
@@ -15,7 +15,7 @@ Foram rastreados 387 contratos entre CMS, backend, storage JSON, APIs e frontend
 | Contratos ativos parcialmente funcionais | 0 |
 | Controles sem consumidor aposentados da UI | 30 |
 | Contratos de páginas funcionando | 181/181 |
-| Testes backend | 9 arquivos / 25 testes aprovados |
+| Testes API CMS | 9 arquivos / 25 testes aprovados |
 
 Os 30 controles aposentados continuam preservados em storages legados, mas não são mais apresentados como editáveis quando não possuem consumidor efetivo.
 
@@ -63,32 +63,32 @@ Os 30 controles aposentados continuam preservados em storages legados, mas não 
 
 - Arrays vazios explícitos, inclusive links de coluna e canais de ajuda, passaram a ser preservados; campos obrigatórios inválidos retornam `422` em vez de voltar silenciosamente ao fallback.
 - Ícones usam allowlists e `external` é derivado da URL.
-- Limites frontend/backend foram alinhados.
+- Limites do CMS frontend/API CMS foram alinhados.
 - Navegação e aliases do CMS foram revisados.
 
 ## Arquivos e áreas alteradas
 
-- `backend/src/controllers/`: consentimento e mídia.
-- `backend/src/repositories/`: conteúdo e usuários.
-- `backend/src/services/`: analytics, autenticação, CMS, consentimento, conteúdo, footer, formulários, leads, mídia, páginas, popup, SEO e tracking.
-- `backend/src/config/contentDefaults.ts`.
-- `backend/src/utils/http.ts` e `sanitize.ts`.
-- `backend/src/tests/` e `backend/tests/`: regressões de contratos e isolamento de storage.
-- `backend/storage/content.json`: defaults públicos versionados.
-- `frontend/src/app/`: páginas públicas e telas do CMS.
-- `frontend/src/components/`: Home, links semânticos, compliance, popup e conteúdo.
-- `frontend/src/lib/`: API, conteúdo público e rotas.
+- `cms/backend/src/controllers/`: consentimento e mídia.
+- `cms/backend/src/repositories/`: conteúdo e usuários.
+- `cms/backend/src/services/`: analytics, autenticação, CMS, consentimento, conteúdo, footer, formulários, leads, mídia, páginas, popup, SEO e tracking.
+- `cms/backend/src/config/contentDefaults.ts`.
+- `cms/backend/src/utils/http.ts` e `sanitize.ts`.
+- `cms/backend/tests/`: regressões de contratos e isolamento de storage.
+- `site/backend/storage/content.json`: defaults públicos versionados.
+- `site/frontend/src/app/`: páginas públicas; `cms/frontend/src/app/`: telas do CMS.
+- `site/frontend/src/components/`: Home, links semânticos, compliance, popup e conteúdo.
+- `site/frontend/src/lib/`: API e conteúdo público; `cms/frontend/src/lib/`: rotas administrativas.
 - `docs/`: inventários e este relatório consolidado.
 
 Nenhum `.env`, credencial, storage privado ou upload foi alterado.
 
 ## Validações executadas
 
-- Backend typecheck: aprovado.
-- Frontend typecheck: aprovado.
-- Backend build: aprovado.
-- Frontend build: aprovado.
-- Backend tests: 9 arquivos, 30 testes aprovados.
+- API CMS typecheck: aprovado.
+- Site frontend typecheck: aprovado.
+- API CMS build: aprovado.
+- Site frontend build: aprovado.
+- API CMS tests: 9 arquivos, 30 testes aprovados.
 - `git diff --check`: aprovado.
 - Hardening ponta a ponta em portas isoladas: aprovado.
 - Chrome headless: Home em desktop/tablet/mobile, Contato em desktop e Privacidade em mobile renderizados sem erro de runtime.

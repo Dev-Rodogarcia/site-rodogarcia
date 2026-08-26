@@ -69,7 +69,7 @@ Esta tabela registra o estado backend → JSON → DTO público. A avaliação v
 
 ### H-01 — URLs de fragmento quebravam ações internas
 
-**Evidência:** `sanitizeUrl` em `backend/src/utils/sanitize.ts` aceitava apenas caminhos iniciados por `/` ou URLs absolutas. `cmsService` usa esse sanitizador nas ações rápidas e `pageContent` o usa em botões. O CMS oferece `#mapa-regional`, `#vagas` e `#candidatura` como valores válidos.
+**Evidência:** `sanitizeUrl` em `cms/backend/src/utils/sanitize.ts` aceitava apenas caminhos iniciados por `/` ou URLs absolutas. `cmsService` usa esse sanitizador nas ações rápidas e `pageContent` o usa em botões. O CMS oferece `#mapa-regional`, `#vagas` e `#candidatura` como valores válidos.
 
 **Efeito:** salvar a ação “Cidades” podia persistir `href: ""`; botões com fragmento podiam voltar ao fallback ou perder a navegação. O backend respondia sucesso.
 
@@ -77,7 +77,7 @@ Esta tabela registra o estado backend → JSON → DTO público. A avaliação v
 
 ### H-02 — Slot de mídia não pode ser limpo
 
-**Evidência:** a interface envia `""` para “Usar fallback do site”. `updateMediaSlots`, em `backend/src/services/mediaService.ts`, filtra pares sem valor e depois faz merge sobre o objeto atual.
+**Evidência:** a interface envia `""` para “Usar fallback do site”. `updateMediaSlots`, em `cms/backend/src/services/mediaService.ts`, filtra pares sem valor e depois faz merge sobre o objeto atual.
 
 **Efeito:** o valor anterior permanece, embora o CMS mostre mensagem de sucesso. O ciclo editar → salvar → recarregar não preserva a intenção.
 
@@ -286,15 +286,15 @@ O primeiro regex de `getDeviceFromRequest` inclui `ipad` na categoria mobile; o 
 - Upload multipart aplica origem, CSRF, validação de assinatura e processamento via Sharp para imagens.
 - URLs de mídia são limitadas a referências internas; a varredura do conteúdo canônico encontrou 55 referências, 27 únicas e zero arquivos ausentes.
 - Fetches públicos relevantes usam `cache: "no-store"`; não foi encontrado cache intermediário que explique conteúdo antigo após salvar.
-- Os tipos ativos de conteúdo em `backend/src/types/content.ts` e `frontend/src/types/content.ts` coincidem; as diferenças do backend são estruturas legadas/agrupadoras esperadas.
+- Os tipos ativos de conteúdo em `cms/backend/src/types/content.ts` e `site/frontend/src/types/content.ts` coincidem; as diferenças da API CMS são estruturas legadas/agrupadoras esperadas.
 
 ## Cobertura automatizada e lacunas
 
 Comandos executados durante a auditoria:
 
 ```text
-backend: npm run typecheck  -> passou
-backend: npm test           -> passou (6 arquivos, 10 testes)
+cms/backend: npm run typecheck  -> passou
+cms/backend: npm test           -> passou (6 arquivos, 10 testes)
 varredura estática de mídia -> 55 referências, 27 únicas, 0 ausentes
 ```
 
@@ -335,4 +335,4 @@ Um item desta auditoria só está encerrado quando:
 - o JSON persistido contém exatamente a estrutura normalizada;
 - o endpoint público entrega o valor quando ele for público;
 - o consumidor visível usa esse valor ou o controle foi removido/bloqueado no CMS;
-- typecheck, build e testes aplicáveis passam no backend e frontend.
+- typecheck, build e testes aplicáveis passam em `cms/backend`, `cms/frontend` e `site/frontend`.

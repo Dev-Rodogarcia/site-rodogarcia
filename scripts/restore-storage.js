@@ -20,14 +20,14 @@ function timestamp() {
 function assertSafeTarget(target) {
   const resolved = path.resolve(target);
   const parsed = path.parse(resolved);
-  const defaultStorage = path.resolve(repoRoot, "backend/storage");
+  const defaultStorage = path.resolve(repoRoot, "site/backend/storage");
   const relativeToDefault = path.relative(defaultStorage, resolved);
 
   if (resolved === parsed.root) {
     throw new Error("Destino de restore nao pode ser a raiz do disco.");
   }
 
-  if (resolved === repoRoot || resolved === path.resolve(repoRoot, "backend")) {
+  if (resolved === repoRoot || resolved === path.resolve(repoRoot, "site", "backend")) {
     throw new Error("Destino de restore amplo demais para sobrescrita segura.");
   }
 
@@ -51,7 +51,7 @@ if (!hasFlag("--confirm-restore")) {
 
 const backupRoot = path.resolve(repoRoot, backupRootArg);
 const backupStorage = path.join(backupRoot, "storage");
-const target = path.resolve(repoRoot, argValue("--target", "backend/storage"));
+const target = path.resolve(repoRoot, argValue("--target", "site/backend/storage"));
 
 if (!fs.existsSync(backupStorage)) {
   throw new Error(`Backup invalido: pasta storage nao encontrada em ${backupStorage}`);

@@ -7,7 +7,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,20 +15,83 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
+            site/backend/package-lock.json
+            site/frontend/package-lock.json
+            cms/backend/package-lock.json
+            cms/frontend/package-lock.json
+            landing-builder/backend/package-lock.json
+            landing-builder/frontend/package-lock.json
       - run: npm ci
-        working-directory: backend
+        working-directory: site/backend
       - run: npm ci
-        working-directory: frontend
+        working-directory: site/frontend
+      - run: npm ci
+        working-directory: cms/backend
+      - run: npm ci
+        working-directory: cms/frontend
+      - run: npm ci
+        working-directory: landing-builder/backend
+      - run: npm ci
+        working-directory: landing-builder/frontend
       - run: npm run typecheck
-        working-directory: backend
+        working-directory: site/backend
       - run: npm test
-        working-directory: backend
+        working-directory: site/backend
       - run: npm run build
-        working-directory: backend
+        working-directory: site/backend
       - run: npm run typecheck
-        working-directory: frontend
+        working-directory: site/frontend
       - run: npm run build
-        working-directory: frontend
+        working-directory: site/frontend
+      - run: npm run typecheck
+        working-directory: cms/backend
+      - run: npm test
+        working-directory: cms/backend
+      - run: npm run build
+        working-directory: cms/backend
+      - run: npm run typecheck
+        working-directory: cms/frontend
+      - run: npm run build
+        working-directory: cms/frontend
+      - run: npm run typecheck
+        working-directory: landing-builder/backend
+      - run: npm run build
+        working-directory: landing-builder/backend
+      - run: npm run typecheck
+        working-directory: landing-builder/frontend
+      - run: npm run build
+        working-directory: landing-builder/frontend
+      - run: npm run build -- --outDir dist.test
+        working-directory: site/backend
+      - run: npm run build -- --outDir dist.test
+        working-directory: cms/backend
+      - run: npm run build:prod
+        working-directory: site/frontend
+        env:
+          NODE_ENV: production
+          BACKEND_PROXY_URL: ""
+          NEXT_PUBLIC_BACKEND_PROXY_URL: ""
+          BACKEND_INTERNAL_URL: http://127.0.0.1:4010
+          CMS_BACKEND_INTERNAL_URL: http://127.0.0.1:5414
+          CMS_INTERNAL_URL: http://127.0.0.1:5413
+          CMS_BACKEND_PROXY_URL: http://127.0.0.1:5414
+          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4010
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:5411
+          LANDING_BUILDER_API_URL: ""
+          LANDING_BUILDER_SERVICE_TOKEN: ""
+          LANDING_BUILDER_PUBLIC_URL: ""
+          PROD_ARTIFACT_DIR: dist-prod.test
+      - run: npm run build:prod
+        working-directory: cms/frontend
+        env:
+          NODE_ENV: production
+          CMS_BACKEND_INTERNAL_URL: http://127.0.0.1:5414
+          CMS_BACKEND_PROXY_URL: http://127.0.0.1:5414
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:5411
+          PROD_ARTIFACT_DIR: dist-prod.test
       - run: node scripts/tests/test-security-hardening.js
+        env:
+          SECURITY_TEST_BACKEND_ARTIFACT_DIR: site/backend/dist.test
+          SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR: cms/backend/dist.test
+          SECURITY_TEST_FRONTEND_ARTIFACT_DIR: site/frontend/dist-prod.test
+          SECURITY_TEST_CMS_ARTIFACT_DIR: cms/frontend/dist-prod.test

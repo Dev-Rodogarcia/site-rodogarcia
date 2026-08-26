@@ -1,6 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const dotenv = require("./backend/node_modules/dotenv");
+const dotenv = require("./site/backend/node_modules/dotenv");
 
 const rootDir = __dirname;
 const envFile = process.env.RODOGARCIA_ENV_FILE
@@ -18,6 +18,11 @@ const sharedEnv = {
   ...productionEnv,
   NODE_ENV: "production",
   BACKEND_INTERNAL_URL: "http://127.0.0.1:6050",
+  CMS_BACKEND_INTERNAL_URL: "http://127.0.0.1:6051",
+  CMS_INTERNAL_URL: "http://127.0.0.1:6061",
+  CMS_BACKEND_PROXY_URL: "http://127.0.0.1:6051",
+  NEXT_PUBLIC_SITE_URL:
+    productionEnv.NEXT_PUBLIC_SITE_URL || "https://site.rodogarcia.com.br",
 };
 
 const backendEnv = {
@@ -32,11 +37,26 @@ const frontendEnv = {
   PORT: "6060",
 };
 
+const cmsBackendEnv = {
+  ...sharedEnv,
+  HOST: "127.0.0.1",
+  PORT: "6051",
+};
+
+const cmsEnv = {
+  ...sharedEnv,
+  HOSTNAME: "127.0.0.1",
+  PORT: "6061",
+};
+
+const cmsBackendScript = path.join(rootDir, "cms", "backend", "dist", "server.js");
+const hasCmsBackendArtifact = fs.existsSync(cmsBackendScript);
+
 module.exports = {
   apps: [
     {
       name: "rodogarcia-backend-prod",
-      cwd: path.join(rootDir, "backend"),
+      cwd: path.join(rootDir, "site", "backend"),
       script: "dist/server.js",
       interpreter: "node",
       // `env` permite `pm2 restart ecosystem.config.js` sem depender de --env.
@@ -53,7 +73,7 @@ module.exports = {
     },
     {
       name: "rodogarcia-frontend-prod",
-      cwd: path.join(rootDir, "frontend", "dist-prod"),
+      cwd: path.join(rootDir, "site", "frontend", "dist-prod"),
       script: "server.js",
       interpreter: "node",
       env: frontendEnv,
@@ -66,6 +86,38 @@ module.exports = {
       time: true,
       out_file: path.join(rootDir, "logs", "rodogarcia-frontend-out.log"),
       error_file: path.join(rootDir, "logs", "rodogarcia-frontend-error.log"),
+    },
+    ...(hasCmsBackendArtifact ? [{
+      name: "rodogarcia-cms-backend-prod",
+      cwd: path.join(rootDir, "cms", "backend"),
+      script: "dist/server.js",
+      interpreter: "node",
+      env: cmsBackendEnv,
+      env_production: cmsBackendEnv,
+      autorestart: true,
+      watch: false,
+      max_restarts: 10,
+      restart_delay: 3000,
+      kill_timeout: 5000,
+      time: true,
+      out_file: path.join(rootDir, "logs", "rodogarcia-cms-backend-out.log"),
+      error_file: path.join(rootDir, "logs", "rodogarcia-cms-backend-error.log"),
+    }] : []),
+    {
+      name: "rodogarcia-cms-prod",
+      cwd: path.join(rootDir, "cms", "frontend", "dist-prod"),
+      script: "server.js",
+      interpreter: "node",
+      env: cmsEnv,
+      env_production: cmsEnv,
+      autorestart: true,
+      watch: false,
+      max_restarts: 10,
+      restart_delay: 3000,
+      kill_timeout: 5000,
+      time: true,
+      out_file: path.join(rootDir, "logs", "rodogarcia-cms-out.log"),
+      error_file: path.join(rootDir, "logs", "rodogarcia-cms-error.log"),
     },
   ],
 };

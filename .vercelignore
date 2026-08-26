@@ -2,8 +2,8 @@ node_modules
 backups
 .env
 .env.*
-backend/storage/private
-backend/storage/uploads
+site/backend/storage/private
+site/backend/storage/uploads
 scripts
 *.log
 .DS_Store

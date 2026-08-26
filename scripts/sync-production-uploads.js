@@ -22,7 +22,7 @@ function resolveFromRepo(value) {
 }
 
 function readEnvironment(envFile) {
-  const dotenv = require(path.join(repoRoot, "backend", "node_modules", "dotenv"));
+  const dotenv = require(path.join(repoRoot, "site", "backend", "node_modules", "dotenv"));
   if (!fs.existsSync(envFile)) {
     throw new Error(`Arquivo de ambiente nao encontrado: ${envFile}`);
   }
@@ -79,12 +79,12 @@ function copyMissingFiles(source, target) {
 
 const envFile = resolveFromRepo(argumentValue("--env-file") ?? ".env.production.local");
 const environment = readEnvironment(envFile);
-const storageRoot = resolveFromRepo(environment.STORAGE_ROOT ?? "backend/storage");
+const storageRoot = resolveFromRepo(environment.STORAGE_ROOT ?? "site/backend/storage");
 const uploadsDir = resolveFromRepo(
   environment.UPLOADS_DIR ?? path.join(storageRoot, "uploads")
 );
 const sourceDir = resolveFromRepo(
-  argumentValue("--source") ?? environment.PRODUCTION_UPLOADS_SEED_DIR ?? "backend/storage/uploads"
+  argumentValue("--source") ?? environment.PRODUCTION_UPLOADS_SEED_DIR ?? "site/backend/storage/uploads"
 );
 const apply = process.argv.includes("--apply");
 
