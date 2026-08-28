@@ -3,10 +3,10 @@ const backendUrl = (
   process.env.CMS_BACKEND_INTERNAL_URL ||
   // Mantido enquanto ambientes de desenvolvimento antigos ainda definem este nome.
   process.env.CMS_BACKEND_PROXY_URL ||
-  "http://127.0.0.1:4013"
+  "http://127.0.0.1:31013"
 ).replace(/\/+$/, "");
 const isProduction = process.env.NODE_ENV === "production";
-const publicSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:5012").replace(/\/+$/, "");
+const publicSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:35180").replace(/\/+$/, "");
 const landingBuilderPublicUrl = process.env.LANDING_BUILDER_PUBLIC_URL?.trim().replace(/\/+$/, "") ?? "";
 const nextBuildDistDir = process.env.NEXT_BUILD_DIST_DIR?.trim() || ".next";
 

@@ -6,19 +6,21 @@ Em 2026-08-25, o responsável aceitou o corte técnico de CMS-03, CMS-04 e CMS-0
 
 ## Limites e pré-requisitos
 
-- [ ] Há autorização explícita do responsável para iniciar manualmente o modo DEV. `iniciar-dev.bat` encerra somente as portas DEV `4012`, `4013`, `5012` e `5013`, limpa caches Next do site/CMS e inicia backend público, API CMS, site e painel.
+- [ ] Há autorização explícita do responsável para iniciar manualmente o modo DEV. `iniciar-dev.bat` usa as portas de cinco dígitos `31012`, `31013`, `35180`, `35013`, `36110` e `35112` e encerra somente processos identificados como deste repositório. Se uma delas pertencer a outro projeto, o script aborta sem encerrar processos; depois de livre, ele limpa os caches Next e inicia backend público, API CMS, site, painel e os dois processos do Landing Builder.
 - [ ] Há uma conta administrativa DEV autorizada e, para ACL, uma conta ou perfil com pelo menos uma permissão negada. Não registrar senha, cookie, token CSRF ou dados pessoais neste documento.
-- [ ] O acesso normal é `http://127.0.0.1:5012/admin/auth/entrar`. A porta `5013` é apenas para o teste direto do CMS em DEV.
-- [ ] A API CMS responde somente internamente em `http://127.0.0.1:4013/health`; o navegador continua no gateway `5012` para `/api/*` e `/uploads/*`.
+- [ ] O acesso normal é `http://127.0.0.1:35180/admin/auth/entrar`. A porta `35013` é apenas para o teste direto do CMS em DEV.
+- [ ] Um Dev Tunnel pode encaminhar temporariamente a porta local `35180` para outra máquina. Essa URL externa não é gravada em `.env`; origens `https://<tunnel>-<porta>.<região>.devtunnels.ms` só são aceitas em desenvolvimento.
+- [ ] A API CMS responde somente internamente em `http://127.0.0.1:31013/health`; o navegador continua no gateway `35180` para `/api/*` e `/uploads/*`.
+- [ ] O Landing Builder responde internamente em `http://127.0.0.1:36110/health` e `http://127.0.0.1:35112/health`; a tela de campanhas não deve apresentar `503` quando os seis processos estiverem ativos.
 - [ ] Cada alteração de conteúdo é reversível: anotar o valor original, testar e restaurá-lo antes de encerrar o aceite. Não usar conteúdo institucional como dado de teste.
-- [ ] Este aceite não cria, publica, despublica nem testa mídia de landing. Esses cenários pertencem ao bloco independente do Landing Builder e não devem alterar seu storage.
+- [ ] Este aceite não cria, publica, despublica nem testa mídia de landing. Esses cenários pertencem ao bloco funcional próprio do Landing Builder e não devem alterar seu storage.
 
 ## Gateway, autenticação e segurança
 
 1. **Sem sessão**
-   - [ ] Abrir `/admin`, `/admin/auth/entrar` e `/admin/developer` pelo host `5012`.
+   - [ ] Abrir `/admin`, `/admin/auth/entrar` e `/admin/developer` pelo host `35180`.
    - [ ] `/admin` redireciona para `/admin/auth/entrar`; `/admin/developer` faz redirecionamento client-side para login e preserva `next=/developer`.
-   - [ ] Conferir no navegador que um asset do CMS é carregado em `/admin/_next/*`, sem URL interna `5013` exposta na barra de endereços.
+   - [ ] Conferir no navegador que um asset do CMS é carregado em `/admin/_next/*`, sem URL interna `35013` exposta na barra de endereços.
    - [ ] Conferir aliases: `/auth/entrar`, `/developer`, `/developer/home` e `/admin/cadastrar-usuario` chegam sob `/admin/...`.
 
 2. **Sessão e logout**
@@ -33,13 +35,13 @@ Em 2026-08-25, o responsável aceitou o corte técnico de CMS-03, CMS-04 e CMS-0
    - [ ] No Dashboard, indicadores sem `analytics`, `popup`, `leads` ou `images` mostram indisponibilidade, não zero nem erro global. Na Home sem `units`, a referência global fica indisponível, mas os cards próprios da Home continuam editáveis.
 
 4. **Upload pelo gateway**
-   - [ ] Em `/admin/developer/imagens`, enviar uma imagem válida pequena (PNG, JPG/JPEG, WebP ou AVIF), conferir preview, sucesso, variante/URL interna e entrega em `/uploads/*` pelo host `5012`.
+   - [ ] Em `/admin/developer/imagens`, enviar uma imagem válida pequena (PNG, JPG/JPEG, WebP ou AVIF), conferir preview, sucesso, variante/URL interna e entrega em `/uploads/*` pelo host `35180`.
    - [ ] Enviar um vídeo válido pequeno (MP4, WebM ou Ogg), conferir preview e entrega pelo mesmo gateway. Não usar arquivos acima dos limites (imagem 8 MB; vídeo 64 MB).
    - [ ] Excluir somente os arquivos criados para o aceite, depois de remover qualquer referência de teste.
 
 ## Matriz das 30 rotas administrativas
 
-Em todas as linhas, conferir carregamento, estado vazio ou erro quando a fonte não tiver dados, mensagem de sucesso após uma ação reversível e responsividade da própria tela. Onde houver **preview**, conferir Desktop, Tablet e Mobile no seletor do CMS; o iframe ou link deve abrir o host público `5012`, nunca `/admin`.
+Em todas as linhas, conferir carregamento, estado vazio ou erro quando a fonte não tiver dados, mensagem de sucesso após uma ação reversível e responsividade da própria tela. Onde houver **preview**, conferir Desktop, Tablet e Mobile no seletor do CMS; o iframe ou link deve abrir o host público `35180`, nunca `/admin`.
 
 | # | URL visível | Permissão efetiva | Ação/estado funcional | Preview ou mídia |
 | --- | --- | --- | --- | --- |
@@ -54,7 +56,7 @@ Em todas as linhas, conferir carregamento, estado vazio ou erro quando a fonte n
 | 9 | `/admin/developer/home-dna` | `home` | Alias redireciona para `/admin/developer/home#section-2`. | Conferir âncora na Home. |
 | 10 | `/admin/developer/home-hero` | `home` | Alias redireciona para `/admin/developer/home#hero`. | Conferir âncora e mídia do hero. |
 | 11 | `/admin/developer/imagens` | `images` | Biblioteca, slots, preview e upload image/vídeo da seção anterior. | Preview local e URL `/uploads/*`. |
-| 12 | `/admin/developer/landing-pages` | `landing-pages` | Confirmar carregamento, ACL e navegação sob `/admin`; com Builder não configurado ou indisponível, aceitar o estado seguro `503`. Não criar, publicar ou despublicar campanha neste aceite. | Prévia e mídia são validadas no bloco Landing Builder. |
+| 12 | `/admin/developer/landing-pages` | `landing-pages` | Confirmar carregamento, ACL e navegação sob `/admin`; com os seis processos ativos, a lista vazia deve carregar sem `503`. Não criar, publicar ou despublicar campanha neste aceite. | Prévia e mídia são validadas no bloco Landing Builder. |
 | 13 | `/admin/developer/leads` | `leads` | Filtros, paginação e estado sem resultados; não expor dados em captura. | Sem preview. |
 | 14 | `/admin/developer/lgpd-cookies` | `cookies` | Texto, categorias e mensagem de sucesso após save reversível. | Banner de consentimento na Home em Desktop/Tablet/Mobile. |
 | 15 | `/admin/developer/melhorias` | `improvements` | Alternar Pendentes/Concluídas/Arquivadas; conferir estado vazio e status. | `/melhoria-continua`; testar download de anexo de teste, se houver. |
@@ -77,5 +79,5 @@ Em todas as linhas, conferir carregamento, estado vazio ou erro quando a fonte n
 ## Fechamento do gate
 
 - [ ] Registrar no `states.md` os itens efetivamente validados e manter pendente apenas o que não foi executado.
-- [ ] Não promover para produção nesta etapa. O rollout continua exigindo backup manual, janela autorizada, pré-flight dos quatro artefatos e health dos backends `6050`/`6051` e de `/admin/auth/entrar` pelo gateway.
+- [ ] Não promover para produção nesta etapa. O rollout continua exigindo backup manual, janela autorizada, pré-flight dos quatro artefatos centrais, candidatos do Landing Builder e health de `41050`/`41051`/`41110`/`41112` e de `/admin/auth/entrar` pelo gateway.
 - [ ] Registrar os cenários de criação, publicação, fallback por slug, mídia e prévias de campanhas somente no aceite próprio do Landing Builder.

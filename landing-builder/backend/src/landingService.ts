@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
 import { z } from "zod";
-import { assertLandingMediaUrl, getLandingMediaByUrl, LANDING_MEDIA_URL_PREFIX } from "./mediaService.js";
+import { assertLandingMediaUrl, getLandingMediaByUrl } from "./mediaService.js";
 import { readLandings, writeLandings } from "./store.js";
+import { campaignV1Schema } from "./templates/campaignV1.js";
 import type { LandingPage, LandingSeo, LandingStatus, PublicLandingIndexItem, PublicLandingPage } from "./types.js";
 
 export class LandingServiceError extends Error {
@@ -23,17 +24,6 @@ const RESERVED_SLUGS = new Set([
   "contact", "quote", "orcamento", "coleta", "solicitar-coleta", "careers", "vagas", "ajuda", "help", "faq",
   "press", "midia", "empresas", "b2b", "termos", "politica", "politica-de-privacidade", "canal-de-denuncias", "rastrear-encomenda",
 ]);
-const safeUrl = z.string().trim().max(400).refine(
-  (value) => !value || (/^\/(?!\/)/.test(value) || /^(https:|mailto:|tel:)/.test(value)),
-  "Use uma rota interna, URL HTTPS, telefone ou e-mail válido."
-).optional().default("");
-const internalMedia = z.string().trim().max(300).refine(
-  (value) =>
-    !value ||
-    (value.startsWith(LANDING_MEDIA_URL_PREFIX) &&
-      !value.split("/").some((segment) => segment === "." || segment === "..")),
-  "Selecione uma mídia válida da biblioteca da campanha."
-).optional().default("");
 const themeSchema = z.preprocess((value) => value ?? {}, z.object({
   primaryColor: colorSchema.optional().default("#111111"),
   secondaryColor: colorSchema.optional().default("#111111"),
@@ -52,25 +42,12 @@ const seoSchema = z.preprocess((value) => value ?? {}, z.object({
   description: text(160),
   index: z.boolean().optional().default(true),
 }));
-const heroSchema = z.preprocess((value) => value ?? {}, z.object({
-  phone: text(40), email: text(160), logo: internalMedia, backgroundImage: internalMedia,
-  eyebrow: text(80), title: text(180), description: text(700), ctaLabel: text(70), ctaUrl: safeUrl,
-  highlights: z.array(z.object({ title: text(80), description: text(220) })).min(1).max(4).optional().default([
-    { title: "Cobertura nacional", description: "Uma informação importante da campanha." },
-  ]),
-}));
-const lowerSectionSchema = z.preprocess((value) => value ?? {}, z.object({
-  title: text(180), description: text(900), ctaLabel: text(70), ctaUrl: safeUrl,
-}));
-
-const landingInputSchema = z.object({
+const landingInputSchema = campaignV1Schema.extend({
   name: text(120),
   slug: slugSchema,
   seo: seoSchema,
   theme: themeSchema,
   analytics: analyticsSchema,
-  hero: heroSchema,
-  lowerSection: lowerSectionSchema,
 });
 
 function normalizeSlug(value: unknown) {
@@ -109,10 +86,12 @@ function publicMediaUrl(value: unknown) {
 }
 
 function ensureLandingMetadata(landing: LandingPage): LandingPage {
-  const previewToken = isPreviewToken(landing.previewToken) ? landing.previewToken : createPreviewToken();
-  const seo = normalizeSeo(landing);
-  if (previewToken === landing.previewToken && JSON.stringify(seo) === JSON.stringify(landing.seo)) return landing;
-  return { ...landing, previewToken, seo };
+  const parsed = landingInputSchema.safeParse(landing);
+  const normalized = parsed.success ? { ...landing, ...parsed.data } : landing;
+  const previewToken = isPreviewToken(normalized.previewToken) ? normalized.previewToken : createPreviewToken();
+  const seo = normalizeSeo(normalized);
+  const withMetadata = { ...normalized, previewToken, seo };
+  return JSON.stringify(withMetadata) === JSON.stringify(landing) ? landing : withMetadata;
 }
 
 function readNormalizedLandings() {
@@ -144,7 +123,7 @@ function parseInput(input: unknown) {
     ...parsed.data,
     seo: normalizeSeo({ hero: parsed.data.hero, seo: parsed.data.seo }),
   };
-  for (const mediaUrl of [values.hero.logo, values.hero.backgroundImage]) {
+  for (const mediaUrl of [values.hero.logo, values.hero.backgroundImage, values.story.image]) {
     if (mediaUrl) assertLandingMediaUrl(mediaUrl);
   }
   return values;
@@ -172,6 +151,7 @@ export function listPublishedLandingIndex(): PublicLandingIndexItem[] {
 
 export function toPublicLanding(landing: LandingPage): PublicLandingPage {
   return {
+    template: landing.template,
     name: landing.name,
     slug: landing.slug,
     seo: normalizeSeo(landing),
@@ -201,10 +181,62 @@ export function toPublicLanding(landing: LandingPage): PublicLandingPage {
       })),
     },
     lowerSection: {
+      visible: landing.lowerSection.visible,
       title: landing.lowerSection.title,
       description: landing.lowerSection.description,
       ctaLabel: landing.lowerSection.ctaLabel,
       ctaUrl: landing.lowerSection.ctaUrl,
+    },
+    benefits: {
+      visible: landing.benefits.visible,
+      eyebrow: landing.benefits.eyebrow,
+      title: landing.benefits.title,
+      description: landing.benefits.description,
+      items: landing.benefits.items.map((item) => ({ title: item.title, description: item.description })),
+    },
+    story: {
+      visible: landing.story.visible,
+      eyebrow: landing.story.eyebrow,
+      title: landing.story.title,
+      description: landing.story.description,
+      image: publicMediaUrl(landing.story.image),
+      ctaLabel: landing.story.ctaLabel,
+      ctaUrl: landing.story.ctaUrl,
+    },
+    metrics: {
+      visible: landing.metrics.visible,
+      eyebrow: landing.metrics.eyebrow,
+      title: landing.metrics.title,
+      items: landing.metrics.items.map((item) => ({ value: item.value, label: item.label })),
+    },
+    testimonial: {
+      visible: landing.testimonial.visible,
+      eyebrow: landing.testimonial.eyebrow,
+      title: landing.testimonial.title,
+      quote: landing.testimonial.quote,
+      author: landing.testimonial.author,
+      role: landing.testimonial.role,
+    },
+    faq: {
+      visible: landing.faq.visible,
+      eyebrow: landing.faq.eyebrow,
+      title: landing.faq.title,
+      items: landing.faq.items.map((item) => ({ question: item.question, answer: item.answer })),
+    },
+    finalCta: {
+      visible: landing.finalCta.visible,
+      eyebrow: landing.finalCta.eyebrow,
+      title: landing.finalCta.title,
+      description: landing.finalCta.description,
+      ctaLabel: landing.finalCta.ctaLabel,
+      ctaUrl: landing.finalCta.ctaUrl,
+    },
+    footer: {
+      brand: landing.footer.brand,
+      description: landing.footer.description,
+      phone: landing.footer.phone,
+      email: landing.footer.email,
+      legalText: landing.footer.legalText,
     },
   };
 }

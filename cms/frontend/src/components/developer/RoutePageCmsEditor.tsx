@@ -20,7 +20,7 @@ import {
   developerPrimaryButtonClassName,
   developerSecondaryButtonClassName,
 } from "@/components/developer/ui";
-import { api, site, siteUrl, type AppPath } from "@/lib/routes";
+import { api, site, type AppPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 type PageKey = "about" | "business" | "contact" | "careers" | "quote" | "collections";
@@ -348,7 +348,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
           { label: "Itens", value: summary.items },
         ]}
         actions={
-          <a href={siteUrl(meta.publicHref)} className={developerSecondaryButtonClassName}>
+          <a href={meta.publicHref} className={developerSecondaryButtonClassName}>
             <ArrowSquareOut size={16} weight="bold" />
             Ver página
           </a>

@@ -11,7 +11,7 @@ export interface NavigationItem {
 export const CMS_BASE_PATH = "/admin" as const;
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
-const fallbackSiteUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:5012" : "";
+const fallbackSiteUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:35180" : "";
 
 function splitPathAndSuffix(value: string) {
   const suffixIndex = value.search(/[?#]/);
@@ -44,7 +44,10 @@ export function siteUrl(pathname: AppPath | string = "/"): string {
   if (/^https?:\/\//i.test(value)) return value;
 
   const pathWithLeadingSlash = value.startsWith("/") ? value : `/${value}`;
-  const baseUrl = configuredSiteUrl || fallbackSiteUrl;
+  const browserGatewayOrigin = typeof window !== "undefined" && window.location.pathname.startsWith(CMS_BASE_PATH)
+    ? window.location.origin
+    : "";
+  const baseUrl = browserGatewayOrigin || configuredSiteUrl || fallbackSiteUrl;
   return baseUrl ? `${baseUrl}${pathWithLeadingSlash}` : pathWithLeadingSlash;
 }
 

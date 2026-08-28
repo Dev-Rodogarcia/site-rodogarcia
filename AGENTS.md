@@ -190,6 +190,14 @@ Toda alteração deve ser avaliada contra estes 20 controles. Itens de banco de 
 - Se uma página depender de seção editável, mantenha fallback seguro para backend indisponível ou conteúdo incompleto.
 - Não duplique textos de negócio em múltiplos lugares quando eles já vierem do CMS ou de `site-texts`.
 
+### Aceite público, SEO e performance
+
+- Toda rota pública inexistente deve responder `404` com página institucional própria e `noindex`. Como o fallback de campanhas pode atender caminhos desconhecidos, `site/frontend` e `landing-builder/frontend` devem manter esse comportamento alinhado.
+- Antes de uma publicação, validar no gateway público `sitemap.xml`, `robots.txt`, favicon/manifest, páginas indexáveis e 404. Cada página indexável precisa entregar `title`, `meta description`, canonical e Open Graph; o rodapé precisa manter dados e links canônicos completos.
+- GA4, Clarity ou outro script externo só pode ser configurado no CMS e carregado após consentimento explícito da categoria correta. Ao negar ou revogar consentimento, remover scripts administrados, cookies conhecidos e storage opcional; nunca registrar identificador pessoal em analytics.
+- Para mídia, validar assinatura real e variantes WebP geradas nos uploads. Em assets versionados, manter formato moderno, dimensões proporcionais ao uso e tamanho sob revisão; não alegar uma nota de PageSpeed sem medição recente da URL HTTPS pública.
+- A medição de PageSpeed é um aceite externo da URL pública HTTPS, não um substituto de testes locais. Se CDN/origem estiver indisponível, registrar o bloqueio e restaurar a borda antes de publicar; não inferir métricas a partir do Dev Tunnel.
+
 ## Diretrizes de Frontend e UX
 
 - Preserve a identidade visual da Rodogarcia e os padrões atuais de layout.

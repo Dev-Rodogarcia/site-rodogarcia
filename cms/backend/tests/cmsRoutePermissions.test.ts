@@ -5,7 +5,7 @@ import { createIsolatedBackendEnv } from "./testEnv.js";
 
 const temporaryRoots: string[] = [];
 const servers: Server[] = [];
-const frontendOrigin = "http://127.0.0.1:5012";
+const frontendOrigin = "http://127.0.0.1:35180";
 
 async function startServer() {
   const isolated = createIsolatedBackendEnv();

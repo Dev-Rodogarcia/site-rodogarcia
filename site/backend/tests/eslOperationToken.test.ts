@@ -94,13 +94,13 @@ describe("capabilities de operações ESL", () => {
   it("protege PATCH e cancelamento no runtime antes de chamar o ESL", async () => {
     createIsolatedBackendEnv();
     process.env.NODE_ENV = "test";
-    process.env.FRONTEND_ORIGIN = "http://127.0.0.1:5012";
+    process.env.FRONTEND_ORIGIN = "http://127.0.0.1:35180";
     process.env.ESL_OPERATION_SECRET = "test-esl-operation-secret-with-more-than-32-characters";
     vi.resetModules();
     const app = await startAppForTest();
     const headers = {
       "content-type": "application/json",
-      origin: "http://127.0.0.1:5012",
+      origin: "http://127.0.0.1:35180",
     };
 
     try {

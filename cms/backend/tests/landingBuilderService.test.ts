@@ -14,7 +14,7 @@ afterEach(() => {
 async function loadService() {
   const isolated = createIsolatedBackendEnv();
   temporaryRoots.push(isolated.root);
-  process.env.LANDING_BUILDER_API_URL = "http://127.0.0.1:6110";
+  process.env.LANDING_BUILDER_API_URL = "http://127.0.0.1:36110";
   process.env.LANDING_BUILDER_SERVICE_TOKEN = "landing-builder-test-token-with-at-least-32-chars";
   return import("../src/services/landingBuilderService.js");
 }
@@ -32,14 +32,14 @@ describe("Landing Builder service proxy", () => {
     await getLandingPreview("landing_1");
 
     const [createUrl, createInit] = fetchMock.mock.calls[0] ?? [];
-    expect(createUrl).toBe("http://127.0.0.1:6110/api/internal/landings");
+    expect(createUrl).toBe("http://127.0.0.1:36110/api/internal/landings");
     expect(createInit).toMatchObject({ method: "POST" });
     const createHeaders = new Headers((createInit as RequestInit).headers);
     expect(createHeaders.get("x-landing-builder-service-token")).toMatch(/^landing-builder-test-token/);
     expect(createHeaders.get("content-type")).toBe("application/json");
 
     const [previewUrl, previewInit] = fetchMock.mock.calls[1] ?? [];
-    expect(previewUrl).toBe("http://127.0.0.1:6110/api/internal/landings/landing_1/preview");
+    expect(previewUrl).toBe("http://127.0.0.1:36110/api/internal/landings/landing_1/preview");
     expect(previewInit).toMatchObject({ method: "POST" });
     expect(new Headers((previewInit as RequestInit).headers).get("content-type")).toBeNull();
   });
@@ -60,7 +60,7 @@ describe("Landing Builder service proxy", () => {
     await uploadLandingMedia(file, "Imagem da campanha");
 
     const [url, init] = fetchMock.mock.calls[0] ?? [];
-    expect(url).toBe("http://127.0.0.1:6110/api/internal/media");
+    expect(url).toBe("http://127.0.0.1:36110/api/internal/media");
     expect(init).toMatchObject({ method: "POST" });
     expect((init as RequestInit).body).toBeInstanceOf(FormData);
     const headers = new Headers((init as RequestInit).headers);

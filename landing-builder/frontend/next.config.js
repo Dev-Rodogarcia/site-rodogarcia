@@ -1,5 +1,9 @@
-const backendUrl = (process.env.LANDING_BUILDER_BACKEND_URL ?? "http://127.0.0.1:6110").replace(/\/+$/, "");
+const backendUrl = (process.env.LANDING_BUILDER_BACKEND_URL ?? "http://127.0.0.1:36110").replace(/\/+$/, "");
 const isProduction = process.env.NODE_ENV === "production";
+const nextBuildDistDir = process.env.NEXT_BUILD_DIST_DIR?.trim() || ".next";
+if (![".next", ".next.test"].includes(nextBuildDistDir)) {
+  throw new Error("NEXT_BUILD_DIST_DIR deve ser .next ou .next.test.");
+}
 const assetPrefix = (() => {
   const value = (process.env.LANDING_BUILDER_ASSET_PREFIX ?? "/landing-assets")
     .trim()
@@ -44,6 +48,7 @@ const securityHeaders = [
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  distDir: nextBuildDistDir,
   output: "standalone",
   poweredByHeader: false,
   productionBrowserSourceMaps: false,

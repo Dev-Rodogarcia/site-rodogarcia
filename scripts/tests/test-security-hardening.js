@@ -4,10 +4,10 @@ const net = require("net");
 const os = require("os");
 const path = require("path");
 
-const FRONTEND_PORT = Number(process.env.SECURITY_TEST_FRONTEND_PORT ?? 5411);
-const BACKEND_PORT = Number(process.env.SECURITY_TEST_BACKEND_PORT ?? 4010);
-const CMS_BACKEND_PORT = Number(process.env.SECURITY_TEST_CMS_BACKEND_PORT ?? 5414);
-const CMS_PORT = Number(process.env.SECURITY_TEST_CMS_PORT ?? 5413);
+const FRONTEND_PORT = Number(process.env.SECURITY_TEST_FRONTEND_PORT ?? 42511);
+const BACKEND_PORT = Number(process.env.SECURITY_TEST_BACKEND_PORT ?? 42010);
+const CMS_BACKEND_PORT = Number(process.env.SECURITY_TEST_CMS_BACKEND_PORT ?? 42514);
+const CMS_PORT = Number(process.env.SECURITY_TEST_CMS_PORT ?? 42513);
 const HOST = "127.0.0.1";
 const FRONTEND_URL = `http://${HOST}:${FRONTEND_PORT}`;
 const BACKEND_URL = `http://${HOST}:${BACKEND_PORT}`;

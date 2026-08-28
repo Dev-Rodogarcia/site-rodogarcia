@@ -58,6 +58,6 @@ describe("env production hardening", () => {
     expect(env.isProduction).toBe(true);
     expect(env.allowedOrigins.has("https://www.rodogarcia.com.br")).toBe(true);
     expect(env.allowedOrigins.has("https://rodogarcia.com.br")).toBe(true);
-    expect(env.allowedOrigins.has("http://127.0.0.1:4010")).toBe(false);
+    expect(env.allowedOrigins.has("http://127.0.0.1:42010")).toBe(false);
   });
 });

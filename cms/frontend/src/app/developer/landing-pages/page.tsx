@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowSquareOut, Eye, FloppyDisk, Plus, RocketLaunch } from "@phosphor-icons/react";
-import { LandingVisualEditor, type LandingMedia } from "@/components/developer/LandingVisualEditor";
+import type { LandingMedia } from "@/components/developer/LandingVisualEditor";
+import { CampaignV1Editor, type CampaignV1Landing } from "@/components/developer/landing-templates/CampaignV1Editor";
 import {
   DeveloperCard,
   DeveloperField,
@@ -23,6 +24,7 @@ type LandingStatus = "draft" | "published" | "unpublished";
 
 type LandingForm = {
   id?: string;
+  template: "campaign-v1";
   name: string;
   slug: string;
   theme: {
@@ -55,13 +57,14 @@ type LandingForm = {
     ctaUrl: string;
     highlights: Array<{ title: string; description: string }>;
   };
-  lowerSection: { title: string; description: string; ctaLabel: string; ctaUrl: string };
+} & CampaignV1Landing & {
   status?: LandingStatus;
 };
 
 type LandingMediaListResponse = { media?: LandingMedia[] };
 
 const createBlankLanding = (): LandingForm => ({
+  template: "campaign-v1",
   name: "Nova campanha",
   slug: "nova-campanha",
   theme: { primaryColor: "#111111", secondaryColor: "#111111", backgroundColor: "#FFFFFF", textColor: "#111111", font: "system" },
@@ -72,19 +75,25 @@ const createBlankLanding = (): LandingForm => ({
     email: "",
     logo: "",
     backgroundImage: "",
-    eyebrow: "Mensagem de apoio",
-    title: "Título principal da campanha",
-    description: "Escreva aqui a proposta da sua landing page.",
-    ctaLabel: "Conheça a solução",
+    eyebrow: "Campanha em destaque",
+    title: "Uma solução preparada para o seu desafio",
+    description: "Apresente a proposta principal da campanha com uma mensagem direta, clara e orientada à ação.",
+    ctaLabel: "Fale com nossa equipe",
     ctaUrl: "",
     highlights: [
-      { title: "Destaque 01", description: "Apresente uma informação importante." },
-      { title: "Destaque 02", description: "Explique um benefício para o público." },
-      { title: "Destaque 03", description: "Inclua outro ponto relevante." },
-      { title: "Destaque 04", description: "Complete a mensagem da campanha." },
+      { title: "Diferencial 01", description: "Apresente um benefício relevante para o público." },
+      { title: "Diferencial 02", description: "Explique por que esta solução faz sentido." },
+      { title: "Diferencial 03", description: "Destaque um ponto que ajude na decisão." },
     ],
   },
-  lowerSection: { title: "Continue a sua apresentação", description: "Esta segunda seção está pronta para receber o próximo conteúdo da campanha.", ctaLabel: "", ctaUrl: "" },
+  lowerSection: { visible: true, title: "A solução certa começa com uma mensagem clara", description: "Use esta abertura para aprofundar a proposta da campanha, explicar o contexto e preparar a pessoa para conhecer os benefícios.", ctaLabel: "", ctaUrl: "" },
+  benefits: { visible: true, eyebrow: "Benefícios", title: "Por que escolher esta solução", description: "Organize os motivos mais importantes em uma leitura rápida.", items: [{ title: "Planejamento próximo", description: "Organize a mensagem para o público que você quer alcançar." }, { title: "Atendimento claro", description: "Explique os diferenciais que ajudam a pessoa a decidir." }, { title: "Próximo passo simples", description: "Direcione a campanha para uma ação objetiva." }] },
+  story: { visible: true, eyebrow: "Como funciona", title: "Uma experiência simples do início ao fim", description: "Combine uma imagem com uma explicação objetiva sobre a operação, o serviço ou a oportunidade apresentada pela campanha.", image: "", ctaLabel: "", ctaUrl: "" },
+  metrics: { visible: true, eyebrow: "Em números", title: "Informações que reforçam a decisão", items: [{ value: "01", label: "Proposta clara" }, { value: "02", label: "Benefícios em destaque" }, { value: "03", label: "CTA bem definido" }] },
+  testimonial: { visible: true, eyebrow: "Confiança", title: "O que as pessoas dizem", quote: "Inclua aqui um depoimento real que ajude o visitante a entender o valor da sua proposta.", author: "Nome do cliente", role: "Cargo ou empresa" },
+  faq: { visible: true, eyebrow: "Dúvidas frequentes", title: "Tudo o que você precisa saber", items: [{ question: "Como funciona esta solução?", answer: "Descreva de forma direta como a pessoa começa e o que pode esperar." }, { question: "Como solicitar atendimento?", answer: "Use o botão principal para orientar o próximo passo da campanha." }, { question: "Onde encontro mais informações?", answer: "Inclua nesta resposta os canais ou condições importantes para o público." }] },
+  finalCta: { visible: true, eyebrow: "Próximo passo", title: "Vamos conversar sobre a sua necessidade?", description: "Finalize a campanha com uma chamada direta e um único destino de conversão.", ctaLabel: "Entrar em contato", ctaUrl: "" },
+  footer: { brand: "Sua empresa", description: "Uma mensagem curta para encerrar a campanha.", phone: "", email: "", legalText: "Todos os direitos reservados." },
 });
 
 function normalizeLanding(landing: LandingForm): LandingForm {
@@ -101,6 +110,13 @@ function normalizeLanding(landing: LandingForm): LandingForm {
       highlights: landing.hero?.highlights?.length ? landing.hero.highlights : blank.hero.highlights,
     },
     lowerSection: { ...blank.lowerSection, ...landing.lowerSection },
+    benefits: { ...blank.benefits, ...landing.benefits, items: landing.benefits?.items?.length ? landing.benefits.items : blank.benefits.items },
+    story: { ...blank.story, ...landing.story },
+    metrics: { ...blank.metrics, ...landing.metrics, items: landing.metrics?.items?.length ? landing.metrics.items : blank.metrics.items },
+    testimonial: { ...blank.testimonial, ...landing.testimonial },
+    faq: { ...blank.faq, ...landing.faq, items: landing.faq?.items?.length ? landing.faq.items : blank.faq.items },
+    finalCta: { ...blank.finalCta, ...landing.finalCta },
+    footer: { ...blank.footer, ...landing.footer },
   };
 }
 
@@ -230,6 +246,7 @@ export default function LandingPagesPage() {
         logo: current.hero.logo === item.url ? "" : current.hero.logo,
         backgroundImage: current.hero.backgroundImage === item.url ? "" : current.hero.backgroundImage,
       },
+      story: { ...current.story, image: current.story.image === item.url ? "" : current.story.image },
     }));
     invalidateAdminResource("admin:landing-media");
     await refreshMedia();
@@ -237,7 +254,7 @@ export default function LandingPagesPage() {
   }
 
   return <DeveloperPage>
-    <DeveloperHero eyebrow="Campanhas" title="Landing Pages" description="Crie, revise em prévia privada e publique campanhas independentes." stats={[{ label: "Landings", value: landings.length }, { label: "Publicadas", value: landings.filter((landing) => landing.status === "published").length }, { label: "Mídias", value: media.length }]} />
+    <DeveloperHero eyebrow="Campanhas" title="Landing Pages" description="Crie campanhas independentes no template padrão, revise em prévia privada e publique pela própria rota." stats={[{ label: "Landings", value: landings.length }, { label: "Publicadas", value: landings.filter((landing) => landing.status === "published").length }, { label: "Mídias", value: media.length }]} />
     {loading ? <DeveloperMessage tone="info">Carregando campanhas...</DeveloperMessage> : null}
     {error ? <DeveloperMessage tone="error">{error}</DeveloperMessage> : null}
     {mediaLoading ? <div className="mt-3"><DeveloperMessage tone="info">Carregando biblioteca da campanha...</DeveloperMessage></div> : null}
@@ -256,7 +273,7 @@ export default function LandingPagesPage() {
     </DeveloperCard>
 
     <form onSubmit={save} className="mt-5 space-y-5">
-      <LandingVisualEditor landing={form} media={media} uploadingMedia={uploadingMedia} onChange={(update) => setForm((current) => update(current))} onUploadMedia={uploadMedia} onDeleteMedia={deleteMedia} />
+      <CampaignV1Editor landing={form} media={media} uploadingMedia={uploadingMedia} onChange={(update) => setForm((current) => update(current))} onUploadMedia={uploadMedia} onDeleteMedia={deleteMedia} />
       <DeveloperCard>
         <DeveloperSectionHeading eyebrow="Configuração" title={form.id ? form.name : "Nova landing"} description="A campanha fica em rascunho até você publicar. Salve antes de abrir a prévia privada." action={<div className="flex flex-wrap gap-2"><button type="button" onClick={() => void openPreview()} disabled={saving || openingPreview} className={developerSecondaryButtonClassName}><ArrowSquareOut size={16} weight="bold" />{openingPreview ? "Abrindo..." : "Abrir prévia"}</button><button type="submit" disabled={saving} className={developerSecondaryButtonClassName}><FloppyDisk size={16} weight="bold" />Salvar</button><button type="button" disabled={saving || form.status === "published"} onClick={() => void changePublication(true)} className={developerPrimaryButtonClassName}><RocketLaunch size={16} weight="bold" />Publicar</button></div>} />
         <div className="grid gap-4 md:grid-cols-2"><DeveloperField label="Nome" required helpKey="landing-pages.field.nome"><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className={developerInputClassName} maxLength={120} /></DeveloperField><DeveloperField label="Rota" required helpKey="landing-pages.field.rota" hint="Exemplo: campanha-distribuicao. A página será aberta em /campanha-distribuicao."><input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} className={developerInputClassName} maxLength={80} /></DeveloperField></div>
@@ -265,8 +282,20 @@ export default function LandingPagesPage() {
 
       <DeveloperCard>
         <DeveloperSectionHeading eyebrow="Busca" title="SEO da campanha" description="Defina como a campanha aparece no Google e se ela pode ser indexada. A prévia privada nunca entra em resultados de busca." />
-        <div className="grid gap-4 md:grid-cols-2"><DeveloperField label="Título SEO" helpKey="landing-pages.field.seo-title" hint="Se ficar vazio, a landing usa o título principal do Hero."><input value={form.seo.title} onChange={(event) => setForm({ ...form, seo: { ...form.seo, title: event.target.value } })} className={developerInputClassName} maxLength={70} /></DeveloperField><DeveloperField label="Descrição SEO" helpKey="landing-pages.field.seo-description" hint="Resumo curto usado por buscadores e compartilhamentos."><textarea value={form.seo.description} onChange={(event) => setForm({ ...form, seo: { ...form.seo, description: event.target.value } })} className={`${developerInputClassName} min-h-24 resize-y`} maxLength={180} /></DeveloperField></div>
-        <DeveloperField label="Indexação" helpKey="landing-pages.field.seo-index" hint="Campanhas de teste podem permanecer fora dos resultados de busca."><label className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold"><input type="checkbox" checked={form.seo.index} onChange={(event) => setForm({ ...form, seo: { ...form.seo, index: event.target.checked } })} className="size-4 accent-[var(--primary)]" />Permitir que buscadores indexem esta campanha publicada</label></DeveloperField>
+        <div className="grid gap-4 lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:items-start">
+          <DeveloperField label="Título SEO" helpKey="landing-pages.field.seo-title" hint="Se ficar vazio, a landing usa o título principal do Hero.">
+            <input value={form.seo.title} onChange={(event) => setForm({ ...form, seo: { ...form.seo, title: event.target.value } })} className={developerInputClassName} maxLength={70} />
+          </DeveloperField>
+          <DeveloperField label="Descrição SEO" helpKey="landing-pages.field.seo-description" hint="Resumo curto usado por buscadores e compartilhamentos." className="lg:col-start-2 lg:row-span-2">
+            <textarea value={form.seo.description} onChange={(event) => setForm({ ...form, seo: { ...form.seo, description: event.target.value } })} className={`${developerInputClassName} min-h-24 resize-y`} maxLength={180} />
+          </DeveloperField>
+          <DeveloperField label="Indexação" helpKey="landing-pages.field.seo-index" hint="Campanhas de teste podem permanecer fora dos resultados de busca." className="lg:col-start-1">
+            <label className="flex min-h-10 items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold">
+              <input type="checkbox" checked={form.seo.index} onChange={(event) => setForm({ ...form, seo: { ...form.seo, index: event.target.checked } })} className="size-4 accent-[var(--primary)]" />
+              Permitir que buscadores indexem esta campanha publicada
+            </label>
+          </DeveloperField>
+        </div>
       </DeveloperCard>
 
       <DeveloperCard><DeveloperSectionHeading eyebrow="Medição" title="Analytics da campanha" description="O GA4 só carrega nesta landing depois que o visitante aceitar analytics. Os demais campos ficam prontos para uso futuro." /><div className="grid gap-4 md:grid-cols-2"><DeveloperField label="Measurement ID GA4" helpKey="landing-pages.field.ga4"><input placeholder="G-XXXXXXXXXX" value={form.analytics.ga4MeasurementId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, ga4MeasurementId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField><DeveloperField label="Google Tag Manager"><input placeholder="GTM-XXXX" value={form.analytics.gtmContainerId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, gtmContainerId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField><DeveloperField label="Meta Pixel"><input value={form.analytics.metaPixelId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, metaPixelId: event.target.value.replace(/\D/g, "") } })} className={developerInputClassName} /></DeveloperField><DeveloperField label="Google Ads"><input placeholder="AW-XXXXXXXXX" value={form.analytics.googleAdsId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, googleAdsId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField></div></DeveloperCard>

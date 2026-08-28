@@ -12,7 +12,7 @@ import {
   Trash,
 } from "@phosphor-icons/react";
 import { useApiRequest } from "@/hooks/useApiRequest";
-import { api, site, siteUrl } from "@/lib/routes";
+import { api, site } from "@/lib/routes";
 import { DEFAULT_FOOTER_LINKS } from "@/lib/footerLinksDefaults";
 import type {
   FooterActionCard,
@@ -384,7 +384,7 @@ export default function FooterLinksCmsPage() {
         description="Controle do rodapé e páginas institucionais."
         stats={stats}
         actions={
-          <a href={siteUrl(site.home)} className={developerSecondaryButtonClassName}>
+          <a href={site.home} className={developerSecondaryButtonClassName}>
             <ArrowSquareOut size={16} weight="bold" />
             Ver site
           </a>

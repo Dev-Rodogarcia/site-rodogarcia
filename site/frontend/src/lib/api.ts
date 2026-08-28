@@ -24,7 +24,7 @@ const firstConfiguredBackendUrl = (
 
 const API_BASE_URL = normalizeBackendUrl(
   firstConfiguredBackendUrl(
-    "http://127.0.0.1:6050",
+    "http://127.0.0.1:41050",
     process.env.BACKEND_PROXY_URL,
     process.env.NEXT_PUBLIC_BACKEND_PROXY_URL,
     process.env.BACKEND_INTERNAL_URL,
@@ -35,8 +35,8 @@ const API_BASE_URL = normalizeBackendUrl(
 const CMS_API_BASE_URL = normalizeBackendUrl(
   firstConfiguredBackendUrl(
     process.env.NODE_ENV === "production"
-      ? "http://127.0.0.1:6051"
-      : "http://127.0.0.1:4013",
+      ? "http://127.0.0.1:41051"
+      : "http://127.0.0.1:31013",
     process.env.CMS_BACKEND_INTERNAL_URL,
     process.env.CMS_BACKEND_PROXY_URL
   )

@@ -7,6 +7,7 @@ import helmet, { type HelmetOptions } from "helmet";
 import { env } from "./config/env.js";
 import { storagePaths } from "./config/storagePaths.js";
 import { apiRouter } from "./routes/index.js";
+import { isAllowedOrigin } from "./security/origin.js";
 import { errorHandler, notFoundHandler } from "./utils/http.js";
 import { recoverJsonTransaction } from "./utils/jsonStore.js";
 
@@ -29,7 +30,7 @@ export function createApp() {
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || env.allowedOrigins.has(origin)) {
+        if (!origin || isAllowedOrigin(origin)) {
           callback(null, true);
           return;
         }

@@ -6,7 +6,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const firstConfiguredBackendUrl = (...values) =>
   values.find((value) => typeof value === "string" && value.trim())?.trim() ||
-  "http://127.0.0.1:6050";
+  "http://127.0.0.1:41050";
 
 const backendUrl = normalizeBackendUrl(
   firstConfiguredBackendUrl(
@@ -18,11 +18,11 @@ const backendUrl = normalizeBackendUrl(
 );
 const cmsInternalUrl = normalizeBackendUrl(
   process.env.CMS_INTERNAL_URL?.trim() ||
-    (isProduction ? "http://127.0.0.1:6061" : "http://127.0.0.1:5013")
+    (isProduction ? "http://127.0.0.1:41061" : "http://127.0.0.1:35013")
 );
 const cmsBackendInternalUrl = normalizeBackendUrl(
   process.env.CMS_BACKEND_INTERNAL_URL?.trim() ||
-    (isProduction ? "http://127.0.0.1:6051" : "http://127.0.0.1:4013")
+    (isProduction ? "http://127.0.0.1:41051" : "http://127.0.0.1:31013")
 );
 const landingBuilderPublicUrl = process.env.LANDING_BUILDER_PUBLIC_URL?.trim().replace(/\/+$/, "") ?? "";
 const landingBuilderAssetPrefix = (() => {
@@ -57,8 +57,6 @@ function buildContentSecurityPolicy(frameAncestors) {
       "https://*.google-analytics.com",
       "https://www.googletagmanager.com",
       "https://*.clarity.ms",
-      "https://*.sentry.io",
-      "https://viacep.com.br",
     ],
     [
       "img-src",

@@ -35,6 +35,23 @@ const artifacts = [
     previous: path.join(rootDir, "cms", "frontend", "dist-prod.previous"),
     failed: path.join(rootDir, "cms", "frontend", "dist-prod.failed"),
   },
+  {
+    label: "backend do Landing Builder",
+    active: path.join(rootDir, "landing-builder", "backend", "dist"),
+    staged: path.join(rootDir, "landing-builder", "backend", "dist.next"),
+    previous: path.join(rootDir, "landing-builder", "backend", "dist.previous"),
+    failed: path.join(rootDir, "landing-builder", "backend", "dist.failed"),
+    // O Builder pode entrar no primeiro rollout depois do site/CMS já ativos.
+    allowMissingActive: true,
+  },
+  {
+    label: "frontend do Landing Builder",
+    active: path.join(rootDir, "landing-builder", "frontend", "dist-prod"),
+    staged: path.join(rootDir, "landing-builder", "frontend", "dist-prod.next"),
+    previous: path.join(rootDir, "landing-builder", "frontend", "dist-prod.previous"),
+    failed: path.join(rootDir, "landing-builder", "frontend", "dist-prod.failed"),
+    allowMissingActive: true,
+  },
 ];
 
 function exists(targetPath) {

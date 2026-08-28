@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 5013",
+    "dev": "next dev --hostname 127.0.0.1 --port 35013",
     "build": "next build",
     "build:prod": "npm run build && node scripts/prepare-prod-artifact.mjs",
-    "start": "next start --hostname 127.0.0.1 --port 5013",
+    "start": "next start --hostname 127.0.0.1 --port 35013",
     "start:prod": "node dist-prod/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

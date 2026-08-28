@@ -109,8 +109,12 @@ test("rota pública devolve somente o DTO publicado necessário", async () => {
 
     const response = await fetch(`${baseUrl}/api/public/landings/${slug}`);
     assert.equal(response.status, 200);
-    const payload = await response.json() as { landing: Record<string, unknown> };
+    const payload = await response.json() as { landing: Record<string, unknown> & { template?: string; benefits?: { items?: unknown[] }; faq?: { items?: unknown[] }; footer?: { brand?: string } } };
     assert.equal(payload.landing.slug, slug);
+    assert.equal(payload.landing.template, "campaign-v1");
+    assert.equal(payload.landing.benefits?.items?.length, 3);
+    assert.equal(payload.landing.faq?.items?.length, 3);
+    assert.equal(payload.landing.footer?.brand, "Sua empresa");
     assert.deepEqual(payload.landing.analytics, { ga4MeasurementId: "G-TEST1234" });
     assert.equal("id" in payload.landing, false);
     assert.equal("status" in payload.landing, false);

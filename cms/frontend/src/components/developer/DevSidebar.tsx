@@ -28,7 +28,7 @@ import {
 } from "@phosphor-icons/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
-import { adminNavigationGroups, api, auth, normalizeCmsPathname, site, siteUrl } from "@/lib/routes";
+import { adminNavigationGroups, api, auth, normalizeCmsPathname, site } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { permissionForAdminPath } from "@/lib/cmsAccess";
 import { useSession } from "@/hooks/useSession";
@@ -294,7 +294,7 @@ export default function DevSidebar({
         <div className="flex h-[62px] w-full shrink-0 items-center border-b border-white/5 transition-colors duration-500">
           <div className="flex w-full items-center justify-between px-3">
             <a
-              href={siteUrl(site.home)}
+              href={site.home}
               onClick={onCloseMobile}
               aria-label="Rodogarcia"
               className="group flex min-w-0 items-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
@@ -389,7 +389,7 @@ export default function DevSidebar({
         <div className="w-full shrink-0 border-t border-white/5 py-3">
           <div className={cn("flex w-full flex-col transition-[gap] duration-500 ease-[cubic-bezier(0.2,0,0,1)]", navigationExpanded ? "gap-1" : "gap-2")}>
             <SidebarItem
-              href={siteUrl(site.home)}
+              href={site.home}
               label="Voltar ao site"
               icon={ArrowSquareOut}
               onClick={() => handleNavigation(site.home)}

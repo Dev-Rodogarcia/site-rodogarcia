@@ -123,6 +123,24 @@ const CMS_HELP_CONTEXTS: Record<string, CmsHelpContext> = {
 };
 
 const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
+  "landing-pages.field.section-visibility": {
+    title: "Visibilidade da seção",
+    summary: "Escolha se este trecho do template aparece na landing publicada. Ao desmarcar, o conteúdo continua salvo no CMS e pode ser exibido novamente depois.",
+    example: "Oculte o depoimento enquanto aguarda autorização do cliente; ele não aparecerá em /lp1 até ser ativado novamente.",
+    details: [{ label: "Onde aparece", value: "Na seção correspondente da rota pública da campanha, como /lp1." }, { label: "Após salvar", value: "A seção deixa de ser renderizada ou volta a aparecer na landing e na prévia privada." }, { label: "Conteúdo", value: "Desativar a seção não apaga textos, mídia, perguntas ou botões já preenchidos." }],
+  },
+  "landing-pages.field.story-image": {
+    title: "Imagem da seção",
+    summary: "Escolha uma imagem já enviada para esta campanha para aparecer ao lado do texto da seção “Imagem e texto”. Não são aceitos links externos ou arquivos de outras bibliotecas.",
+    example: "Envie uma foto da operação pela edição visual e depois selecione-a aqui para ilustrar a explicação da solução.",
+    details: [{ label: "Onde aparece", value: "Ao lado da explicação na seção “Imagem e texto” da rota pública da campanha." }, { label: "Biblioteca", value: "A lista mostra somente imagens validadas e enviadas para o Landing Builder desta campanha." }, { label: "Sem imagem", value: "A estrutura da seção continua visível com uma área neutra até uma imagem ser escolhida." }],
+  },
+  "landing-pages.field.responsive-preview": {
+    title: "Referências de tela",
+    summary: "Escolha Desktop, Tablet ou Mobile para editar a campanha em um tamanho por vez. Use Comparar para ver as três referências simultaneamente sem alterar o conteúdo.",
+    example: "Depois de ajustar o título do Hero, abra Comparar para conferir se o texto e os cartões continuam claros nas três telas.",
+    details: [{ label: "Onde aparece", value: "No editor visual de /admin/developer/landing-pages." }, { label: "Edição individual", value: "Desktop, Tablet e Mobile mantêm os lápis para editar cada bloco da campanha." }, { label: "Comparar", value: "Mostra uma referência visual das três larguras ao mesmo tempo; escolha uma tela individual para continuar a edição." }],
+  },
   "landing-pages.field.nome": {
     title: "Nome da landing page",
     summary: "Dê um nome interno para reconhecer esta campanha no painel. Esse nome organiza a lista de Landing Pages e não muda sozinho o endereço público.",

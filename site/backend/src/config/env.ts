@@ -77,7 +77,7 @@ function resolveEslGraphqlUrl(tenant: string, override: string | undefined) {
   }
 }
 
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://127.0.0.1:5012";
+const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://127.0.0.1:35180";
 const frontendOriginLocalhost =
   frontendOrigin.includes("127.0.0.1")
     ? frontendOrigin.replace("127.0.0.1", "localhost")
@@ -85,7 +85,7 @@ const frontendOriginLocalhost =
 const nodeEnv = process.env.NODE_ENV ?? "development";
 const isProduction = nodeEnv === "production";
 const host = process.env.HOST ?? "127.0.0.1";
-const port = numberEnv("PORT", 4012);
+const port = numberEnv("PORT", 31012);
 const extraCorsOrigins = parseOrigins(process.env.CORS_ORIGINS);
 const trustProxy = parseTrustProxy(process.env.TRUST_PROXY);
 const eslTenant = normalizeEslTenant(process.env.ESL_TENANT);

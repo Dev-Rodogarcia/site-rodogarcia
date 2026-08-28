@@ -5,6 +5,7 @@ import cors from "cors";
 import helmet, { type HelmetOptions } from "helmet";
 import { env } from "./config/env.js";
 import { apiRouter } from "./routes/index.js";
+import { isAllowedOrigin } from "./security/origin.js";
 import { errorHandler, notFoundHandler } from "./utils/http.js";
 
 const helmetMiddleware = helmet as unknown as (
@@ -25,7 +26,7 @@ export function createApp() {
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || env.allowedOrigins.has(origin)) {
+        if (!origin || isAllowedOrigin(origin)) {
           callback(null, true);
           return;
         }

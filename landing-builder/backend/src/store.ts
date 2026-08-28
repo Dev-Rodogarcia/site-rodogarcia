@@ -11,7 +11,10 @@ const mediaRoot = path.join(storageRoot, "media");
 function readJsonArray<T>(filePath: string): T[] {
   try {
     const value: unknown = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    return Array.isArray(value) ? value as T[] : [];
+    if (!Array.isArray(value)) {
+      throw new Error("O armazenamento da campanha possui formato inválido.");
+    }
+    return value as T[];
   } catch (error) {
     if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return [];
     throw error;

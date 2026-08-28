@@ -17,6 +17,8 @@ export interface LandingSeo {
 
 export interface LandingPage {
   id: string;
+  /** Identifica a estrutura visual aplicada à campanha. O v1 não é selecionável no CMS. */
+  template: "campaign-v1";
   name: string;
   slug: string;
   status: LandingStatus;
@@ -43,10 +45,62 @@ export interface LandingPage {
     highlights: Array<{ title: string; description: string }>;
   };
   lowerSection: {
+    visible: boolean;
     title: string;
     description: string;
     ctaLabel: string;
     ctaUrl: string;
+  };
+  benefits: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    description: string;
+    items: Array<{ title: string; description: string }>;
+  };
+  story: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    description: string;
+    image: string;
+    ctaLabel: string;
+    ctaUrl: string;
+  };
+  metrics: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    items: Array<{ value: string; label: string }>;
+  };
+  testimonial: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    quote: string;
+    author: string;
+    role: string;
+  };
+  faq: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    items: Array<{ question: string; answer: string }>;
+  };
+  finalCta: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    description: string;
+    ctaLabel: string;
+    ctaUrl: string;
+  };
+  footer: {
+    brand: string;
+    description: string;
+    phone: string;
+    email: string;
+    legalText: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -54,6 +108,7 @@ export interface LandingPage {
 }
 
 export interface PublicLandingPage {
+  template: LandingPage["template"];
   name: string;
   slug: string;
   seo: LandingSeo;
@@ -63,6 +118,13 @@ export interface PublicLandingPage {
   };
   hero: LandingPage["hero"];
   lowerSection: LandingPage["lowerSection"];
+  benefits: LandingPage["benefits"];
+  story: LandingPage["story"];
+  metrics: LandingPage["metrics"];
+  testimonial: LandingPage["testimonial"];
+  faq: LandingPage["faq"];
+  finalCta: LandingPage["finalCta"];
+  footer: LandingPage["footer"];
 }
 
 /** Registro público mínimo para geração de sitemap. */

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-import { Desktop, DeviceMobile, PencilSimple, Plus, Trash, UploadSimple, X } from "@phosphor-icons/react";
+import { Desktop, DeviceMobile, PencilSimple, Plus, Rectangle, SquaresFour, Trash, UploadSimple, X } from "@phosphor-icons/react";
+import { DeveloperHelp } from "./ui";
 
 type EditorDialog = "theme" | "contacts" | "logo" | "background" | "content" | "highlights" | "lower-title" | "lower-description" | null;
 
@@ -31,6 +32,14 @@ export type LandingMedia = {
 };
 
 type MediaSlot = "logo" | "background";
+type PreviewMode = "desktop" | "tablet" | "mobile" | "compare";
+type IndividualPreviewMode = Exclude<PreviewMode, "compare">;
+
+const PREVIEW_VIEWPORTS = [
+  { key: "desktop", label: "Desktop", dimensions: "1440 px", icon: Desktop, widthClass: "w-full" },
+  { key: "tablet", label: "Tablet", dimensions: "768 px", icon: Rectangle, widthClass: "w-[768px] max-w-full" },
+  { key: "mobile", label: "Mobile", dimensions: "390 px", icon: DeviceMobile, widthClass: "w-[360px] max-w-full" },
+] as const satisfies ReadonlyArray<{ key: IndividualPreviewMode; label: string; dimensions: string; icon: typeof Desktop; widthClass: string }>;
 
 const inputClass = "mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-950 focus:ring-4 focus:ring-slate-950/10";
 
@@ -120,6 +129,62 @@ function LandingMediaPicker({
   </div>;
 }
 
+function LandingViewportReference({
+  viewport,
+  theme,
+  hero,
+  lowerSection,
+  backgroundImage,
+  logo,
+}: {
+  viewport: (typeof PREVIEW_VIEWPORTS)[number];
+  theme: LandingPreview["theme"];
+  hero: LandingPreview["hero"];
+  lowerSection: LandingPreview["lowerSection"];
+  backgroundImage: string;
+  logo: string;
+}) {
+  const Icon = viewport.icon;
+  const hasBackgroundImage = Boolean(backgroundImage);
+  const textColor = hasBackgroundImage ? "#ffffff" : theme.textColor;
+  const mutedTextColor = hasBackgroundImage ? "rgba(255,255,255,.8)" : theme.textColor;
+  const isDesktop = viewport.key === "desktop";
+  const isMobile = viewport.key === "mobile";
+  const highlightColumns = isDesktop ? "repeat(4, minmax(0, 1fr))" : isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))";
+
+  return <article className="min-w-0 rounded-xl border border-slate-300 bg-slate-100 p-2.5 shadow-sm">
+    <header className="mb-2 flex items-center justify-between gap-2 px-0.5">
+      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800"><Icon size={15} weight="bold" />{viewport.label}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">{viewport.dimensions}</span>
+    </header>
+    <div className="overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm">
+      <section className="overflow-hidden" style={{ color: textColor, backgroundColor: hasBackgroundImage ? theme.primaryColor : theme.backgroundColor, backgroundImage: hasBackgroundImage ? `linear-gradient(120deg, rgba(4,11,25,.9), rgba(4,11,25,.25)), url(${backgroundImage})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
+        <div className="flex min-h-8 items-center justify-between gap-2 border-b px-3 py-2 text-[8px] font-medium" style={{ background: hasBackgroundImage ? "rgba(0,0,0,.28)" : theme.backgroundColor, borderColor: hasBackgroundImage ? "rgba(255,255,255,.22)" : "rgba(17,17,17,.16)" }}>
+          <span className="min-w-0 truncate">{hero.phone || "Telefone"}</span>
+          {!isMobile ? <span className="min-w-0 truncate text-right">{hero.email || "E-mail"}</span> : null}
+        </div>
+        <div className="min-h-[248px] px-4 pb-5 pt-4" style={{ paddingInline: isMobile ? "1rem" : isDesktop ? "1.4rem" : "1.15rem" }}>
+          {logo ? <img src={logo} alt="Logo da landing page" className="h-7 w-auto max-w-28 object-contain object-left" /> : <span className="text-[10px] font-black tracking-[0.1em]">SUA LOGO</span>}
+          <div className="mt-7 max-w-[32rem]">
+            <p className="truncate text-[7px] font-bold uppercase tracking-[0.18em]" style={{ color: mutedTextColor }}>{hero.eyebrow || "Mensagem de apoio"}</p>
+            <h3 className="mt-2 overflow-hidden text-lg font-bold leading-[.95] tracking-[-.05em]" style={{ fontSize: isMobile ? "1.15rem" : isDesktop ? "1.7rem" : "1.45rem" }}>{hero.title || "Título principal da campanha"}</h3>
+            <p className="mt-2 overflow-hidden text-[9px] leading-4" style={{ color: mutedTextColor }}>{hero.description || "Descreva aqui a proposta principal desta landing page."}</p>
+            {hero.ctaLabel ? <span className="mt-3 inline-flex rounded-full px-3 py-1.5 text-[8px] font-bold" style={{ background: theme.primaryColor, color: theme.backgroundColor }}>{hero.ctaLabel}</span> : null}
+          </div>
+          <div className="mt-5 grid gap-1.5" style={{ gridTemplateColumns: highlightColumns }}>
+            {hero.highlights.slice(0, 4).map((item, index) => <article key={`${item.title}-${index}`} className="min-w-0 rounded-md border p-2" style={{ borderColor: hasBackgroundImage ? "rgba(255,255,255,.48)" : "rgba(17,17,17,.2)", background: hasBackgroundImage ? "rgba(8,16,28,.5)" : theme.backgroundColor }}><strong className="block truncate text-[8px]">{item.title || "Informação"}</strong><p className="mt-1 overflow-hidden text-[7px] leading-3" style={{ color: mutedTextColor }}>{item.description || "Descrição da informação."}</p></article>)}
+          </div>
+        </div>
+      </section>
+      <section className="px-4 py-5" style={{ color: theme.textColor, backgroundColor: theme.backgroundColor }}>
+        <p className="text-[7px] font-bold uppercase tracking-[0.14em]" style={{ color: theme.primaryColor }}>Seção de teste</p>
+        <h3 className="mt-1 max-w-[18ch] text-sm font-bold leading-tight">{lowerSection.title || "Título da seção"}</h3>
+        <p className="mt-2 text-[8px] leading-3 opacity-80">{lowerSection.description || "Descrição da seção inferior."}</p>
+      </section>
+    </div>
+  </article>;
+}
+
 export function LandingVisualEditor<T extends LandingPreview>({
   landing,
   media,
@@ -135,7 +200,7 @@ export function LandingVisualEditor<T extends LandingPreview>({
   onUploadMedia: (file: File) => Promise<void>;
   onDeleteMedia: (item: LandingMedia) => Promise<void>;
 }) {
-  const [mobile, setMobile] = useState(false);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
   const [dialog, setDialog] = useState<EditorDialog>(null);
   const { theme, hero, lowerSection } = landing;
   const backgroundImage = isInternalMediaPath(hero.backgroundImage) ? hero.backgroundImage : "";
@@ -152,8 +217,8 @@ export function LandingVisualEditor<T extends LandingPreview>({
 
   return <>
     <section className="rounded-xl border border-[var(--border)] bg-slate-100/70 p-3 shadow-[0_8px_22px_rgba(15,23,42,0.035)] sm:p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">Editor visual</p><h2 className="mt-0.5 text-base font-semibold text-[var(--foreground)]">Use o lápis de cada bloco para editar somente aquele conteúdo</h2></div><div className="flex items-center gap-2"><button type="button" onClick={() => setDialog("theme")} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 text-xs font-semibold text-[var(--foreground)] hover:bg-slate-50"><PencilSimple size={14} weight="bold" />Cores</button><div className="inline-flex rounded-lg border border-[var(--border)] bg-white p-1"><button type="button" onClick={() => setMobile(false)} className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ${!mobile ? "bg-slate-950 text-white" : "text-[var(--color-muted-raw)]"}`}><Desktop size={15} weight="bold" />Desktop</button><button type="button" onClick={() => setMobile(true)} className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ${mobile ? "bg-slate-950 text-white" : "text-[var(--color-muted-raw)]"}`}><DeviceMobile size={15} weight="bold" />Mobile</button></div></div></div>
-      <div className="overflow-auto rounded-lg bg-slate-200 p-2 sm:p-4"><div className={`relative mx-auto overflow-hidden rounded-md bg-white shadow-2xl transition-[width] duration-300 ${mobile ? "w-[360px] max-w-full" : "w-full"}`} style={{ color: theme.textColor, backgroundColor: theme.backgroundColor }}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">Editor visual</p><h2 className="mt-0.5 text-base font-semibold text-[var(--foreground)]">Use o lápis de cada bloco para editar somente aquele conteúdo</h2><p className="mt-1 flex items-center gap-1 text-xs text-[var(--color-muted-raw)]">Escolha uma tela para editar ou compare as três referências.<DeveloperHelp label="Referências de tela" templateKey="landing-pages.field.responsive-preview" /></p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => setDialog("theme")} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 text-xs font-semibold text-[var(--foreground)] hover:bg-slate-50"><PencilSimple size={14} weight="bold" />Cores</button><div className="inline-flex rounded-lg border border-[var(--border)] bg-white p-1" role="group" aria-label="Tamanho da prévia">{PREVIEW_VIEWPORTS.map((viewport) => { const Icon = viewport.icon; const selected = previewMode === viewport.key; return <button key={viewport.key} type="button" onClick={() => setPreviewMode(viewport.key)} aria-pressed={selected} className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ${selected ? "bg-slate-950 text-white" : "text-[var(--color-muted-raw)] hover:bg-slate-100"}`}><Icon size={15} weight="bold" />{viewport.label}</button>; })}</div><button type="button" onClick={() => setPreviewMode("compare")} aria-pressed={previewMode === "compare"} className={`inline-flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${previewMode === "compare" ? "border-slate-950 bg-slate-950 text-white" : "border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-slate-50"}`}><SquaresFour size={15} weight="bold" />Comparar</button></div></div>
+      <div className="overflow-auto rounded-lg bg-slate-200 p-2 sm:p-4">{previewMode === "compare" ? <div className="grid gap-3 lg:grid-cols-3">{PREVIEW_VIEWPORTS.map((viewport) => <LandingViewportReference key={viewport.key} viewport={viewport} theme={theme} hero={hero} lowerSection={lowerSection} backgroundImage={backgroundImage} logo={logo} />)}</div> : <div className={`relative mx-auto overflow-hidden rounded-md bg-white shadow-2xl transition-[width] duration-300 ${PREVIEW_VIEWPORTS.find((viewport) => viewport.key === previewMode)?.widthClass ?? "w-full"}`} style={{ color: theme.textColor, backgroundColor: theme.backgroundColor }}>
         <section className="relative min-h-[520px] overflow-hidden px-6 pb-10 sm:px-10" style={{ color: heroTextColor, backgroundColor: hasBackgroundImage ? theme.primaryColor : theme.backgroundColor, backgroundImage: hasBackgroundImage ? `linear-gradient(90deg, rgba(4,11,25,.88), rgba(4,11,25,.2)), url(${backgroundImage})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
           <EditControl label="Editar foto de fundo" onClick={() => setDialog("background")} className="bottom-4 right-3" />
           <div className="-mx-6 flex min-h-12 items-center gap-3 border-b px-6 py-3 text-xs sm:-mx-10 sm:w-[calc(100%+5rem)] sm:px-10" style={{ background: hasBackgroundImage ? "rgba(0,0,0,.28)" : theme.backgroundColor, borderColor: hasBackgroundImage ? "rgba(255,255,255,.22)" : "rgba(17,17,17,.16)" }}><div className="grid min-w-0 flex-1 grid-cols-2 gap-3"><span className="truncate">{hero.phone || "Telefone"}</span><span className="truncate text-right">{hero.email || "E-mail"}</span></div><button type="button" onClick={() => setDialog("contacts")} title="Editar faixa de contatos" aria-label="Editar faixa de contatos" className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-950 shadow-md transition hover:scale-105 hover:bg-slate-950 hover:text-white focus:outline-none focus:ring-4 focus:ring-slate-950/15"><PencilSimple size={15} weight="bold" /></button></div>
@@ -163,7 +228,7 @@ export function LandingVisualEditor<T extends LandingPreview>({
         </section>
         <section className="relative px-6 py-12 sm:px-10"><p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: theme.primaryColor }}>Seção de teste</p><div className="relative mt-3 max-w-[16ch] pr-11"><h3 className="text-2xl font-bold leading-tight tracking-[-0.035em]">{lowerSection.title || "Título da seção"}</h3><EditControl label="Editar título da seção" onClick={() => setDialog("lower-title")} className="right-0 top-0" /></div><div className="relative mt-4 max-w-xl pr-11"><p className="text-sm leading-6 opacity-80">{lowerSection.description || "Descrição da seção inferior."}</p><EditControl label="Editar descrição da seção" onClick={() => setDialog("lower-description")} className="right-0 top-0" /></div></section>
         <footer className="border-t px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.14em] opacity-60">Rodogarcia Transportes</footer>
-      </div></div>
+      </div>}</div>
     </section>
     {dialog ? <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label={dialogTitle[dialog]} onMouseDown={() => setDialog(null)}><div className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-7" onMouseDown={(event) => event.stopPropagation()}><div className="mb-5 flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-slate-500">Edição rápida</p><h3 className="mt-1 text-xl font-bold text-slate-950">{dialogTitle[dialog]}</h3><p className="mt-1 text-sm text-slate-500">As alterações aparecem na prévia imediatamente. Salve a landing quando terminar.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X size={20} weight="bold" /></button></div>
       {dialog === "theme" ? <div className="grid gap-4 sm:grid-cols-2">{(["primaryColor", "secondaryColor", "backgroundColor", "textColor"] as const).map((key) => <label key={key} className="text-sm font-semibold text-slate-700">{({ primaryColor: "Cor dos detalhes", secondaryColor: "Cor de apoio", backgroundColor: "Fundo", textColor: "Texto" })[key]}<input type="color" value={theme[key]} onChange={(event) => onChange((current) => ({ ...current, theme: { ...current.theme, [key]: event.target.value } }))} className="mt-2 h-12 w-full cursor-pointer rounded-lg border border-slate-200 bg-white p-1" /></label>)}</div> : null}

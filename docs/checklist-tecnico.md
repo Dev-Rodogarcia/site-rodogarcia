@@ -21,11 +21,11 @@ rg -n --pcre2 "[^\x00-\x7F]" site/backend/src cms/backend/src site/frontend/src 
 ## 3. CMS
 
 - [ ] `/admin/auth/entrar` abre normalmente pelo site público.
-- [ ] `/admin/developer` exige sessão e o CMS direto em `5013` só é usado em DEV.
+- [ ] `/admin/developer` exige sessão e o CMS direto em `35013` só é usado em DEV.
 - [ ] `/admin`, `/auth/*` e `/developer/*` legados encaminham para `/admin/...`.
 - [ ] `/admin/_next/*` responde com assets do CMS.
 - [ ] `/api/admin/**` exige admin.
-- [ ] O gateway roteia auth/admin, conteúdo, mídia/uploads, formulários, consentimento, analytics, popup e tracking à API CMS `4013`; ESL, CEP e CNPJ permanecem no backend público `4012`.
+- [ ] O gateway roteia auth/admin, conteúdo, mídia/uploads, formulários, consentimento, analytics, popup e tracking à API CMS `31013`; ESL, CEP e CNPJ permanecem no backend público `31012`.
 
 ## 4. Dados locais
 

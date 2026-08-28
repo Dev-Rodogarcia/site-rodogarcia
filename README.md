@@ -50,19 +50,23 @@ Suba os serviços de desenvolvimento:
 cmd /c iniciar-dev.bat
 ```
 
-O modo DEV é iniciado manualmente pelo responsável. `iniciar-dev.bat` encerra somente os processos DEV do backend público, API CMS, site e painel, limpa os caches gerados do Next e inicia esses quatro serviços no terminal atual. O Landing Builder possui ciclo próprio: este script não instala, interrompe nem inicia seus dois processos; as variáveis `LANDING_BUILDER_*` do ambiente são preservadas apenas para integrar uma instância iniciada separadamente.
+O modo DEV é iniciado manualmente pelo responsável. `iniciar-dev.bat` usa somente portas de cinco dígitos e encerra exclusivamente processos identificados como deste repositório; se alguma delas pertencer a outro projeto, ele aborta sem encerrar nada. Depois limpa os caches gerados do Next e inicia backend público, API CMS, site, painel CMS, API do Landing Builder e renderizador de campanhas no terminal atual. O token entre CMS e Builder é privado; se não existir no ambiente, o script gera um token forte apenas para a sessão atual.
 
 URLs padrao:
 
-- Frontend: `http://127.0.0.1:5012`
-- Backend público: `http://127.0.0.1:4012`
-- API CMS privada: `http://127.0.0.1:4013`
-- CMS pelo gateway: `http://127.0.0.1:5012/admin/auth/entrar`
-- CMS direto, somente para desenvolvimento: `http://127.0.0.1:5013/admin/auth/entrar`
+- Frontend: `http://127.0.0.1:35180`
+- Backend público: `http://127.0.0.1:31012`
+- API CMS privada: `http://127.0.0.1:31013`
+- CMS pelo gateway: `http://127.0.0.1:35180/admin/auth/entrar`
+- CMS direto, somente para desenvolvimento: `http://127.0.0.1:35013/admin/auth/entrar`
+- API do Landing Builder: `http://127.0.0.1:36110`
+- Landing Builder: `http://127.0.0.1:35112`
+
+Para ver o DEV em outra máquina, crie um Dev Tunnel para a porta local `35180`. A URL pública é temporária e não deve ser salva no `.env`; em desenvolvimento, apenas hosts HTTPS válidos de `*.devtunnels.ms` são aceitos nas mutações.
 
 ## Producao local e tunnel
 
-O site não pode ser exportado como HTML estático: ele usa Server Components, rewrites para as APIs e o CMS. Em produção, há quatro artefatos privados: `site/backend/dist`, `cms/backend/dist`, `site/frontend/dist-prod` e `cms/frontend/dist-prod`.
+O site não pode ser exportado como HTML estático: ele usa Server Components, rewrites para as APIs e o CMS. Em produção, há seis artefatos privados: `site/backend/dist`, `cms/backend/dist`, `site/frontend/dist-prod`, `cms/frontend/dist-prod`, `landing-builder/backend/dist` e `landing-builder/frontend/dist-prod`.
 
 Copie `.env.production.example` para `.env.production.local`, preencha segredos, origens HTTPS e o volume persistente. A execução é exclusivamente manual pela equipe responsável, em janela autorizada:
 
@@ -70,14 +74,16 @@ Copie `.env.production.example` para `.env.production.local`, preencha segredos,
 cmd /c iniciar-prod.bat
 ```
 
-O script executa `npm ci` pelos lockfiles, valida ambiente, typecheck, testes dos dois backends, builds e hardening em artefatos candidatos antes de interromper os processos ativos. Após o pre-flight, promove os candidatos, inicia os processos privados e reverte os artefatos anteriores se o health do gateway falhar. Antes do primeiro rollout da topologia, a equipe precisa migrar e conferir o artefato ativo do site em `site/frontend/dist-prod/server.js` (ou aprovar um fluxo inicial explícito), pois a promoção exige esse rollback. A API CMS pode não ter versão anterior no primeiro rollout; nesse caso o rollback remove somente sua candidata e restaura os processos já existentes:
+O script executa `npm ci` pelos lockfiles, valida ambiente, typecheck, testes dos três backends, builds e hardening dos quatro artefatos centrais antes de interromper os processos ativos. Após o pre-flight, gera os candidatos do Builder, promove os seis artefatos, inicia os processos privados e reverte os artefatos anteriores se algum health falhar. Antes do primeiro rollout da topologia, a equipe precisa conferir os artefatos ativos ou aprovar um fluxo inicial explícito; um processo sem versão anterior remove somente sua candidata no rollback:
 
-- Site Next: `127.0.0.1:6060`
-- Backend público Express: `127.0.0.1:6050`
-- API CMS Express: `127.0.0.1:6051`
-- CMS Next privado: `127.0.0.1:6061`
+- Site Next: `127.0.0.1:41060`
+- Backend público Express: `127.0.0.1:41050`
+- API CMS Express: `127.0.0.1:41051`
+- CMS Next privado: `127.0.0.1:41061`
+- API do Landing Builder: `127.0.0.1:41110`
+- Landing Builder: `127.0.0.1:41112`
 
-O Cloudflare publica somente o hostname do site em `6060`; `/admin` é encaminhado internamente para o CMS em `6061`. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
+O Cloudflare publica somente o hostname do site em `41060`; `/admin` é encaminhado internamente para o CMS em `41061`. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
 
 ## Estrutura
 
@@ -186,4 +192,4 @@ Antes de publicar, confirme:
 - `UPLOADS_DIR` persistente e servido apenas como arquivo estatico com `nosniff`.
 - Nenhum script de analytics configurado sem banner de consentimento ativo.
 - Backups dos JSON privados antes de migracoes ou deploys grandes.
-- Execução manual via `iniciar-prod.bat` ou gerenciador de processos equivalente, sempre com site, painel CMS, API CMS e backend público ligados apenas em `127.0.0.1`; a API e o painel CMS não recebem hostname público próprio.
+- Execução manual via `iniciar-prod.bat` ou gerenciador de processos equivalente, sempre com site, painel CMS, API CMS, backend público e os dois processos do Landing Builder ligados apenas em `127.0.0.1`; a API e o painel CMS não recebem hostname público próprio.

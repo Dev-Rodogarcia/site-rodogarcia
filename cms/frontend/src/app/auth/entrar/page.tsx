@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { LockKey, Moon, ShieldCheck, Sun, TrendUp } from "@phosphor-icons/react";
 import { useSession } from "@/hooks/useSession";
-import { admin, api, auth, cmsHref, external, normalizeCmsPathname, site, siteUrl } from "@/lib/routes";
+import { admin, api, auth, cmsHref, external, normalizeCmsPathname, site } from "@/lib/routes";
 import type { CmsTheme, User } from "@/types/auth";
 
 const schema = z.object({
@@ -159,9 +159,9 @@ function LoginForm() {
       </div>
 
       <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-4 py-2 sm:py-3">
-        <a href={siteUrl(site.home)} className="group flex items-center gap-3" aria-label="Voltar à página inicial">
+        <a href={site.home} className="group flex items-center gap-3" aria-label="Voltar à página inicial">
           <img
-            src={siteUrl("/logo.svg")}
+            src="/logo.svg"
             alt="Rodogarcia"
             width={156}
             height={30}
@@ -235,7 +235,7 @@ function LoginForm() {
               </form>
             ) : null}
             <div className={`mt-6 border-t pt-5 text-xs ${darkTheme ? "border-white/10 text-slate-400" : "border-slate-200 text-slate-500"}`}>
-              <a href={siteUrl(site.home)} className="transition-colors hover:text-blue-500">← Voltar ao site</a>
+              <a href={site.home} className="transition-colors hover:text-blue-500">← Voltar ao site</a>
             </div>
           </div>
 

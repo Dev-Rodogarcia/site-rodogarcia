@@ -29,22 +29,37 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem Os quatro processos de producao ficam privados; o tunnel/reverse proxy e a unica borda publica.
-rem O Landing Builder e independente: este script nao instala, interrompe, valida nem inicia seus processos.
-rem LANDING_BUILDER_PUBLIC_URL e mantida apenas como fallback opcional de slugs no site publico.
+rem Os seis processos de producao ficam privados; o tunnel/reverse proxy e a unica borda publica.
 set "NODE_ENV=production"
 set "HOST=127.0.0.1"
-set "PORT=6050"
-set "BACKEND_INTERNAL_URL=http://127.0.0.1:6050"
-set "CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:6051"
-set "CMS_INTERNAL_URL=http://127.0.0.1:6061"
-set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051"
+set "PORT=41050"
+set "BACKEND_INTERNAL_URL=http://127.0.0.1:41050"
+set "CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:41051"
+set "CMS_INTERNAL_URL=http://127.0.0.1:41061"
+set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:41051"
 if not defined NEXT_PUBLIC_SITE_URL set "NEXT_PUBLIC_SITE_URL=https://site.rodogarcia.com.br"
+set "LANDING_BUILDER_API_URL=http://127.0.0.1:41110"
+set "LANDING_BUILDER_PUBLIC_URL=http://127.0.0.1:41112"
+set "LANDING_BUILDER_BACKEND_URL=http://127.0.0.1:41110"
+set "LANDING_BUILDER_HOST=127.0.0.1"
+set "LANDING_BUILDER_PORT=41110"
+set "LANDING_BUILDER_SITE_URL=%NEXT_PUBLIC_SITE_URL%"
+if not defined LANDING_BUILDER_ASSET_PREFIX set "LANDING_BUILDER_ASSET_PREFIX=/landing-assets"
+if not defined LANDING_BUILDER_SERVICE_TOKEN (
+  echo [Rodogarcia PROD] LANDING_BUILDER_SERVICE_TOKEN e obrigatorio para iniciar o Landing Builder.
+  goto :preflight_failed
+)
+if not defined LANDING_BUILDER_STORAGE_ROOT (
+  echo [Rodogarcia PROD] LANDING_BUILDER_STORAGE_ROOT e obrigatorio e deve apontar para um volume externo.
+  goto :preflight_failed
+)
 set "PRODUCTION_SITE_URL=%NEXT_PUBLIC_SITE_URL%"
 set "PRODUCTION_PUBLIC_BACKEND_URL=%NEXT_PUBLIC_BACKEND_URL%"
+set "PRODUCTION_LANDING_BUILDER_API_URL=%LANDING_BUILDER_API_URL%"
+set "PRODUCTION_LANDING_BUILDER_SERVICE_TOKEN=%LANDING_BUILDER_SERVICE_TOKEN%"
 set "PRODUCTION_LANDING_BUILDER_PUBLIC_URL=%LANDING_BUILDER_PUBLIC_URL%"
 
-rem O hardening preserva as portas isoladas padrao (4010/5411/5413/5414).
+rem O hardening preserva as portas isoladas padrao (42010/42511/42513/42514).
 rem Nao aponte SECURITY_TEST_* para os processos ativos de producao.
 set "SECURITY_TEST_BACKEND_PORT="
 set "SECURITY_TEST_FRONTEND_PORT="
@@ -66,6 +81,10 @@ if errorlevel 1 goto :preflight_failed
 call :install_locked "site\frontend" "site"
 if errorlevel 1 goto :preflight_failed
 call :install_locked "cms\frontend" "CMS"
+if errorlevel 1 goto :preflight_failed
+call :install_locked "landing-builder\backend" "backend do Landing Builder"
+if errorlevel 1 goto :preflight_failed
+call :install_locked "landing-builder\frontend" "frontend do Landing Builder"
 if errorlevel 1 goto :preflight_failed
 
 echo [Rodogarcia PROD] Sincronizando e validando uploads no volume persistente...
@@ -119,6 +138,32 @@ popd
 
 echo [Rodogarcia PROD] Validando CMS...
 pushd cms\frontend
+call npm run typecheck
+if errorlevel 1 (
+  popd
+  goto :preflight_failed
+)
+popd
+
+echo [Rodogarcia PROD] Validando backend do Landing Builder...
+pushd landing-builder\backend
+call npm run typecheck
+if errorlevel 1 (
+  popd
+  goto :preflight_failed
+)
+set "NODE_ENV=test"
+call npm test
+if errorlevel 1 (
+  set "NODE_ENV=production"
+  popd
+  goto :preflight_failed
+)
+set "NODE_ENV=production"
+popd
+
+echo [Rodogarcia PROD] Validando frontend do Landing Builder...
+pushd landing-builder\frontend
 call npm run typecheck
 if errorlevel 1 (
   popd
@@ -218,6 +263,29 @@ if errorlevel 1 (
 )
 popd
 
+echo [Rodogarcia PROD] Gerando artefato candidato do backend do Landing Builder em landing-builder\backend\dist.next...
+pushd landing-builder\backend
+call npm run build -- --outDir dist.next
+if errorlevel 1 (
+  popd
+  goto :preflight_failed
+)
+node --input-type=module --eval "import('./dist.next/config/env.js')"
+if errorlevel 1 (
+  popd
+  goto :preflight_failed
+)
+popd
+
+echo [Rodogarcia PROD] Gerando artefato candidato do frontend do Landing Builder em landing-builder\frontend\dist-prod.next...
+pushd landing-builder\frontend
+call npm run build:prod
+if errorlevel 1 (
+  popd
+  goto :preflight_failed
+)
+popd
+
 echo [Rodogarcia PROD] Validando os artefatos candidatos de producao...
 node scripts\promote-production-artifacts.js --verify
 if errorlevel 1 goto :preflight_failed
@@ -230,6 +298,8 @@ call pm2 delete rodogarcia-backend-prod >nul 2>&1
 call pm2 delete rodogarcia-cms-backend-prod >nul 2>&1
 call pm2 delete rodogarcia-frontend-prod >nul 2>&1
 call pm2 delete rodogarcia-cms-prod >nul 2>&1
+call pm2 delete rodogarcia-landing-builder-backend-prod >nul 2>&1
+call pm2 delete rodogarcia-landing-builder-prod >nul 2>&1
 call :wait_for_ports_free
 if errorlevel 1 goto :restore_previous_processes
 
@@ -237,7 +307,7 @@ echo [Rodogarcia PROD] Promovendo os artefatos candidatos...
 node scripts\promote-production-artifacts.js --promote
 if errorlevel 1 goto :restore_previous_processes
 
-echo [Rodogarcia PROD] Iniciando backend, backend do CMS, site e CMS com PM2...
+echo [Rodogarcia PROD] Iniciando backend, backend do CMS, site, CMS e Landing Builder com PM2...
 if not exist "logs" mkdir "logs"
 call pm2 startOrReload ecosystem.config.js --env production --update-env
 if errorlevel 1 goto :rollback
@@ -253,11 +323,13 @@ if errorlevel 1 (
 )
 
 echo.
-echo [Rodogarcia PROD] Backend Cloudflare:  https://sitebackend.rodogarcia.com.br ^> http://127.0.0.1:6050
-echo [Rodogarcia PROD] CMS API privada:    http://127.0.0.1:6051
-echo [Rodogarcia PROD] Frontend Cloudflare: https://site.rodogarcia.com.br ^> http://127.0.0.1:6060
-echo [Rodogarcia PROD] CMS privado:        http://127.0.0.1:6061 ^> https://site.rodogarcia.com.br/admin
-echo [Rodogarcia PROD] Status: pm2 status rodogarcia-backend-prod rodogarcia-cms-backend-prod rodogarcia-frontend-prod rodogarcia-cms-prod
+echo [Rodogarcia PROD] Backend Cloudflare:  https://sitebackend.rodogarcia.com.br ^> http://127.0.0.1:41050
+echo [Rodogarcia PROD] CMS API privada:    http://127.0.0.1:41051
+echo [Rodogarcia PROD] Frontend Cloudflare: https://site.rodogarcia.com.br ^> http://127.0.0.1:41060
+echo [Rodogarcia PROD] CMS privado:        http://127.0.0.1:41061 ^> https://site.rodogarcia.com.br/admin
+echo [Rodogarcia PROD] Landing API privada: http://127.0.0.1:41110
+echo [Rodogarcia PROD] Landing privado:     http://127.0.0.1:41112
+echo [Rodogarcia PROD] Status: pm2 status rodogarcia-backend-prod rodogarcia-cms-backend-prod rodogarcia-frontend-prod rodogarcia-cms-prod rodogarcia-landing-builder-backend-prod rodogarcia-landing-builder-prod
 
 endlocal
 exit /b 0
@@ -273,13 +345,14 @@ exit /b %INSTALL_EXIT%
 :configure_test_build
 set "BACKEND_PROXY_URL="
 set "NEXT_PUBLIC_BACKEND_PROXY_URL="
-set "BACKEND_INTERNAL_URL=http://127.0.0.1:4010"
-set "CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:5414"
-set "CMS_INTERNAL_URL=http://127.0.0.1:5413"
-set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:5414"
-set "NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:4010"
-set "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:5411"
-rem O hardening isolado nao deve depender de uma instancia externa do Landing Builder.
+set "BACKEND_INTERNAL_URL=http://127.0.0.1:42010"
+set "CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:42514"
+set "CMS_INTERNAL_URL=http://127.0.0.1:42513"
+set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:42514"
+set "NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:42010"
+set "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:42511"
+set "NEXT_BUILD_DIST_DIR=.next.test"
+rem O hardening isolado nao inicializa nem depende do Landing Builder.
 set "LANDING_BUILDER_API_URL="
 set "LANDING_BUILDER_SERVICE_TOKEN="
 set "LANDING_BUILDER_PUBLIC_URL="
@@ -289,23 +362,29 @@ exit /b 0
 :configure_production_build
 set "BACKEND_PROXY_URL="
 set "NEXT_PUBLIC_BACKEND_PROXY_URL="
-set "BACKEND_INTERNAL_URL=http://127.0.0.1:6050"
-set "CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:6051"
-set "CMS_INTERNAL_URL=http://127.0.0.1:6061"
-set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051"
+set "BACKEND_INTERNAL_URL=http://127.0.0.1:41050"
+set "CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:41051"
+set "CMS_INTERNAL_URL=http://127.0.0.1:41061"
+set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:41051"
 set "NEXT_PUBLIC_BACKEND_URL=%PRODUCTION_PUBLIC_BACKEND_URL%"
 set "NEXT_PUBLIC_SITE_URL=%PRODUCTION_SITE_URL%"
+set "NEXT_BUILD_DIST_DIR=.next"
+set "LANDING_BUILDER_API_URL=%PRODUCTION_LANDING_BUILDER_API_URL%"
+set "LANDING_BUILDER_SERVICE_TOKEN=%PRODUCTION_LANDING_BUILDER_SERVICE_TOKEN%"
 set "LANDING_BUILDER_PUBLIC_URL=%PRODUCTION_LANDING_BUILDER_PUBLIC_URL%"
 set "PROD_ARTIFACT_DIR=dist-prod.next"
 exit /b 0
 
 :wait_for_ports_free
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(6050,6051,6060,6061); $deadline=(Get-Date).AddSeconds(20); do { $listeners=Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $ports -contains $_.LocalPort }; if (-not $listeners) { exit 0 }; Start-Sleep -Milliseconds 500 } while ((Get-Date) -lt $deadline); $listeners | Select-Object LocalAddress,LocalPort,OwningProcess | Format-Table -AutoSize | Out-String | Write-Error; exit 1"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(41050,41051,41060,41061,41110,41112); $deadline=(Get-Date).AddSeconds(20); do { $listeners=Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $ports -contains $_.LocalPort }; if (-not $listeners) { exit 0 }; Start-Sleep -Milliseconds 500 } while ((Get-Date) -lt $deadline); $listeners | Select-Object LocalAddress,LocalPort,OwningProcess | Format-Table -AutoSize | Out-String | Write-Error; exit 1"
 exit /b %ERRORLEVEL%
 
 :wait_for_release
-echo [Rodogarcia PROD] Verificando os backends e gateway do CMS...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$urls=@('http://127.0.0.1:6050/health','http://127.0.0.1:6051/health','http://127.0.0.1:6060/admin/auth/entrar'); $deadline=(Get-Date).AddSeconds(30); do { $ready=$true; foreach ($url in $urls) { try { $response=Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 5; if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 400) { $ready=$false; break } } catch { $ready=$false; break } }; if ($ready) { exit 0 }; Start-Sleep -Milliseconds 500 } while ((Get-Date) -lt $deadline); Write-Error 'Backend, backend do CMS ou gateway CMS indisponivel.'; exit 1"
+set "LANDING_BUILDER_RELEASE_URLS="
+if exist "landing-builder\backend\dist\server.js" set "LANDING_BUILDER_RELEASE_URLS=,'http://127.0.0.1:41110/health'"
+if exist "landing-builder\frontend\dist-prod\server.js" set "LANDING_BUILDER_RELEASE_URLS=%LANDING_BUILDER_RELEASE_URLS%,'http://127.0.0.1:41112/health'"
+echo [Rodogarcia PROD] Verificando os backends, gateways e Landing Builder ativos...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$urls=@('http://127.0.0.1:41050/health','http://127.0.0.1:41051/health','http://127.0.0.1:41060/admin/auth/entrar'%LANDING_BUILDER_RELEASE_URLS%); $deadline=(Get-Date).AddSeconds(30); do { $ready=$true; foreach ($url in $urls) { try { $response=Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 5; if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 400) { $ready=$false; break } } catch { $ready=$false; break } }; if ($ready) { exit 0 }; Start-Sleep -Milliseconds 500 } while ((Get-Date) -lt $deadline); Write-Error 'Backend, CMS, gateway ou Landing Builder indisponivel.'; exit 1"
 exit /b %ERRORLEVEL%
 
 :restore_previous_processes
@@ -333,6 +412,8 @@ call pm2 delete rodogarcia-backend-prod >nul 2>&1
 call pm2 delete rodogarcia-cms-backend-prod >nul 2>&1
 call pm2 delete rodogarcia-frontend-prod >nul 2>&1
 call pm2 delete rodogarcia-cms-prod >nul 2>&1
+call pm2 delete rodogarcia-landing-builder-backend-prod >nul 2>&1
+call pm2 delete rodogarcia-landing-builder-prod >nul 2>&1
 call :wait_for_ports_free
 if errorlevel 1 (
   echo [Rodogarcia PROD] As portas continuam ocupadas; rollback automatico interrompido.

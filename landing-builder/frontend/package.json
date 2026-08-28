@@ -2,9 +2,11 @@
   "name": "rodogarcia-landing-builder-frontend",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 5112",
+    "dev": "next dev --hostname 127.0.0.1 --port 35112",
     "build": "next build",
-    "start": "next start --hostname 127.0.0.1 --port 5112",
+    "build:prod": "npm run build && node scripts/prepare-prod-artifact.mjs",
+    "start": "next start --hostname 127.0.0.1 --port 35112",
+    "start:prod": "node dist-prod/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

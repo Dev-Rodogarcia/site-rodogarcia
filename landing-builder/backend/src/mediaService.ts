@@ -120,7 +120,7 @@ function isMediaReferenced(url: string) {
     return false;
   };
 
-  return readLandings().some((landing) => visit(landing.hero) || visit(landing.lowerSection));
+  return readLandings().some((landing) => visit(landing));
 }
 
 function mediaUrl(id: string) {
@@ -211,7 +211,7 @@ export async function saveLandingMedia(file: LandingMediaUpload): Promise<Landin
       createdAt,
       storageName,
     };
-    writeLandingMedia([record, ...readLandingMedia()].slice(0, 5_000));
+    writeLandingMedia([record, ...readLandingMedia()]);
     return toMediaDto(record);
   }
 
@@ -236,7 +236,7 @@ export async function saveLandingMedia(file: LandingMediaUpload): Promise<Landin
     createdAt,
     storageName,
   };
-  writeLandingMedia([record, ...readLandingMedia()].slice(0, 5_000));
+  writeLandingMedia([record, ...readLandingMedia()]);
   return toMediaDto(record);
 }
 

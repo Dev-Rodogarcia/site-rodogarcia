@@ -25,10 +25,10 @@ function createInput(slug: string, mediaUrl = "", index = true) {
     analytics: { ga4MeasurementId: "G-TEST1234" },
     hero: {
       title: "Título seguro",
-      logo: mediaUrl,
       highlights: [{ title: "Destaque", description: "Descrição" }],
     },
     lowerSection: { title: "Seção inferior" },
+    story: { image: mediaUrl },
   };
 }
 

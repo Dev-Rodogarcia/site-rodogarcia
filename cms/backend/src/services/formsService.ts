@@ -7,6 +7,14 @@ import { sanitizeEmail, sanitizeText } from "../utils/sanitize.js";
 import { createLeadRecord } from "./leadsService.js";
 import { recordTrackingEvent } from "./trackingService.js";
 
+function requestBody(req: Request): Record<string, unknown> {
+  const body: unknown = req.body;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw new HttpError(422, "Envie um objeto JSON válido.");
+  }
+  return body as Record<string, unknown>;
+}
+
 function enforceLeadRateLimit(req: Request, namespace: string) {
   const ip = getClientIp(req);
   const { windowMs, maxAttempts } = RATE_LIMITS.lead;
@@ -19,7 +27,7 @@ function enforceLeadRateLimit(req: Request, namespace: string) {
 
 export function createContact(req: Request) {
   enforceLeadRateLimit(req, "contact");
-  const body = req.body as Record<string, unknown>;
+  const body = requestBody(req);
   const entry = {
     id: generateId("contact"),
     createdAt: new Date().toISOString(),
@@ -67,7 +75,7 @@ export function listContacts() {
 
 export function createQuote(req: Request) {
   enforceLeadRateLimit(req, "quote");
-  const body = req.body as Record<string, unknown>;
+  const body = requestBody(req);
   const entry = {
     id: generateId("quote"),
     createdAt: new Date().toISOString(),

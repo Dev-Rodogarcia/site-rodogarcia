@@ -78,8 +78,8 @@ cms/backend/storage/
 landing-builder/backend/storage/
 
 # Build
-.next/
-.next.test/
+# Inclui os caches isolados usados por validação, como .next.test e futuras variações.
+.next*/
 site/backend/dist*/
 cms/backend/dist*/
 site/frontend/dist-prod*/

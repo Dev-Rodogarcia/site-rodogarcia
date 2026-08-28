@@ -381,7 +381,7 @@ Esses testes confirmam as proteções atualmente cobertas, mas não detectam as 
 - CRUD de usuário, owner/supremo, coerção de payload e invalidação de sessão;
 - métrica de conversão baseada em `form_success`.
 
-Não foram iniciados os servidores 4010/5010 e nenhum JSON operacional foi modificado. Validação visual real em mobile/tablet/desktop deve ser executada após as correções, especialmente para banner de consentimento, popup, tabelas de tracking/leads e estados vazios dos editores.
+Não foram iniciados servidores de teste nem modificado JSON operacional. Validação visual real em mobile/tablet/desktop deve ser executada após as correções, especialmente para banner de consentimento, popup, tabelas de tracking/leads e estados vazios dos editores.
 
 ## Ordem recomendada de correção
 

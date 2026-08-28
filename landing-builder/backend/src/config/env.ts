@@ -4,7 +4,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const configuredStorageRoot = (process.env.LANDING_BUILDER_STORAGE_ROOT ?? "").trim();
 const serviceToken = (process.env.LANDING_BUILDER_SERVICE_TOKEN ?? "").trim();
 const host = (process.env.LANDING_BUILDER_HOST ?? process.env.HOST ?? "127.0.0.1").trim();
-const port = Number(process.env.LANDING_BUILDER_PORT ?? process.env.PORT ?? 6110);
+const port = Number(process.env.LANDING_BUILDER_PORT ?? process.env.PORT ?? 36110);
 
 function isStrongServiceToken(value: string) {
   return value.length >= 32 && !/altere-para|change-me|example|placeholder/i.test(value);

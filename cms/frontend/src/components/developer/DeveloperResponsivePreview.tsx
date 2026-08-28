@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DeviceMobile, Desktop, Rectangle, SquaresFour } from "@phosphor-icons/react";
-import { siteUrl, type AppPath } from "@/lib/routes";
+import { type AppPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import {
   DeveloperCard,
@@ -78,7 +78,7 @@ export function DeveloperResponsivePreview({
       params.set("popup-preview", "1");
     }
     const path = `${href}${href.includes("?") ? "&" : "?"}${params.toString()}${anchor ? `#${anchor}` : ""}`;
-    return siteUrl(path);
+    return path;
   }
 
   useEffect(() => {

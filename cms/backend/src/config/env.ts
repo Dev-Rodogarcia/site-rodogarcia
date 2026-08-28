@@ -84,12 +84,12 @@ function resolveFromBackendRoot(value: string) {
 const nodeEnv = process.env.NODE_ENV ?? "development";
 const isProduction = nodeEnv === "production";
 const host = process.env.HOST ?? "127.0.0.1";
-const port = numberEnv("PORT", 4013);
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://127.0.0.1:5012";
+const port = numberEnv("PORT", 31013);
+const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://127.0.0.1:35180";
 const frontendOriginLocalhost = frontendOrigin.includes("127.0.0.1")
   ? frontendOrigin.replace("127.0.0.1", "localhost")
   : frontendOrigin.replace("localhost", "127.0.0.1");
-const directCmsOrigin = process.env.CMS_INTERNAL_URL ?? "http://127.0.0.1:5013";
+const directCmsOrigin = process.env.CMS_INTERNAL_URL ?? "http://127.0.0.1:35013";
 const directCmsOriginLocalhost = directCmsOrigin.includes("127.0.0.1")
   ? directCmsOrigin.replace("127.0.0.1", "localhost")
   : directCmsOrigin.replace("localhost", "127.0.0.1");
