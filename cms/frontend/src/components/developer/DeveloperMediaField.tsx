@@ -236,7 +236,7 @@ export function DeveloperMediaField({
       </DeveloperField>
 
       {pickerOpen ? (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6">
+        <div className="cms-content-dialog fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6">
           <button
             type="button"
             aria-label="Fechar biblioteca de mídias"
@@ -444,7 +444,7 @@ export function DeveloperMediaPreview({
       </div>
 
       {hasPreview && previewOpen ? (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/76 p-4">
+        <div className="cms-content-dialog fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/76 p-4">
           <button
             type="button"
             aria-label="Fechar preview"

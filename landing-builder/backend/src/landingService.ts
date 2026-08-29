@@ -26,9 +26,9 @@ const RESERVED_SLUGS = new Set([
 ]);
 const themeSchema = z.preprocess((value) => value ?? {}, z.object({
   primaryColor: colorSchema.optional().default("#111111"),
-  secondaryColor: colorSchema.optional().default("#111111"),
+  secondaryColor: colorSchema.optional().default("#2a2a2a"),
   backgroundColor: colorSchema.optional().default("#ffffff"),
-  textColor: colorSchema.optional().default("#111111"),
+  textColor: colorSchema.optional().default("#171717"),
   font: z.enum(["system", "space-grotesk", "plus-jakarta"]).optional().default("system"),
 }));
 const analyticsSchema = z.preprocess((value) => value ?? {}, z.object({
@@ -123,7 +123,7 @@ function parseInput(input: unknown) {
     ...parsed.data,
     seo: normalizeSeo({ hero: parsed.data.hero, seo: parsed.data.seo }),
   };
-  for (const mediaUrl of [values.hero.logo, values.hero.backgroundImage, values.story.image]) {
+  for (const mediaUrl of [values.hero.logo, values.hero.backgroundImage, values.story.image, values.showcase.backgroundImage, values.finalCta.backgroundImage]) {
     if (mediaUrl) assertLandingMediaUrl(mediaUrl);
   }
   return values;
@@ -184,6 +184,12 @@ export function toPublicLanding(landing: LandingPage): PublicLandingPage {
       visible: landing.lowerSection.visible,
       title: landing.lowerSection.title,
       description: landing.lowerSection.description,
+      formTitle: landing.lowerSection.formTitle,
+      formDescription: landing.lowerSection.formDescription,
+      submitLabel: landing.lowerSection.submitLabel,
+      mapBaseColor: landing.lowerSection.mapBaseColor,
+      mapBranchColor: landing.lowerSection.mapBranchColor,
+      mapBorderColor: landing.lowerSection.mapBorderColor,
       ctaLabel: landing.lowerSection.ctaLabel,
       ctaUrl: landing.lowerSection.ctaUrl,
     },
@@ -200,6 +206,7 @@ export function toPublicLanding(landing: LandingPage): PublicLandingPage {
       title: landing.story.title,
       description: landing.story.description,
       image: publicMediaUrl(landing.story.image),
+      items: landing.story.items.map((item) => ({ title: item.title, description: item.description })),
       ctaLabel: landing.story.ctaLabel,
       ctaUrl: landing.story.ctaUrl,
     },
@@ -207,15 +214,24 @@ export function toPublicLanding(landing: LandingPage): PublicLandingPage {
       visible: landing.metrics.visible,
       eyebrow: landing.metrics.eyebrow,
       title: landing.metrics.title,
-      items: landing.metrics.items.map((item) => ({ value: item.value, label: item.label })),
+      items: landing.metrics.items.map((item) => ({ value: item.value, label: item.label, description: item.description })),
+    },
+    showcase: {
+      visible: landing.showcase.visible,
+      eyebrow: landing.showcase.eyebrow,
+      title: landing.showcase.title,
+      description: landing.showcase.description,
+      backgroundImage: publicMediaUrl(landing.showcase.backgroundImage),
+      ctaLabel: landing.showcase.ctaLabel,
+      ctaUrl: landing.showcase.ctaUrl,
+      items: landing.showcase.items.map((item) => ({ title: item.title, description: item.description })),
     },
     testimonial: {
       visible: landing.testimonial.visible,
       eyebrow: landing.testimonial.eyebrow,
       title: landing.testimonial.title,
-      quote: landing.testimonial.quote,
-      author: landing.testimonial.author,
-      role: landing.testimonial.role,
+      description: landing.testimonial.description,
+      items: landing.testimonial.items.map((item) => ({ name: item.name, detail: item.detail, quote: item.quote, rating: item.rating })),
     },
     faq: {
       visible: landing.faq.visible,
@@ -228,6 +244,7 @@ export function toPublicLanding(landing: LandingPage): PublicLandingPage {
       eyebrow: landing.finalCta.eyebrow,
       title: landing.finalCta.title,
       description: landing.finalCta.description,
+      backgroundImage: publicMediaUrl(landing.finalCta.backgroundImage),
       ctaLabel: landing.finalCta.ctaLabel,
       ctaUrl: landing.finalCta.ctaUrl,
     },

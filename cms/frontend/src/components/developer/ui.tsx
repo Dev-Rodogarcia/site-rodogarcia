@@ -167,6 +167,7 @@ export function DeveloperColorField({
   required,
   hint,
   className,
+  helpKey,
 }: {
   label: string;
   value: string;
@@ -174,11 +175,12 @@ export function DeveloperColorField({
   required?: boolean;
   hint?: string;
   className?: string;
+  helpKey?: string;
 }) {
   const color = value || "#1d4ed8";
 
   return (
-    <DeveloperField label={label} required={required} hint={hint} className={className}>
+    <DeveloperField label={label} required={required} hint={hint} className={className} helpKey={helpKey}>
       <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)] sm:items-center">
         <div className="relative h-10 cursor-pointer overflow-hidden rounded-xl border border-[var(--border)] bg-white p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition-all focus-within:border-[var(--primary)]/35 focus-within:ring-4 focus-within:ring-[var(--primary)]/10">
           <span className="pointer-events-none absolute inset-1 rounded-lg" style={{ backgroundColor: color }} />

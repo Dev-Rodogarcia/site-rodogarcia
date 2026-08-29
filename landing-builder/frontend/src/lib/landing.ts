@@ -21,13 +21,14 @@ export interface PublicLandingPage {
     phone: string; email: string; logo: string; backgroundImage: string; eyebrow: string; title: string;
     description: string; ctaLabel: string; ctaUrl: string; highlights: Array<{ title: string; description: string }>;
   };
-  lowerSection: { visible: boolean; title: string; description: string; ctaLabel: string; ctaUrl: string };
+  lowerSection: { visible: boolean; title: string; description: string; formTitle: string; formDescription: string; submitLabel: string; mapBaseColor: string; mapBranchColor: string; mapBorderColor: string; ctaLabel: string; ctaUrl: string };
   benefits: { visible: boolean; eyebrow: string; title: string; description: string; items: Array<{ title: string; description: string }> };
-  story: { visible: boolean; eyebrow: string; title: string; description: string; image: string; ctaLabel: string; ctaUrl: string };
-  metrics: { visible: boolean; eyebrow: string; title: string; items: Array<{ value: string; label: string }> };
-  testimonial: { visible: boolean; eyebrow: string; title: string; quote: string; author: string; role: string };
+  story: { visible: boolean; eyebrow: string; title: string; description: string; image: string; items: Array<{ title: string; description: string }>; ctaLabel: string; ctaUrl: string };
+  metrics: { visible: boolean; eyebrow: string; title: string; items: Array<{ value: string; label: string; description: string }> };
+  showcase: { visible: boolean; eyebrow: string; title: string; description: string; backgroundImage: string; ctaLabel: string; ctaUrl: string; items: Array<{ title: string; description: string }> };
+  testimonial: { visible: boolean; eyebrow: string; title: string; description: string; items: Array<{ name: string; detail: string; quote: string; rating: number }> };
   faq: { visible: boolean; eyebrow: string; title: string; items: Array<{ question: string; answer: string }> };
-  finalCta: { visible: boolean; eyebrow: string; title: string; description: string; ctaLabel: string; ctaUrl: string };
+  finalCta: { visible: boolean; eyebrow: string; title: string; description: string; backgroundImage: string; ctaLabel: string; ctaUrl: string };
   footer: { brand: string; description: string; phone: string; email: string; legalText: string };
 }
 
@@ -98,15 +99,43 @@ function normalizeBenefits(value: unknown): PublicLandingPage["benefits"] {
   return { visible: visible(input.visible), eyebrow: string(input.eyebrow, 80), title: string(input.title, 180), description: string(input.description, 700), items };
 }
 
+function normalizeFeatureItems(value: unknown, maxItems: number) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, maxItems).flatMap((item) => {
+    const entry = record(item);
+    const title = string(entry?.title, 100);
+    const description = string(entry?.description, 320);
+    return title || description ? [{ title, description }] : [];
+  });
+}
+
 function normalizeMetrics(value: unknown): PublicLandingPage["metrics"] {
   const input = record(value) ?? {};
   const items = Array.isArray(input.items) ? input.items.slice(0, 4).flatMap((item) => {
     const entry = record(item);
     const metricValue = string(entry?.value, 40);
     const label = string(entry?.label, 120);
-    return metricValue || label ? [{ value: metricValue, label }] : [];
+    const description = string(entry?.description, 320);
+    return metricValue || label || description ? [{ value: metricValue, label, description }] : [];
   }) : [];
   return { visible: visible(input.visible), eyebrow: string(input.eyebrow, 80), title: string(input.title, 180), items };
+}
+
+function normalizeFeedbacks(value: unknown): PublicLandingPage["testimonial"] {
+  const input = record(value) ?? {};
+  const items = Array.isArray(input.items) ? input.items.slice(0, 6).flatMap((item) => {
+    const entry = record(item);
+    const name = string(entry?.name, 100);
+    const detail = string(entry?.detail, 120);
+    const quote = string(entry?.quote, 900);
+    const rating = typeof entry?.rating === "number" && Number.isInteger(entry.rating) && entry.rating >= 1 && entry.rating <= 5 ? entry.rating : 5;
+    return name || detail || quote ? [{ name, detail, quote, rating }] : [];
+  }) : [];
+  if (items.length) return { visible: visible(input.visible), eyebrow: string(input.eyebrow, 80), title: string(input.title, 180), description: string(input.description, 900), items };
+  const quote = string(input.quote, 900);
+  const name = string(input.author, 100);
+  const detail = string(input.role, 120);
+  return { visible: visible(input.visible), eyebrow: string(input.eyebrow, 80), title: string(input.title, 180), description: string(input.description, 900), items: quote || name || detail ? [{ name, detail, quote, rating: 5 }] : [] };
 }
 
 function normalizeFaq(value: unknown): PublicLandingPage["faq"] {
@@ -137,6 +166,7 @@ function normalizeLanding(value: unknown): PublicLandingPage | null {
   const analyticsInput = record(input.analytics) ?? {};
   const seoInput = record(input.seo) ?? {};
   const story = record(input.story) ?? {};
+  const showcase = record(input.showcase) ?? {};
   const testimonial = record(input.testimonial) ?? {};
   const finalCta = record(input.finalCta) ?? {};
   const footer = record(input.footer) ?? {};
@@ -157,13 +187,26 @@ function normalizeLanding(value: unknown): PublicLandingPage | null {
       phone: string(hero.phone, 40), email: string(hero.email, 160), logo: normalizeMediaUrl(hero.logo), backgroundImage: normalizeMediaUrl(hero.backgroundImage),
       eyebrow: string(hero.eyebrow, 80), title: heroTitle, description: string(hero.description, 700), ctaLabel: string(hero.ctaLabel, 70), ctaUrl: normalizeActionUrl(hero.ctaUrl), highlights: normalizeHighlights(hero.highlights),
     },
-    lowerSection: { visible: visible(lowerSection.visible), title: lowerTitle, description: string(lowerSection.description, 900), ctaLabel: string(lowerSection.ctaLabel, 70), ctaUrl: normalizeActionUrl(lowerSection.ctaUrl) },
+    lowerSection: {
+      visible: visible(lowerSection.visible),
+      title: lowerTitle,
+      description: string(lowerSection.description, 900),
+      formTitle: string(lowerSection.formTitle, 180),
+      formDescription: string(lowerSection.formDescription, 400),
+      submitLabel: string(lowerSection.submitLabel, 70),
+      mapBaseColor: normalizeColor(lowerSection.mapBaseColor, "#A9D4EF"),
+      mapBranchColor: normalizeColor(lowerSection.mapBranchColor, "#2E2882"),
+      mapBorderColor: normalizeColor(lowerSection.mapBorderColor, "#FFFFFF"),
+      ctaLabel: string(lowerSection.ctaLabel, 70),
+      ctaUrl: normalizeActionUrl(lowerSection.ctaUrl),
+    },
     benefits: normalizeBenefits(input.benefits),
-    story: { visible: visible(story.visible), eyebrow: string(story.eyebrow, 80), title: string(story.title, 180), description: string(story.description, 900), image: normalizeMediaUrl(story.image), ctaLabel: string(story.ctaLabel, 70), ctaUrl: normalizeActionUrl(story.ctaUrl) },
+    story: { visible: visible(story.visible), eyebrow: string(story.eyebrow, 80), title: string(story.title, 180), description: string(story.description, 900), image: normalizeMediaUrl(story.image), items: normalizeFeatureItems(story.items, 4), ctaLabel: string(story.ctaLabel, 70), ctaUrl: normalizeActionUrl(story.ctaUrl) },
     metrics: normalizeMetrics(input.metrics),
-    testimonial: { visible: visible(testimonial.visible), eyebrow: string(testimonial.eyebrow, 80), title: string(testimonial.title, 180), quote: string(testimonial.quote, 900), author: string(testimonial.author, 100), role: string(testimonial.role, 120) },
+    showcase: { visible: visible(showcase.visible), eyebrow: string(showcase.eyebrow, 80), title: string(showcase.title, 180), description: string(showcase.description, 700), backgroundImage: normalizeMediaUrl(showcase.backgroundImage), ctaLabel: string(showcase.ctaLabel, 70), ctaUrl: normalizeActionUrl(showcase.ctaUrl), items: normalizeFeatureItems(showcase.items, 3) },
+    testimonial: normalizeFeedbacks(testimonial),
     faq: normalizeFaq(input.faq),
-    finalCta: { visible: visible(finalCta.visible), eyebrow: string(finalCta.eyebrow, 80), title: string(finalCta.title, 180), description: string(finalCta.description, 700), ctaLabel: string(finalCta.ctaLabel, 70), ctaUrl: normalizeActionUrl(finalCta.ctaUrl) },
+    finalCta: { visible: visible(finalCta.visible), eyebrow: string(finalCta.eyebrow, 80), title: string(finalCta.title, 180), description: string(finalCta.description, 700), backgroundImage: normalizeMediaUrl(finalCta.backgroundImage), ctaLabel: string(finalCta.ctaLabel, 70), ctaUrl: normalizeActionUrl(finalCta.ctaUrl) },
     footer: { brand: string(footer.brand, 120) || name, description: string(footer.description, 400), phone: string(footer.phone, 40), email: string(footer.email, 160), legalText: string(footer.legalText, 240) || "Todos os direitos reservados." },
   };
 }

@@ -109,16 +109,24 @@ test("rota pública devolve somente o DTO publicado necessário", async () => {
 
     const response = await fetch(`${baseUrl}/api/public/landings/${slug}`);
     assert.equal(response.status, 200);
-    const payload = await response.json() as { landing: Record<string, unknown> & { template?: string; benefits?: { items?: unknown[] }; faq?: { items?: unknown[] }; footer?: { brand?: string } } };
+    const payload = await response.json() as { landing: Record<string, unknown> & { template?: string; lowerSection?: { mapBaseColor?: string; mapBranchColor?: string; mapBorderColor?: string }; benefits?: { items?: unknown[] }; showcase?: { items?: unknown[]; backgroundImage?: string }; story?: { items?: unknown[] }; testimonial?: { items?: unknown[] }; faq?: { items?: unknown[] }; footer?: { brand?: string } } };
     assert.equal(payload.landing.slug, slug);
     assert.equal(payload.landing.template, "campaign-v1");
-    assert.equal(payload.landing.benefits?.items?.length, 3);
+    assert.equal(payload.landing.benefits?.items?.length, 4);
+    assert.equal(payload.landing.showcase?.items?.length, 3);
+    assert.equal(payload.landing.showcase?.backgroundImage, "");
+    assert.equal(payload.landing.story?.items?.length, 3);
+    assert.equal(payload.landing.testimonial?.items?.length, 3);
     assert.equal(payload.landing.faq?.items?.length, 3);
     assert.equal(payload.landing.footer?.brand, "Sua empresa");
+    assert.equal(payload.landing.lowerSection?.mapBaseColor, "#A9D4EF");
+    assert.equal(payload.landing.lowerSection?.mapBranchColor, "#2E2882");
+    assert.equal(payload.landing.lowerSection?.mapBorderColor, "#FFFFFF");
     assert.deepEqual(payload.landing.analytics, { ga4MeasurementId: "G-TEST1234" });
     assert.equal("id" in payload.landing, false);
     assert.equal("status" in payload.landing, false);
     assert.equal("createdAt" in payload.landing, false);
     assert.equal("updatedAt" in payload.landing, false);
+    assert.equal("quote" in (payload.landing.testimonial ?? {}), false);
   });
 });

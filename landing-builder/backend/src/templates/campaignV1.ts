@@ -11,7 +11,19 @@ const internalMedia = z.string().trim().max(300).refine(
   (value) => !value || (/^\/landing-media\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)),
   "Selecione uma mídia válida da biblioteca da campanha.",
 ).optional().default("");
+const color = (fallback: string) => z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, "Use uma cor hexadecimal válida.").optional().default(fallback);
 const visible = z.boolean().optional().default(true);
+const feedbackItem = z.object({ name: text(100), detail: text(120), quote: text(900), rating: z.number().int().min(1).max(5).optional().default(5) });
+
+function preserveLegacyFeedback(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const content = value as Record<string, unknown>;
+  if (Array.isArray(content.items) && content.items.length > 0) return value;
+  const quote = typeof content.quote === "string" ? content.quote.trim() : "";
+  const name = typeof content.author === "string" ? content.author.trim() : "";
+  const detail = typeof content.role === "string" ? content.role.trim() : "";
+  return quote || name || detail ? { ...content, items: [{ name, detail, quote, rating: 5 }] } : value;
+}
 
 /**
  * Contrato e conteúdo inicial do primeiro template de campanhas.
@@ -33,33 +45,66 @@ export const campaignV1Schema = z.object({
   })),
   lowerSection: z.preprocess((value) => value ?? {}, z.object({
     visible,
-    title: text(180).default("A solução certa começa com uma mensagem clara"),
-    description: text(900).default("Use esta abertura para aprofundar a proposta da campanha, explicar o contexto e preparar a pessoa para conhecer os benefícios."),
+    title: text(180).default("Conectamos os maiores polos industriais do Brasil"),
+    description: text(900).default("Operamos com soluções de alta performance em todo o território nacional para operações dedicadas e posições de armazenagem e distribuição."),
+    formTitle: text(180).default("Fale com um especialista em logística B2B"),
+    formDescription: text(400).default("Preencha o formulário abaixo. Nossa equipe analisará sua demanda e entrará em contato."),
+    submitLabel: text(70).default("Receber solução personalizada"),
+    mapBaseColor: color("#A9D4EF"),
+    mapBranchColor: color("#2E2882"),
+    mapBorderColor: color("#FFFFFF"),
     ctaLabel: text(70), ctaUrl: safeUrl,
   })),
   benefits: z.preprocess((value) => value ?? {}, z.object({
-    visible, eyebrow: text(80).default("Benefícios"), title: text(180).default("Por que escolher esta solução"), description: text(700).default("Organize os motivos mais importantes em uma leitura rápida."),
+    visible, eyebrow: text(80).default("Nossos serviços"), title: text(180).default("Soluções inteligentes de armazenagem e gestão de estoque"), description: text(700),
     items: z.array(z.object({ title: text(80), description: text(220) })).min(1).max(6).optional().default([
-      { title: "Planejamento próximo", description: "Organize a mensagem para o público que você quer alcançar." },
-      { title: "Atendimento claro", description: "Explique os diferenciais que ajudam a pessoa a decidir." },
-      { title: "Próximo passo simples", description: "Direcione a campanha para uma ação objetiva." },
+      { title: "Recebimento e preparação de pedidos", description: "Entrada rigorosa da mercadoria, conferência cega, separação e picking otimizados para cada pedido." },
+      { title: "Picking e packing", description: "Armazenagem, etiquetagem e organização do estoque com separação, montagem de kits e expedição ágil." },
+      { title: "Controle de estoque e rastreabilidade", description: "Gestão integrada com inventário cíclico, acuracidade e controle por lote ou validade." },
+      { title: "Armazenagem estruturada e flexível", description: "Infraestrutura para absorver picos sazonais e apoiar diferentes necessidades da operação." },
     ]),
   })),
   story: z.preprocess((value) => value ?? {}, z.object({
     visible, eyebrow: text(80).default("Como funciona"), title: text(180).default("Uma experiência simples do início ao fim"),
     description: text(900).default("Combine uma imagem com uma explicação objetiva sobre a operação, o serviço ou a oportunidade apresentada pela campanha."),
-    image: internalMedia, ctaLabel: text(70), ctaUrl: safeUrl,
+    image: internalMedia,
+    items: z.array(z.object({ title: text(100), description: text(320) })).min(1).max(4).optional().default([
+      { title: "Operação preparada", description: "Organize a estrutura e os processos que sustentam a sua rotina logística." },
+      { title: "Visibilidade em tempo real", description: "Apresente os recursos que mantêm a operação acompanhada em cada etapa." },
+      { title: "Segurança e escala", description: "Destaque como a estrutura acompanha o crescimento do seu negócio." },
+    ]),
+    ctaLabel: text(70), ctaUrl: safeUrl,
   })),
   metrics: z.preprocess((value) => value ?? {}, z.object({
-    visible, eyebrow: text(80).default("Em números"), title: text(180).default("Informações que reforçam a decisão"),
-    items: z.array(z.object({ value: text(40), label: text(120) })).min(1).max(4).optional().default([
-      { value: "01", label: "Proposta clara" },
-      { value: "02", label: "Benefícios em destaque" },
-      { value: "03", label: "CTA bem definido" },
+    visible, eyebrow: text(80), title: text(180),
+    items: z.array(z.object({ value: text(40), label: text(120), description: text(320) })).min(1).max(4).optional().default([
+      { value: "10.850 m²", label: "Área de armazenagem", description: "Infraestrutura e capacidade instalada para uma operação segura, uniforme e eficiente." },
+      { value: "8", label: "Centros de distribuição", description: "Hubs e unidades estratégicas para conectar operações em diferentes regiões." },
+      { value: "+36", label: "Anos de mercado", description: "Experiência e solidez para conduzir operações com confiança." },
     ]),
   })),
-  testimonial: z.preprocess((value) => value ?? {}, z.object({
-    visible, eyebrow: text(80).default("Confiança"), title: text(180).default("O que as pessoas dizem"),
+  showcase: z.preprocess((value) => value ?? {}, z.object({
+    visible,
+    eyebrow: text(80).default("Soluções sob medida"),
+    title: text(180).default("Soluções de armazenagem para diversos produtos"),
+    description: text(700).default("Apresente a estrutura, os processos e a capacidade que tornam esta operação preparada para diferentes demandas."),
+    backgroundImage: internalMedia,
+    ctaLabel: text(70).default("Fazer cotação"),
+    ctaUrl: safeUrl,
+    items: z.array(z.object({ title: text(100), description: text(320) })).min(1).max(3).optional().default([
+      { title: "Cargas e produtos industriais", description: "Estrutura preparada para receber e gerenciar fluxos industriais de grande porte." },
+      { title: "Matéria-prima", description: "Infraestrutura flexível para recebimento, controle e armazenagem de insumos essenciais." },
+      { title: "Bens de distribuição geral", description: "Movimentação eficiente com suporte para acelerar o abastecimento dos seus canais." },
+    ]),
+  })),
+  testimonial: z.preprocess((value) => preserveLegacyFeedback(value ?? {}), z.object({
+    visible, eyebrow: text(80).default("Nossa história"), title: text(180).default("Solidez, tradição e inovação estruturada na gestão do seu estoque"), description: text(900).default("A confiança de quem acompanha a nossa operação mostra o cuidado que levamos para cada etapa da logística."),
+    items: z.array(feedbackItem).min(1).max(6).optional().default([
+      { name: "Cliente atendido", detail: "Operação industrial", quote: "Inclua aqui uma avaliação autorizada que descreva a experiência com a operação.", rating: 5 },
+      { name: "Cliente atendido", detail: "Distribuição nacional", quote: "Use feedbacks reais para reforçar a confiança antes do próximo contato.", rating: 5 },
+      { name: "Cliente atendido", detail: "Operação dedicada", quote: "Apresente uma fala curta, objetiva e aprovada pelo cliente.", rating: 5 },
+    ]),
+    // Mantidos para ler e migrar campanhas que usavam o antigo depoimento único.
     quote: text(900).default("Inclua aqui um depoimento real que ajude o visitante a entender o valor da sua proposta."),
     author: text(100).default("Nome do cliente"), role: text(120).default("Cargo ou empresa"),
   })),
@@ -74,7 +119,7 @@ export const campaignV1Schema = z.object({
   finalCta: z.preprocess((value) => value ?? {}, z.object({
     visible, eyebrow: text(80).default("Próximo passo"), title: text(180).default("Vamos conversar sobre a sua necessidade?"),
     description: text(700).default("Finalize a campanha com uma chamada direta e um único destino de conversão."),
-    ctaLabel: text(70).default("Entrar em contato"), ctaUrl: safeUrl,
+    backgroundImage: internalMedia, ctaLabel: text(70).default("Entrar em contato"), ctaUrl: safeUrl,
   })),
   footer: z.preprocess((value) => value ?? {}, z.object({
     brand: text(120).default("Sua empresa"), description: text(400).default("Uma mensagem curta para encerrar a campanha."),

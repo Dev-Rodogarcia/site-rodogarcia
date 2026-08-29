@@ -1,7 +1,7 @@
 "use client";
 
 import { LandingVisualEditor, type LandingMedia } from "../LandingVisualEditor";
-import { CampaignV1SectionsEditor, type CampaignV1Sections } from "./CampaignV1SectionsEditor";
+import type { CampaignV1Sections } from "./CampaignV1SectionsEditor";
 
 type CampaignV1Hero = {
   theme: { primaryColor: string; secondaryColor: string; backgroundColor: string; textColor: string };
@@ -31,6 +31,5 @@ export function CampaignV1Editor<T extends CampaignV1Landing>({
 }) {
   return <>
     <LandingVisualEditor landing={landing} media={media} uploadingMedia={uploadingMedia} onChange={onChange} onUploadMedia={onUploadMedia} onDeleteMedia={onDeleteMedia} />
-    <CampaignV1SectionsEditor landing={landing} media={media} onChange={onChange} />
   </>;
 }

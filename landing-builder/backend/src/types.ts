@@ -48,6 +48,12 @@ export interface LandingPage {
     visible: boolean;
     title: string;
     description: string;
+    formTitle: string;
+    formDescription: string;
+    submitLabel: string;
+    mapBaseColor: string;
+    mapBranchColor: string;
+    mapBorderColor: string;
     ctaLabel: string;
     ctaUrl: string;
   };
@@ -64,6 +70,7 @@ export interface LandingPage {
     title: string;
     description: string;
     image: string;
+    items: Array<{ title: string; description: string }>;
     ctaLabel: string;
     ctaUrl: string;
   };
@@ -71,12 +78,24 @@ export interface LandingPage {
     visible: boolean;
     eyebrow: string;
     title: string;
-    items: Array<{ value: string; label: string }>;
+    items: Array<{ value: string; label: string; description: string }>;
+  };
+  showcase: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    description: string;
+    backgroundImage: string;
+    ctaLabel: string;
+    ctaUrl: string;
+    items: Array<{ title: string; description: string }>;
   };
   testimonial: {
     visible: boolean;
     eyebrow: string;
     title: string;
+    description: string;
+    items: Array<{ name: string; detail: string; quote: string; rating: number }>;
     quote: string;
     author: string;
     role: string;
@@ -92,6 +111,7 @@ export interface LandingPage {
     eyebrow: string;
     title: string;
     description: string;
+    backgroundImage: string;
     ctaLabel: string;
     ctaUrl: string;
   };
@@ -121,7 +141,14 @@ export interface PublicLandingPage {
   benefits: LandingPage["benefits"];
   story: LandingPage["story"];
   metrics: LandingPage["metrics"];
-  testimonial: LandingPage["testimonial"];
+  showcase: LandingPage["showcase"];
+  testimonial: {
+    visible: boolean;
+    eyebrow: string;
+    title: string;
+    description: string;
+    items: Array<{ name: string; detail: string; quote: string; rating: number }>;
+  };
   faq: LandingPage["faq"];
   finalCta: LandingPage["finalCta"];
   footer: LandingPage["footer"];

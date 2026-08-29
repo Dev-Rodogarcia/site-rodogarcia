@@ -3,6 +3,38 @@
   scrollbar-width: none;
 }
 
+/* Diálogos do CMS respeitam a área útil quando a navegação lateral está visível. */
+[data-admin-shell="true"][data-admin-sidebar-transition-ready="false"] [data-admin-sidebar-panel="true"],
+[data-admin-shell="true"][data-admin-sidebar-transition-ready="false"] [data-admin-sidebar-panel="true"] * {
+  transition: none !important;
+}
+
+@media (min-width: 1024px) {
+  [data-admin-shell="true"][data-admin-sidebar="expanded"] {
+    --cms-content-dialog-offset: 230px;
+  }
+
+  [data-admin-shell="true"][data-admin-sidebar="collapsed"] {
+    --cms-content-dialog-offset: 64px;
+  }
+
+  [data-admin-shell="true"] .cms-content-dialog {
+    left: var(--cms-content-dialog-offset, 0px) !important;
+    transition: left 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* A prévia realmente em tela cheia não reserva espaço para a navegação do CMS. */
+html[data-landing-preview-fullscreen="true"] .cms-content-dialog {
+  left: 0 !important;
+}
+
+/* A prévia de landing deve ocupar a tela inteira, inclusive quando o navegador não libera a Fullscreen API. */
+html[data-landing-preview-fullscreen="true"] [data-admin-shell="true"] > div > aside,
+html[data-landing-preview-fullscreen="true"] [data-developer-mobile-navigation="true"] {
+  display: none !important;
+}
+
 /* Tema noturno restrito ao painel; nunca vaza para o site público. */
 [data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) {
   --background: #0b1220;
@@ -110,45 +142,45 @@
   border-color: rgba(125, 211, 252, 0.18) !important;
 }
 
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-[linear-gradient"] {
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-[linear-gradient"] {
   background-color: #142844 !important;
   background-image: linear-gradient(135deg, #17375f 0%, #142b4a 56%, #10243e 100%) !important;
   border-color: rgba(96, 165, 250, 0.32) !important;
 }
 
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-[linear-gradient(90deg,#1d4ed8"] {
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-[linear-gradient(90deg,#1d4ed8"] {
   background-color: #2563eb !important;
   background-image: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%) !important;
   border-color: transparent !important;
 }
 
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] .h-2.overflow-hidden.rounded-full.bg-\[var\(--color-surface-2\)\] {
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *).h-2.overflow-hidden.rounded-full.bg-\[var\(--color-surface-2\)\] {
   background-color: #263b59 !important;
 }
 
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-[#"] {
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-[#"] {
   background-color: #173052 !important;
   border-color: rgba(96, 165, 250, 0.3) !important;
 }
 
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-white"] { background-color: #132b4a !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-slate-50"] { background-color: #1a3456 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-slate-100"] { background-color: #213b60 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-blue-50"],
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-sky-50"] { background-color: #122d52 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-emerald-50"] { background-color: #123a34 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-amber-50"] { background-color: #402f18 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="bg-red-50"] { background-color: #41202b !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-white"] { background-color: #132b4a !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-slate-50"] { background-color: #1a3456 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-slate-100"] { background-color: #213b60 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-blue-50"],
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-sky-50"] { background-color: #122d52 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-emerald-50"] { background-color: #123a34 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-amber-50"] { background-color: #402f18 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="bg-red-50"] { background-color: #41202b !important; }
 
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="border-slate-"],
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="border-black"] { border-color: rgba(148, 163, 184, 0.2) !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-slate-"] { color: #c9d5e5 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-blue-"],
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-sky-"] { color: #93c5fd !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-emerald-"] { color: #6ee7b7 !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-amber-"] { color: #fcd34d !important; }
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-red-"],
-[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] [class*="text-rose-"] { color: #fda4af !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="border-slate-"],
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="border-black"] { border-color: rgba(148, 163, 184, 0.2) !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-slate-"] { color: #c9d5e5 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-blue-"],
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-sky-"] { color: #93c5fd !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-emerald-"] { color: #6ee7b7 !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-amber-"] { color: #fcd34d !important; }
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-red-"],
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] :not([data-landing-preview="true"]):not([data-landing-preview="true"] *)[class*="text-rose-"] { color: #fda4af !important; }
 
 [data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] label { color: #dbe7f5; }
 [data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-admin-theme-content="true"] input,

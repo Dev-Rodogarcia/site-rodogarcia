@@ -414,6 +414,7 @@ export default function DevSidebar({
   return (
     <>
       <aside
+        data-admin-sidebar-panel="true"
         className={cn(
           "relative z-20 hidden h-dvh shrink-0 overflow-hidden border-r border-white/5 text-white transition-[width] duration-500 ease-[cubic-bezier(0.2,0,0,1)] lg:flex",
           expanded ? "w-[230px]" : "w-[64px]"
@@ -428,7 +429,7 @@ export default function DevSidebar({
       </aside>
 
       {mobileOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div data-developer-mobile-navigation="true" className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             aria-label="Fechar navegação"

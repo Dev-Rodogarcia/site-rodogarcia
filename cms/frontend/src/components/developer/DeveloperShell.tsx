@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import DevSidebar from "./DevSidebar";
 import DevTopbar from "./DevTopbar";
 import { DeveloperPageHeaderProvider } from "./DeveloperPageHeaderContext";
@@ -19,6 +19,8 @@ export default function DeveloperShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [sidebarPreferenceLoaded, setSidebarPreferenceLoaded] = useState(false);
+  const [sidebarTransitionReady, setSidebarTransitionReady] = useState(false);
   const [darkTheme, setDarkTheme] = useState(false);
   const { session, loading: sessionLoading } = useSession();
   const { apiRequest } = useApiRequest();
@@ -26,20 +28,39 @@ export default function DeveloperShell({
   const requiredPermission = permissionForAdminPath(normalizeCmsPathname(pathname));
   const accessDenied = Boolean(requiredPermission && session?.authenticated && !session.user?.cmsPermissions?.includes(requiredPermission));
 
-  useEffect(() => {
-    const storedValue = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
-    if (storedValue === "0") {
-      setSidebarExpanded(false);
-      return;
+  useLayoutEffect(() => {
+    try {
+      const storedValue = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      if (storedValue === "0") {
+        setSidebarExpanded(false);
+      } else if (storedValue === "1") {
+        setSidebarExpanded(true);
+      }
+    } catch {
+      // O CMS continua funcional se o navegador bloquear o armazenamento local.
+    } finally {
+      setSidebarPreferenceLoaded(true);
     }
-    if (storedValue === "1") {
-      setSidebarExpanded(true);
-    }
+
+    let secondFrame: number | undefined;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => setSidebarTransitionReady(true));
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) window.cancelAnimationFrame(secondFrame);
+    };
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarExpanded ? "1" : "0");
-  }, [sidebarExpanded]);
+    if (!sidebarPreferenceLoaded) return;
+    try {
+      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarExpanded ? "1" : "0");
+    } catch {
+      // O CMS continua funcional se o navegador bloquear o armazenamento local.
+    }
+  }, [sidebarExpanded, sidebarPreferenceLoaded]);
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -62,6 +83,8 @@ export default function DeveloperShell({
     <div
       data-admin-shell="true"
       data-admin-theme={darkTheme ? "dark" : "light"}
+      data-admin-sidebar={sidebarExpanded ? "expanded" : "collapsed"}
+      data-admin-sidebar-transition-ready={sidebarTransitionReady ? "true" : "false"}
       className={`relative h-dvh overflow-hidden bg-[#f3f6fa] transition-colors duration-300 ${darkTheme ? "cms-dark" : ""}`}
     >
       <div className="relative flex h-full min-w-0">

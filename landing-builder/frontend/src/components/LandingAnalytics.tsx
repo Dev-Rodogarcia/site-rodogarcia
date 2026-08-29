@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 const SHARED_CONSENT_KEY = "rg_analytics_consent";
 const LEGACY_CONSENT_KEY = "rg_landing_analytics_consent";
 const CONSENT_UPDATED_EVENT = "rg:consent-updated";
+const OPEN_CONSENT_PREFERENCES_EVENT = "rg:open-consent-preferences";
 const ga4MeasurementIdPattern = /^G-[A-Z0-9]{4,}$/i;
 
 type ConsentDecision = boolean | null;
@@ -91,6 +92,7 @@ function clearOptionalAnalyticsStorage() {
 
 export function LandingAnalytics({ measurementId }: { measurementId: string }) {
   const [consent, setConsent] = useState<ConsentDecision>(null);
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
   const validMeasurementId = ga4MeasurementIdPattern.test(measurementId);
 
   useEffect(() => {
@@ -102,13 +104,16 @@ export function LandingAnalytics({ measurementId }: { measurementId: string }) {
     const syncStorage = (event: StorageEvent) => {
       if (event.key === SHARED_CONSENT_KEY || event.key === LEGACY_CONSENT_KEY) syncStoredConsent();
     };
+    const openPreferences = () => setPreferencesOpen(true);
 
     syncStoredConsent();
     window.addEventListener(CONSENT_UPDATED_EVENT, syncEventConsent);
     window.addEventListener("storage", syncStorage);
+    window.addEventListener(OPEN_CONSENT_PREFERENCES_EVENT, openPreferences);
     return () => {
       window.removeEventListener(CONSENT_UPDATED_EVENT, syncEventConsent);
       window.removeEventListener("storage", syncStorage);
+      window.removeEventListener(OPEN_CONSENT_PREFERENCES_EVENT, openPreferences);
     };
   }, []);
 
@@ -149,18 +154,27 @@ export function LandingAnalytics({ measurementId }: { measurementId: string }) {
     return () => { active = false; };
   }, [consent, measurementId, validMeasurementId]);
 
-  if (!validMeasurementId || consent !== null) return null;
+  const showConsentDialog = preferencesOpen || (validMeasurementId && consent === null);
+  if (!showConsentDialog) return null;
+
+  function saveConsent(accepted: boolean) {
+    writeFallbackConsent(accepted);
+    setConsent(accepted);
+    setPreferencesOpen(false);
+  }
 
   return (
     <aside
       role="dialog"
+      aria-modal="true"
       aria-label="Preferências de cookies"
       style={{ position: "fixed", right: 16, bottom: 16, zIndex: 50, maxWidth: 360, padding: 16, borderRadius: 12, background: "#10233f", color: "#fff", boxShadow: "0 18px 48px rgba(0,0,0,.25)" }}
     >
-      <strong>Cookies de analytics</strong>
-      <p style={{ margin: "8px 0 14px", lineHeight: 1.45, fontSize: 13 }}>Com sua permissão, medimos a campanha para melhorar a experiência.</p>
-      <button type="button" onClick={() => writeFallbackConsent(true)} style={{ marginRight: 8, border: 0, borderRadius: 6, padding: "9px 12px", fontWeight: 700 }}>Aceitar</button>
-      <button type="button" onClick={() => writeFallbackConsent(false)} style={{ border: "1px solid #fff", borderRadius: 6, padding: "8px 12px", color: "#fff", background: "transparent" }}>Recusar</button>
+      <strong>Preferências de cookies</strong>
+      <p style={{ margin: "8px 0 14px", lineHeight: 1.45, fontSize: 13 }}>Os cookies necessários mantêm a landing funcionando. Com sua permissão, os opcionais medem a campanha para melhorar a experiência.</p>
+      <button type="button" onClick={() => saveConsent(true)} style={{ marginRight: 8, border: 0, borderRadius: 6, padding: "9px 12px", fontWeight: 700 }}>Aceitar opcionais</button>
+      <button type="button" onClick={() => saveConsent(false)} style={{ border: "1px solid #fff", borderRadius: 6, padding: "8px 12px", color: "#fff", background: "transparent" }}>Recusar opcionais</button>
+      {consent !== null ? <button type="button" onClick={() => setPreferencesOpen(false)} style={{ display: "block", marginTop: 12, border: 0, padding: 0, color: "rgba(255,255,255,.78)", background: "transparent", fontSize: 12, textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer" }}>Fechar</button> : null}
     </aside>
   );
 }

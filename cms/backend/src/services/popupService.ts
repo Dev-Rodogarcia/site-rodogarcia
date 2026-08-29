@@ -50,6 +50,22 @@ const ALLOWED_EVENTS = new Set([
   "popup_ignored",
 ]);
 
+const LANDING_B2B_SOURCE = "landing-b2b-form";
+
+function requestBody(req: Request): Record<string, unknown> {
+  const body: unknown = req.body;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw new HttpError(422, "Envie um objeto JSON válido.");
+  }
+  return body as Record<string, unknown>;
+}
+
+function digits(value: unknown, maxLength: number) {
+  return typeof value === "string" || typeof value === "number"
+    ? String(value).replace(/\D/g, "").slice(0, maxLength)
+    : "";
+}
+
 type PopupConfig = typeof DEFAULT_CONFIG;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -173,12 +189,23 @@ export function createLead(req: Request) {
     throw new HttpError(429, "Limite de envios atingido. Tente novamente mais tarde.");
   }
 
-  const body = req.body as Record<string, unknown>;
+  const body = requestBody(req);
+  const source = sanitizeText(body.source, 40) || "exit-intent-popup";
   const name = sanitizeText(body.name, 80);
   const email = sanitizeEmail(body.email);
   const phone = sanitizeText(body.phone, 20);
+  const cnpj = digits(body.cnpj, 14);
+  const isLandingB2BLead = source === LANDING_B2B_SOURCE;
   if (!name && !email && !phone) {
     throw new HttpError(422, "Informe ao menos um dado de contato.");
+  }
+  if (isLandingB2BLead) {
+    if (!name || !email || digits(phone, 11).length < 10 || !cnpj || body.privacyAccepted !== true) {
+      throw new HttpError(422, "Informe nome, e-mail, telefone, CNPJ e aceite a Política de Privacidade.");
+    }
+    if (cnpj.length !== 14) {
+      throw new HttpError(422, "Informe um CNPJ com 14 dígitos.");
+    }
   }
 
   const leads = popupLeadRepository.read();
@@ -194,15 +221,28 @@ export function createLead(req: Request) {
   }
 
   registerHit("lead", ip, windowMs);
+  const metadata = isLandingB2BLead
+    ? sanitizeMetadata({
+      origin: sanitizeText(body.origin, 80) || "campaign-v1",
+      cnpj,
+      companyLocation: sanitizeText(body.companyLocation, 140),
+      warehouseLocation: sanitizeText(body.warehouseLocation, 140),
+      notes: sanitizeText(body.notes, 180),
+      privacyAccepted: "true",
+      utmSource: sanitizeText(body.utmSource, 120),
+      utmMedium: sanitizeText(body.utmMedium, 120),
+      utmCampaign: sanitizeText(body.utmCampaign, 120),
+    })
+    : sanitizeMetadata({ origin: sanitizeText(body.origin, 80) });
   const lead = createLeadRecord({
     req,
-    source: sanitizeText(body.source, 40) || "exit-intent-popup",
+    source,
     pagePath: body.pagePath,
     name,
     email,
     phone,
     sessionId: body.sessionId,
-    metadata: { origin: sanitizeText(body.origin, 80) },
+    metadata,
   });
   leads.push(lead);
   popupLeadRepository.write(leads);
