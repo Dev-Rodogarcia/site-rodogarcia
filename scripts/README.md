@@ -28,6 +28,6 @@ O teste de segurança sobe `site/backend/`, `cms/backend/`, `site/frontend/` e `
 
 Além da presença dos servidores standalone, o teste lê `site/frontend/dist-prod.test/.next/routes-manifest.json` e exige que ESL/CEP/CNPJ apontem para `127.0.0.1:42010`, as rotas de ownership do CMS e `/uploads/*` apontem para `127.0.0.1:42514` e `/admin/*` para `127.0.0.1:42513`. Assim, valores de rewrite definidos no build não podem redirecionar o hardening para processos de desenvolvimento ou produção.
 
-O pré-flight de produção cria esses artefatos com as URLs isoladas `42010`/`42514`/`42511`/`42513`, exporta as quatro variáveis e só então executa o hardening. Os candidatos `dist.next`/`dist-prod.next` são recompilados com `41050`/`41051`/`41060`/`41061` depois do hardening. Para um diagnóstico manual, gere primeiro os quatro artefatos `.test` com esse mesmo contrato e use as variáveis acima na mesma sessão de terminal.
+O pré-flight de produção cria esses artefatos com as URLs isoladas `42010`/`42514`/`42511`/`42513`, exporta as quatro variáveis e só então executa o hardening. Os candidatos `dist.next`/`dist-prod.next` são recompilados com `6050`/`6051`/`6060`/`6061` depois do hardening. Para um diagnóstico manual, gere primeiro os quatro artefatos `.test` com esse mesmo contrato e use as variáveis acima na mesma sessão de terminal.
 
 O teste usa um `STORAGE_ROOT` temporario e nao reutiliza o storage configurado no ambiente chamador.

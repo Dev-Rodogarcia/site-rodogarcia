@@ -17,10 +17,10 @@ const productionEnv = dotenv.parse(fs.readFileSync(envFile));
 const sharedEnv = {
   ...productionEnv,
   NODE_ENV: "production",
-  BACKEND_INTERNAL_URL: "http://127.0.0.1:41050",
-  CMS_BACKEND_INTERNAL_URL: "http://127.0.0.1:41051",
-  CMS_INTERNAL_URL: "http://127.0.0.1:41061",
-  CMS_BACKEND_PROXY_URL: "http://127.0.0.1:41051",
+  BACKEND_INTERNAL_URL: "http://127.0.0.1:6050",
+  CMS_BACKEND_INTERNAL_URL: "http://127.0.0.1:6051",
+  CMS_INTERNAL_URL: "http://127.0.0.1:6061",
+  CMS_BACKEND_PROXY_URL: "http://127.0.0.1:6051",
   LANDING_BUILDER_API_URL: "http://127.0.0.1:41110",
   LANDING_BUILDER_PUBLIC_URL: "http://127.0.0.1:41112",
   LANDING_BUILDER_ASSET_PREFIX:
@@ -32,25 +32,25 @@ const sharedEnv = {
 const backendEnv = {
   ...sharedEnv,
   HOST: "127.0.0.1",
-  PORT: "41050",
+  PORT: "6050",
 };
 
 const frontendEnv = {
   ...sharedEnv,
   HOSTNAME: "127.0.0.1",
-  PORT: "41060",
+  PORT: "6060",
 };
 
 const cmsBackendEnv = {
   ...sharedEnv,
   HOST: "127.0.0.1",
-  PORT: "41051",
+  PORT: "6051",
 };
 
 const cmsEnv = {
   ...sharedEnv,
   HOSTNAME: "127.0.0.1",
-  PORT: "41061",
+  PORT: "6061",
 };
 
 const landingBuilderBackendEnv = {
@@ -80,7 +80,7 @@ const hasLandingBuilderFrontendArtifact = fs.existsSync(landingBuilderFrontendSc
 module.exports = {
   apps: [
     {
-      name: "rodogarcia-backend-prod",
+      name: "site-api-prod",
       cwd: path.join(rootDir, "site", "backend"),
       script: "dist/server.js",
       interpreter: "node",
@@ -97,7 +97,7 @@ module.exports = {
       error_file: path.join(rootDir, "logs", "rodogarcia-backend-error.log"),
     },
     {
-      name: "rodogarcia-frontend-prod",
+      name: "site-prod",
       cwd: path.join(rootDir, "site", "frontend", "dist-prod"),
       script: "server.js",
       interpreter: "node",
@@ -113,7 +113,7 @@ module.exports = {
       error_file: path.join(rootDir, "logs", "rodogarcia-frontend-error.log"),
     },
     ...(hasCmsBackendArtifact ? [{
-      name: "rodogarcia-cms-backend-prod",
+      name: "cms-api-prod",
       cwd: path.join(rootDir, "cms", "backend"),
       script: "dist/server.js",
       interpreter: "node",
@@ -129,7 +129,7 @@ module.exports = {
       error_file: path.join(rootDir, "logs", "rodogarcia-cms-backend-error.log"),
     }] : []),
     {
-      name: "rodogarcia-cms-prod",
+      name: "cms-prod",
       cwd: path.join(rootDir, "cms", "frontend", "dist-prod"),
       script: "server.js",
       interpreter: "node",
@@ -145,7 +145,7 @@ module.exports = {
       error_file: path.join(rootDir, "logs", "rodogarcia-cms-error.log"),
     },
     ...(hasLandingBuilderBackendArtifact ? [{
-      name: "rodogarcia-landing-builder-backend-prod",
+      name: "landing-api-prod",
       cwd: path.join(rootDir, "landing-builder", "backend"),
       script: "dist/server.js",
       interpreter: "node",
@@ -161,7 +161,7 @@ module.exports = {
       error_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-backend-error.log"),
     }] : []),
     ...(hasLandingBuilderFrontendArtifact ? [{
-      name: "rodogarcia-landing-builder-prod",
+      name: "landing-prod",
       cwd: path.join(rootDir, "landing-builder", "frontend", "dist-prod"),
       script: "server.js",
       interpreter: "node",

@@ -76,14 +76,14 @@ cmd /c iniciar-prod.bat
 
 O script executa `npm ci` pelos lockfiles, valida ambiente, typecheck, testes dos três backends, builds e hardening dos quatro artefatos centrais antes de interromper os processos ativos. Após o pre-flight, gera os candidatos do Builder, promove os seis artefatos, inicia os processos privados e reverte os artefatos anteriores se algum health falhar. Antes do primeiro rollout da topologia, a equipe precisa conferir os artefatos ativos ou aprovar um fluxo inicial explícito; um processo sem versão anterior remove somente sua candidata no rollback:
 
-- Site Next: `127.0.0.1:41060`
-- Backend público Express: `127.0.0.1:41050`
-- API CMS Express: `127.0.0.1:41051`
-- CMS Next privado: `127.0.0.1:41061`
+- Site Next: `127.0.0.1:6060`
+- Backend público Express: `127.0.0.1:6050`
+- API CMS Express: `127.0.0.1:6051`
+- CMS Next privado: `127.0.0.1:6061`
 - API do Landing Builder: `127.0.0.1:41110`
 - Landing Builder: `127.0.0.1:41112`
 
-O Cloudflare publica somente o hostname do site em `41060`; `/admin` é encaminhado internamente para o CMS em `41061`. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
+O Cloudflare publica somente o hostname do site em `6060`; `/admin` é encaminhado internamente para o CMS em `6061`. Consulte `docs/operacao-producao.md` para o contrato de ambiente, storage e tunnel.
 
 ## Estrutura
 

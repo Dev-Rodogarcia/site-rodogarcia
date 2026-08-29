@@ -62,10 +62,12 @@ function hasServer(artifact) {
   return exists(path.join(artifact, "server.js"));
 }
 
-function assertArtifacts(property, description) {
+function assertArtifacts(property, description, { initialRollout = false } = {}) {
   const invalid = artifacts.filter((artifact) => {
     if (hasServer(artifact[property])) return false;
-    return property === "active" && artifact.allowMissingActive === true ? false : true;
+    return property === "active" && (artifact.allowMissingActive === true || initialRollout)
+      ? false
+      : true;
   });
   if (invalid.length > 0) {
     throw new Error(
@@ -74,9 +76,12 @@ function assertArtifacts(property, description) {
   }
 }
 
-function assertRollbackArtifacts() {
+function assertRollbackArtifacts({ initialRollout = false } = {}) {
   const invalid = artifacts.filter(
-    (artifact) => !hasServer(artifact.previous) && artifact.allowMissingActive !== true
+    (artifact) =>
+      !hasServer(artifact.previous) &&
+      artifact.allowMissingActive !== true &&
+      !initialRollout
   );
   if (invalid.length > 0) {
     throw new Error(
@@ -93,14 +98,14 @@ function move(source, target) {
   fs.renameSync(source, target);
 }
 
-function verify() {
-  assertArtifacts("staged", "Artefato em staging");
-  assertArtifacts("active", "Artefato ativo para rollback");
+function verify(options) {
+  assertArtifacts("staged", "Artefato em staging", options);
+  assertArtifacts("active", "Artefato ativo para rollback", options);
   console.log("Artefatos em staging validados.");
 }
 
-function promote() {
-  verify();
+function promote(options) {
+  verify(options);
   const archived = [];
   const activated = [];
 
@@ -138,8 +143,8 @@ function promote() {
   console.log("Artefatos de produção promovidos; a versão anterior foi preservada.");
 }
 
-function rollback() {
-  assertRollbackArtifacts();
+function rollback(options) {
+  assertRollbackArtifacts(options);
   const archived = [];
   const restored = [];
 
@@ -175,18 +180,28 @@ function rollback() {
     throw error;
   }
 
-  console.log("Rollback de artefatos concluído; as versões candidatas foram preservadas em *.failed.");
+  if (options.initialRollout) {
+    console.log("Rollback inicial concluído; artefatos sem versão anterior foram preservados em *.failed.");
+  } else {
+    console.log("Rollback de artefatos concluído; as versões candidatas foram preservadas em *.failed.");
+  }
 }
 
-const command = process.argv[2] ?? "--verify";
+const [command = "--verify", ...flags] = process.argv.slice(2);
+const initialRollout = flags.includes("--initial-rollout");
+const invalidFlags = flags.filter((flag) => flag !== "--initial-rollout");
+const options = { initialRollout };
 
 try {
+  if (invalidFlags.length > 0) {
+    throw new Error(`Opção desconhecida: ${invalidFlags.join(", ")}`);
+  }
   if (command === "--verify") {
-    verify();
+    verify(options);
   } else if (command === "--promote") {
-    promote();
+    promote(options);
   } else if (command === "--rollback") {
-    rollback();
+    rollback(options);
   } else {
     throw new Error(`Comando desconhecido: ${command}`);
   }

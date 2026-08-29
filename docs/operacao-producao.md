@@ -8,14 +8,14 @@ O Rodogarcia não é uma SPA estática: o site Next renderiza Server Components,
 
 | Componente | Bind local | Função |
 | --- | --- | --- |
-| Express público (`site/backend/dist/server.js`) | `127.0.0.1:41050` | ESL e consultas públicas de CEP/CNPJ. |
-| Express do CMS (`cms/backend/dist/server.js`) | `127.0.0.1:41051` | Auth, admin, conteúdo, SEO, mídia, uploads, formulários, consentimento, analytics, popup, leads, sessões e scheduler. |
-| Next do site (`site/frontend/dist-prod/server.js`) | `127.0.0.1:41060` | Site público, headers e gateway interno. |
-| Next do CMS (`cms/frontend/dist-prod/server.js`) | `127.0.0.1:41061` | Painel com `basePath: /admin`. |
+| Express público (`site/backend/dist/server.js`) | `127.0.0.1:6050` | ESL e consultas públicas de CEP/CNPJ. |
+| Express do CMS (`cms/backend/dist/server.js`) | `127.0.0.1:6051` | Auth, admin, conteúdo, SEO, mídia, uploads, formulários, consentimento, analytics, popup, leads, sessões e scheduler. |
+| Next do site (`site/frontend/dist-prod/server.js`) | `127.0.0.1:6060` | Site público, headers e gateway interno. |
+| Next do CMS (`cms/frontend/dist-prod/server.js`) | `127.0.0.1:6061` | Painel com `basePath: /admin`. |
 | API Landing Builder (`landing-builder/backend/dist/server.js`) | `127.0.0.1:41110` | API privada de campanhas, mídias e prévias. |
 | Next Landing Builder (`landing-builder/frontend/dist-prod/server.js`) | `127.0.0.1:41112` | Renderizador de campanhas encaminhado pelo gateway. |
 
-O site em `41060` encaminha `/admin/*` ao painel em `41061`. Também encaminha ao backend do CMS em `41051` as rotas de auth/admin, conteúdo/SEO/mídia, uploads, consentimento, tracking, analytics, popup, formulários, leads e melhorias; `/landing-assets/_next/*`, `/landing-media/*` e os slugs de campanha seguem para o Builder em `41112`. ESL, CEP e CNPJ continuam no backend público em `41050`.
+O site em `6060` encaminha `/admin/*` ao painel em `6061`. Também encaminha ao backend do CMS em `6051` as rotas de auth/admin, conteúdo/SEO/mídia, uploads, consentimento, tracking, analytics, popup, formulários, leads e melhorias; `/landing-assets/_next/*`, `/landing-media/*` e os slugs de campanha seguem para o Builder em `41112`. ESL, CEP e CNPJ continuam no backend público em `6050`.
 
 Não existe hostname ou ingresso público para a API do CMS. O navegador usa `/api/*` e `/uploads/*` no hostname do site; a escolha do destino é interna ao gateway. O hostname `sitebackend.rodogarcia.com.br`, quando usado, aponta somente ao backend público.
 
@@ -33,9 +33,9 @@ Na VM, crie `.env.production.local` a partir de `.env.production.example`. O arq
 - `ADMIN_SETUP_CODE`, `SESSION_SECRET` ou `JWT_SECRET` e `ESL_OPERATION_SECRET` com valores fortes e distintos.
 - `STORAGE_ROOT` e `UPLOADS_DIR` com caminhos absolutos no volume persistente.
 - `TRUST_PROXY=1` quando o Next/tunnel for o salto confiável até os Express.
-- `BACKEND_INTERNAL_URL=http://127.0.0.1:41050` para a API pública.
-- `CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:41051` e `CMS_BACKEND_PROXY_URL=http://127.0.0.1:41051` para a API do CMS.
-- `CMS_INTERNAL_URL=http://127.0.0.1:41061` para o painel CMS.
+- `BACKEND_INTERNAL_URL=http://127.0.0.1:6050` para a API pública.
+- `CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:6051` e `CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051` para a API do CMS.
+- `CMS_INTERNAL_URL=http://127.0.0.1:6061` para o painel CMS.
 - `LANDING_BUILDER_SERVICE_TOKEN` forte e `LANDING_BUILDER_STORAGE_ROOT` absoluto, externo ao repositório, para o Builder. O inicializador fixa suas URLs internas em `41110` e `41112`.
 - `NEXT_PUBLIC_SITE_URL=https://site.rodogarcia.com.br`, variável pública usada somente para links, previews e assets do site.
 
@@ -47,9 +47,9 @@ O desenvolvimento integrado usa `127.0.0.1:31012` (backend público), `31013` (A
 
 ## PM2 e rollout manual
 
-O `ecosystem.config.js` define `rodogarcia-backend-prod`, `rodogarcia-cms-backend-prod`, `rodogarcia-frontend-prod`, `rodogarcia-cms-prod`, `rodogarcia-landing-builder-backend-prod` e `rodogarcia-landing-builder-prod`, todos com bind local. Ele lê `.env.production.local` (ou o caminho em `RODOGARCIA_ENV_FILE`) sem versionar valores sensíveis.
+O `ecosystem.config.js` define `site-api-prod`, `site-prod`, `cms-api-prod`, `cms-prod`, `landing-api-prod` e `landing-prod`, todos com bind local. Ele lê `.env.production.local` (ou o caminho em `RODOGARCIA_ENV_FILE`) sem versionar valores sensíveis. Na primeira promoção após essa renomeação, o inicializador remove também os nomes legados `rodogarcia-*` deste projeto para evitar duplicidade.
 
-Somente a equipe responsável, em janela autorizada, pode executar o rollout. Antes disso, ela deve criar e conferir backup manual com `node scripts/backup-storage.js`, migrar e conferir os artefatos ativos (ou aprovar um fluxo inicial explícito), validar os quatro artefatos centrais e os dois candidatos do Builder, e conferir `http://127.0.0.1:41050/health`, `http://127.0.0.1:41051/health`, `http://127.0.0.1:41110/health`, `http://127.0.0.1:41112/health` e `http://127.0.0.1:41060/admin/auth/entrar`. O fluxo de promoção preserva `*.previous`, deixa candidata falha em `*.failed` e restaura os artefatos anteriores se o start ou health falhar. Em primeiro rollout sem artefato anterior, o rollback remove somente a candidata daquele processo e religa os que tinham artefato ativo.
+Somente a equipe responsável, em janela autorizada, pode executar o rollout. Antes disso, ela deve criar e conferir backup manual com `node scripts/backup-storage.js`, migrar e conferir os artefatos ativos (ou aprovar um fluxo inicial explícito), validar os quatro artefatos centrais e os dois candidatos do Builder, e conferir `http://127.0.0.1:6050/health`, `http://127.0.0.1:6051/health`, `http://127.0.0.1:41110/health`, `http://127.0.0.1:41112/health` e `http://127.0.0.1:6060/admin/auth/entrar`. O fluxo de promoção preserva `*.previous`, deixa candidata falha em `*.failed` e restaura os artefatos anteriores se o start ou health falhar. Em primeiro rollout sem artefato anterior, o rollback remove somente a candidata daquele processo e religa os que tinham artefato ativo.
 
 ## Cloudflare Tunnel
 
@@ -58,12 +58,12 @@ O arquivo do `cloudflared` pertence à infraestrutura, não ao repositório. O c
 ```yaml
 ingress:
   - hostname: site.rodogarcia.com.br
-    service: http://127.0.0.1:41060
+    service: http://127.0.0.1:6060
   - hostname: sitebackend.rodogarcia.com.br
-    service: http://127.0.0.1:41050
+    service: http://127.0.0.1:6050
 ```
 
-Não crie ingressos para `41051` ou `41061`. No Cloudflare, não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis; cache longo cobre somente assets com hash. Bloqueie caminhos de desenvolvimento que não fazem parte do Next de produção, como `/src/*`, `/node_modules/*`, `/@vite/*`, `/@react-refresh/*` e `/@fs/*`.
+Não crie ingressos para `6051` ou `6061`. No Cloudflare, não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis; cache longo cobre somente assets com hash. Bloqueie caminhos de desenvolvimento que não fazem parte do Next de produção, como `/src/*`, `/node_modules/*`, `/@vite/*`, `/@react-refresh/*` e `/@fs/*`.
 
 ## Artefatos e hardening isolado
 
@@ -76,4 +76,4 @@ O pré-flight produz quatro artefatos isolados, sem tocar os ativos:
 | `site/frontend/dist-prod.test` | `42511` |
 | `cms/frontend/dist-prod.test` | `42513` |
 
-O hardening só aceita esses diretórios pelas variáveis `SECURITY_TEST_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_FRONTEND_ARTIFACT_DIR` e `SECURITY_TEST_CMS_ARTIFACT_DIR`; ele recusa `.next` e artefatos ativos. Depois do hardening aprovado, os quatro candidatos centrais e os dois do Builder são gerados como `dist.next` ou `dist-prod.next` nas portas privadas `41050`/`41051`/`41060`/`41061`/`41110`/`41112`. Nenhum teste deve apontar para processos ou storage de produção.
+O hardening só aceita esses diretórios pelas variáveis `SECURITY_TEST_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_FRONTEND_ARTIFACT_DIR` e `SECURITY_TEST_CMS_ARTIFACT_DIR`; ele recusa `.next` e artefatos ativos. Depois do hardening aprovado, os quatro candidatos centrais e os dois do Builder são gerados como `dist.next` ou `dist-prod.next` nas portas privadas `6050`/`6051`/`6060`/`6061`/`41110`/`41112`. Nenhum teste deve apontar para processos ou storage de produção.

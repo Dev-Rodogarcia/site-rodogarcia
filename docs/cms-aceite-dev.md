@@ -79,5 +79,5 @@ Em todas as linhas, conferir carregamento, estado vazio ou erro quando a fonte n
 ## Fechamento do gate
 
 - [ ] Registrar no `states.md` os itens efetivamente validados e manter pendente apenas o que não foi executado.
-- [ ] Não promover para produção nesta etapa. O rollout continua exigindo backup manual, janela autorizada, pré-flight dos quatro artefatos centrais, candidatos do Landing Builder e health de `41050`/`41051`/`41110`/`41112` e de `/admin/auth/entrar` pelo gateway.
+- [ ] Não promover para produção nesta etapa. O rollout continua exigindo backup manual, janela autorizada, pré-flight dos quatro artefatos centrais, candidatos do Landing Builder e health de `6050`/`6051`/`41110`/`41112` e de `/admin/auth/entrar` pelo gateway.
 - [ ] Registrar os cenários de criação, publicação, fallback por slug, mídia e prévias de campanhas somente no aceite próprio do Landing Builder.

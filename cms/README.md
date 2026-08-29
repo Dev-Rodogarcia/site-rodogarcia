@@ -31,7 +31,7 @@ npm run typecheck
 Variáveis privadas:
 
 - `CMS_INTERNAL_URL` encaminha `/admin/*` do site ao painel CMS.
-- `CMS_BACKEND_INTERNAL_URL` encaminha, a partir do site, as APIs e uploads de ownership do CMS à API em `31013` no DEV e `41051` no PROD.
+- `CMS_BACKEND_INTERNAL_URL` encaminha, a partir do site, as APIs e uploads de ownership do CMS à API em `31013` no DEV e `6051` no PROD.
 - `CMS_BACKEND_PROXY_URL` é usada somente pelo painel aberto diretamente em DEV; aponta para a mesma API do CMS.
 - `CMS_STORAGE_ROOT` e `CMS_UPLOADS_DIR`, quando definidos, devem apontar para o mesmo volume persistente do CMS. Na configuração padrão, o root físico continua `site/backend/storage`.
 - `NEXT_PUBLIC_SITE_URL` é pública e serve apenas para links, logo, prévias e assets do site.
@@ -44,11 +44,11 @@ Esta mudança não inicia nem publica produção. Quando houver janela autorizad
 
 | Processo | Bind | Artefato |
 | --- | --- | --- |
-| Backend público | `127.0.0.1:41050` | `site/backend/dist/server.js` |
-| API do CMS | `127.0.0.1:41051` | `cms/backend/dist/server.js` |
-| Site Next | `127.0.0.1:41060` | `site/frontend/dist-prod/server.js` |
-| CMS Next | `127.0.0.1:41061` | `cms/frontend/dist-prod/server.js` |
+| Backend público | `127.0.0.1:6050` | `site/backend/dist/server.js` |
+| API do CMS | `127.0.0.1:6051` | `cms/backend/dist/server.js` |
+| Site Next | `127.0.0.1:6060` | `site/frontend/dist-prod/server.js` |
+| CMS Next | `127.0.0.1:6061` | `cms/frontend/dist-prod/server.js` |
 | API Landing Builder | `127.0.0.1:41110` | `landing-builder/backend/dist/server.js` |
 | Next Landing Builder | `127.0.0.1:41112` | `landing-builder/frontend/dist-prod/server.js` |
 
-O site em `41060` encaminha `/admin/*` ao painel em `41061`, as rotas de ownership do CMS à API em `41051` e os assets, mídia e slugs de campanha ao Builder em `41112`. Não existe hostname, túnel ou CORS público próprio para a API do CMS. Consulte `docs/operacao-producao.md` para o rollout manual, backup e hardening isolado.
+O site em `6060` encaminha `/admin/*` ao painel em `6061`, as rotas de ownership do CMS à API em `6051` e os assets, mídia e slugs de campanha ao Builder em `41112`. Não existe hostname, túnel ou CORS público próprio para a API do CMS. Consulte `docs/operacao-producao.md` para o rollout manual, backup e hardening isolado.
