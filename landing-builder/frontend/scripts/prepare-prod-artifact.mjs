@@ -11,11 +11,15 @@ if (!allowedNextBuildDirectories.has(nextBuildDirectoryName)) {
   throw new Error("NEXT_BUILD_DIST_DIR deve ser .next ou .next.test.");
 }
 
-const artifactDirectoryName = process.env.PROD_ARTIFACT_DIR?.trim() || "dist-prod";
+const artifactDirectoryName = process.env.PROD_ARTIFACT_DIR?.trim()
+  || (nextBuildDirectoryName === ".next.test" ? "dist-prod.test" : "dist-prod");
 const allowedArtifactDirectories = new Set(["dist-prod", "dist-prod.next", "dist-prod.test"]);
 
 if (!allowedArtifactDirectories.has(artifactDirectoryName)) {
   throw new Error("PROD_ARTIFACT_DIR deve ser dist-prod, dist-prod.next ou dist-prod.test.");
+}
+if (nextBuildDirectoryName === ".next.test" && artifactDirectoryName !== "dist-prod.test") {
+  throw new Error("Build isolado so pode preparar dist-prod.test.");
 }
 
 const nextDir = path.join(frontendRoot, nextBuildDirectoryName);

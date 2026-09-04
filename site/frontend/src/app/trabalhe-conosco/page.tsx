@@ -433,9 +433,9 @@ export default async function TrabalheConoscoPage() {
                   label: careersPage.finalCta.buttons[1]?.label || "Falar com contato",
                   href: careersPage.finalCta.buttons[1]?.url || site.contact,
                   external: careersPage.finalCta.buttons[1]?.external,
-                  variant: "secondary",
+                  variant: "contrast",
                 }}
-                className="min-h-[64px] w-full min-w-0 border-transparent bg-slate-900 text-[15px] text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] hover:bg-slate-800 hover:text-white hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:ring-slate-900/30 sm:min-w-[260px]"
+                className="min-h-[64px] w-full min-w-0 text-[15px] sm:min-w-[260px]"
               />
             </div>
             

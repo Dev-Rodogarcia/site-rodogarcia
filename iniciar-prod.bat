@@ -41,7 +41,7 @@ set "LANDING_BUILDER_SITE_URL=%NEXT_PUBLIC_SITE_URL%"
 if not defined LANDING_BUILDER_ASSET_PREFIX set "LANDING_BUILDER_ASSET_PREFIX=/landing-assets"
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\validate-production-inputs.ps1" -RepositoryRoot "%CD%"
-if not "%ERRORLEVEL%"=="0" goto :preflight_failed
+if errorlevel 1 goto :preflight_failed
 where java >nul 2>nul
 if not "%ERRORLEVEL%"=="0" (
   echo [Rodogarcia PROD] Java compativel com os Maven Wrappers nao foi encontrado no PATH.
@@ -58,7 +58,7 @@ if not "%ERRORLEVEL%"=="0" (
   goto :preflight_failed
 )
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\assert-production-preflight-isolated.ps1"
-if not "%ERRORLEVEL%"=="0" goto :preflight_failed
+if errorlevel 1 goto :preflight_failed
 
 set "PRODUCTION_SITE_URL=%NEXT_PUBLIC_SITE_URL%"
 set "PRODUCTION_PUBLIC_BACKEND_URL=%NEXT_PUBLIC_BACKEND_URL%"

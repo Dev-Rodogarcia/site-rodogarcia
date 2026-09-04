@@ -23,6 +23,8 @@
 - Não há banco de dados, JPA, Hibernate, Flyway ou outra persistência além de JSON local.
 - O site encaminha `/admin/*` ao CMS, rotas administrativas e `/uploads/*` à API CMS, CEP/CNPJ/ESL à API pública e assets, mídia e fallback de slug ao Builder. O navegador não recebe URLs internas ou tokens de serviço.
 - No formulário público de cotação, os blocos de dados acompanham visualmente o tipo de carga selecionado: carga fracionada usa tom e ícone verdes e carga fechada tom e ícone azuis. As camadas de cor fazem crossfade suave e escalonado, respeitam redução de movimento e não alteram campos, cálculo ou envio.
+- O crédito canônico do rodapé é “Desenvolvido por Lucas Andrade” e preserva o link externo seguro para o perfil profissional informado no CMS.
+- Os CTAs de contraste sobre superfícies claras usam a variante explícita `contrast`: fundo azul-escuro, texto e ícone brancos, hover visível e sem concorrer com o fundo claro da variante secundária.
 
 ## Portas e artefatos
 
@@ -37,8 +39,10 @@
 - Cada processo Spring iniciado pelo fluxo DEV recebe explicitamente sua porta canônica por launcher isolado: site `31012`, CMS `31013` e Builder `36110`. O launcher usa atribuições `set "chave=valor"`, sem aspas/whitespace propagados para `HOST`, `PORT` ou as variáveis do Builder.
 - A promoção preserva rollback completo quando existe conjunto ativo; `RODOGARCIA_INITIAL_PROD_ROLLOUT=1` continua restrito ao caso excepcional em que esse conjunto esteja ausente.
 - O preflight de produção recusa os seis listeners DEV antes de executar `npm ci`, pois as instalações compartilham os `node_modules` do checkout e poderiam corromper o runtime DEV em uso. O encerramento/início do DEV permanece manual.
+- As validações PowerShell iniciais do `iniciar-prod.bat` usam retorno explícito `0`/`1` e `if errorlevel 1`: qualquer bloqueio de ambiente ou listener DEV encerra o preflight antes de instalação, build ou acesso a artefatos ativos.
 - Os helpers batch de instalação, Maven, typecheck e staging normalizam qualquer retorno diferente de `0` (inclusive o `EPERM -4048` negativo do npm no Windows) para falha explícita; o orquestrador compara o status literal e não pode avançar ao Maven/typecheck após uma instalação incompleta.
 - O hardening isolado cobre site e CMS com `site/backend/dist.test/server.jar`, `cms/backend/dist.test/server.jar`, `site/frontend/dist-prod.test` e `cms/frontend/dist-prod.test`. O Builder tem Maven Wrapper e suíte de contrato próprios.
+- Os preparadores de artefato Next derivam `dist-prod.test` do build `.next.test` e o impõem como único destino permitido nesse modo; uma falha de propagação de ambiente não pode remover `dist-prod` ativo.
 
 ## Contratos, Segurança e Persistência
 
@@ -70,6 +74,7 @@
 - `site/frontend`, `cms/frontend` e `landing-builder/frontend`: typecheck e build isolado em `.next.test` passaram.
 - Após a sinalização visual do tipo de carga na cotação, `site/frontend` passou novamente em typecheck e build isolado em `.next.test`.
 - `node scripts/tests/test-production-operations.js` passou, inclusive a guarda contra retorno de `call :rótulo`, a recusa do DEV ativo e a propagação correta do `EPERM -4048` do npm no `iniciar-prod.bat`; os helpers PowerShell e a promoção de artefatos também foram validados estaticamente.
+- A guarda real do `cmd` com listeners DEV ativos retornou `1` e bloqueou antes do build. A preparação isolada dos três frontends foi exercitada em fixture; no site, o build em `.next.test` e o preparo produziram `dist-prod.test` sem alterar `dist-prod`.
 - O hardening isolado de site/CMS passou integralmente com JARs e storage temporários. Ele não usou portas ou artefatos de produção.
 
 ## Tarefas Pendentes

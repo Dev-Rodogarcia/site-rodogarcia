@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export interface PageAction {
   label: string;
   href: string;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "contrast" | "ghost";
   external?: boolean;
 }
 
@@ -707,6 +707,8 @@ export function ActionLink({
       ? tone === "dark"
         ? "border border-white/12 bg-white/8 text-white hover:bg-white/12 focus-visible:ring-white/12"
         : "border border-[var(--border)] bg-white/78 text-[var(--foreground)] hover:bg-[var(--color-surface-2)] focus-visible:ring-[var(--primary)]/12"
+      : action.variant === "contrast"
+        ? "border border-slate-900 bg-slate-900 text-white shadow-[0_12px_32px_rgba(15,23,42,0.15)] hover:bg-slate-800 hover:shadow-[0_20px_48px_rgba(15,23,42,0.25)] focus-visible:ring-slate-900/30"
       : action.variant === "ghost"
         ? tone === "dark"
           ? "bg-transparent text-white/82 hover:bg-white/8 focus-visible:ring-white/12"
@@ -718,7 +720,7 @@ export function ActionLink({
   const content = (
     <>
       <span className="min-w-0 truncate">{action.label}</span>
-      {action.variant === "secondary" ? (
+      {action.variant === "secondary" || action.variant === "contrast" ? (
         <ArrowUpRight size={18} weight="bold" className="shrink-0" />
       ) : (
         <ArrowRight size={18} weight="bold" className="shrink-0" />

@@ -123,9 +123,9 @@ function testProductionLauncherUsesExternalBatchHelpers() {
   const launcher = fs.readFileSync(path.join(ROOT_DIR, "iniciar-prod.bat"), "utf8");
   assert.doesNotMatch(launcher, /\bcall\s+:/i);
   assert.match(launcher, /set\s+"ERRORLEVEL="/i);
-  assert.doesNotMatch(launcher, /\bif\s+errorlevel\s+1\b/i);
   assert.match(launcher, /validate-production-inputs\.ps1/i);
   assert.match(launcher, /assert-production-preflight-isolated\.ps1/i);
+  assert.match(launcher, /assert-production-preflight-isolated\.ps1"\s*\r?\nif\s+errorlevel\s+1\s+goto\s+:preflight_failed/i);
   assert.match(launcher, /validate-production-rollout-mode\.bat/i);
   assert.match(launcher, /verify-production-spring-backend\.bat/i);
   assert.match(launcher, /RODOGARCIA_INITIAL_PROD_ROLLOUT/i);
@@ -163,10 +163,76 @@ function testNegativeNpmExitStopsTheInstallHelper() {
   }
 }
 
+function testIsolatedNextArtifactNeverTouchesTheActiveArtifact() {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "rodogarcia-next-artifact-test-"));
+  const frontends = [
+    { project: ["site", "frontend"], standaloneApp: ["site", "frontend"] },
+    { project: ["cms", "frontend"], standaloneApp: ["cms", "frontend"] },
+    { project: ["landing-builder", "frontend"], standaloneApp: [] },
+  ];
+
+  try {
+    for (const frontend of frontends) {
+      const projectRoot = path.join(fixture, ...frontend.project);
+      const sourceScript = path.join(
+        ROOT_DIR,
+        ...frontend.project,
+        "scripts",
+        "prepare-prod-artifact.mjs"
+      );
+      const script = path.join(projectRoot, "scripts", "prepare-prod-artifact.mjs");
+      const nextTestRoot = path.join(projectRoot, ".next.test");
+      const standaloneRoot = path.join(nextTestRoot, "standalone", ...frontend.standaloneApp);
+
+      fs.mkdirSync(path.dirname(script), { recursive: true });
+      fs.copyFileSync(sourceScript, script);
+      writeFile(path.join(standaloneRoot, "server.js"), "// isolated artifact\n");
+      writeFile(path.join(nextTestRoot, "static", "chunk.js"), "// static\n");
+      writeFile(path.join(nextTestRoot, "BUILD_ID"), "isolated-test\n");
+      writeFile(path.join(projectRoot, "dist-prod", "server.js"), "// active artifact\n");
+
+      const blocked = spawnSync(process.execPath, [script], {
+        cwd: projectRoot,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          NEXT_BUILD_DIST_DIR: ".next.test",
+          PROD_ARTIFACT_DIR: "dist-prod",
+        },
+      });
+      assert.notEqual(blocked.status, 0);
+      assert.match(blocked.stderr, /Build isolado so pode preparar dist-prod\.test/);
+      assert.equal(
+        fs.readFileSync(path.join(projectRoot, "dist-prod", "server.js"), "utf8"),
+        "// active artifact\n"
+      );
+
+      const prepared = spawnSync(process.execPath, [script], {
+        cwd: projectRoot,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          NEXT_BUILD_DIST_DIR: ".next.test",
+          PROD_ARTIFACT_DIR: "",
+        },
+      });
+      assert.equal(prepared.status, 0, prepared.stderr);
+      assert.ok(fs.existsSync(path.join(projectRoot, "dist-prod.test", "server.js")));
+      assert.equal(
+        fs.readFileSync(path.join(projectRoot, "dist-prod", "server.js"), "utf8"),
+        "// active artifact\n"
+      );
+    }
+  } finally {
+    remove(fixture);
+  }
+}
+
 testVerifyRequiresActiveSpringArtifacts();
 testPromotionAndRollbackPreserveSpringArtifacts();
 testInitialRolloutAllowsMissingActiveArtifacts();
 testExternalBackupManifestTargetsItsOriginalSource();
 testProductionLauncherUsesExternalBatchHelpers();
 testNegativeNpmExitStopsTheInstallHelper();
+testIsolatedNextArtifactNeverTouchesTheActiveArtifact();
 console.log("ALL PRODUCTION OPERATION TESTS PASS");

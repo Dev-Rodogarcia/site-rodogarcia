@@ -17,13 +17,17 @@ const workspaceRoot = path.resolve(cmsRoot, "../..");
 const standaloneAppDir = path.join(standaloneDir, path.relative(workspaceRoot, cmsRoot));
 const staticDir = path.join(nextDir, "static");
 const publicDir = path.join(cmsRoot, "public");
-const artifactDirectoryName = process.env.PROD_ARTIFACT_DIR?.trim() || "dist-prod";
+const artifactDirectoryName = process.env.PROD_ARTIFACT_DIR?.trim()
+  || (nextBuildDirectoryName === ".next.test" ? "dist-prod.test" : "dist-prod");
 const allowedArtifactDirectories = new Set(["dist-prod", "dist-prod.next", "dist-prod.test"]);
 
 if (!allowedArtifactDirectories.has(artifactDirectoryName)) {
   throw new Error(
     "PROD_ARTIFACT_DIR deve ser dist-prod, dist-prod.next ou dist-prod.test."
   );
+}
+if (nextBuildDirectoryName === ".next.test" && artifactDirectoryName !== "dist-prod.test") {
+  throw new Error("Build isolado so pode preparar dist-prod.test.");
 }
 
 const outputDir = path.join(cmsRoot, artifactDirectoryName);

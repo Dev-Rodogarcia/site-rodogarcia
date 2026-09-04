@@ -16,5 +16,5 @@ if ($listeners.Count -eq 0) {
 }
 
 $activePorts = ($listeners | ForEach-Object { $_.LocalPort } | Sort-Object -Unique) -join ', '
-Write-Error "[Rodogarcia PROD] Processos DEV ativos nas portas $activePorts. O pre-flight usa npm ci e nao pode compartilhar node_modules com DEV. Encerre o DEV manualmente e execute novamente."
+[Console]::Error.WriteLine("[Rodogarcia PROD] Processos DEV ativos nas portas $activePorts. O pre-flight usa npm ci e nao pode compartilhar node_modules com DEV. Encerre o DEV manualmente e execute novamente.")
 exit 1
