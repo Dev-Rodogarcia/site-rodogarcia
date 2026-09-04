@@ -4,22 +4,20 @@ const path = require("node:path");
 const rootDir = path.resolve(__dirname, "..");
 const artifacts = [
   {
-    label: "backend",
+    label: "backend Spring público",
     active: path.join(rootDir, "site", "backend", "dist"),
     staged: path.join(rootDir, "site", "backend", "dist.next"),
     previous: path.join(rootDir, "site", "backend", "dist.previous"),
     failed: path.join(rootDir, "site", "backend", "dist.failed"),
+    entrypoint: "server.jar",
   },
   {
-    label: "backend do CMS",
+    label: "backend Spring do CMS",
     active: path.join(rootDir, "cms", "backend", "dist"),
     staged: path.join(rootDir, "cms", "backend", "dist.next"),
     previous: path.join(rootDir, "cms", "backend", "dist.previous"),
     failed: path.join(rootDir, "cms", "backend", "dist.failed"),
-    // O primeiro rollout cria este processo; ainda não há uma versão ativa
-    // para arquivar. Depois da primeira promoção, ele participa normalmente
-    // do rollback pela pasta dist.previous.
-    allowMissingActive: true,
+    entrypoint: "server.jar",
   },
   {
     label: "site",
@@ -27,6 +25,7 @@ const artifacts = [
     staged: path.join(rootDir, "site", "frontend", "dist-prod.next"),
     previous: path.join(rootDir, "site", "frontend", "dist-prod.previous"),
     failed: path.join(rootDir, "site", "frontend", "dist-prod.failed"),
+    entrypoint: "server.js",
   },
   {
     label: "CMS",
@@ -34,14 +33,15 @@ const artifacts = [
     staged: path.join(rootDir, "cms", "frontend", "dist-prod.next"),
     previous: path.join(rootDir, "cms", "frontend", "dist-prod.previous"),
     failed: path.join(rootDir, "cms", "frontend", "dist-prod.failed"),
+    entrypoint: "server.js",
   },
   {
-    label: "backend do Landing Builder",
+    label: "backend Spring do Landing Builder",
     active: path.join(rootDir, "landing-builder", "backend", "dist"),
     staged: path.join(rootDir, "landing-builder", "backend", "dist.next"),
     previous: path.join(rootDir, "landing-builder", "backend", "dist.previous"),
     failed: path.join(rootDir, "landing-builder", "backend", "dist.failed"),
-    // O Builder pode entrar no primeiro rollout depois do site/CMS já ativos.
+    entrypoint: "server.jar",
     allowMissingActive: true,
   },
   {
@@ -50,6 +50,7 @@ const artifacts = [
     staged: path.join(rootDir, "landing-builder", "frontend", "dist-prod.next"),
     previous: path.join(rootDir, "landing-builder", "frontend", "dist-prod.previous"),
     failed: path.join(rootDir, "landing-builder", "frontend", "dist-prod.failed"),
+    entrypoint: "server.js",
     allowMissingActive: true,
   },
 ];
@@ -58,13 +59,13 @@ function exists(targetPath) {
   return fs.existsSync(targetPath);
 }
 
-function hasServer(artifact) {
-  return exists(path.join(artifact, "server.js"));
+function hasEntrypoint(artifact, entrypoint) {
+  return exists(path.join(artifact, entrypoint));
 }
 
 function assertArtifacts(property, description, { initialRollout = false } = {}) {
   const invalid = artifacts.filter((artifact) => {
-    if (hasServer(artifact[property])) return false;
+    if (hasEntrypoint(artifact[property], artifact.entrypoint)) return false;
     return property === "active" && (artifact.allowMissingActive === true || initialRollout)
       ? false
       : true;
@@ -79,7 +80,7 @@ function assertArtifacts(property, description, { initialRollout = false } = {})
 function assertRollbackArtifacts({ initialRollout = false } = {}) {
   const invalid = artifacts.filter(
     (artifact) =>
-      !hasServer(artifact.previous) &&
+      !hasEntrypoint(artifact.previous, artifact.entrypoint) &&
       artifact.allowMissingActive !== true &&
       !initialRollout
   );
@@ -101,7 +102,7 @@ function move(source, target) {
 function verify(options) {
   assertArtifacts("staged", "Artefato em staging", options);
   assertArtifacts("active", "Artefato ativo para rollback", options);
-  console.log("Artefatos em staging validados.");
+  console.log("Artefatos Spring e frontends em staging validados.");
 }
 
 function promote(options) {
@@ -160,7 +161,7 @@ function rollback(options) {
     }
 
     for (const artifact of artifacts) {
-      if (!hasServer(artifact.previous)) continue;
+      if (!hasEntrypoint(artifact.previous, artifact.entrypoint)) continue;
       move(artifact.previous, artifact.active);
       restored.push(artifact);
     }

@@ -1,19 +1,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const dotenv = require("./site/backend/node_modules/dotenv");
+const { readEnvironmentFile } = require("./scripts/parse-environment-file");
 
 const rootDir = __dirname;
 const envFile = process.env.RODOGARCIA_ENV_FILE
   ? path.resolve(rootDir, process.env.RODOGARCIA_ENV_FILE)
   : path.join(rootDir, ".env.production.local");
 
-if (!fs.existsSync(envFile)) {
-  throw new Error(
-    `Arquivo de ambiente de produção não encontrado: ${envFile}. Configure RODOGARCIA_ENV_FILE ou crie .env.production.local.`
-  );
-}
-
-const productionEnv = dotenv.parse(fs.readFileSync(envFile));
+const productionEnv = readEnvironmentFile(envFile);
 const sharedEnv = {
   ...productionEnv,
   NODE_ENV: "production",
@@ -70,11 +64,38 @@ const landingBuilderEnv = {
     productionEnv.NEXT_PUBLIC_SITE_URL || "https://site.rodogarcia.com.br",
 };
 
-const cmsBackendScript = path.join(rootDir, "cms", "backend", "dist", "server.js");
-const hasCmsBackendArtifact = fs.existsSync(cmsBackendScript);
-const landingBuilderBackendScript = path.join(rootDir, "landing-builder", "backend", "dist", "server.js");
-const landingBuilderFrontendScript = path.join(rootDir, "landing-builder", "frontend", "dist-prod", "server.js");
-const hasLandingBuilderBackendArtifact = fs.existsSync(landingBuilderBackendScript);
+function requiredArtifact(label, targetPath) {
+  if (!fs.existsSync(targetPath)) {
+    throw new Error(`Artefato ${label} não encontrado: ${targetPath}`);
+  }
+  return targetPath;
+}
+
+requiredArtifact(
+  "Spring do backend público",
+  path.join(rootDir, "site", "backend", "dist", "server.jar")
+);
+requiredArtifact(
+  "Spring do backend do CMS",
+  path.join(rootDir, "cms", "backend", "dist", "server.jar")
+);
+const landingBuilderBackendJar = requiredArtifact(
+  "Spring do backend do Landing Builder",
+  path.join(
+    rootDir,
+    "landing-builder",
+    "backend",
+    "dist",
+    "server.jar"
+  )
+);
+const landingBuilderFrontendScript = path.join(
+  rootDir,
+  "landing-builder",
+  "frontend",
+  "dist-prod",
+  "server.js"
+);
 const hasLandingBuilderFrontendArtifact = fs.existsSync(landingBuilderFrontendScript);
 
 module.exports = {
@@ -82,9 +103,9 @@ module.exports = {
     {
       name: "site-api-prod",
       cwd: path.join(rootDir, "site", "backend"),
-      script: "dist/server.js",
-      interpreter: "node",
-      // `env` permite `pm2 restart ecosystem.config.js` sem depender de --env.
+      script: "java",
+      args: ["-jar", path.join("dist", "server.jar")],
+      interpreter: "none",
       env: backendEnv,
       env_production: backendEnv,
       autorestart: true,
@@ -112,11 +133,12 @@ module.exports = {
       out_file: path.join(rootDir, "logs", "rodogarcia-frontend-out.log"),
       error_file: path.join(rootDir, "logs", "rodogarcia-frontend-error.log"),
     },
-    ...(hasCmsBackendArtifact ? [{
+    {
       name: "cms-api-prod",
       cwd: path.join(rootDir, "cms", "backend"),
-      script: "dist/server.js",
-      interpreter: "node",
+      script: "java",
+      args: ["-jar", path.join("dist", "server.jar")],
+      interpreter: "none",
       env: cmsBackendEnv,
       env_production: cmsBackendEnv,
       autorestart: true,
@@ -127,7 +149,7 @@ module.exports = {
       time: true,
       out_file: path.join(rootDir, "logs", "rodogarcia-cms-backend-out.log"),
       error_file: path.join(rootDir, "logs", "rodogarcia-cms-backend-error.log"),
-    }] : []),
+    },
     {
       name: "cms-prod",
       cwd: path.join(rootDir, "cms", "frontend", "dist-prod"),
@@ -144,11 +166,12 @@ module.exports = {
       out_file: path.join(rootDir, "logs", "rodogarcia-cms-out.log"),
       error_file: path.join(rootDir, "logs", "rodogarcia-cms-error.log"),
     },
-    ...(hasLandingBuilderBackendArtifact ? [{
+    {
       name: "landing-api-prod",
       cwd: path.join(rootDir, "landing-builder", "backend"),
-      script: "dist/server.js",
-      interpreter: "node",
+      script: "java",
+      args: ["-jar", path.relative(path.join(rootDir, "landing-builder", "backend"), landingBuilderBackendJar)],
+      interpreter: "none",
       env: landingBuilderBackendEnv,
       env_production: landingBuilderBackendEnv,
       autorestart: true,
@@ -159,22 +182,26 @@ module.exports = {
       time: true,
       out_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-backend-out.log"),
       error_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-backend-error.log"),
-    }] : []),
-    ...(hasLandingBuilderFrontendArtifact ? [{
-      name: "landing-prod",
-      cwd: path.join(rootDir, "landing-builder", "frontend", "dist-prod"),
-      script: "server.js",
-      interpreter: "node",
-      env: landingBuilderEnv,
-      env_production: landingBuilderEnv,
-      autorestart: true,
-      watch: false,
-      max_restarts: 10,
-      restart_delay: 3000,
-      kill_timeout: 5000,
-      time: true,
-      out_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-out.log"),
-      error_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-error.log"),
-    }] : []),
+    },
+    ...(hasLandingBuilderFrontendArtifact
+      ? [
+          {
+            name: "landing-prod",
+            cwd: path.join(rootDir, "landing-builder", "frontend", "dist-prod"),
+            script: "server.js",
+            interpreter: "node",
+            env: landingBuilderEnv,
+            env_production: landingBuilderEnv,
+            autorestart: true,
+            watch: false,
+            max_restarts: 10,
+            restart_delay: 3000,
+            kill_timeout: 5000,
+            time: true,
+            out_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-out.log"),
+            error_file: path.join(rootDir, "logs", "rodogarcia-landing-builder-error.log"),
+          },
+        ]
+      : []),
   ],
 };

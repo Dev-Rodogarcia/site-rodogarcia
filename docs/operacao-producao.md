@@ -1,59 +1,63 @@
 # Operação de produção
 
-Este documento descreve o rollout manual futuro. A separação de código para `cms/backend` não inicia, reinicia nem publica produção por si só.
+Este documento descreve o rollout manual. A alteração de código não inicia, reinicia nem publica produção.
 
 ## Fronteiras e processos
 
-O Rodogarcia não é uma SPA estática: o site Next renderiza Server Components, aplica headers, encaminha `/admin/*` ao painel e roteia APIs pelo mesmo hostname público. Em uma janela autorizada, a equipe responsável opera seis processos privados:
+O Rodogarcia não é uma SPA estática: o site Next renderiza Server Components, aplica headers, encaminha `/admin/*` ao painel e roteia APIs pelo mesmo hostname público. Em janela autorizada, a equipe responsável opera seis processos privados:
 
 | Componente | Bind local | Função |
 | --- | --- | --- |
-| Express público (`site/backend/dist/server.js`) | `127.0.0.1:6050` | ESL e consultas públicas de CEP/CNPJ. |
-| Express do CMS (`cms/backend/dist/server.js`) | `127.0.0.1:6051` | Auth, admin, conteúdo, SEO, mídia, uploads, formulários, consentimento, analytics, popup, leads, sessões e scheduler. |
+| API pública Spring (`site/backend/dist/server.jar`) | `127.0.0.1:6050` | ESL e consultas públicas de CEP/CNPJ. |
+| API CMS Spring (`cms/backend/dist/server.jar`) | `127.0.0.1:6051` | Auth, admin, conteúdo, SEO, mídia, uploads, formulários, consentimento, analytics, popup, leads, sessões e scheduler. |
 | Next do site (`site/frontend/dist-prod/server.js`) | `127.0.0.1:6060` | Site público, headers e gateway interno. |
 | Next do CMS (`cms/frontend/dist-prod/server.js`) | `127.0.0.1:6061` | Painel com `basePath: /admin`. |
-| API Landing Builder (`landing-builder/backend/dist/server.js`) | `127.0.0.1:41110` | API privada de campanhas, mídias e prévias. |
+| API Landing Builder Spring (`landing-builder/backend/dist/server.jar`) | `127.0.0.1:41110` | API privada de campanhas, mídias e prévias. |
 | Next Landing Builder (`landing-builder/frontend/dist-prod/server.js`) | `127.0.0.1:41112` | Renderizador de campanhas encaminhado pelo gateway. |
 
-O site em `6060` encaminha `/admin/*` ao painel em `6061`. Também encaminha ao backend do CMS em `6051` as rotas de auth/admin, conteúdo/SEO/mídia, uploads, consentimento, tracking, analytics, popup, formulários, leads e melhorias; `/landing-assets/_next/*`, `/landing-media/*` e os slugs de campanha seguem para o Builder em `41112`. ESL, CEP e CNPJ continuam no backend público em `6050`.
-
-Não existe hostname ou ingresso público para a API do CMS. O navegador usa `/api/*` e `/uploads/*` no hostname do site; a escolha do destino é interna ao gateway. O hostname `sitebackend.rodogarcia.com.br`, quando usado, aponta somente ao backend público.
+O site em `6060` encaminha `/admin/*` ao painel em `6061`, as rotas CMS e `/uploads/*` à API em `6051`, CEP/CNPJ/ESL à API pública em `6050`, e assets, mídia e slugs de campanha ao Builder. Não existe hostname público para API ou painel CMS.
 
 ## Persistência e escritor único
 
-O volume canônico permanece em `site/backend/storage`; não copie JSON, uploads, sessões ou logs privados para `cms/backend`. A API do CMS aponta para esse volume por `STORAGE_ROOT` ou, quando necessário, `CMS_STORAGE_ROOT`, e é o único escritor das coleções administrativas. O backend público não grava conteúdo, uploads, usuários, sessões, auditoria ou dados de CMS.
+O volume canônico é `site/backend/storage`; não copie JSON, uploads, sessões ou logs privados para diretórios de runtime. `cms/backend` é o único escritor das coleções administrativas e usa `private/cms-rate-limits.json`; `site/backend` mantém apenas seu rate limit operacional. O Builder é escritor único de seu volume externo.
 
-Os rate limits também não concorrem: a API do CMS usa `site/backend/storage/private/cms-rate-limits.json`; o backend público mantém apenas seu arquivo de limite operacional. Antes de backup, restore ou alteração manual do storage, pare os writers autorizados na janela de manutenção; nunca exponha `site/backend/storage/private/**` ou uploads por canais públicos.
+Antes de backup, restore ou alteração manual do storage, pare os writers na janela de manutenção. Nunca exponha `site/backend/storage/private/**` nem uploads por canais privados indevidos.
 
 ## Ambiente
 
-Na VM, crie `.env.production.local` a partir de `.env.production.example`. O arquivo é ignorado pelo Git. Preencha ao menos:
+Na VM, crie `.env.production.local` a partir de `.env.production.example`. Preencha ao menos:
 
 - `FRONTEND_ORIGIN` e `CORS_ORIGINS` com origens HTTPS canônicas.
-- `ADMIN_SETUP_CODE`, `SESSION_SECRET` ou `JWT_SECRET` e `ESL_OPERATION_SECRET` com valores fortes e distintos.
+- `ADMIN_SETUP_CODE`, `SESSION_SECRET` ou `JWT_SECRET`, e `ESL_OPERATION_SECRET` com valores fortes e distintos.
 - `STORAGE_ROOT` e `UPLOADS_DIR` com caminhos absolutos no volume persistente.
-- `TRUST_PROXY=1` quando o Next/tunnel for o salto confiável até os Express.
-- `BACKEND_INTERNAL_URL=http://127.0.0.1:6050` para a API pública.
-- `CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:6051` e `CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051` para a API do CMS.
-- `CMS_INTERNAL_URL=http://127.0.0.1:6061` para o painel CMS.
-- `LANDING_BUILDER_SERVICE_TOKEN` forte e `LANDING_BUILDER_STORAGE_ROOT` absoluto, externo ao repositório, para o Builder. O inicializador fixa suas URLs internas em `41110` e `41112`.
-- `NEXT_PUBLIC_SITE_URL=https://site.rodogarcia.com.br`, variável pública usada somente para links, previews e assets do site.
+- `FFMPEG_PATH` absoluto para um executável estável fora do repositório e de `node_modules`, usado pelos backends Spring do CMS e Landing Builder.
+- `TRUST_PROXY=1` quando o Next/tunnel for o salto confiável.
+- `BACKEND_INTERNAL_URL=http://127.0.0.1:6050`.
+- `CMS_BACKEND_INTERNAL_URL=http://127.0.0.1:6051`, `CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051` e `CMS_INTERNAL_URL=http://127.0.0.1:6061`.
+- `LANDING_BUILDER_SERVICE_TOKEN` forte e `LANDING_BUILDER_STORAGE_ROOT` absoluto, externo ao repositório.
+- `NEXT_PUBLIC_SITE_URL=https://site.rodogarcia.com.br` somente para links, prévias e assets públicos.
 
-O `cms/backend` rejeita no boot segredos fracos, placeholders e origens locais ou não HTTPS; o backend público aplica o hardening de origem, mas não recebe segredos de sessão/setup. Variáveis `CMS_*_INTERNAL_URL`, `CMS_BACKEND_PROXY_URL`, secrets e caminhos de storage são privadas; nenhuma delas pode receber prefixo `NEXT_PUBLIC_`.
+As variáveis internas, segredos e caminhos de storage são privados; nenhuma pode receber o prefixo `NEXT_PUBLIC_`.
 
 ## DEV manual
 
-O desenvolvimento integrado usa `127.0.0.1:31012` (backend público), `31013` (API CMS), `35180` (site), `35013` (CMS Next), `36110` (API do Landing Builder) e `35112` (renderizador de campanhas). O responsável inicia esse fluxo manualmente; o endereço normal do painel é `http://127.0.0.1:35180/admin/auth/entrar`, enquanto `35013` serve apenas ao diagnóstico direto do painel. Um Dev Tunnel pode encaminhar a porta `35180` para outra máquina, mas sua URL é temporária e não fica registrada no ambiente.
+O desenvolvimento integrado usa Spring em `31012` e `31013`, site em `35180`, CMS Next em `35013`, API Builder em `36110` e renderizador em `35112`. O responsável inicia esse fluxo manualmente; a URL normal do painel é `http://127.0.0.1:35180/admin/auth/entrar`.
 
 ## PM2 e rollout manual
 
-O `ecosystem.config.js` define `site-api-prod`, `site-prod`, `cms-api-prod`, `cms-prod`, `landing-api-prod` e `landing-prod`, todos com bind local. Ele lê `.env.production.local` (ou o caminho em `RODOGARCIA_ENV_FILE`) sem versionar valores sensíveis. Na primeira promoção após essa renomeação, o inicializador remove também os nomes legados `rodogarcia-*` deste projeto para evitar duplicidade.
+`ecosystem.config.js` define `site-api-prod`, `site-prod`, `cms-api-prod`, `cms-prod`, `landing-api-prod` e `landing-prod`, todos em loopback. As três APIs executam `java -jar dist/server.jar`.
 
-Somente a equipe responsável, em janela autorizada, pode executar o rollout. Antes disso, ela deve criar e conferir backup manual com `node scripts/backup-storage.js`, migrar e conferir os artefatos ativos (ou aprovar um fluxo inicial explícito), validar os quatro artefatos centrais e os dois candidatos do Builder, e conferir `http://127.0.0.1:6050/health`, `http://127.0.0.1:6051/health`, `http://127.0.0.1:41110/health`, `http://127.0.0.1:41112/health` e `http://127.0.0.1:6060/admin/auth/entrar`. O fluxo de promoção preserva `*.previous`, deixa candidata falha em `*.failed` e restaura os artefatos anteriores se o start ou health falhar. Em primeiro rollout sem artefato anterior, o rollback remove somente a candidata daquele processo e religa os que tinham artefato ativo.
+Somente a equipe responsável pode executar o rollout. Com os writers parados, crie e confira backup com o volume explícito, por exemplo:
+
+```powershell
+node scripts/backup-storage.js --source "C:\Rodogarcia\storage-prod"
+```
+
+Depois, valide os artefatos isolados, promova candidatos, e confira `/health` e `/ready` nas APIs `6050` e `6051`, `/health` no Builder, e o gateway em `6060/admin/auth/entrar`. A promoção preserva `*.previous`, mantém candidata falha em `*.failed` e restaura a versão JAR anterior se health ou readiness falhar.
 
 ## Cloudflare Tunnel
 
-O arquivo do `cloudflared` pertence à infraestrutura, não ao repositório. O contrato mínimo é:
+O arquivo do `cloudflared` pertence à infraestrutura. O contrato mínimo é:
 
 ```yaml
 ingress:
@@ -63,17 +67,17 @@ ingress:
     service: http://127.0.0.1:6050
 ```
 
-Não crie ingressos para `6051` ou `6061`. No Cloudflare, não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis; cache longo cobre somente assets com hash. Bloqueie caminhos de desenvolvimento que não fazem parte do Next de produção, como `/src/*`, `/node_modules/*`, `/@vite/*`, `/@react-refresh/*` e `/@fs/*`.
+Não crie ingressos para `6051`, `6061`, `41110` ou `41112`. Não faça cache de HTML, `/api/*`, autenticação, CMS ou uploads mutáveis.
 
 ## Artefatos e hardening isolado
 
-O pré-flight produz quatro artefatos isolados, sem tocar os ativos:
+O pré-flight gera artefatos isolados, sem tocar os ativos:
 
 | Artefato | Porta de hardening |
 | --- | --- |
-| `site/backend/dist.test` | `42010` |
-| `cms/backend/dist.test` | `42514` |
+| `site/backend/dist.test/server.jar` | `42010` |
+| `cms/backend/dist.test/server.jar` | `42514` |
 | `site/frontend/dist-prod.test` | `42511` |
 | `cms/frontend/dist-prod.test` | `42513` |
 
-O hardening só aceita esses diretórios pelas variáveis `SECURITY_TEST_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR`, `SECURITY_TEST_FRONTEND_ARTIFACT_DIR` e `SECURITY_TEST_CMS_ARTIFACT_DIR`; ele recusa `.next` e artefatos ativos. Depois do hardening aprovado, os quatro candidatos centrais e os dois do Builder são gerados como `dist.next` ou `dist-prod.next` nas portas privadas `6050`/`6051`/`6060`/`6061`/`41110`/`41112`. Nenhum teste deve apontar para processos ou storage de produção.
+O hardening recusa `.next`, artefatos ativos, portas e storage de produção. Depois da aprovação, os candidatos são gerados como `dist.next` ou `dist-prod.next` nas portas privadas operacionais.

@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { readEnvironmentFile } = require("./parse-environment-file");
 
 const repoRoot = path.resolve(__dirname, "..");
 const uploadUrlPattern = /^\/uploads\/([a-zA-Z0-9][a-zA-Z0-9._/-]*)$/;
@@ -22,11 +23,7 @@ function resolveFromRepo(value) {
 }
 
 function readEnvironment(envFile) {
-  const dotenv = require(path.join(repoRoot, "site", "backend", "node_modules", "dotenv"));
-  if (!fs.existsSync(envFile)) {
-    throw new Error(`Arquivo de ambiente nao encontrado: ${envFile}`);
-  }
-  return dotenv.parse(fs.readFileSync(envFile));
+  return readEnvironmentFile(envFile);
 }
 
 function walkJson(value, references) {

@@ -9,6 +9,7 @@ export interface LandingTheme {
 }
 
 export interface LandingSeo { title: string; description: string; index: boolean; }
+export interface LandingMediaDescriptor { kind: "image" | "video"; alt: string; poster: string; }
 
 export interface PublicLandingPage {
   template: "campaign-v1";
@@ -17,6 +18,7 @@ export interface PublicLandingPage {
   seo: LandingSeo;
   theme: LandingTheme;
   analytics: { ga4MeasurementId: string };
+  media: Record<string, LandingMediaDescriptor>;
   hero: {
     phone: string; email: string; logo: string; backgroundImage: string; eyebrow: string; title: string;
     description: string; ctaLabel: string; ctaUrl: string; highlights: Array<{ title: string; description: string }>;
@@ -63,6 +65,24 @@ function normalizeColor(value: unknown, fallback: string) {
 function normalizeMediaUrl(value: unknown) {
   const url = string(value, 300);
   return internalMediaPattern.test(url) ? url : "";
+}
+
+function normalizeMediaDescriptors(value: unknown): Record<string, LandingMediaDescriptor> {
+  const input = record(value) ?? {};
+  const result: Record<string, LandingMediaDescriptor> = {};
+  for (const [url, rawDescriptor] of Object.entries(input)) {
+    const normalizedUrl = normalizeMediaUrl(url);
+    const descriptor = record(rawDescriptor);
+    if (!normalizedUrl || !descriptor) continue;
+    const kind = descriptor.kind === "video" ? "video" : descriptor.kind === "image" ? "image" : null;
+    if (!kind) continue;
+    result[normalizedUrl] = {
+      kind,
+      alt: string(descriptor.alt, 160),
+      poster: normalizeMediaUrl(descriptor.poster),
+    };
+  }
+  return result;
 }
 
 function normalizeActionUrl(value: unknown) {
@@ -183,6 +203,7 @@ function normalizeLanding(value: unknown): PublicLandingPage | null {
       font: themeInput.font === "space-grotesk" || themeInput.font === "plus-jakarta" ? themeInput.font : "system",
     },
     analytics: { ga4MeasurementId: ga4MeasurementIdPattern.test(measurementId) ? measurementId : "" },
+    media: normalizeMediaDescriptors(input.media),
     hero: {
       phone: string(hero.phone, 40), email: string(hero.email, 160), logo: normalizeMediaUrl(hero.logo), backgroundImage: normalizeMediaUrl(hero.backgroundImage),
       eyebrow: string(hero.eyebrow, 80), title: heroTitle, description: string(hero.description, 700), ctaLabel: string(hero.ctaLabel, 70), ctaUrl: normalizeActionUrl(hero.ctaUrl), highlights: normalizeHighlights(hero.highlights),

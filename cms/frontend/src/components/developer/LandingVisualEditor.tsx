@@ -31,6 +31,7 @@ export type LandingMedia = {
   url: string;
   kind: "image" | "video" | string;
   alt?: string;
+  poster?: string;
   createdAt: string;
 };
 
@@ -188,27 +189,30 @@ function LandingMediaPicker({
   media: LandingMedia[];
   uploading: boolean;
   onSelect: (url: string) => void;
-  onUpload: (file: File) => Promise<void>;
+  onUpload: (file: File, alt?: string) => Promise<void>;
   onDelete: (item: LandingMedia) => Promise<void>;
 }) {
   const imageMedia = media.filter((item) => item.kind === "image");
   const label = slot === "logo" ? "logo" : "foto de fundo";
+  const [alt, setAlt] = useState("");
 
   async function uploadSelectedFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    await onUpload(file);
+    await onUpload(file, alt);
+    setAlt("");
   }
 
   return <div className="space-y-4">
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
       <p className="text-sm font-semibold text-slate-800">Mídia própria da campanha</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500">Escolha um arquivo já enviado ou envie uma imagem para esta landing. Links externos não são aceitos.</p>
+      <p className="mt-1 text-xs leading-5 text-slate-500">Escolha um arquivo já enviado ou envie uma mídia para esta landing. Links externos não são aceitos. Vídeos só podem ser usados na seção Imagem e conteúdo.</p>
+      <label className="mt-3 block text-xs font-semibold text-slate-700">Descrição da mídia (alt)<input value={alt} onChange={(event) => setAlt(event.target.value)} maxLength={160} placeholder="Descreva a imagem para leitores de tela" className={inputClass} /></label>
       <label className={`mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-sm font-bold text-white transition hover:bg-slate-800 ${uploading ? "cursor-wait opacity-60" : ""}`}>
         <UploadSimple size={17} weight="bold" />
-        {uploading ? "Enviando..." : "Enviar imagem"}
-        <input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploading} onChange={(event) => void uploadSelectedFile(event)} className="sr-only" />
+        {uploading ? "Enviando..." : "Enviar mídia"}
+        <input type="file" accept="image/png,image/jpeg,image/webp,image/avif,video/mp4,video/webm,video/ogg" disabled={uploading} onChange={(event) => void uploadSelectedFile(event)} className="sr-only" />
       </label>
     </div>
 
@@ -414,7 +418,7 @@ export function LandingVisualEditor<T extends LandingPreview>({
   media: LandingMedia[];
   uploadingMedia: boolean;
   onChange: (update: (current: T) => T) => void;
-  onUploadMedia: (file: File) => Promise<void>;
+  onUploadMedia: (file: File, alt?: string) => Promise<void>;
   onDeleteMedia: (item: LandingMedia) => Promise<void>;
 }) {
   const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
@@ -602,7 +606,7 @@ export function LandingVisualEditor<T extends LandingPreview>({
   function renderPreviewToolbar(fullscreen = false) {
     return <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-2">
-        <div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">{fullscreen ? "Edição em tela cheia" : "Prévia da landing"}</p><h2 className="mt-0.5 text-sm font-semibold text-[var(--foreground)]">Edite pelo lápis de cada seção</h2></div>
+        <div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">{fullscreen ? "Edição em tela cheia" : "Canvas de edição"}</p><h2 className="mt-0.5 text-sm font-semibold text-[var(--foreground)]">Edite pelo lápis de cada seção</h2></div>
         <DeveloperHelp label="Referências de tela" templateKey="landing-pages.field.responsive-preview" />
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -662,7 +666,7 @@ export function LandingVisualEditor<T extends LandingPreview>({
     <section ref={visualEditorRef} className={isFullscreen ? "fixed inset-0 z-[90] h-[100dvh] w-screen overflow-hidden bg-white" : "rounded-xl border border-[var(--border)] bg-slate-100/70 p-3 shadow-[0_8px_22px_rgba(15,23,42,0.035)] sm:p-4"}>
       {!isFullscreen ? <>{renderPreviewToolbar()}{renderPreviewNavigation()}{renderPreviewSurface()}</> : <div className="relative h-full w-full">{renderPreviewSurface(true)}<button type="button" onClick={closeFullscreen} className="absolute right-4 top-4 z-50 inline-flex min-h-10 items-center gap-2 rounded-full bg-slate-950/90 px-4 py-2 text-sm font-bold text-white shadow-lg backdrop-blur transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50" aria-label="Voltar ao editor do CMS" title="Voltar ao editor (Esc)"><ArrowsIn size={17} weight="bold" />Voltar<span className="hidden sm:inline">ao editor</span></button></div>}
     </section>
-    {dialog && dialogPortalTarget ? createPortal(<div className={`${isFullscreen ? "" : "cms-content-dialog "}fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:items-center`} role="dialog" aria-modal="true" aria-label={dialogTitle[dialog]} onMouseDown={closeDialog}><div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6 lg:p-7" onMouseDown={(event) => event.stopPropagation()}><div className="mb-6 flex items-start justify-between gap-5"><div className="max-w-3xl"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-slate-500">Edição rápida</p><h3 className="mt-1 text-xl font-bold text-slate-950">{dialogTitle[dialog]}</h3><p className="mt-1 text-sm text-slate-500">As alterações aparecem na prévia imediatamente. Salve a landing quando terminar.</p></div><button type="button" onClick={closeDialog} aria-label="Fechar" className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X size={20} weight="bold" /></button></div>
+    {dialog && dialogPortalTarget ? createPortal(<div data-landing-editor-dialog="true" className={`${isFullscreen ? "" : "cms-content-dialog "}fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:items-center`} role="dialog" aria-modal="true" aria-label={dialogTitle[dialog]} onMouseDown={closeDialog}><div className="landing-editor-dialog__surface max-h-[calc(100dvh-1.5rem)] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6 lg:p-7" onMouseDown={(event) => event.stopPropagation()}><div className="mb-6 flex items-start justify-between gap-5"><div className="max-w-3xl"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-slate-500">Edição rápida</p><h3 className="mt-1 text-xl font-bold text-slate-950">{dialogTitle[dialog]}</h3><p className="mt-1 text-sm text-slate-500">As alterações aparecem na prévia imediatamente. Salve a landing quando terminar.</p></div><button type="button" onClick={closeDialog} aria-label="Fechar" className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X size={20} weight="bold" /></button></div>
       {dialog === "theme" ? <LandingThemeEditor theme={theme} onChange={(nextTheme) => onChange((current) => ({ ...current, theme: nextTheme }))} /> : null}
       {dialog === "contacts" ? <div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold text-slate-700">Telefone<input value={hero.phone} onChange={(event) => editHero({ phone: event.target.value })} className={inputClass} /></label><label className="text-sm font-semibold text-slate-700">E-mail<input value={hero.email} onChange={(event) => editHero({ email: event.target.value })} className={inputClass} /></label></div> : null}
       {dialog === "logo" ? <LandingMediaPicker slot="logo" currentUrl={hero.logo} media={media} uploading={uploadingMedia} onSelect={(url) => editHero({ logo: url })} onUpload={onUploadMedia} onDelete={onDeleteMedia} /> : null}

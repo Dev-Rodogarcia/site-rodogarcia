@@ -1,0 +1,8 @@
+/target/
+/dist.test/
+/dist.next/
+/dist/
+/dist.previous/
+/dist.failed/
+*.jar
+*.log

@@ -58,9 +58,40 @@ const LIMITED_ADMIN_EMAIL = "security-limited@rodogarcia.test";
 const LIMITED_ADMIN_TEMPORARY_PASSWORD = "SecurityTemporary2026";
 const LIMITED_ADMIN_PASSWORD = "SecurityUpdated2026";
 const TEST_PNG = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL9VwAAAABJRU5ErkJggg==",
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADUlEQVQImWP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==",
   "base64"
 );
+
+const PROCESS_ENV_ALLOWLIST = new Set([
+  "APPDATA",
+  "COMSPEC",
+  "HOME",
+  "JAVA_HOME",
+  "LANG",
+  "LC_ALL",
+  "LOCALAPPDATA",
+  "NUMBER_OF_PROCESSORS",
+  "OS",
+  "PATH",
+  "PATHEXT",
+  "PROGRAMDATA",
+  "PROGRAMFILES",
+  "PROGRAMFILES(X86)",
+  "SYSTEMROOT",
+  "TEMP",
+  "TMP",
+  "TMPDIR",
+  "USERPROFILE",
+  "WINDIR",
+]);
+
+function isolatedProcessEnvironment() {
+  return Object.fromEntries(
+    Object.entries(process.env).filter(([name]) =>
+      PROCESS_ENV_ALLOWLIST.has(name.toUpperCase())
+    )
+  );
+}
 
 const BLOCKED_PATHS = [
   "/.env",
@@ -104,6 +135,14 @@ function standaloneServerPath(artifactDir, label) {
     throw new Error(`Artefato standalone de ${label} ausente: ${serverPath}`);
   }
   return serverPath;
+}
+
+function springServerCommand(artifactDir, label) {
+  const serverPath = path.join(artifactDir, "server.jar");
+  if (!fs.existsSync(serverPath)) {
+    throw new Error(`Artefato Spring de ${label} ausente: ${serverPath}`);
+  }
+  return { command: "java", args: ["-jar", serverPath] };
 }
 
 function readRoutesManifest(artifactDir) {
@@ -227,8 +266,8 @@ function validateHardeningConfiguration() {
     seenPorts.add(port);
   }
 
-  standaloneServerPath(BACKEND_ARTIFACT_DIR, "backend");
-  standaloneServerPath(CMS_BACKEND_ARTIFACT_DIR, "backend do CMS");
+  springServerCommand(BACKEND_ARTIFACT_DIR, "backend público");
+  springServerCommand(CMS_BACKEND_ARTIFACT_DIR, "backend do CMS");
   standaloneServerPath(CMS_ARTIFACT_DIR, "CMS");
   standaloneServerPath(FRONTEND_ARTIFACT_DIR, "site");
   validateTestGatewayRewrites();
@@ -292,10 +331,13 @@ function copyDirectoryFixture(relativePath, targetPath) {
   }
 }
 
-function startStandaloneBuild({ artifactDir, env, label }) {
-  const serverPath = standaloneServerPath(artifactDir, label);
+function startStandaloneBuild({ artifactDir, env, label, command }) {
+  const serverCommand = command ?? {
+    command: process.execPath,
+    args: [standaloneServerPath(artifactDir, label)],
+  };
 
-  const child = spawn(process.execPath, [serverPath], {
+  const child = spawn(serverCommand.command, serverCommand.args, {
     cwd: artifactDir,
     env,
     stdio: ["ignore", "pipe", "pipe"],
@@ -312,12 +354,14 @@ function startStandaloneBuild({ artifactDir, env, label }) {
   return { child, getLogs: () => logs };
 }
 
-async function waitFor(url, timeoutMs = 90000) {
+async function waitFor(url, timeoutMs = 90000, expectedStatus) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
       const response = await fetch(url, { redirect: "manual" });
-      if (response.status >= 200 && response.status < 500) return;
+      if (expectedStatus === undefined
+        ? response.status >= 200 && response.status < 500
+        : response.status === expectedStatus) return;
     } catch {
       // wait
     }
@@ -348,8 +392,9 @@ function startServers(storeDir) {
   copyDirectoryFixture("site/backend/storage/uploads", path.join(cmsStoreDir, "uploads"));
   fs.mkdirSync(publicStoreDir, { recursive: true });
 
+  const baseProcessEnvironment = isolatedProcessEnvironment();
   const backendEnv = {
-    ...process.env,
+    ...baseProcessEnvironment,
     HOST,
     PORT: String(BACKEND_PORT),
     NODE_ENV: "test",
@@ -358,20 +403,27 @@ function startServers(storeDir) {
     SESSION_SECRET: "test-session-secret-with-more-than-32-characters",
     ESL_OPERATION_SECRET: "test-esl-operation-secret-with-more-than-32-characters",
     STORAGE_ROOT: publicStoreDir,
+    RATE_LIMITS_STORE_PATH: path.join(publicStoreDir, "private", "rate-limits.json"),
     UPLOADS_DIR: path.join(publicStoreDir, "uploads"),
     CORS_ORIGINS: `${FRONTEND_URL},${CMS_URL}`,
+    TRUST_PROXY: "false",
+    ESL_TENANT: "test",
+    ESL_GRAPHQL_URL: "https://127.0.0.1:1/graphql",
+    GRAPHQL_API_KEY: "test-graphql-api-key",
   };
 
   const cmsBackendEnv = {
-    ...process.env,
+    ...baseProcessEnvironment,
     HOST,
     PORT: String(CMS_BACKEND_PORT),
     NODE_ENV: "test",
     FRONTEND_ORIGIN: FRONTEND_URL,
     CMS_INTERNAL_URL: CMS_URL,
     ADMIN_SETUP_CODE: SETUP_CODE,
+    JWT_SECRET: "test-session-secret-with-more-than-32-characters",
     SESSION_SECRET: "test-session-secret-with-more-than-32-characters",
     STORAGE_ROOT: cmsStoreDir,
+    CMS_STORAGE_ROOT: cmsStoreDir,
     CONTENT_STORE_PATH: contentStorePath,
     SITE_TEXTS_STORE_PATH: siteTextsStorePath,
     USERS_STORE_PATH: path.join(cmsStoreDir, "users.json"),
@@ -397,11 +449,16 @@ function startServers(storeDir) {
     MEDIA_REPLACE_TRANSACTION_PATH: path.join(cmsStoreDir, "media-replace-transaction.json"),
     CMS_RATE_LIMITS_STORE_PATH: path.join(cmsStoreDir, "cms-rate-limits.json"),
     UPLOADS_DIR: path.join(cmsStoreDir, "uploads"),
+    CMS_UPLOADS_DIR: path.join(cmsStoreDir, "uploads"),
+    FRONTEND_PUBLIC_DIR: path.join(ROOT_DIR, "site", "frontend", "public"),
     CORS_ORIGINS: `${FRONTEND_URL},${CMS_URL}`,
+    TRUST_PROXY: "false",
+    LANDING_BUILDER_API_URL: "http://127.0.0.1:1",
+    LANDING_BUILDER_SERVICE_TOKEN: "test-landing-builder-service-token-with-32-characters",
   };
 
   const cmsEnv = {
-    ...process.env,
+    ...baseProcessEnvironment,
     NODE_ENV: "production",
     PORT: String(CMS_PORT),
     HOSTNAME: HOST,
@@ -411,7 +468,7 @@ function startServers(storeDir) {
   };
 
   const frontendEnv = {
-    ...process.env,
+    ...baseProcessEnvironment,
     NODE_ENV: "production",
     PORT: String(FRONTEND_PORT),
     HOSTNAME: HOST,
@@ -426,12 +483,18 @@ function startServers(storeDir) {
 
   const started = [];
   try {
-    const backend = startStandaloneBuild({ artifactDir: BACKEND_ARTIFACT_DIR, env: backendEnv, label: "backend" });
+    const backend = startStandaloneBuild({
+      artifactDir: BACKEND_ARTIFACT_DIR,
+      env: backendEnv,
+      label: "backend Spring público",
+      command: springServerCommand(BACKEND_ARTIFACT_DIR, "backend público"),
+    });
     started.push(backend);
     const cmsBackend = startStandaloneBuild({
       artifactDir: CMS_BACKEND_ARTIFACT_DIR,
       env: cmsBackendEnv,
-      label: "backend do CMS",
+      label: "backend Spring do CMS",
+      command: springServerCommand(CMS_BACKEND_ARTIFACT_DIR, "backend do CMS"),
     });
     started.push(cmsBackend);
     const cms = startStandaloneBuild({ artifactDir: CMS_ARTIFACT_DIR, env: cmsEnv, label: "CMS" });
@@ -946,8 +1009,10 @@ async function main() {
 
   try {
     try {
-      await waitFor(`${BACKEND_URL}/health`);
-      await waitFor(`${CMS_BACKEND_URL}/health`);
+      await waitFor(`${BACKEND_URL}/health`, 90000, 200);
+      await waitFor(`${BACKEND_URL}/ready`, 90000, 200);
+      await waitFor(`${CMS_BACKEND_URL}/health`, 90000, 200);
+      await waitFor(`${CMS_BACKEND_URL}/ready`, 90000, 200);
       await waitFor(`${CMS_URL}/admin/auth/entrar`);
       await waitFor(`${FRONTEND_URL}/api/auth/session`);
     } catch (error) {

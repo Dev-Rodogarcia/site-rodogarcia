@@ -20,7 +20,9 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { adminResourceKeys, invalidateAdminResource, useAdminResource } from "@/hooks/useAdminResource";
 import { api, siteUrl } from "@/lib/routes";
 
-type LandingStatus = "draft" | "published" | "unpublished";
+type LandingStatus = "draft" | "published" | "unpublished" | "archived";
+
+type LandingRevision = { id: string; operation: string; createdAt: string };
 
 type LandingForm = {
   id?: string;
@@ -36,9 +38,6 @@ type LandingForm = {
   };
   analytics: {
     ga4MeasurementId: string;
-    gtmContainerId: string;
-    metaPixelId: string;
-    googleAdsId: string;
   };
   seo: {
     title: string;
@@ -59,6 +58,9 @@ type LandingForm = {
   };
 } & CampaignV1Landing & {
   status?: LandingStatus;
+  scheduledPublishAt?: string;
+  scheduledUnpublishAt?: string;
+  revisionCount?: number;
 };
 
 type LandingMediaListResponse = { media?: LandingMedia[] };
@@ -68,7 +70,7 @@ const createBlankLanding = (): LandingForm => ({
   name: "Nova campanha",
   slug: "nova-campanha",
   theme: { primaryColor: "#111111", secondaryColor: "#2A2A2A", backgroundColor: "#FFFFFF", textColor: "#171717", font: "system" },
-  analytics: { ga4MeasurementId: "", gtmContainerId: "", metaPixelId: "", googleAdsId: "" },
+  analytics: { ga4MeasurementId: "" },
   seo: { title: "", description: "", index: true },
   hero: {
     phone: "",
@@ -135,7 +137,21 @@ function normalizeLanding(landing: LandingForm): LandingForm {
 }
 
 function labelForStatus(status?: LandingStatus) {
-  return status === "published" ? "Publicada" : status === "unpublished" ? "Despublicada" : "Rascunho";
+  return status === "published" ? "Publicada" : status === "unpublished" ? "Despublicada" : status === "archived" ? "Arquivada" : "Rascunho";
+}
+
+function localDateTime(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+}
+
+function isoDateTime(value: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 export default function LandingPagesPage() {
@@ -146,6 +162,11 @@ export default function LandingPagesPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [openingPreview, setOpeningPreview] = useState(false);
+  const [previewPath, setPreviewPath] = useState<string | null>(null);
+  const [savedFingerprint, setSavedFingerprint] = useState("");
+  const [publishAt, setPublishAt] = useState("");
+  const [unpublishAt, setUnpublishAt] = useState("");
+  const [revisions, setRevisions] = useState<LandingRevision[]>([]);
   const { data, loading, error, refresh } = useAdminResource<{ landings: LandingForm[] }>({
     key: adminResourceKeys.landings,
     fetcher: (request) => request<{ landings: LandingForm[] }>(api.admin.landings),
@@ -158,8 +179,15 @@ export default function LandingPagesPage() {
   const media = mediaData?.media ?? [];
 
   useEffect(() => {
-    if (!creatingNew && !form.id && landings.length > 0) setForm(landings[0]!);
+    if (!creatingNew && !form.id && landings.length > 0) {
+      const next = landings[0]!;
+      setForm(next);
+      setSavedFingerprint(JSON.stringify(next));
+      setPublishAt(localDateTime(next.scheduledPublishAt));
+      setUnpublishAt(localDateTime(next.scheduledUnpublishAt));
+    }
   }, [creatingNew, form.id, landings]);
+  const hasUnsavedChanges = Boolean(form.id && savedFingerprint && JSON.stringify(form) !== savedFingerprint);
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
@@ -177,7 +205,13 @@ export default function LandingPagesPage() {
       return;
     }
 
-    if (result.data?.landing) setForm(normalizeLanding(result.data.landing));
+    if (result.data?.landing) {
+      const saved = normalizeLanding(result.data.landing);
+      setForm(saved);
+      setSavedFingerprint(JSON.stringify(saved));
+      setPublishAt(localDateTime(saved.scheduledPublishAt));
+      setUnpublishAt(localDateTime(saved.scheduledUnpublishAt));
+    }
     setCreatingNew(false);
     setMessage({ tone: "success", text: "Landing page salva como rascunho. Agora você pode abrir a prévia privada." });
     invalidateAdminResource(adminResourceKeys.landings);
@@ -214,6 +248,10 @@ export default function LandingPagesPage() {
       setMessage({ tone: "error", text: "Salve o rascunho antes de abrir a prévia." });
       return;
     }
+    if (hasUnsavedChanges) {
+      setMessage({ tone: "error", text: "Salve o rascunho antes de abrir a prévia pública; ela sempre mostra a última versão persistida." });
+      return;
+    }
 
     setOpeningPreview(true);
     setMessage(null);
@@ -225,14 +263,16 @@ export default function LandingPagesPage() {
       return;
     }
 
+    setPreviewPath(result.data.previewPath);
     window.open(siteUrl(result.data.previewPath), "_blank", "noopener,noreferrer");
   }
 
-  async function uploadMedia(file: File) {
+  async function uploadMedia(file: File, alt = "") {
     setUploadingMedia(true);
     setMessage(null);
     const body = new FormData();
     body.append("file", file);
+    body.append("alt", alt);
     const result = await apiRequest<{ media: LandingMedia }>(api.admin.landingMedia, { method: "POST", body });
     setUploadingMedia(false);
 
@@ -244,6 +284,99 @@ export default function LandingPagesPage() {
     invalidateAdminResource("admin:landing-media");
     await refreshMedia();
     setMessage({ tone: "success", text: "Imagem enviada para a biblioteca da campanha. Selecione-a para usar no logo ou fundo." });
+  }
+
+  async function duplicateLanding() {
+    if (!form.id) return;
+    const result = await apiRequest<{ landing: LandingForm }>(api.admin.duplicateLanding(form.id), { method: "POST" });
+    if (!result.success || !result.data?.landing) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível duplicar a campanha." });
+      return;
+    }
+    const duplicated = normalizeLanding(result.data.landing);
+    setCreatingNew(false);
+    setForm(duplicated);
+    setSavedFingerprint(JSON.stringify(duplicated));
+    setPreviewPath(null);
+    setMessage({ tone: "success", text: "Campanha duplicada como rascunho independente." });
+    invalidateAdminResource(adminResourceKeys.landings);
+    await refresh();
+  }
+
+  async function archiveLanding() {
+    if (!form.id) return;
+    const result = await apiRequest<{ landing: LandingForm }>(api.admin.archiveLanding(form.id), { method: "POST" });
+    if (!result.success || !result.data?.landing) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível arquivar a campanha." });
+      return;
+    }
+    const archived = normalizeLanding(result.data.landing);
+    setForm(archived);
+    setSavedFingerprint(JSON.stringify(archived));
+    setMessage({ tone: "success", text: "Campanha arquivada. Ela pode ser excluída com segurança quando não for mais necessária." });
+    invalidateAdminResource(adminResourceKeys.landings);
+    await refresh();
+  }
+
+  async function deleteLanding() {
+    if (!form.id || form.status !== "archived" || !window.confirm("Excluir definitivamente esta campanha arquivada? As mídias continuam preservadas na biblioteca.")) return;
+    const result = await apiRequest(api.admin.landing(form.id), { method: "DELETE" });
+    if (!result.success) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível excluir a campanha." });
+      return;
+    }
+    setCreatingNew(true);
+    setForm(createBlankLanding());
+    setSavedFingerprint("");
+    setPreviewPath(null);
+    setRevisions([]);
+    setMessage({ tone: "success", text: "Campanha removida. Nenhuma mídia compartilhada foi excluída." });
+    invalidateAdminResource(adminResourceKeys.landings);
+    await refresh();
+  }
+
+  async function saveSchedule() {
+    if (!form.id) return;
+    const result = await apiRequest<{ landing: LandingForm }>(api.admin.scheduleLanding(form.id), {
+      method: "POST",
+      body: JSON.stringify({ publishAt: isoDateTime(publishAt), unpublishAt: isoDateTime(unpublishAt) }),
+    });
+    if (!result.success || !result.data?.landing) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível programar a campanha." });
+      return;
+    }
+    const scheduled = normalizeLanding(result.data.landing);
+    setForm(scheduled);
+    setSavedFingerprint(JSON.stringify(scheduled));
+    setMessage({ tone: "success", text: "Programação salva. A campanha é publicada e despublicada automaticamente nos horários informados." });
+    invalidateAdminResource(adminResourceKeys.landings);
+    await refresh();
+  }
+
+  async function loadRevisions() {
+    if (!form.id) return;
+    const result = await apiRequest<{ revisions: LandingRevision[] }>(api.admin.landingRevisions(form.id));
+    if (!result.success) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível carregar o histórico." });
+      return;
+    }
+    setRevisions(result.data?.revisions ?? []);
+  }
+
+  async function rollback(revisionId: string) {
+    if (!form.id || !window.confirm("Restaurar esta revisão? O estado atual ficará salvo no histórico antes da restauração.")) return;
+    const result = await apiRequest<{ landing: LandingForm }>(api.admin.rollbackLanding(form.id, revisionId), { method: "POST" });
+    if (!result.success || !result.data?.landing) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível restaurar a revisão." });
+      return;
+    }
+    const restored = normalizeLanding(result.data.landing);
+    setForm(restored);
+    setSavedFingerprint(JSON.stringify(restored));
+    setMessage({ tone: "success", text: "Revisão restaurada e o estado anterior foi mantido no histórico." });
+    await loadRevisions();
+    invalidateAdminResource(adminResourceKeys.landings);
+    await refresh();
   }
 
   async function deleteMedia(item: LandingMedia) {
@@ -262,10 +395,24 @@ export default function LandingPagesPage() {
       },
       story: { ...current.story, image: current.story.image === item.url ? "" : current.story.image },
       showcase: { ...current.showcase, backgroundImage: current.showcase.backgroundImage === item.url ? "" : current.showcase.backgroundImage },
+      finalCta: { ...current.finalCta, backgroundImage: current.finalCta.backgroundImage === item.url ? "" : current.finalCta.backgroundImage },
     }));
     invalidateAdminResource("admin:landing-media");
     await refreshMedia();
     setMessage({ tone: "success", text: "Imagem removida da biblioteca. Salve a landing se ela estava em uso." });
+  }
+
+  async function updateMedia(item: LandingMedia, update: { alt?: string; poster?: string }) {
+    const result = await apiRequest<{ media: LandingMedia }>(api.admin.landingMediaItem(item.id), {
+      method: "PUT",
+      body: JSON.stringify(update),
+    });
+    if (!result.success) {
+      setMessage({ tone: "error", text: result.error ?? "Não foi possível atualizar a acessibilidade da mídia." });
+      return;
+    }
+    invalidateAdminResource("admin:landing-media");
+    await refreshMedia();
   }
 
   return <DeveloperPage>
@@ -280,20 +427,43 @@ export default function LandingPagesPage() {
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">Biblioteca</p><h2 className="mt-0.5 text-base font-semibold text-[var(--foreground)]">Suas campanhas</h2></div><button type="button" onClick={() => { setCreatingNew(true); setForm(createBlankLanding()); setMessage(null); }} className={`${developerSecondaryButtonClassName} min-h-9 px-3 py-2 text-xs`}><Plus size={16} weight="bold" />Nova</button></div>
       {landings.length === 0 && !loading ? <p className="mt-2 text-sm text-[var(--color-muted-raw)]">Nenhuma campanha criada. Use <strong className="font-semibold text-[var(--foreground)]">Nova</strong> para começar.</p> : null}
       {landings.length > 0 ? <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-        {landings.map((landing) => <button key={landing.id} type="button" onClick={() => { setCreatingNew(false); setForm(landing); setMessage(null); }} className={`min-w-52 rounded-xl border px-3 py-2 text-left transition ${form.id === landing.id ? "border-[var(--primary)] bg-[var(--primary)]/5" : "border-[var(--border)] hover:border-[var(--primary)]/40"}`}>
+        {landings.map((landing) => <button key={landing.id} type="button" onClick={() => { setCreatingNew(false); setForm(landing); setSavedFingerprint(JSON.stringify(landing)); setPublishAt(localDateTime(landing.scheduledPublishAt)); setUnpublishAt(localDateTime(landing.scheduledUnpublishAt)); setPreviewPath(null); setRevisions([]); setMessage(null); }} className={`min-w-52 rounded-xl border px-3 py-2 text-left transition ${form.id === landing.id ? "border-[var(--primary)] bg-[var(--primary)]/5" : "border-[var(--border)] hover:border-[var(--primary)]/40"}`}>
           <div className="flex items-center justify-between gap-2"><strong className="truncate text-sm text-[var(--foreground)]">{landing.name}</strong><DeveloperStatusPill active={landing.status === "published"} activeLabel="Publicada" inactiveLabel={labelForStatus(landing.status)} /></div>
           <p className="mt-1 truncate text-xs text-[var(--color-muted-raw)]">/{landing.slug}</p>
         </button>)}
       </div> : null}
     </DeveloperCard>
 
+    {media.length > 0 ? <DeveloperCard className="mt-5">
+      <DeveloperSectionHeading eyebrow="Biblioteca" title="Acessibilidade e vídeo" description="Descreva cada mídia para leitores de tela. Vídeos usados na seção Imagem e conteúdo exibem controles; selecione uma imagem como poster quando quiser definir a capa antes da reprodução." />
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">{media.map((item) => <article key={item.id} className="rounded-xl border border-[var(--border)] p-3"><div className="flex items-center justify-between gap-2"><strong className="text-sm text-[var(--foreground)]">{item.kind === "video" ? "Vídeo" : "Imagem"}</strong><span className="text-xs text-[var(--color-muted-raw)]">{item.id}</span></div><DeveloperField label="Descrição alternativa" className="mt-3"><input defaultValue={item.alt ?? ""} maxLength={160} onBlur={(event) => { if (event.target.value !== (item.alt ?? "")) void updateMedia(item, { alt: event.target.value }); }} className={developerInputClassName} placeholder="O que a pessoa deve entender com esta mídia?" /></DeveloperField>{item.kind === "video" ? <DeveloperField label="Poster do vídeo" className="mt-3"><select value={item.poster ?? ""} onChange={(event) => void updateMedia(item, { poster: event.target.value })} className={developerInputClassName}><option value="">Usar primeiro quadro do vídeo</option>{media.filter((candidate) => candidate.kind === "image").map((candidate) => <option key={candidate.id} value={candidate.url}>{candidate.alt || candidate.id}</option>)}</select></DeveloperField> : null}</article>)}</div>
+    </DeveloperCard> : null}
+
     <form onSubmit={save} className="mt-5 space-y-5">
       <CampaignV1Editor landing={form} media={media} uploadingMedia={uploadingMedia} onChange={(update) => setForm((current) => update(current))} onUploadMedia={uploadMedia} onDeleteMedia={deleteMedia} />
       <DeveloperCard>
-        <DeveloperSectionHeading eyebrow="Configuração" title={form.id ? form.name : "Nova landing"} description="A campanha fica em rascunho até você publicar. Salve antes de abrir a prévia privada." action={<div className="flex flex-wrap gap-2"><button type="button" onClick={() => void openPreview()} disabled={saving || openingPreview} className={developerSecondaryButtonClassName}><ArrowSquareOut size={16} weight="bold" />{openingPreview ? "Abrindo..." : "Abrir prévia"}</button><button type="submit" disabled={saving} className={developerSecondaryButtonClassName}><FloppyDisk size={16} weight="bold" />Salvar</button><button type="button" disabled={saving || form.status === "published"} onClick={() => void changePublication(true)} className={developerPrimaryButtonClassName}><RocketLaunch size={16} weight="bold" />Publicar</button></div>} />
+        <DeveloperSectionHeading eyebrow="Configuração" title={form.id ? form.name : "Nova landing"} description="A prévia usa o renderizador público e sempre mostra a última versão salva. A publicação valida SEO, CTAs e conteúdo de orientação do template." action={<div className="flex flex-wrap gap-2"><button type="button" onClick={() => void openPreview()} disabled={saving || openingPreview || hasUnsavedChanges} className={developerSecondaryButtonClassName}><ArrowSquareOut size={16} weight="bold" />{openingPreview ? "Abrindo..." : "Abrir prévia real"}</button><button type="submit" disabled={saving} className={developerSecondaryButtonClassName}><FloppyDisk size={16} weight="bold" />Salvar</button><button type="button" disabled={saving || form.status === "published" || form.status === "archived"} onClick={() => void changePublication(true)} className={developerPrimaryButtonClassName}><RocketLaunch size={16} weight="bold" />Publicar</button></div>} />
         <div className="grid gap-4 md:grid-cols-2"><DeveloperField label="Nome" required helpKey="landing-pages.field.nome"><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className={developerInputClassName} maxLength={120} /></DeveloperField><DeveloperField label="Rota" required helpKey="landing-pages.field.rota" hint="Exemplo: campanha-distribuicao. A página será aberta em /campanha-distribuicao."><input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} className={developerInputClassName} maxLength={80} /></DeveloperField></div>
-        {form.status === "published" ? <button type="button" disabled={saving} onClick={() => void changePublication(false)} className={`${developerSecondaryButtonClassName} mt-4`}><Eye size={16} weight="bold" />Despublicar</button> : null}
+        {hasUnsavedChanges ? <p className="mt-3 text-sm font-medium text-amber-700">Há alterações não salvas. Salve para atualizar a prévia pública e habilitar a publicação.</p> : null}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {form.status === "published" ? <button type="button" disabled={saving} onClick={() => void changePublication(false)} className={developerSecondaryButtonClassName}><Eye size={16} weight="bold" />Despublicar</button> : null}
+          {form.id ? <button type="button" disabled={saving} onClick={() => void duplicateLanding()} className={developerSecondaryButtonClassName}>Duplicar</button> : null}
+          {form.id && form.status !== "archived" ? <button type="button" disabled={saving} onClick={() => void archiveLanding()} className={developerSecondaryButtonClassName}>Arquivar</button> : null}
+          {form.id && form.status === "archived" ? <button type="button" disabled={saving} onClick={() => void deleteLanding()} className={developerSecondaryButtonClassName}>Excluir definitivamente</button> : null}
+        </div>
       </DeveloperCard>
+
+      {previewPath ? <DeveloperCard>
+        <DeveloperSectionHeading eyebrow="Prévia pública" title="Renderização real da campanha" description="Esta moldura usa a mesma rota privada e o mesmo frontend que a prévia aberta em outra aba. O link expira em sete dias e é renovado ao abrir novamente." />
+        <iframe title="Prévia pública da campanha" src={siteUrl(previewPath)} className="mt-4 h-[760px] w-full rounded-xl border border-[var(--border)] bg-white" />
+      </DeveloperCard> : null}
+
+      {form.id ? <DeveloperCard>
+        <DeveloperSectionHeading eyebrow="Ciclo de vida" title="Programação, histórico e recuperação" description="Defina publicação e despublicação futuras, duplique para uma nova variação e recupere versões anteriores sem apagar mídias que ainda possam estar referenciadas." action={<button type="button" onClick={() => void loadRevisions()} className={developerSecondaryButtonClassName}>Ver histórico</button>} />
+        <div className="mt-4 grid gap-4 md:grid-cols-2"><DeveloperField label="Publicar em"><input type="datetime-local" value={publishAt} onChange={(event) => setPublishAt(event.target.value)} className={developerInputClassName} /></DeveloperField><DeveloperField label="Despublicar em"><input type="datetime-local" value={unpublishAt} onChange={(event) => setUnpublishAt(event.target.value)} className={developerInputClassName} /></DeveloperField></div>
+        <button type="button" disabled={saving || form.status === "archived"} onClick={() => void saveSchedule()} className={`${developerSecondaryButtonClassName} mt-4`}>Salvar programação</button>
+        {revisions.length > 0 ? <div className="mt-5 space-y-2">{revisions.map((revision) => <div key={revision.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] p-3"><div><p className="text-sm font-semibold text-[var(--foreground)]">{revision.operation}</p><p className="text-xs text-[var(--color-muted-raw)]">{new Date(revision.createdAt).toLocaleString("pt-BR")}</p></div><button type="button" onClick={() => void rollback(revision.id)} className={developerSecondaryButtonClassName}>Restaurar</button></div>)}</div> : null}
+      </DeveloperCard> : null}
 
       <DeveloperCard>
         <DeveloperSectionHeading eyebrow="Busca" title="SEO da campanha" description="Defina como a campanha aparece no Google e se ela pode ser indexada. A prévia privada nunca entra em resultados de busca." />
@@ -313,7 +483,7 @@ export default function LandingPagesPage() {
         </div>
       </DeveloperCard>
 
-      <DeveloperCard><DeveloperSectionHeading eyebrow="Medição" title="Analytics da campanha" description="O GA4 só carrega nesta landing depois que o visitante aceitar analytics. Os demais campos ficam prontos para uso futuro." /><div className="grid gap-4 md:grid-cols-2"><DeveloperField label="Measurement ID GA4" helpKey="landing-pages.field.ga4"><input placeholder="G-XXXXXXXXXX" value={form.analytics.ga4MeasurementId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, ga4MeasurementId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField><DeveloperField label="Google Tag Manager"><input placeholder="GTM-XXXX" value={form.analytics.gtmContainerId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, gtmContainerId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField><DeveloperField label="Meta Pixel"><input value={form.analytics.metaPixelId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, metaPixelId: event.target.value.replace(/\D/g, "") } })} className={developerInputClassName} /></DeveloperField><DeveloperField label="Google Ads"><input placeholder="AW-XXXXXXXXX" value={form.analytics.googleAdsId} onChange={(event) => setForm({ ...form, analytics: { ...form.analytics, googleAdsId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField></div></DeveloperCard>
+      <DeveloperCard><DeveloperSectionHeading eyebrow="Medição" title="Analytics da campanha" description="O Measurement ID informado é isolado para esta campanha e só é carregado depois do consentimento de analytics. Integrações sem renderizador sujeito a consentimento não fazem parte deste template." /><DeveloperField label="Measurement ID GA4" helpKey="landing-pages.field.ga4"><input placeholder="G-XXXXXXXXXX" value={form.analytics.ga4MeasurementId} onChange={(event) => setForm({ ...form, analytics: { ga4MeasurementId: event.target.value.toUpperCase() } })} className={developerInputClassName} /></DeveloperField></DeveloperCard>
     </form>
   </DeveloperPage>;
 }

@@ -3,10 +3,13 @@ const redirectAliases = require("./src/lib/redirectAliases.json");
 
 const normalizeBackendUrl = (url) => url.replace(/\/+$/, "");
 const isProduction = process.env.NODE_ENV === "production";
+const defaultBackendUrl = isProduction
+  ? "http://127.0.0.1:6050"
+  : "http://127.0.0.1:31012";
 
 const firstConfiguredBackendUrl = (...values) =>
   values.find((value) => typeof value === "string" && value.trim())?.trim() ||
-  "http://127.0.0.1:6050";
+  defaultBackendUrl;
 
 const backendUrl = normalizeBackendUrl(
   firstConfiguredBackendUrl(

@@ -35,6 +35,10 @@ function safeCopy(source, destination) {
   });
 }
 
+function quotedCommandArgument(value) {
+  return `"${String(value).replaceAll('"', '\\"')}"`;
+}
+
 const source = path.resolve(repoRoot, argValue("--source", "site/backend/storage"));
 const outRoot = path.resolve(repoRoot, argValue("--out", "backups"));
 const name = argValue("--name", `storage-${timestamp()}`);
@@ -49,7 +53,13 @@ const manifest = {
   backupRoot,
   storagePath: backupStorage,
   fileCount: countFiles(backupStorage),
-  restoreCommand: `node scripts/restore-storage.js --backup ${backupRoot} --confirm-restore`,
+  restoreCommand: [
+    "node scripts/restore-storage.js --backup",
+    quotedCommandArgument(backupRoot),
+    "--target",
+    quotedCommandArgument(source),
+    "--confirm-restore",
+  ].join(" "),
 };
 
 fs.writeFileSync(

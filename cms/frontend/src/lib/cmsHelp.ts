@@ -196,10 +196,10 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
     details: [{ label: "Onde aparece", value: "Dentro de um card da seção Feedbacks da campanha publicada." }, { label: "Limite", value: "Aceita até 900 caracteres; priorize uma avaliação curta e compreensível em Mobile.", technical: true }],
   },
   "landing-pages.field.story-image": {
-    title: "Imagem da seção",
-    summary: "Escolha uma imagem já enviada para esta campanha para ficar na coluna esquerda da seção “Imagem e conteúdo”. À direita, o visitante verá o painel textual e seus diferenciais. Não são aceitos links externos ou arquivos de outras bibliotecas.",
-    example: "Envie uma foto da operação pela edição visual e depois selecione-a aqui para compor o lado esquerdo do bloco.",
-    details: [{ label: "Onde aparece", value: "Na coluna esquerda da seção “Imagem e conteúdo” da rota pública da campanha." }, { label: "Biblioteca", value: "A lista mostra somente imagens validadas e enviadas para o Landing Builder desta campanha." }, { label: "Sem imagem", value: "O painel de conteúdo continua visível com uma área neutra à esquerda até uma imagem ser escolhida." }],
+    title: "Imagem ou vídeo da seção",
+    summary: "Escolha uma imagem ou vídeo enviado para esta campanha para ficar na coluna esquerda de “Imagem e conteúdo”. O visitante verá a mídia ao lado do texto; vídeos têm controles de reprodução e podem usar uma capa antes de iniciar.",
+    example: "Envie um vídeo curto da operação, escreva a descrição alternativa na Biblioteca e escolha uma imagem como poster se quiser definir a capa.",
+    details: [{ label: "Onde aparece", value: "Na coluna esquerda da seção “Imagem e conteúdo” da rota pública da campanha." }, { label: "Biblioteca", value: "A lista mostra imagens e vídeos validados e enviados para o Landing Builder; links externos não são aceitos." }, { label: "Acessibilidade", value: "A descrição alternativa é exibida para leitores de tela. Para vídeo, a capa é opcional e os controles permanecem disponíveis ao visitante." }, { label: "Sem mídia", value: "O painel de conteúdo continua visível com uma área neutra à esquerda até uma mídia ser escolhida." }],
   },
   "landing-pages.field.showcase-background": {
     title: "Foto de fundo das soluções",
@@ -215,9 +215,9 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
   },
   "landing-pages.field.responsive-preview": {
     title: "Referências de tela",
-    summary: "Escolha Desktop, Tablet ou Mobile para percorrer a landing completa em um tamanho por vez. Os lápis aparecem sobre o elemento que você quer ajustar — título, mapa, formulário, imagem, cards ou botão — e cada um abre só os campos daquele ponto; Comparar mostra as três referências simultaneamente.",
-    example: "Na Cobertura B2B, use o lápis do título para ajustar a mensagem, o do mapa para trocar as cores e o do card escuro para alterar apenas o formulário, sem sair da prévia.",
-    details: [{ label: "Onde aparece", value: "No editor visual de /admin/developer/landing-pages." }, { label: "Navegação e edição", value: "Desktop, Tablet e Mobile mostram do Hero ao rodapé em uma área rolável. Os atalhos rolam somente essa prévia, sem mover a página do CMS. Cada lápis abre uma ficha curta do elemento visual em que ele aparece; ao fechar a ficha, a página permanece na mesma posição. Se uma seção estiver oculta, o atalho abre a ficha da sua chamada para reativá-la. O rodapé é padrão do template e não pode ser alterado por campanha." }, { label: "Tela cheia", value: "Usa a tela cheia nativa do navegador: a landing ocupa toda a janela sem menu, toolbar ou moldura do CMS. Somente o botão flutuante Voltar ao editor permanece disponível; a tecla Esc também retorna ao CMS. Os lápis continuam funcionando nessa visualização." }, { label: "Comparar", value: "Mostra as três larguras ao mesmo tempo em proporção: Desktop é a maior, Tablet é intermediário e Mobile é a menor. Cada referência tem rolagem própria e a mesma altura externa para a leitura visual ser direta." }],
+    summary: "Escolha Desktop, Tablet ou Mobile para editar a referência visual do template. Os lápis abrem só os campos daquele ponto; depois de salvar, use “Abrir prévia real” para conferir o renderizador público que o visitante receberá.",
+    example: "Na Cobertura B2B, use o lápis do título para ajustar a mensagem, o do mapa para trocar as cores e o do card escuro para alterar apenas o formulário; salve e abra a prévia real antes de publicar.",
+    details: [{ label: "Onde aparece", value: "No canvas de edição de /admin/developer/landing-pages." }, { label: "Navegação e edição", value: "Desktop, Tablet e Mobile mostram do Hero ao rodapé em uma área rolável. Os atalhos rolam somente esse canvas, sem mover a página do CMS. Cada lápis abre uma ficha curta do elemento visual em que ele aparece." }, { label: "Prévia real", value: "A prévia real só usa conteúdo salvo e abre a rota privada renderizada pelo Landing Builder. Ela expira em sete dias, permanece noindex e é renovada ao abrir novamente." }, { label: "Comparar", value: "Mostra as três larguras de referência ao mesmo tempo; a confirmação final de responsividade deve ser feita na prévia real salva." }],
   },
   "landing-pages.field.theme": {
     title: "Cores da landing",
@@ -241,19 +241,19 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
     title: "Measurement ID GA4",
     summary: "Informe o código do Google Analytics exclusivo desta campanha. Ele mede somente a landing publicada nesta rota, depois que a pessoa aceitar cookies de analytics.",
     example: "Cole um código no formato G-ABC123DEF4 criado para esta campanha.",
-    details: [{ label: "Onde aparece", value: "Não é visível ao visitante; é usado pelo Google Analytics da campanha." }, { label: "Validação", value: "O CMS aceita apenas códigos no formato G- seguido por letras e números.", technical: true }, { label: "Consentimento", value: "O script só é carregado após a escolha positiva de analytics." }],
+    details: [{ label: "Onde aparece", value: "Não é visível ao visitante; é usado apenas pelo Google Analytics desta campanha." }, { label: "Validação", value: "O CMS aceita apenas códigos no formato G- seguido por letras e números.", technical: true }, { label: "Consentimento", value: "O script só é carregado após a escolha positiva de analytics. GTM, Meta Pixel e Google Ads não são configurados neste template enquanto não houver renderizador sujeito a consentimento." }],
   },
   "landing-pages.field.seo-title": {
     title: "Título SEO da campanha",
     summary: "Escreva o título que buscadores e compartilhamentos usarão para esta campanha. Se você deixar vazio, a landing usa o título principal do Hero.",
     example: "Use “Distribuição para o Sudeste | Rodogarcia” para uma campanha regional.",
-    details: [{ label: "Onde aparece", value: "Nos resultados de busca e na aba do navegador da landing publicada." }, { label: "Limite", value: "Use até 70 caracteres para manter o título objetivo e compatível com buscadores.", technical: true }, { label: "Prévia", value: "A prévia privada permanece fora de resultados, mesmo que esta campanha esteja configurada para indexação." }],
+    details: [{ label: "Onde aparece", value: "Nos resultados de busca e na aba do navegador da landing publicada." }, { label: "Limite", value: "Use de 20 a 70 caracteres para concluir a publicação e manter o título objetivo.", technical: true }, { label: "Prévia", value: "A prévia privada permanece fora de resultados, mesmo que esta campanha esteja configurada para indexação." }],
   },
   "landing-pages.field.seo-description": {
     title: "Descrição SEO da campanha",
     summary: "Resuma em poucas palavras o que a campanha oferece. Essa descrição ajuda a explicar a landing nos resultados de busca e compartilhamentos.",
     example: "Use “Soluções de distribuição com acompanhamento e cobertura para operações no Sudeste.”",
-    details: [{ label: "Onde aparece", value: "Abaixo do título em resultados de busca e em compartilhamentos compatíveis." }, { label: "Limite", value: "Use até 180 caracteres, sem dados sensíveis ou promessas que não estejam na campanha.", technical: true }, { label: "Após salvar", value: "A descrição passa a ser usada quando a landing publicada for consultada por buscadores." }],
+    details: [{ label: "Onde aparece", value: "Abaixo do título em resultados de busca e em compartilhamentos compatíveis." }, { label: "Limite", value: "Use de 50 a 160 caracteres para concluir a publicação, sem dados sensíveis ou promessas que não estejam na campanha.", technical: true }, { label: "Após salvar", value: "A descrição passa a ser usada quando a landing publicada for consultada por buscadores." }],
   },
   "landing-pages.field.seo-index": {
     title: "Indexação da campanha",
@@ -340,6 +340,48 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Criar usuários", value: "Permite cadastrar novas contas com senha temporária; a pessoa criada ainda precisa trocar essa senha no primeiro acesso." },
       { label: "Excluir usuários", value: "Permite excluir contas que não sejam a conta suprema. A própria pessoa também não pode excluir a si mesma." },
       { label: "Proteção", value: "Somente o usuário supremo pode conceder, remover ou editar essas permissões; administradores com uma permissão não conseguem distribuir permissões para outras pessoas.", technical: true },
+    ],
+  },
+  "setores.section.criar-setor": {
+    title: "Criar setor",
+    summary: "Aqui você cria um perfil de acesso e escolhe quais áreas do CMS as pessoas vinculadas a ele poderão usar.",
+    example: "Crie o setor Recursos Humanos e libere somente Página Carreiras e Imagens.",
+    details: [
+      { label: "Onde é usado", value: "O setor pode ser atribuído às contas em /admin/developer/usuarios." },
+      { label: "Acesso", value: "Somente as áreas marcadas ficam disponíveis para os usuários vinculados; a conta suprema continua protegida por sua regra própria." },
+      { label: "Setor inativo", value: "Ao desativar o setor, usuários já vinculados perdem todas as permissões herdadas dele; somente exceções individuais concedidas explicitamente continuam válidas.", technical: true },
+      { label: "Após salvar", value: "As permissões passam a valer nas próximas requisições autenticadas do CMS." },
+    ],
+  },
+  "setores.section.atualizar-setor": {
+    title: "Atualizar setor",
+    summary: "Aqui você ajusta as áreas liberadas e o status do setor. A mudança afeta as contas vinculadas assim que for salva.",
+    example: "Desmarque Analytics para retirar essa área de todos os usuários vinculados a este setor.",
+    details: [
+      { label: "Onde é usado", value: "O setor controla as contas associadas a ele em /admin/developer/usuarios." },
+      { label: "Setor inativo", value: "Um setor inativo não concede permissões. As contas vinculadas conservam apenas exceções individuais permitidas explicitamente.", technical: true },
+      { label: "Exclusão", value: "Excluir o setor também não libera acesso padrão ou total; atribua outro setor ativo às contas que ainda estiverem vinculadas." },
+      { label: "Após salvar", value: "As permissões passam a valer nas próximas requisições autenticadas do CMS." },
+    ],
+  },
+  "setores.field.status-do-setor": {
+    title: "Status do setor",
+    summary: "Escolha se este setor concede acesso às contas vinculadas e pode ser selecionado para novos usuários.",
+    example: "Desative um setor que não deve mais liberar áreas do painel, mesmo antes de reassociar seus usuários.",
+    details: [
+      { label: "Ativo", value: "O setor pode ser atribuído e concede somente os privilégios marcados." },
+      { label: "Inativo", value: "O setor deixa de conceder sua lista de permissões. Somente exceções individuais concedidas explicitamente continuam válidas." },
+      { label: "Proteção", value: "Um setor ausente, inativo ou excluído nunca faz a conta receber acesso padrão ou acesso total.", technical: true },
+    ],
+  },
+  "setores.section.perfis-disponiveis": {
+    title: "Perfis disponíveis",
+    summary: "Aqui você consulta, edita ou exclui os setores cadastrados e confere quantas áreas cada um libera.",
+    example: "Revise o setor Recursos Humanos antes de mudar seus privilégios ou removê-lo.",
+    details: [
+      { label: "Edição", value: "Alterar os privilégios muda o acesso de todas as contas vinculadas nas próximas requisições." },
+      { label: "Exclusão", value: "As contas vinculadas perdem as permissões herdadas do setor; somente exceções individuais explícitas continuam válidas até a atribuição de outro setor ativo." },
+      { label: "Proteção", value: "Excluir ou desativar um setor nunca concede permissões adicionais.", technical: true },
     ],
   },
   "dashboard.metric.itens-editaveis": {

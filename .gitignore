@@ -53,6 +53,17 @@ logs/
 *.pid
 *.pid.lock
 *.seed
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
+
+# Certificates and local credentials
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
 
 # Sensitive local persistence
 site/backend/storage/private/**
@@ -86,6 +97,17 @@ site/frontend/dist-prod*/
 cms/frontend/dist-prod*/
 landing-builder/backend/dist*/
 landing-builder/frontend/dist-prod*/
+/site/backend/target/
+/cms/backend/target/
+/landing-builder/backend/target/
+**/surefire-reports/
+**/failsafe-reports/
+**/maven-status/
+dependency-reduced-pom.xml
+.flattened-pom.xml
+pom.xml.versionsBackup
+release.properties
+.spring-boot-devtools.properties
 .turbo/
 .cache/
 .vite/

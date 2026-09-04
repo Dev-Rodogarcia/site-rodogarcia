@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import {
   CheckCircle,
   ClipboardText,
@@ -281,14 +281,26 @@ function Fieldset({
   description,
   children,
   className = "",
+  tone = "neutral",
+  transitionIndex = 0,
 }: {
   title: string;
   description?: string;
   children: ReactNode;
   className?: string;
+  tone?: "neutral" | QuoteKind;
+  transitionIndex?: number;
 }) {
+  const toneClassName = tone === "fractional"
+    ? styles.quoteFieldsetFractional
+    : tone === "closed"
+      ? styles.quoteFieldsetClosed
+      : styles.quoteFieldsetNeutral;
   return (
-    <fieldset className={`grid gap-5 rounded-[28px] border border-slate-200/85 bg-slate-50/82 p-5 shadow-[0_14px_32px_rgba(15,23,42,0.045)] sm:p-6 ${className}`}>
+    <fieldset
+      className={`grid gap-5 rounded-[28px] border p-5 sm:p-6 ${styles.quoteFieldset} ${toneClassName} ${className}`}
+      style={{ "--quote-fieldset-delay": `${transitionIndex * 70}ms` } as CSSProperties}
+    >
       <legend className="sr-only">{title}</legend>
       <div>
         <p className={sectionTitleClassName}>{title}</p>
@@ -697,10 +709,18 @@ export function EslQuoteForm({
         {(["fractional", "closed"] as const).map((kind) => {
           const selected = values.kind === kind;
           const Icon = kind === "fractional" ? Package : Truck;
+          const cardToneClassName = kind === "fractional" ? styles.quoteKindCardFractional : styles.quoteKindCardClosed;
+          const iconClassName = selected
+            ? kind === "fractional"
+              ? "bg-emerald-600 text-white shadow-[0_8px_18px_rgba(5,150,105,0.28)]"
+              : "bg-blue-600 text-white shadow-[0_8px_18px_rgba(37,99,235,0.28)]"
+            : kind === "fractional"
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-blue-50 text-blue-700";
           return (
-            <button key={kind} type="button" onClick={() => update("kind", kind)} aria-pressed={selected} className={`relative rounded-2xl border p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${styles.quoteKindCard} ${selected ? styles.quoteKindCardSelected : "border-[var(--border)] bg-white/72 hover:bg-white"}`}>
+            <button key={kind} type="button" onClick={() => update("kind", kind)} aria-pressed={selected} className={`relative rounded-2xl border p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${styles.quoteKindCard} ${cardToneClassName} ${selected ? styles.quoteKindCardSelected : "border-[var(--border)] bg-white/72 hover:bg-white"}`}>
               <span className="flex items-start gap-3">
-                <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${selected ? "bg-[linear-gradient(135deg,#2563eb_0%,#059669_100%)] text-white shadow-[0_8px_18px_rgba(37,99,235,0.24)]" : "bg-slate-100 text-slate-600"}`}><Icon size={21} weight="duotone" /></span>
+                <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,box-shadow] duration-300 ${iconClassName}`}><Icon size={21} weight="duotone" /></span>
                 <span>
                   <span className="block text-sm font-semibold text-[var(--foreground)]">{kind === "fractional" ? "Carga fracionada" : "Carga fechada"}</span>
                   <span className="mt-1 block text-xs leading-5 text-[var(--color-muted-raw)]">{kind === "fractional" ? "Para volumes que seguem junto de outras cargas; o valor é calculado nesta página." : "Para um veículo dedicado à sua operação; os dados seguem para atendimento comercial."}</span>
@@ -711,7 +731,7 @@ export function EslQuoteForm({
         })}
       </div>
 
-      <Fieldset title="Empresas envolvidas" description="Informe o CNPJ da empresa responsável pela operação. A filial Rodogarcia é identificada automaticamente pela cidade de origem." className="lg:col-span-12">
+      <Fieldset title="Empresas envolvidas" description="Informe o CNPJ da empresa responsável pela operação. A filial Rodogarcia é identificada automaticamente pela cidade de origem." tone={values.kind} transitionIndex={0} className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
           <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
@@ -719,7 +739,7 @@ export function EslQuoteForm({
         </div>
       </Fieldset>
 
-      <Fieldset title="Origem e destino" className="lg:col-span-12">
+      <Fieldset title="Origem e destino" tone={values.kind} transitionIndex={1} className="lg:col-span-12">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="CEP de origem" required><input value={values.originPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("originPostalCode", postalCode); schedulePostalLookup("origin", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("origin", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
           <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
@@ -730,7 +750,7 @@ export function EslQuoteForm({
         </div>
       </Fieldset>
 
-      <Fieldset title="Dados da carga" className="lg:col-span-7 lg:self-stretch">
+      <Fieldset title="Dados da carga" tone={values.kind} transitionIndex={2} className="lg:col-span-7 lg:self-stretch">
         <div className="grid gap-4 [&>label]:min-w-0 [&>label>span]:whitespace-nowrap">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.72fr)_repeat(3,minmax(0,1fr))]">
             <Field label="Quantidade" required><input value={values.invoiceVolumes} onChange={(event) => updateQuantity(event.target.value)} type="number" min="1" step="1" inputMode="numeric" placeholder="1" className={fieldClassName} /></Field>
@@ -748,7 +768,7 @@ export function EslQuoteForm({
         </div>
       </Fieldset>
 
-      <Fieldset title="Solicitante" className="lg:col-span-5 lg:self-stretch">
+      <Fieldset title="Solicitante" tone={values.kind} transitionIndex={3} className="lg:col-span-5 lg:self-stretch">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome" required><input value={values.requesterName} onChange={input("requesterName")} autoComplete="name" placeholder="Seu nome" className={fieldClassName} /></Field>
           <Field label="Telefone" required><input value={values.requesterPhone} onChange={formattedInput("requesterPhone")} type="tel" inputMode="tel" maxLength={15} autoComplete="tel" placeholder="(00) 00000-0000" className={fieldClassName} /></Field>

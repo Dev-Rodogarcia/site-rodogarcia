@@ -11,6 +11,7 @@ import {
   DeveloperCard,
   DeveloperField,
   DeveloperHero,
+  DeveloperHelp,
   DeveloperMessage,
   DeveloperPage,
   DeveloperSectionHeading,
@@ -81,7 +82,7 @@ export default function SetoresPage() {
   }
   async function remove(sector: Sector) {
     if (!isSupreme) { setMessage("Somente o usuário supremo pode administrar setores."); return; }
-    if (!window.confirm(`Excluir o setor “${sector.name}”? Usuários vinculados a ele ficarão sem esse setor.`)) return;
+    if (!window.confirm(`Excluir o setor “${sector.name}”? Usuários vinculados perderão as permissões herdadas dele; somente exceções individuais explícitas continuarão válidas até receberem outro setor ativo.`)) return;
     const response = await apiRequest(api.admin.accessProfile(sector.id), { method: "DELETE" });
     if (!response.success) { setMessage(response.error ?? "Não foi possível excluir o setor."); return; }
     invalidateAdminResource(["admin:access-profiles", "admin:access-profiles-for-users"]);
@@ -126,7 +127,7 @@ export default function SetoresPage() {
               {CMS_PERMISSION_CATALOG.filter(([permission]) => permission !== "users").map(([permission, label]) => <label key={permission} className="flex min-h-9 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/75 px-2.5 py-1.5 text-sm font-semibold text-[var(--foreground)]"><input type="checkbox" checked={form.permissions.includes(permission)} onChange={(event) => togglePermission(permission, event.target.checked)} className="h-4 w-4 shrink-0 accent-[var(--primary)]" /><span className="truncate">{label}</span></label>)}
             </div>
           </DeveloperField>
-          <label className="flex items-center gap-3 text-sm font-semibold text-[var(--foreground)]"><input type="checkbox" checked={form.active} onChange={(event) => setForm((current) => ({ ...current, active: event.target.checked }))} className="h-4 w-4 accent-[var(--primary)]" />Setor disponível para novos usuários</label>
+          <label className="flex items-center gap-3 text-sm font-semibold text-[var(--foreground)]"><input type="checkbox" checked={form.active} onChange={(event) => setForm((current) => ({ ...current, active: event.target.checked }))} className="h-4 w-4 accent-[var(--primary)]" /><span>Setor ativo</span><DeveloperHelp label="Status do setor" templateKey="status-do-setor" /></label>
           {message ? <DeveloperMessage tone={message.includes("sucesso") ? "success" : "error"}>{message}</DeveloperMessage> : null}
           <div className="flex flex-wrap gap-2"><button type="submit" disabled={saving} className={developerPrimaryButtonClassName}><CheckCircle size={16} weight="bold" />{saving ? "Salvando..." : editingId ? "Salvar setor" : "Criar setor"}</button>{editingId ? <button type="button" onClick={resetForm} className={developerSecondaryButtonClassName}><X size={16} weight="bold" />Cancelar</button> : null}</div>
         </form>

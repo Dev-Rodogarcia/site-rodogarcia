@@ -4,6 +4,7 @@ backups
 .env.*
 site/backend/storage/private
 site/backend/storage/uploads
+cms/backend
 scripts
 *.log
 .DS_Store

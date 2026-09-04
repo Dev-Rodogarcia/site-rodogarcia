@@ -7,63 +7,49 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: |
-            site/backend/package-lock.json
             site/frontend/package-lock.json
-            cms/backend/package-lock.json
             cms/frontend/package-lock.json
-            landing-builder/backend/package-lock.json
             landing-builder/frontend/package-lock.json
       - run: npm ci
-        working-directory: site/backend
-      - run: npm ci
         working-directory: site/frontend
-      - run: npm ci
-        working-directory: cms/backend
       - run: npm ci
         working-directory: cms/frontend
       - run: npm ci
-        working-directory: landing-builder/backend
-      - run: npm ci
         working-directory: landing-builder/frontend
-      - run: npm run typecheck
+      - run: chmod +x mvnw && ./mvnw -B -ntp clean verify
         working-directory: site/backend
-      - run: npm test
-        working-directory: site/backend
-      - run: npm run build
-        working-directory: site/backend
+      - run: chmod +x mvnw && ./mvnw -B -ntp clean verify
+        working-directory: cms/backend
+      - run: chmod +x mvnw && ./mvnw -B -ntp clean verify
+        working-directory: landing-builder/backend
       - run: npm run typecheck
         working-directory: site/frontend
       - run: npm run build
         working-directory: site/frontend
       - run: npm run typecheck
-        working-directory: cms/backend
-      - run: npm test
-        working-directory: cms/backend
-      - run: npm run build
-        working-directory: cms/backend
-      - run: npm run typecheck
         working-directory: cms/frontend
       - run: npm run build
         working-directory: cms/frontend
       - run: npm run typecheck
-        working-directory: landing-builder/backend
-      - run: npm run build
-        working-directory: landing-builder/backend
-      - run: npm run typecheck
         working-directory: landing-builder/frontend
       - run: npm run build
         working-directory: landing-builder/frontend
-      - run: npm run build -- --outDir dist.test
+      - run: mkdir -p dist.test && cp target/server.jar dist.test/server.jar
         working-directory: site/backend
-      - run: npm run build -- --outDir dist.test
+      - run: mkdir -p dist.test && cp target/server.jar dist.test/server.jar
         working-directory: cms/backend
       - run: npm run build:prod
         working-directory: site/frontend
@@ -71,12 +57,12 @@ jobs:
           NODE_ENV: production
           BACKEND_PROXY_URL: ""
           NEXT_PUBLIC_BACKEND_PROXY_URL: ""
-          BACKEND_INTERNAL_URL: http://127.0.0.1:4010
-          CMS_BACKEND_INTERNAL_URL: http://127.0.0.1:5414
-          CMS_INTERNAL_URL: http://127.0.0.1:5413
-          CMS_BACKEND_PROXY_URL: http://127.0.0.1:5414
-          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:4010
-          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:5411
+          BACKEND_INTERNAL_URL: http://127.0.0.1:42010
+          CMS_BACKEND_INTERNAL_URL: http://127.0.0.1:42514
+          CMS_INTERNAL_URL: http://127.0.0.1:42513
+          CMS_BACKEND_PROXY_URL: http://127.0.0.1:42514
+          NEXT_PUBLIC_BACKEND_URL: http://127.0.0.1:42010
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:42511
           LANDING_BUILDER_API_URL: ""
           LANDING_BUILDER_SERVICE_TOKEN: ""
           LANDING_BUILDER_PUBLIC_URL: ""
@@ -85,9 +71,9 @@ jobs:
         working-directory: cms/frontend
         env:
           NODE_ENV: production
-          CMS_BACKEND_INTERNAL_URL: http://127.0.0.1:5414
-          CMS_BACKEND_PROXY_URL: http://127.0.0.1:5414
-          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:5411
+          CMS_BACKEND_INTERNAL_URL: http://127.0.0.1:42514
+          CMS_BACKEND_PROXY_URL: http://127.0.0.1:42514
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:42511
           PROD_ARTIFACT_DIR: dist-prod.test
       - run: node scripts/tests/test-security-hardening.js
         env:
@@ -95,3 +81,4 @@ jobs:
           SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR: cms/backend/dist.test
           SECURITY_TEST_FRONTEND_ARTIFACT_DIR: site/frontend/dist-prod.test
           SECURITY_TEST_CMS_ARTIFACT_DIR: cms/frontend/dist-prod.test
+      - run: node scripts/tests/test-production-operations.js

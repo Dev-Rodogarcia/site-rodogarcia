@@ -1,6 +1,6 @@
 # Regras Operacionais para IAs - Site Rodogarcia
 
-Você atua como Engenheiro de Software Principal neste repositório. O projeto atual é o site institucional da Rodogarcia com frontend Next.js, painel CMS interno e backend Node.js/Express em TypeScript. Seu objetivo é resolver a tarefa solicitada mantendo a integridade do site público, do CMS, da segurança e da persistência local em JSON.
+Você atua como Engenheiro de Software Principal neste repositório. O projeto atual é o site institucional da Rodogarcia com frontend Next.js, painel CMS interno e três backends canônicos em Java 21/Spring Boot MVC. Seu objetivo é resolver a tarefa solicitada mantendo a integridade do site público, do CMS, da segurança e da persistência local em JSON.
 
 ---
 
@@ -23,18 +23,18 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 
 - Não execute `iniciar-dev.bat` ou `iniciar-prod.bat` sem pedido explícito do usuário. Esses scripts encerram processos e abrem janelas externas.
 - A IA nunca inicia produção nem executa `iniciar-prod.bat`/restart de PM2: essa operação é exclusivamente manual da equipe responsável, em janela autorizada. O modo DEV também é iniciado manualmente pelo usuário; a IA apenas pode fazer verificações não destrutivas nos processos já ativos.
-- Não derrube, reinicie, libere ou mate processos nas portas `4010`/`5010` (produção) ou `4011`/`5011` (desenvolvimento) sem pedido explícito.
-- Prefira `npm run dev`, `npm run typecheck`, `npm run build` e `npm test` dentro de `site/backend/` ou `site/frontend/` conforme o escopo.
+- Não derrube, reinicie, libere ou mate processos nas portas de produção `6050`/`6051`/`6060`/`6061`/`41110`/`41112` ou de desenvolvimento `31012`/`31013`/`35180`/`35013`/`36110`/`35112` sem pedido explícito.
+- Nos três backends Spring, prefira os Maven Wrappers de `site/backend/`, `cms/backend/` e `landing-builder/backend/`; nos frontends, use os scripts npm do próprio projeto. A execução de um servidor DEV continua sendo manual pelo usuário.
 - Não edite `.env`, `.env.*` reais, credenciais, chaves, arquivos privados de storage, backups ou uploads de produção sem solicitação explícita.
 - Não versionar dados sensíveis: `site/backend/storage/private/**`, `site/backend/storage/uploads/**`, JSONs operacionais privados, logs, builds e caches devem permanecer fora do Git.
 - Não altere remotes Git, credenciais locais, arquivos de configuração global ou conteúdo fora do workspace.
 
 ## Escopo de Escrita Permitido
 
-- Você pode alterar código TypeScript/TSX, CSS, componentes, rotas, controllers, services, repositories, validators, types, testes, docs e exemplos de configuração.
+- Você pode alterar código Java, TypeScript/TSX, CSS, XML Maven, propriedades versionadas, componentes, rotas, controllers, services, repositories, validators, types, testes, docs e exemplos de configuração.
 - Você pode atualizar os JSONs canônicos versionados quando a tarefa envolver conteúdo público inicial, schema de CMS ou defaults de desenvolvimento.
 - Não edite `node_modules`, `.next`, `dist`, caches, artefatos gerados ou arquivos ignorados sem necessidade explícita.
-- A raiz do repositório deve continuar reservada para arquivos globais e as áreas `site/`, `landing-builder/`, `cms/` e `shared/`; `site/` contém `backend/` e `frontend/`. `shared/` contém contratos, hooks e utilitários agnósticos de aplicação; não deve conter UI, runtime Next nem regra exclusiva do site ou do CMS. A extração para `cms/` é física: arquivos já migrados não devem ser duplicados ou restaurados em `site/frontend` ou `site/backend`; `cms/frontend` e `cms/backend` são as origens definitivas do runtime administrativo.
+- A raiz do repositório deve continuar reservada para arquivos globais e as áreas `site/`, `landing-builder/`, `cms/` e `shared/`; `site/` contém o backend público canônico em `backend/` e o frontend em `frontend/`. `shared/` contém contratos, hooks e utilitários agnósticos de aplicação; não deve conter UI, runtime Next nem regra exclusiva do site ou do CMS. A extração para `cms/` é física: arquivos já migrados não devem ser duplicados ou restaurados nos backends públicos ou em `site/frontend`; `cms/frontend` e `cms/backend` são as origens definitivas do runtime administrativo.
 
 ---
 
@@ -45,6 +45,7 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 - O frontend fica em `site/frontend/` e usa Next.js App Router, React, TypeScript e Tailwind CSS.
 - Rotas públicas ficam em `site/frontend/src/app/*`.
 - O frontend público encaminha `/admin` e `/admin/:path*` ao processo privado do CMS por `CMS_INTERNAL_URL`; APIs e uploads do navegador continuam em `/api/*` e `/uploads/*` no mesmo hostname público. Rewrites de auth/admin, conteúdo, mídia/uploads, formulários, consentimento, analytics, popup, tracking e leads seguem para `CMS_BACKEND_INTERNAL_URL`; ESL, CEP e CNPJ seguem para o backend público. Quando o Landing Builder estiver configurado, `/landing-assets/_next/*` e `/landing-media/*` seguem para ele e o fallback por slug só ocorre depois das rotas institucionais.
+- A ligação do frontend ao backend público é exclusivamente por `BACKEND_INTERNAL_URL`/`BACKEND_PROXY_URL`/`NEXT_PUBLIC_BACKEND_URL`, sem importar implementação de runtime. URLs, JSON, headers, métodos e portas permanecem idênticos: `31012` no DEV e `6050` em produção apontam ao Spring canônico.
 - `site/frontend/src/components/layout/ShellLayout.tsx` define somente o chrome público.
 - Constantes de rotas, navegação, sitemap, aliases públicos e URLs externas ficam em `site/frontend/src/lib/routes.ts`. Aliases antigos de CMS são tratados no `next.config.js`, sem recriar rotas administrativas no bundle público.
 - Fetch server-side para conteúdo público fica em `site/frontend/src/lib/api.ts`; mutações client-side devem passar por `useApiRequest` para injetar CSRF.
@@ -58,17 +59,16 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 
 ### Backend público
 
-- O backend público fica em `site/backend/`, usa Node.js, Express 5 e TypeScript ESM e atende exclusivamente transporte ESL e consultas públicas de CEP/CNPJ.
-- `site/backend/src/app.ts` monta Helmet, CORS, JSON parser, `/api` e `/health`; ele não serve uploads nem mantém sessão, usuários, conteúdo ou outras coleções administrativas.
-- Controllers são fronteiras HTTP finas, services concentram integração/regras ESL e repositories encapsulam apenas o rate limit operacional desse processo.
-- `site/backend/src/config`, `security`, `validators`, `types` e `utils` mantêm somente os contratos necessários à sua superfície pública.
+- O backend público canônico fica em `site/backend/`, usa Java 21, Spring Boot MVC bloqueante e Maven Wrapper e atende exclusivamente transporte ESL e consultas públicas de CEP/CNPJ. Ele é o padrão de desenvolvimento e CI; sua configuração versionada fica em `src/main/resources/application.properties`, sem YAML e sem Lombok.
+- `SiteBackendApplication` inicia o runtime; `controller` contém fronteiras HTTP finas, `service` concentra regras, `integration` encapsula ViaCEP/BrasilAPI/ESL, `repository` persiste somente o rate limit operacional, e `dto`, `model`, `security`, `validation`, `config`, `exception` e `utils` mantêm suas responsabilidades locais. O backend público não serve uploads nem mantém sessão, usuários, conteúdo ou coleções administrativas.
+- O Spring deve preservar integralmente o contrato observável já homologado: URLs e casing, métodos, status, JSON, cookies quando aplicáveis, headers, CORS/origin, limites, porta, variáveis de ambiente e regras de segurança. Mudança deliberada de contrato exige aceite explícito, teste e atualização da documentação operacional.
+- `site/backend/` é a única implementação do backend público. A compatibilidade HTTP histórica está documentada e coberta pelos testes locais; não recrie um runtime alternativo nem um segundo writer para o rate limit.
 
 ### Backend CMS
 
-- O runtime administrativo fica em `cms/backend/`, usa Node.js, Express 5 e TypeScript ESM e é a origem definitiva de auth, sessão, ACL, CSRF, conteúdo, SEO, mídia, uploads, formulários/leads, consentimento, analytics, popup, melhorias, auditoria e scheduler.
-- `cms/backend/src/app.ts` monta Helmet, CORS, JSON parser, cookies, `/uploads` estático com `nosniff`, `/api` e `/health`; `server.ts` inicia o HTTP e o scheduler administrativo.
-- Controllers são fronteiras HTTP finas em `cms/backend/src/controllers`; services concentram regras de negócio; repositories encapsulam JSON; `security` concentra sessão, autenticação, CSRF, CORS/origin e rate limits; config, validators, types e utils permanecem coesos e locais.
-- Não importe módulos de runtime entre `cms/backend/src/**` e `site/backend/src/**`. Compartilhe somente contratos realmente agnósticos em `shared/`; não duplique writers para uma coleção JSON.
+- O backend administrativo canônico fica em `cms/backend/` em Java 21/Spring Boot MVC e concentra auth, sessão, ACL, CSRF, conteúdo, SEO, mídia, uploads, formulários/leads, consentimento, analytics, popup, melhorias, auditoria, integração privada com o Builder e scheduler.
+- No Spring, controllers são fronteiras HTTP finas, services concentram regras, repositories encapsulam JSON, `security` concentra sessão/autenticação/ACL/CSRF/CORS/limites, `validation` trata bordas e `config` mantém ambiente, storage, filtros e runtime. Preserve os 95 endpoints explícitos, `/uploads`, `HEAD`/`OPTIONS`, cookies, headers, status e efeitos documentados em `contracts/`.
+- Não importe módulos de runtime entre `cms/backend/src/**`, `site/backend/src/**` e `landing-builder/backend/src/**`. Compartilhe somente contratos realmente agnósticos em `shared/`; não duplique writers para uma coleção JSON.
 
 ### Landing Builder
 
@@ -82,12 +82,12 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 
 - Preserve as responsabilidades já consolidadas: controllers apenas traduzem HTTP, services concentram regra de negócio, repositories fazem persistência JSON, validators/types/utils ficam puros e reutilizáveis.
 - Trate entrada externa como `unknown` na borda, valide/sanitize antes de usar e nunca propague `req.body`, query string ou payload de CMS sem normalização explícita.
-- Prefira tipos e contratos existentes antes de criar novos formatos; ao mudar schema, mantenha tipos de `site/backend`/`site/frontend`, sanitização, normalização pública, CMS e testes sincronizados.
+- Prefira tipos e contratos existentes antes de criar novos formatos; ao mudar schema ou contrato HTTP público, mantenha `site/backend`, `site/frontend`, CMS, sanitização, normalização pública e testes sincronizados.
 - Evite duplicação de rotas, labels canônicos, URLs externas, limites, regras de mídia e textos de negócio; use `routes.ts`, storage canônico, validators e helpers locais como fonte única.
 - Escreva funções e componentes coesos, com nomes claros e fluxo legível. Extraia helpers quando reduzir ramificações reais ou repetição significativa, não para criar abstração prematura.
 - Mantenha React Components focados em renderização e interação; transformação pesada de dados deve ficar em helpers, hooks ou camada de API já existente.
 - Não use `any` como atalho. Quando a entrada for dinâmica, modele com `unknown`, type guards, Zod ou sanitizadores já presentes.
-- Use `HttpError` e `asyncHandler` nas bordas HTTP das duas APIs, preservando mensagens seguras e sem vazar detalhes internos.
+- Nos backends Spring, use `ApiException` e `GlobalExceptionHandler`. Em todas as bordas, preserve mensagens seguras e não vaze detalhes internos.
 - Comentários devem explicar decisões, contratos ou exceções não óbvias; não comente código autoexplicativo.
 - Testes devem acompanhar risco e superfície alterada: services, security, media, storage, validators e contratos compartilhados exigem cobertura próxima da mudança.
 
@@ -107,19 +107,20 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 - `site/backend/storage/content.json` e `site/backend/storage/site-texts.json` são conteúdo público canônico versionado.
 - `site/backend/storage/private/**` guarda usuários, sessões, analytics, consentimentos, auditoria e rate limit locais; não deve ser versionado.
 - `site/backend/storage/uploads/**` guarda uploads de runtime; não deve ser versionado.
-- O volume canônico continua em `site/backend/storage`, sem cópia para `cms/backend`. Coleções do CMS devem ser declaradas em `cms/backend/src/config/storagePaths.ts`, acessadas por repository e cobertas pelo `.gitignore` quando forem privadas/runtime; o backend público declara somente seu rate limit operacional.
+- O volume canônico continua em `site/backend/storage`, sem cópia para outro backend. O CMS declara suas coleções em `StoragePaths`, acessa-as por repository e mantém arquivos privados/runtime no `.gitignore`; o backend público declara somente seu rate limit operacional. O Builder escreve exclusivamente o próprio volume configurado por `LANDING_BUILDER_STORAGE_ROOT`.
 - Escrita JSON deve passar por `readJsonFile`/`writeJsonFile` ou repositories existentes para preservar criação de diretório e escrita atômica.
-- Mudanças de schema de conteúdo devem atualizar tipos de `site/backend`/`site/frontend`/CMS, sanitização, normalização pública, telas do CMS, defaults/migração de leitura e testes quando aplicável.
-- Backups completos do storage local devem usar `node scripts/backup-storage.js`; restores devem usar `node scripts/restore-storage.js --backup ... --confirm-restore` e seguir `docs/backup-restore-json.md`.
+- Mudanças de schema de conteúdo devem atualizar contratos em `shared/`, no backend CMS, em `site/frontend` e em `cms/frontend`, além de sanitização, normalização pública, telas do CMS, defaults/migração de leitura e testes quando aplicável. O backend público não é writer dessas coleções.
+- Backups completos do storage local devem usar `node scripts/backup-storage.js`; em produção, pare os writers e informe obrigatoriamente `--source` com o `STORAGE_ROOT` absoluto. Restores devem usar `node scripts/restore-storage.js --backup ... --target ... --confirm-restore` e seguir `docs/backup-restore-json.md`.
 
 ## Mídia e Uploads
 
 - O CMS só deve aceitar mídia interna validada. É proibido permitir `http://`, `https://`, `data:`, `javascript:`, path traversal ou referência inexistente em campos de mídia.
 - Validações de mídia ficam em `mediaValidationService`.
-- Uploads de imagem aceitam PNG, JPG/JPEG, WebP e AVIF, validam assinatura real e geram WebP otimizado, thumbnail, medium e large via Sharp.
+- Uploads de imagem aceitam PNG, JPG/JPEG, WebP e AVIF, validam assinatura real e geram WebP otimizado, thumbnail, medium e large via WebP4j nos backends Spring.
 - Uploads de vídeo aceitam MP4, WebM e Ogg, validam assinatura real e não são convertidos para WebP.
+- Os backends Spring do CMS e Landing Builder exigem em produção `FFMPEG_PATH` absoluto, existente e estável fora do repositório/`node_modules`; DEV/teste podem definir um binário local compatível.
 - A mídia do Landing Builder segue o mesmo princípio no volume próprio: imagem PNG/JPG/WebP/AVIF é otimizada para WebP; vídeo MP4/WebM/Ogg preserva o formato e não pode ser excluído enquanto estiver referenciado.
-- Ao alterar contratos de mídia, atualize `cms/backend`, CMS frontend, frontend público, testes de mídia e documentação.
+- Ao alterar contratos de mídia, mantenha o backend CMS sincronizado com CMS frontend, frontend público, testes de mídia e documentação.
 
 ---
 
@@ -129,7 +130,7 @@ Você atua como Engenheiro de Software Principal neste repositório. O projeto a
 - Rotas administrativas exigem `requireAdmin`; mutações administrativas também exigem `requireAllowedOrigin`, `requireJson` quando houver JSON e `requireCsrf`.
 - Rotas públicas mutáveis, como formulários, consentimento, analytics e popup, devem validar origem e tipo de conteúdo.
 - Setup inicial de administrador depende de `ADMIN_SETUP_CODE` somente quando ainda não existem usuários.
-- Em produção, `JWT_SECRET` ou `SESSION_SECRET`, `ADMIN_SETUP_CODE`, `FRONTEND_ORIGIN` e `CORS_ORIGINS` devem passar pelo hardening de `cms/backend/src/config/env.ts`: secrets fortes, setup code forte e origens HTTPS não locais. O backend público aplica hardening de origem, mas não recebe segredos de sessão/setup.
+- Em produção, `JWT_SECRET` ou `SESSION_SECRET`, `ADMIN_SETUP_CODE`, `FRONTEND_ORIGIN` e `CORS_ORIGINS` devem passar pelo hardening de `CmsProperties`: secrets fortes, setup code forte e origens HTTPS não locais. O backend público aplica hardening de origem, mas não recebe segredos de sessão/setup.
 - Gestão de identidades e ACL após o setup exige usuário supremo (`SUPREME_ADMIN_EMAILS`, e-mail dev configurado ou regra atual de usuário supremo). Permissão de `users` não autoriza criar administradores privilegiados, conceder/remover permissões, editar perfis de acesso ou atribuir exceções; essas ações nunca podem elevar o próprio ator nem contornar o usuário supremo.
 - Senhas novas usam bcrypt; hashes legados PBKDF2 continuam verificáveis.
 - Preserve rate limits do CMS para login, leads, popup e analytics, isolados dos limites operacionais de ESL/CEP/CNPJ no backend público.
@@ -213,15 +214,15 @@ Toda alteração deve ser avaliada contra estes 20 controles. Itens de banco de 
 
 ## Validação Obrigatória
 
-- Backend:
-  - `cd site/backend && cmd /c npm run typecheck`
-  - `cd site/backend && cmd /c npm run build`
-  - `cd site/backend && cmd /c npm test` quando alterar services, security, media, storage ou validações.
+- Backend público Spring canônico:
+  - `cd site/backend && cmd /c mvnw.cmd -B clean verify`
+  - O `verify` e os testes HTTP/socket do Spring são obrigatórios ao alterar controllers, services, integrações, segurança, parsing, storage, configuração ou contratos observáveis.
 - Backend CMS:
-  - `cd cms/backend && cmd /c npm ci`
-  - `cd cms/backend && cmd /c npm run typecheck`
-  - `cd cms/backend && cmd /c npm run build`
-  - `cd cms/backend && cmd /c npm test` quando alterar services, security, media, storage ou validações.
+  - `cd cms/backend && cmd /c mvnw.cmd -B clean verify`
+  - O `verify` é obrigatório ao alterar controllers, services, security, media, storage, validações ou contratos observáveis.
+- Landing Builder:
+  - `cd landing-builder/backend && cmd /c mvnw.cmd -B clean verify`
+  - O `verify` é obrigatório ao alterar campanhas, mídia, storage, filtros, segurança ou contratos observáveis.
 - Frontend:
   - `cd site/frontend && cmd /c npm run typecheck`
   - `cd site/frontend && cmd /c npm run build`
@@ -230,14 +231,9 @@ Toda alteração deve ser avaliada contra estes 20 controles. Itens de banco de 
   - `cd cms/frontend && cmd /c npm run typecheck`
   - `cd cms/frontend && cmd /c npm run build`
 - O `next.config.js` ignora erros de TypeScript durante build; por isso o typecheck separado do frontend é obrigatório.
-- Para hardening de segurança fim a fim, use somente os artefatos isolados
-  `site/backend/dist.test`, `cms/backend/dist.test`, `site/frontend/dist-prod.test` e
-  `cms/frontend/dist-prod.test`, com as quatro variáveis
-  `SECURITY_TEST_*_ARTIFACT_DIR` correspondentes; o script recusa `.next` e
-  artefatos ativos antes de iniciar processos. O `iniciar-prod.bat` prepara
-  esse contrato automaticamente. Com `next dev` manual em execução, use
-  `NEXT_BUILD_DIST_DIR=.next.test` ao gerar os artefatos para não tocar no cache
-  ativo. Nunca aponte o hardening para produção.
+- O hardening de rollout usa somente `site/backend/dist.test/server.jar`, `cms/backend/dist.test/server.jar`, `site/frontend/dist-prod.test` e `cms/frontend/dist-prod.test`. O `iniciar-prod.bat` prepara os artefatos isolados antes de qualquer promoção manual.
+- O CI executa Spring nos três backends, copia os JARs verificados de site e CMS para os diretórios de hardening e executa o hardening ponta a ponta em portas e storage temporários. O Builder é validado pelo Maven Wrapper próprio e pela suíte de contrato.
+- O hardening recusa artefatos ativos e nunca deve apontar para produção. Com `next dev` manual em execução, use `NEXT_BUILD_DIST_DIR=.next.test` ao gerar os artefatos Next para não tocar no cache ativo.
 - Para validação visual DEV, use somente processos iniciados manualmente pelo usuário; a IA faz verificações não destrutivas e não inicia, reinicia ou encerra serviços desse fluxo.
 
 ## Sincronização de Estado

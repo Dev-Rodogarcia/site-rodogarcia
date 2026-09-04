@@ -2,32 +2,24 @@
 
 ## Testes
 
-- `node scripts/tests/test-security-hardening.js` — somente com os artefatos isolados e variáveis `SECURITY_TEST_*_ARTIFACT_DIR` descritos abaixo.
+- `node scripts/tests/test-security-hardening.js` executa somente com artefatos isolados e storage temporário.
+- `node scripts/tests/test-production-operations.js` valida promoção e rollback de artefatos em diretórios temporários.
+
+O hardening usa `site/backend/dist.test/server.jar`, `cms/backend/dist.test/server.jar`, `site/frontend/dist-prod.test` e `cms/frontend/dist-prod.test`. Ele recusa `.next`, artefatos ativos, portas e storage de produção.
 
 ## Backup e restore
 
-- `node scripts/backup-storage.js`
-- `node scripts/restore-storage.js --backup backups/storage-... --confirm-restore`
+- `node scripts/backup-storage.js --source "<STORAGE_ROOT absoluto>"`
+- `node scripts/restore-storage.js --backup backups/storage-... --target "<STORAGE_ROOT absoluto>" --confirm-restore`
 
-Detalhes operacionais: `docs/backup-restore-json.md`.
+Em produção, writers devem estar parados e o backup precisa receber `--source` explícito. O comando sem source aponta ao storage local. Veja `docs/backup-restore-json.md`.
 
-## Conversão de imagens para WebP
+## Uploads de produção
 
-- `node site/backend/scripts/migrate-images-to-webp.js` mostra a migração planejada sem alterar arquivos.
-- `node site/backend/scripts/migrate-images-to-webp.js --apply` converte PNG/JPG/JPEG/AVIF em `site/frontend/public` e `site/backend/storage/uploads`, atualiza referências conhecidas e remove os originais após validar o WebP gerado.
+`node scripts/sync-production-uploads.js --env-file .env.production.local` valida referências de uploads no volume alvo. Use `--apply` somente na janela autorizada para copiar arquivos ausentes sem sobrescrever os existentes.
 
-## Conversão de vídeos para WebM
+## Observação
 
-- O backend instala o FFmpeg compatível como dependência; `FFMPEG_PATH` é opcional e permite sobrescrever esse executável em ambientes operacionais específicos.
-- `node site/backend/scripts/migrate-videos-to-webm.js` mostra a migração planejada sem alterar arquivos.
-- `node site/backend/scripts/migrate-videos-to-webm.js --apply` converte MP4/Ogg em `site/frontend/public` e `site/backend/storage/uploads`, atualiza referências conhecidas e remove os originais após validar o WebM gerado.
+O teste de segurança sobe as APIs Spring e os frontends Next em processos isolados, verifica o gateway `/admin` e lê `routes-manifest.json`. ESL/CEP/CNPJ devem apontar para `127.0.0.1:42010`; rotas CMS e `/uploads/*` para `127.0.0.1:42514`; `/admin/*` para `127.0.0.1:42513`.
 
-## Observacao
-
-O teste de segurança sobe `site/backend/`, `cms/backend/`, `site/frontend/` e `cms/frontend/` como processos separados e verifica o gateway `/admin`. Ele **nunca deve ser executado sem os quatro artefatos isolados**: `site/backend/dist.test`, `cms/backend/dist.test`, `site/frontend/dist-prod.test` e `cms/frontend/dist-prod.test`. O comando exige, respectivamente, `SECURITY_TEST_BACKEND_ARTIFACT_DIR=site/backend/dist.test`, `SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR=cms/backend/dist.test`, `SECURITY_TEST_FRONTEND_ARTIFACT_DIR=site/frontend/dist-prod.test` e `SECURITY_TEST_CMS_ARTIFACT_DIR=cms/frontend/dist-prod.test`; qualquer outro caminho, inclusive `.next`, `site/backend/dist`, `cms/backend/dist` ou `dist-prod` ativo, é recusado antes de iniciar processos. Quando houver `next dev` manual em execução, gere os dois artefatos Next com `NEXT_BUILD_DIST_DIR=.next.test`; o cache `.next` ativo não é tocado e os scripts de preparação leem esse diretório isolado.
-
-Além da presença dos servidores standalone, o teste lê `site/frontend/dist-prod.test/.next/routes-manifest.json` e exige que ESL/CEP/CNPJ apontem para `127.0.0.1:42010`, as rotas de ownership do CMS e `/uploads/*` apontem para `127.0.0.1:42514` e `/admin/*` para `127.0.0.1:42513`. Assim, valores de rewrite definidos no build não podem redirecionar o hardening para processos de desenvolvimento ou produção.
-
-O pré-flight de produção cria esses artefatos com as URLs isoladas `42010`/`42514`/`42511`/`42513`, exporta as quatro variáveis e só então executa o hardening. Os candidatos `dist.next`/`dist-prod.next` são recompilados com `6050`/`6051`/`6060`/`6061` depois do hardening. Para um diagnóstico manual, gere primeiro os quatro artefatos `.test` com esse mesmo contrato e use as variáveis acima na mesma sessão de terminal.
-
-O teste usa um `STORAGE_ROOT` temporario e nao reutiliza o storage configurado no ambiente chamador.
+O Landing Builder também usa Spring MVC e é validado pelo Maven Wrapper próprio. Ele ainda não participa do hardening dos quatro artefatos centrais; quando houver `next dev` manual, use `NEXT_BUILD_DIST_DIR=.next.test` para não tocar no cache ativo.

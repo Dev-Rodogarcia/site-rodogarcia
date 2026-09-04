@@ -1,35 +1,22 @@
-# Persistencia Local
+# Persistência local
 
-Esta pasta concentra o volume JSON canônico usado pelo backend público e pela API CMS.
+Esta pasta concentra o volume JSON canônico usado pela API pública Spring e pela API CMS Spring.
 
-## Arquivos
+## Arquivos relevantes
 
-- `site/backend/storage/content.json`
-- `site/backend/storage/site-texts.json`
-- `site/backend/storage/popup-config.json`
-- `site/backend/storage/popup-leads.json`
-- `site/backend/storage/popup-events.json`
-- `site/backend/storage/private/users.json`
-- `site/backend/storage/private/sessions.json`
-- `site/backend/storage/private/analytics.json`
-- `site/backend/storage/private/analytics-config.json`
-- `site/backend/storage/private/cookie-consents.json`
-- `site/backend/storage/seo-settings.json`
-- `site/backend/storage/consent-settings.json`
-- `site/backend/storage/leads.json`
-- `site/backend/storage/private/tracking-events.json`
-- `site/backend/storage/private/audit-log.json`
-- `site/backend/storage/media-library.json`
-- `site/backend/storage/media-slots.json`
-- `site/backend/storage/private/rate-limits.json`
-- `site/backend/storage/private/cms-rate-limits.json`
-- `site/backend/storage/uploads/*`
-- `site/backend/storage/users.example.json`
+- `content.json` e `site-texts.json`: conteúdo público canônico.
+- `private/users.json`, `private/sessions.json`, `private/analytics.json`, `private/cookie-consents.json` e `private/audit-log.json`: dados administrativos privados.
+- `media-library.json`, `media-slots.json` e `uploads/*`: biblioteca e arquivos públicos validados pelo CMS.
+- `private/rate-limits.json`: exclusivo da API pública.
+- `private/cms-rate-limits.json`: exclusivo da API CMS.
 
 ## Regras
 
-- `site/backend/storage/private/**` e `site/backend/storage/uploads/**` nao devem ser publicados no repositorio.
-- Os backends aceitam overrides por variavel de ambiente para testes e deploy; a API CMS deve continuar apontando para este mesmo volume e é a única escritora das coleções administrativas.
-- Em producao, usuarios, sessoes e rate limit podem migrar para banco/store dedicado sem alterar o frontend.
-- Backups completos devem ser feitos com `node scripts/backup-storage.js` a partir da raiz e restaurados com `node scripts/restore-storage.js --backup backups/storage-... --confirm-restore`.
-- O runbook operacional fica em `docs/backup-restore-json.md`.
+- `site/backend/storage/private/**` e `site/backend/storage/uploads/**` não devem ser versionados.
+- A API pública Spring e a API CMS Spring aceitam overrides por variável de ambiente para testes e deploy; ambas usam este volume, porém escrevem coleções distintas.
+- `site/backend` grava somente seu rate limit operacional. `cms/backend` é o único escritor de conteúdo, uploads, sessões e demais coleções administrativas.
+- O Landing Builder mantém volume próprio e nunca grava no storage do site/CMS.
+- Escritas JSON passam pelos repositories/armazenamento atômico do runtime; não edite JSON operacional manualmente com writers em execução.
+- Backups usam `node scripts/backup-storage.js --source "<STORAGE_ROOT absoluto>"`; restores usam `node scripts/restore-storage.js --backup ... --target "<STORAGE_ROOT absoluto>" --confirm-restore`.
+
+O runbook completo está em `docs/backup-restore-json.md`.

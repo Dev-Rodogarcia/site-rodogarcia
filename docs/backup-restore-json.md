@@ -21,6 +21,11 @@ Para usar outro storage ou destino:
 node scripts/backup-storage.js --source D:\rodogarcia\storage --out E:\backups-rodogarcia
 ```
 
+Em produção, pare todos os writers e informe sempre `--source` com o
+`STORAGE_ROOT` absoluto. O default sem argumento é apenas o storage local do
+repositório. O `manifest.json` registra esse source como `--target` no comando de
+restore para evitar restaurar um volume externo no destino local por engano.
+
 Depois de criado, copie o backup para um local externo e protegido, como storage criptografado do provedor, cofre corporativo ou volume com politica de retencao.
 
 ## Restaurar Backup

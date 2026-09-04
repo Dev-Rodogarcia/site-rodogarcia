@@ -1,21 +1,19 @@
-# Checklist tecnico rapido
+# Checklist técnico rápido
 
 ## 1. Build
 
-- [ ] `cmd /c npm run build` conclui sem erro em `site/backend/`.
-- [ ] `cmd /c npm run build` conclui sem erro em `cms/backend/`.
-- [ ] `cmd /c npm run build` conclui sem erro em `site/frontend/`.
-- [ ] `cmd /c npm run build` conclui sem erro em `cms/frontend/`.
+- [ ] `cmd /c mvnw.cmd -B clean verify` conclui sem erro em `site/backend/`.
+- [ ] `cmd /c mvnw.cmd -B clean verify` conclui sem erro em `cms/backend/`.
+- [ ] Typecheck e build concluem sem erro em `site/frontend/` e `cms/frontend/`.
+- [ ] `cmd /c mvnw.cmd -B clean verify` conclui sem erro em `landing-builder/backend/`; typecheck e build concluem sem erro em `landing-builder/frontend/`.
 
 ## 2. Encoding
 
-- [ ] Nenhum mojibake em `site/backend/src`, `cms/backend/src`, `site/frontend/src`, `cms/frontend/src`, `docs` e `README.md`.
-- [ ] Textos visiveis em portugues estao revisados.
-
-Comando:
+- [ ] Nenhum mojibake em `site/backend/src`, `cms/backend/src`, `site/frontend/src`, `cms/frontend/src`, `landing-builder`, `docs` e `README.md`.
+- [ ] Textos visíveis em português estão revisados.
 
 ```powershell
-rg -n --pcre2 "[^\x00-\x7F]" site/backend/src cms/backend/src site/frontend/src cms/frontend/src docs README.md -S
+rg -n --pcre2 "[^\x00-\x7F]" site/backend/src cms/backend/src site/frontend/src cms/frontend/src landing-builder/backend/src landing-builder/frontend/src docs README.md -S
 ```
 
 ## 3. CMS
@@ -29,14 +27,14 @@ rg -n --pcre2 "[^\x00-\x7F]" site/backend/src cms/backend/src site/frontend/src 
 
 ## 4. Dados locais
 
-- [ ] `site/backend/storage/private/**` nao esta sendo versionado.
-- [ ] `site/backend/storage/uploads/` nao contem lixo de teste.
-- [ ] Não há cópia de storage em `cms/backend`; ele é o escritor único das coleções administrativas do volume canônico.
-- [ ] Nao ha duplicacao de assets sem uso.
-- [ ] A raiz não contém backups ou logs soltos fora de `backups/` e `logs/`, nem docs ou pastas de agente fora dos locais previstos.
+- [ ] `site/backend/storage/private/**` não está sendo versionado.
+- [ ] `site/backend/storage/uploads/` não contém lixo de teste.
+- [ ] Não há cópia de storage nos diretórios de runtime; `cms/backend` é o único escritor das coleções administrativas do volume canônico.
+- [ ] Não há duplicação de assets sem uso.
+- [ ] A raiz não contém backups ou logs soltos fora de `backups/` e `logs/`.
 
-## 5. SEO tecnico
+## 5. SEO técnico
 
 - [ ] `/sitemap.xml` responde.
 - [ ] `/robots.txt` responde.
-- [ ] URLs canonicas apontam para rotas atuais.
+- [ ] URLs canônicas apontam para rotas atuais.

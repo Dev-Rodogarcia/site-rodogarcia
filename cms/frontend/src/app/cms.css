@@ -286,6 +286,52 @@ html[data-landing-preview-fullscreen="true"] [data-developer-mobile-navigation="
 }
 [data-admin-shell="true"] select option { padding: 0.625rem 0.75rem; }
 
+/* A edição rápida pertence ao CMS; a paleta configurável só deve atingir a prévia da campanha. */
+.landing-editor-dialog__surface {
+  color-scheme: light;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface {
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  background: #142844 !important;
+  color: #e7edf8;
+  color-scheme: dark;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface label {
+  color: #dbe7f5 !important;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface input,
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface textarea,
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface select {
+  border-color: rgba(148, 163, 184, 0.32) !important;
+  background: #0f192a !important;
+  color: #e7edf8 !important;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface select option,
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface select optgroup {
+  background: #0f192a !important;
+  color: #e7edf8 !important;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface [class*="bg-white"] {
+  background-color: #132b4a !important;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface [class*="bg-slate-50"] {
+  background-color: #1a3456 !important;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface [class*="border-slate-"] {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+[data-admin-shell="true"]:is([data-admin-theme="dark"], .cms-dark) [data-landing-editor-dialog="true"] .landing-editor-dialog__surface [class*="text-slate-"] {
+  color: #c9d5e5 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cms-theme-toggle,
   .cms-theme-toggle::before,

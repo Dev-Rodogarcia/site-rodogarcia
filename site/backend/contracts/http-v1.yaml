@@ -1,0 +1,412 @@
+openapi: 3.1.0
+info:
+  title: Rodogarcia Site Backend
+  version: 1.0.0
+  description: Contrato de migração; este arquivo não habilita Swagger ou endpoint OpenAPI no runtime.
+servers:
+  - url: http://127.0.0.1:31012
+    description: DEV direto
+  - url: https://sitebackend.rodogarcia.com.br
+    description: Produção
+paths:
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Processo vivo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+  /ready:
+    get:
+      operationId: ready
+      responses:
+        "200":
+          description: Storage acessível para leitura e escrita
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+        "503":
+          description: Storage indisponível
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+  /api/public/postal-code/{postalCode}:
+    get:
+      operationId: postalCode
+      parameters:
+        - name: postalCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Endereço público mínimo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PostalCode" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /api/public/company/{cnpj}:
+    get:
+      operationId: company
+      parameters:
+        - name: cnpj
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Cadastro público mínimo, sem razão social
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Company" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /api/quote/fractional:
+    post:
+      operationId: createFractionalQuote
+      parameters: [{ $ref: "#/components/parameters/Origin" }]
+      requestBody: { $ref: "#/components/requestBodies/Quote" }
+      responses:
+        "201":
+          description: Cotação criada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [quote]
+                properties:
+                  quote: { $ref: "#/components/schemas/QuoteResponse" }
+        "403": { $ref: "#/components/responses/Error" }
+        "415": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/quote/closed/whatsapp:
+    post:
+      operationId: prepareClosedQuoteWhatsapp
+      parameters: [{ $ref: "#/components/parameters/Origin" }]
+      requestBody: { $ref: "#/components/requestBodies/Quote" }
+      responses:
+        "200":
+          description: Mensagem pronta
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Whatsapp" }
+        "403": { $ref: "#/components/responses/Error" }
+        "415": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/collections/invoice-validation:
+    post:
+      operationId: validateInvoice
+      parameters: [{ $ref: "#/components/parameters/Origin" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InvoiceLookup" }
+      responses:
+        "200":
+          description: Nota validada e capability de curta duração
+          headers:
+            Cache-Control: { schema: { const: no-store } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvoiceValidation" }
+        "403": { $ref: "#/components/responses/Error" }
+        "415": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/collections:
+    post:
+      operationId: createCollection
+      parameters: [{ $ref: "#/components/parameters/Origin" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CollectionRequest" }
+      responses:
+        "200":
+          description: Cliente sem cadastro; encaminhamento por WhatsApp
+          headers:
+            Cache-Control: { schema: { const: no-store } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CollectionWhatsapp" }
+        "201":
+          description: Coleta criada
+          headers:
+            Cache-Control: { schema: { const: no-store } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CollectionCreated" }
+        "403": { $ref: "#/components/responses/Error" }
+        "415": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/collections/{id}:
+    patch:
+      operationId: updateCollection
+      parameters:
+        - { $ref: "#/components/parameters/Origin" }
+        - { $ref: "#/components/parameters/CollectionId" }
+        - { $ref: "#/components/parameters/CollectionCapability" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CollectionUpdate" }
+      responses:
+        "200":
+          description: Coleta alterada
+          headers:
+            Cache-Control: { schema: { const: no-store } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CollectionEnvelope" }
+        "403": { $ref: "#/components/responses/Error" }
+        "415": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/collections/{id}/cancel:
+    post:
+      operationId: cancelCollection
+      parameters:
+        - { $ref: "#/components/parameters/Origin" }
+        - { $ref: "#/components/parameters/CollectionId" }
+        - { $ref: "#/components/parameters/CollectionCapability" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CollectionCancellation" }
+      responses:
+        "200":
+          description: Coleta cancelada
+          headers:
+            Cache-Control: { schema: { const: no-store } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CollectionEnvelope" }
+        "403": { $ref: "#/components/responses/Error" }
+        "415": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+components:
+  parameters:
+    Origin:
+      name: Origin
+      in: header
+      required: true
+      schema: { type: string, format: uri }
+    CollectionId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, pattern: "^[0-9]+$", maxLength: 30 }
+    CollectionCapability:
+      name: X-Collection-Capability
+      in: header
+      required: true
+      schema: { type: string, maxLength: 2048 }
+  requestBodies:
+    Quote:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/QuoteRequest" }
+  responses:
+    Error:
+      description: Erro seguro
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties: { error: { type: string } }
+    Health:
+      type: object
+      additionalProperties: false
+      required: [ok]
+      properties: { ok: { type: boolean } }
+    PostalCode:
+      type: object
+      additionalProperties: false
+      required: [postalCode, city, stateCode]
+      properties:
+        postalCode: { type: string }
+        city: { type: string }
+        stateCode: { type: string }
+    Company:
+      type: object
+      additionalProperties: false
+      required: [cnpj, postalCode, street, number, complement, neighborhood, city, stateCode]
+      properties:
+        cnpj: { type: string }
+        postalCode: { type: string }
+        street: { type: string }
+        number: { type: string }
+        complement: { type: string }
+        neighborhood: { type: string }
+        city: { type: string }
+        stateCode: { type: string }
+    PostalCity:
+      type: object
+      required: [name, stateCode, postalCode]
+      properties:
+        name: { type: string, maxLength: 100 }
+        stateCode: { type: string, pattern: "^[A-Za-z]{2}$" }
+        postalCode: { type: string }
+    City:
+      type: object
+      required: [name, stateCode]
+      properties:
+        name: { type: string, maxLength: 100 }
+        stateCode: { type: string, pattern: "^[A-Za-z]{2}$" }
+    QuoteRequest:
+      type: object
+      required: [customerCnpj, origin, destination, height, width, length, realWeight, cubicVolume, invoiceValue, invoiceVolumes, requesterName, requesterPhone, requesterEmail]
+      properties:
+        customerCnpj: { type: string }
+        senderCnpj: { type: string }
+        recipientCnpj: { type: string }
+        origin: { $ref: "#/components/schemas/PostalCity" }
+        destination: { $ref: "#/components/schemas/PostalCity" }
+        height: { type: number, exclusiveMinimum: 0, maximum: 1000 }
+        width: { type: number, exclusiveMinimum: 0, maximum: 1000 }
+        length: { type: number, exclusiveMinimum: 0, maximum: 1000 }
+        realWeight: { type: number, exclusiveMinimum: 0, maximum: 1000000 }
+        cubicVolume: { type: number, exclusiveMinimum: 0, maximum: 100000 }
+        invoiceValue: { type: number, exclusiveMinimum: 0, maximum: 100000000 }
+        invoiceVolumes: { type: integer, minimum: 1, maximum: 1000000 }
+        requesterName: { type: string, maxLength: 100 }
+        requesterPhone: { type: string }
+        requesterEmail: { type: string, maxLength: 160 }
+        productClassificationName: { type: string, maxLength: 100 }
+        comments: { type: string, maxLength: 700 }
+    InvoiceLookup:
+      type: object
+      properties:
+        invoiceKey: { type: string }
+        invoiceNumber: { type: string, maxLength: 40 }
+        invoiceSeries: { type: string, maxLength: 20 }
+        senderCnpj: { type: string }
+        recipientCnpj: { type: string }
+    Address:
+      type: object
+      properties:
+        postalCode: { type: string }
+        street: { type: string }
+        number: { type: string }
+        complement: { type: string }
+        neighborhood: { type: string }
+        city: { type: string }
+        stateCode: { type: string }
+    CollectionRequest:
+      type: object
+      required: [customerCnpj, pickupLocationCnpj, origin, serviceDate, serviceStartHour, serviceEndHour, invoice]
+      properties:
+        customerCnpj: { type: string }
+        pickupLocationCnpj: { type: string }
+        senderCnpj: { type: string }
+        recipientCnpj: { type: string }
+        origin: { $ref: "#/components/schemas/City" }
+        serviceDate: { type: string, pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+        serviceStartHour: { type: string, pattern: "^[0-9]{2}:[0-9]{2}$" }
+        serviceEndHour: { type: string, pattern: "^[0-9]{2}:[0-9]{2}$" }
+        deliveryAddress: { $ref: "#/components/schemas/Address" }
+        invoiceValidationToken: { type: string }
+        invoice: { $ref: "#/components/schemas/InvoiceLookup" }
+        referenceNumber: { type: string }
+        comments: { type: string, maxLength: 700 }
+    CollectionUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        serviceDate: { type: string }
+        serviceStartHour: { type: string }
+        serviceEndHour: { type: string }
+        comments: { type: string, maxLength: 700 }
+    CollectionCancellation:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          enum: [CLIENTE_SOLICITOU, DIVERGENCIA_DE_DADOS, ENDERECO_INCORRETO, MERCADORIA_INDISPONIVEL, SOLICITACAO_DUPLICADA, OUTROS]
+        otherReason: { type: string }
+    QuoteResponse:
+      type: object
+      required: [id, sequenceCode, referenceNumber, requestedAt, price]
+      properties:
+        id: { type: string }
+        sequenceCode: { type: string }
+        referenceNumber: { type: string }
+        requestedAt: { type: string }
+        price:
+          type: object
+          required: [stretches, total]
+          properties:
+            stretches:
+              type: array
+              items:
+                type: object
+                required: [total]
+                properties: { total: { type: number } }
+            total: { type: [number, "null"] }
+    Whatsapp:
+      type: object
+      required: [whatsappMessage]
+      properties: { whatsappMessage: { type: string } }
+    InvoiceValidation:
+      type: object
+      required: [validated, validationToken]
+      properties:
+        validated: { const: true }
+        validationToken: { type: string }
+    CollectionResource:
+      type: object
+      required: [id, sequenceCode, status]
+      properties:
+        id: { type: string }
+        sequenceCode: { type: string }
+        status: { type: string }
+        cancellationReason: { type: string }
+        maintenanceToken: { type: string }
+    CollectionEnvelope:
+      type: object
+      required: [collection]
+      properties: { collection: { $ref: "#/components/schemas/CollectionResource" } }
+    CollectionCreated:
+      type: object
+      required: [requiresWhatsApp, collection]
+      properties:
+        requiresWhatsApp: { const: false }
+        collection: { $ref: "#/components/schemas/CollectionResource" }
+    CollectionWhatsapp:
+      type: object
+      required: [requiresWhatsApp, whatsappMessage]
+      properties:
+        requiresWhatsApp: { const: true }
+        whatsappMessage: { type: string }

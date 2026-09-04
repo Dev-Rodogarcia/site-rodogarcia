@@ -3,7 +3,7 @@
 Data da auditoria: 14/07/2026  
 Escopo: rotas, controllers, services, repositories JSON, validação, mídia, SEO, consentimento, popup, analytics, leads e o contrato entregue ao site público.
 
-> Este documento registra o comportamento encontrado no início do pente-fino. Algumas correções podem aparecer simultaneamente no worktree compartilhado durante a integração final; uma divergência só deve ser considerada encerrada depois dos testes indicados em cada item.
+> Documento histórico: esta auditoria descreve a implementação anterior ao corte físico para Spring MVC. Os paths, comandos Node e números abaixo não são instruções operacionais atuais. Para o estado vigente, contratos e validação, use `states.md`, `cms/backend/README.md` e `cms/backend/contracts/`.
 
 ## Resumo executivo
 
@@ -20,7 +20,7 @@ Resultado consolidado do backend:
 | Slots de mídia anunciados pelo CMS | 25 | 7 consumidos continuamente, 2 usados apenas em migração e 16 sem consumidor |
 | Testes automatizados existentes | 10 | Nenhum cobre CRUD/round-trip das páginas, footer, SEO, popup, analytics ou coleções |
 
-Os fundamentos estão íntegros: a persistência passa pelos repositories JSON e pela escrita atômica; o DTO público não expõe as estruturas legadas do `content.json`; uploads validam assinatura real e passam pelo Sharp; as rotas administrativas usam autenticação e as mutações aplicam origem, JSON quando cabível e CSRF. Os problemas encontrados se concentram na fidelidade entre “editar/salvar/recarregar/publicar”, em controles de CMS que não chegam ao site público e em integrações paralelas que não compartilham a mesma fonte de verdade.
+Os fundamentos encontrados à época estavam íntegros: a persistência passava pelos repositories JSON e pela escrita atômica; o DTO público não expunha as estruturas legadas do `content.json`; uploads validavam assinatura real e passavam pelo pipeline histórico; as rotas administrativas usavam autenticação e as mutações aplicavam origem, JSON quando cabível e CSRF. Os problemas encontrados se concentravam na fidelidade entre “editar/salvar/recarregar/publicar”, em controles de CMS que não chegavam ao site público e em integrações paralelas que não compartilhavam a mesma fonte de verdade.
 
 ## Mapa de fluxo auditado
 
@@ -290,7 +290,7 @@ O primeiro regex de `getDeviceFromRequest` inclui `ipad` na categoria mobile; o 
 
 ## Cobertura automatizada e lacunas
 
-Comandos executados durante a auditoria:
+Comandos executados durante a auditoria histórica:
 
 ```text
 cms/backend: npm run typecheck  -> passou
