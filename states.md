@@ -39,10 +39,10 @@
 - Cada processo Spring iniciado pelo fluxo DEV recebe explicitamente sua porta canônica por launcher isolado: site `31012`, CMS `31013` e Builder `36110`. O launcher usa atribuições `set "chave=valor"`, sem aspas/whitespace propagados para `HOST`, `PORT` ou as variáveis do Builder.
 - A promoção preserva rollback completo quando existe conjunto ativo; `RODOGARCIA_INITIAL_PROD_ROLLOUT=1` continua restrito ao caso excepcional em que esse conjunto esteja ausente.
 - O preflight de produção recusa os seis listeners DEV antes de executar `npm ci`, pois as instalações compartilham os `node_modules` do checkout e poderiam corromper o runtime DEV em uso. O encerramento/início do DEV permanece manual.
-- As validações PowerShell iniciais do `iniciar-prod.bat` usam retorno explícito `0`/`1` e `if errorlevel 1`: qualquer bloqueio de ambiente ou listener DEV encerra o preflight antes de instalação, build ou acesso a artefatos ativos.
+- A guarda de listeners DEV é chamada por um helper batch que captura explicitamente o retorno do PowerShell. Qualquer bloqueio encerra o preflight antes de instalação, build ou acesso a artefatos ativos.
 - Os helpers batch de instalação, Maven, typecheck e staging normalizam qualquer retorno diferente de `0` (inclusive o `EPERM -4048` negativo do npm no Windows) para falha explícita; o orquestrador compara o status literal e não pode avançar ao Maven/typecheck após uma instalação incompleta.
 - O hardening isolado cobre site e CMS com `site/backend/dist.test/server.jar`, `cms/backend/dist.test/server.jar`, `site/frontend/dist-prod.test` e `cms/frontend/dist-prod.test`. O Builder tem Maven Wrapper e suíte de contrato próprios.
-- Os preparadores de artefato Next derivam `dist-prod.test` do build `.next.test` e o impõem como único destino permitido nesse modo; uma falha de propagação de ambiente não pode remover `dist-prod` ativo.
+- O helper de build entrega `NEXT_BUILD_DIST_DIR`, `PROD_ARTIFACT_DIR` e o marcador `RODOGARCIA_ISOLATED_PREFLIGHT` diretamente ao npm. Os preparadores Next recusam esse marcador fora de `.next.test`/`dist-prod.test`, portanto uma falha de propagação não pode remover `dist-prod` ativo.
 
 ## Contratos, Segurança e Persistência
 

@@ -6,9 +6,13 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const frontendRoot = path.resolve(scriptDir, "..");
 const nextBuildDirectoryName = process.env.NEXT_BUILD_DIST_DIR?.trim() || ".next";
 const allowedNextBuildDirectories = new Set([".next", ".next.test"]);
+const isolatedPreflight = process.env.RODOGARCIA_ISOLATED_PREFLIGHT?.trim() === "1";
 
 if (!allowedNextBuildDirectories.has(nextBuildDirectoryName)) {
   throw new Error("NEXT_BUILD_DIST_DIR deve ser .next ou .next.test.");
+}
+if (isolatedPreflight && nextBuildDirectoryName !== ".next.test") {
+  throw new Error("Pre-flight isolado exige NEXT_BUILD_DIST_DIR=.next.test.");
 }
 
 const nextDir = path.join(frontendRoot, nextBuildDirectoryName);
@@ -18,7 +22,7 @@ const standaloneAppDir = path.join(standaloneDir, path.relative(workspaceRoot, f
 const staticDir = path.join(nextDir, "static");
 const publicDir = path.join(frontendRoot, "public");
 const artifactDirectoryName = process.env.PROD_ARTIFACT_DIR?.trim()
-  || (nextBuildDirectoryName === ".next.test" ? "dist-prod.test" : "dist-prod");
+  || (isolatedPreflight || nextBuildDirectoryName === ".next.test" ? "dist-prod.test" : "dist-prod");
 const allowedArtifactDirectories = new Set(["dist-prod", "dist-prod.next", "dist-prod.test"]);
 
 if (!allowedArtifactDirectories.has(artifactDirectoryName)) {
@@ -26,7 +30,7 @@ if (!allowedArtifactDirectories.has(artifactDirectoryName)) {
     "PROD_ARTIFACT_DIR deve ser dist-prod, dist-prod.next ou dist-prod.test."
   );
 }
-if (nextBuildDirectoryName === ".next.test" && artifactDirectoryName !== "dist-prod.test") {
+if ((isolatedPreflight || nextBuildDirectoryName === ".next.test") && artifactDirectoryName !== "dist-prod.test") {
   throw new Error("Build isolado so pode preparar dist-prod.test.");
 }
 

@@ -124,8 +124,11 @@ function testProductionLauncherUsesExternalBatchHelpers() {
   assert.doesNotMatch(launcher, /\bcall\s+:/i);
   assert.match(launcher, /set\s+"ERRORLEVEL="/i);
   assert.match(launcher, /validate-production-inputs\.ps1/i);
-  assert.match(launcher, /assert-production-preflight-isolated\.ps1/i);
-  assert.match(launcher, /assert-production-preflight-isolated\.ps1"\s*\r?\nif\s+errorlevel\s+1\s+goto\s+:preflight_failed/i);
+  assert.match(launcher, /assert-production-preflight-isolated\.bat/i);
+  assert.match(launcher, /DEV_PREFLIGHT_EXIT_CODE=%ERRORLEVEL%/i);
+  assert.match(launcher, /if not "%DEV_PREFLIGHT_EXIT_CODE%"=="0" goto :preflight_failed/i);
+  assert.match(launcher, /build-production-frontend-artifact\.bat" "site\\frontend" "site" "\.next\.test" "dist-prod\.test" "1"/i);
+  assert.match(launcher, /build-production-frontend-artifact\.bat" "cms\\frontend" "CMS" "\.next\.test" "dist-prod\.test" "1"/i);
   assert.match(launcher, /validate-production-rollout-mode\.bat/i);
   assert.match(launcher, /verify-production-spring-backend\.bat/i);
   assert.match(launcher, /RODOGARCIA_INITIAL_PROD_ROLLOUT/i);
@@ -136,6 +139,14 @@ function testProductionLauncherUsesExternalBatchHelpers() {
   );
   assert.match(installer, /set\s+"COMMAND_EXIT_CODE=%ERRORLEVEL%"/i);
   assert.match(installer, /if not "%COMMAND_EXIT_CODE%"=="0"/i);
+
+  const isolatedBuild = fs.readFileSync(
+    path.join(ROOT_DIR, "scripts", "build-production-frontend-artifact.bat"),
+    "utf8"
+  );
+  assert.match(isolatedBuild, /set "NEXT_BUILD_DIST_DIR=%~3"/i);
+  assert.match(isolatedBuild, /set "PROD_ARTIFACT_DIR=%~4"/i);
+  assert.match(isolatedBuild, /set "RODOGARCIA_ISOLATED_PREFLIGHT=%~5"/i);
 }
 
 function testNegativeNpmExitStopsTheInstallHelper() {
@@ -202,6 +213,26 @@ function testIsolatedNextArtifactNeverTouchesTheActiveArtifact() {
       });
       assert.notEqual(blocked.status, 0);
       assert.match(blocked.stderr, /Build isolado so pode preparar dist-prod\.test/);
+      assert.equal(
+        fs.readFileSync(path.join(projectRoot, "dist-prod", "server.js"), "utf8"),
+        "// active artifact\n"
+      );
+
+      const missingIsolatedEnvironment = spawnSync(process.execPath, [script], {
+        cwd: projectRoot,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          NEXT_BUILD_DIST_DIR: ".next",
+          PROD_ARTIFACT_DIR: "dist-prod",
+          RODOGARCIA_ISOLATED_PREFLIGHT: "1",
+        },
+      });
+      assert.notEqual(missingIsolatedEnvironment.status, 0);
+      assert.match(
+        missingIsolatedEnvironment.stderr,
+        /Pre-flight isolado exige NEXT_BUILD_DIST_DIR=\.next\.test/
+      );
       assert.equal(
         fs.readFileSync(path.join(projectRoot, "dist-prod", "server.js"), "utf8"),
         "// active artifact\n"

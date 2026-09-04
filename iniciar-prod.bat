@@ -57,8 +57,9 @@ if not "%ERRORLEVEL%"=="0" (
   echo [Rodogarcia PROD] PM2 nao encontrado. Instale com: npm install -g pm2
   goto :preflight_failed
 )
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\assert-production-preflight-isolated.ps1"
-if errorlevel 1 goto :preflight_failed
+call "%~dp0scripts\assert-production-preflight-isolated.bat"
+set "DEV_PREFLIGHT_EXIT_CODE=%ERRORLEVEL%"
+if not "%DEV_PREFLIGHT_EXIT_CODE%"=="0" goto :preflight_failed
 
 set "PRODUCTION_SITE_URL=%NEXT_PUBLIC_SITE_URL%"
 set "PRODUCTION_PUBLIC_BACKEND_URL=%NEXT_PUBLIC_BACKEND_URL%"
@@ -121,6 +122,7 @@ set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:42514"
 set "NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:42010"
 set "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:42511"
 set "NEXT_BUILD_DIST_DIR=.next.test"
+set "RODOGARCIA_ISOLATED_PREFLIGHT=1"
 set "LANDING_BUILDER_API_URL="
 set "LANDING_BUILDER_SERVICE_TOKEN="
 set "LANDING_BUILDER_PUBLIC_URL="
@@ -131,22 +133,12 @@ call "%~dp0scripts\stage-production-jar.bat" "cms\backend" "cms\backend\dist.tes
 if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Gerando artefato isolado de teste do site...
-pushd site\frontend
-call npm run build:prod
-if not "%ERRORLEVEL%"=="0" (
-  popd
-  goto :preflight_failed
-)
-popd
+call "%~dp0scripts\build-production-frontend-artifact.bat" "site\frontend" "site" ".next.test" "dist-prod.test" "1"
+if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Gerando artefato isolado de teste do CMS...
-pushd cms\frontend
-call npm run build:prod
-if not "%ERRORLEVEL%"=="0" (
-  popd
-  goto :preflight_failed
-)
-popd
+call "%~dp0scripts\build-production-frontend-artifact.bat" "cms\frontend" "CMS" ".next.test" "dist-prod.test" "1"
+if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Executando hardening ponta a ponta em portas isoladas...
 node scripts\tests\test-security-hardening.js
@@ -161,6 +153,7 @@ set "CMS_BACKEND_PROXY_URL=http://127.0.0.1:6051"
 set "NEXT_PUBLIC_BACKEND_URL=%PRODUCTION_PUBLIC_BACKEND_URL%"
 set "NEXT_PUBLIC_SITE_URL=%PRODUCTION_SITE_URL%"
 set "NEXT_BUILD_DIST_DIR=.next"
+set "RODOGARCIA_ISOLATED_PREFLIGHT="
 set "LANDING_BUILDER_API_URL=%PRODUCTION_LANDING_BUILDER_API_URL%"
 set "LANDING_BUILDER_BACKEND_URL=%PRODUCTION_LANDING_BUILDER_API_URL%"
 set "LANDING_BUILDER_SERVICE_TOKEN=%PRODUCTION_LANDING_BUILDER_SERVICE_TOKEN%"
@@ -174,37 +167,23 @@ call "%~dp0scripts\stage-production-jar.bat" "landing-builder\backend" "landing-
 if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Gerando artefato candidato do site...
-pushd site\frontend
-call npm run build:prod
-if not "%ERRORLEVEL%"=="0" (
-  popd
-  goto :preflight_failed
-)
-popd
+call "%~dp0scripts\build-production-frontend-artifact.bat" "site\frontend" "site" ".next" "dist-prod.next"
+if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Gerando artefato candidato do CMS...
-pushd cms\frontend
-call npm run build:prod
-if not "%ERRORLEVEL%"=="0" (
-  popd
-  goto :preflight_failed
-)
-popd
+call "%~dp0scripts\build-production-frontend-artifact.bat" "cms\frontend" "CMS" ".next" "dist-prod.next"
+if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Gerando artefato candidato do frontend do Landing Builder...
-pushd landing-builder\frontend
-call npm run build:prod
-if not "%ERRORLEVEL%"=="0" (
-  popd
-  goto :preflight_failed
-)
-popd
+call "%~dp0scripts\build-production-frontend-artifact.bat" "landing-builder\frontend" "Landing Builder" ".next" "dist-prod.next"
+if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 echo [Rodogarcia PROD] Validando todos os artefatos candidatos...
 node scripts\promote-production-artifacts.js --verify %PROD_PROMOTION_FLAG%
 if not "%ERRORLEVEL%"=="0" goto :preflight_failed
 
 set "PROD_ARTIFACT_DIR="
+set "RODOGARCIA_ISOLATED_PREFLIGHT="
 set "SECURITY_TEST_BACKEND_ARTIFACT_DIR="
 set "SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR="
 set "SECURITY_TEST_FRONTEND_ARTIFACT_DIR="
@@ -294,6 +273,7 @@ exit /b 1
 
 :preflight_failed
 set "PROD_ARTIFACT_DIR="
+set "RODOGARCIA_ISOLATED_PREFLIGHT="
 set "SECURITY_TEST_BACKEND_ARTIFACT_DIR="
 set "SECURITY_TEST_CMS_BACKEND_ARTIFACT_DIR="
 set "SECURITY_TEST_FRONTEND_ARTIFACT_DIR="
